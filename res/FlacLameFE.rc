@@ -1,0 +1,143 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+DLG_MAIN DIALOGEX 0, 0, 314, 282
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CENTER | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_ACCEPTFILES
+CAPTION "FLAC/LAME front end"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "&Run",BTN_RUN,241,260,62,15,WS_DISABLED
+    CONTROL         "",LST_FILES,"SysListView32",LVS_REPORT | LVS_SORTASCENDING | LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | WS_BORDER | WS_TABSTOP,3,2,308,175
+    LTEXT           "Destination",LBL_DEST,7,183,40,8
+    EDITTEXT        TXT_DEST,51,181,236,13,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",BTN_DEST,289,180,20,14
+    GROUPBOX        "Conversion",FRA_CONV,6,199,173,79
+    CONTROL         "MP3",RAD_MP3,"Button",BS_AUTORADIOBUTTON | WS_GROUP,12,216,29,10
+    CONTROL         "FLAC",RAD_FLAC,"Button",BS_AUTORADIOBUTTON,12,247,33,10
+    CONTROL         "WAV",RAD_WAV,"Button",BS_AUTORADIOBUTTON,12,263,31,10
+    CONTROL         "CBR",RAD_CBR,"Button",BS_AUTORADIOBUTTON | WS_GROUP,47,211,29,10
+    CONTROL         "VBR",RAD_VBR,"Button",BS_AUTORADIOBUTTON,47,227,29,10
+    COMBOBOX        CMB_CBR,77,210,93,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        CMB_VBR,77,226,93,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Level",LBL_LEVEL,54,247,18,8
+    COMBOBOX        CMB_FLAC,78,245,29,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Delete original file",CHK_DELSRC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,186,204,75,10
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+ICO_MAIN                ICON                    "Ron Burgundy.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
+ FILEFLAGSMASK 0x17L
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "FLAC/LAME graphical front end."
+            VALUE "CompanyName", "Rodrigo Cesar de Freitas Dias"
+            VALUE "FileDescription", "FLAC/LAME graphical front end."
+            VALUE "FileVersion", "1, 0, 0, 0"
+            VALUE "InternalName", "FlacLameFE"
+            VALUE "LegalCopyright", "Copyright (C) 2013"
+            VALUE "LegalTrademarks", "Rodrigo Cesar de Freitas Dias"
+            VALUE "OriginalFilename", "FlacLame.exe"
+            VALUE "ProductName", "FLAC/LAME graphical front end."
+            VALUE "ProductVersion", "1.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
