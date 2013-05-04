@@ -42,6 +42,7 @@ public:
 	int            toInt() const                         { return this->isInt() ? ::_wtoi(this->str()) : 0; }
 	double         toFloat() const                       { return this->isFloat() ? ::_wtof(this->str()) : 0; }
 	int            find(wchar_t ch) const;
+	int            find(const wchar_t *substr) const;
 	int            findr(wchar_t ch) const;
 	String&        replace(const wchar_t *target, const wchar_t *replacement);
 	String&        invert();

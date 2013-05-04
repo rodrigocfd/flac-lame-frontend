@@ -4,8 +4,8 @@
 
 void FileMap::close()
 {
-	if(_pMem) { ::UnmapViewOfFile(_pMem); _pMem = 0; }
-	if(_hMap) { ::CloseHandle(_hMap); _hMap = 0; }
+	if(_pMem) { UnmapViewOfFile(_pMem); _pMem = 0; }
+	if(_hMap) { CloseHandle(_hMap); _hMap = 0; }
 	_file.close();
 	_size = 0;
 }
@@ -21,22 +21,22 @@ bool FileMap::open(const wchar_t *path, File::Access access, String *pErr)
 	}
 
 	// Mapping into memory.
-	_hMap = ::CreateFileMapping(_file.hFile(), 0,
+	_hMap = CreateFileMapping(_file.hFile(), 0,
 		access == File::READWRITE ? PAGE_READWRITE : PAGE_READONLY, 0, 0, 0);
 	if(!_hMap) {
 		this->close();
 		if(pErr) pErr->fmt(L"CreateFileMapping() failed to create file mapping, error code %d.",
-			::GetLastError());
+			GetLastError());
 		return false;
 	}
 
 	// Get pointer to data block.
-	_pMem = ::MapViewOfFile(_hMap,
+	_pMem = MapViewOfFile(_hMap,
 		access == File::READWRITE ? FILE_MAP_WRITE : FILE_MAP_READ, 0, 0, 0);
 	if(!_pMem) {
 		this->close();
 		if(pErr) pErr->fmt(L"MapViewOfFile() failed to map view of file, error code %d.",
-			::GetLastError());
+			GetLastError());
 		return false;
 	}
 
@@ -56,8 +56,8 @@ bool FileMap::setNewSize(int newSize, String *pErr)
 	}
 
 	// Unmap file, but keep it open.
-	::UnmapViewOfFile(_pMem);
-	::CloseHandle(_hMap);
+	UnmapViewOfFile(_pMem);
+	CloseHandle(_hMap);
 
 	// Truncate/expand file.
 	if(!_file.setNewSize(newSize, pErr)) {
@@ -66,18 +66,18 @@ bool FileMap::setNewSize(int newSize, String *pErr)
 	}
 
 	// Remap into memory.
-	if(!( _hMap = ::CreateFileMapping(_file.hFile(), 0, PAGE_READWRITE, 0, 0, 0) )) {
+	if(!( _hMap = CreateFileMapping(_file.hFile(), 0, PAGE_READWRITE, 0, 0, 0) )) {
 		this->close();
 		if(pErr) pErr->fmt(L"CreateFileMapping() failed to recreate file mapping, error code %d.",
-			::GetLastError());
+			GetLastError());
 		return false;
 	}
 
 	// Get new pointer to data block, old one just became invalid!
-	if(!( _pMem = ::MapViewOfFile(_hMap, FILE_MAP_WRITE, 0, 0, 0) )) {
+	if(!( _pMem = MapViewOfFile(_hMap, FILE_MAP_WRITE, 0, 0, 0) )) {
 		this->close();
 		if(pErr) pErr->fmt(L"MapViewOfFile() failed to remap view of file, error code %d.",
-			::GetLastError());
+			GetLastError());
 		return false;
 	}
 
@@ -99,7 +99,7 @@ bool FileMap::getContent(Array<BYTE> *pBuf, int offset, int numBytes, String *pE
 	}
 	
 	pBuf->realloc(numBytes);
-	::memcpy(&(*pBuf)[0], this->pMem(), numBytes * sizeof(BYTE));
+	memcpy(&(*pBuf)[0], this->pMem(), numBytes * sizeof(BYTE));
 	
 	if(pErr) *pErr = L"";
 	return true;

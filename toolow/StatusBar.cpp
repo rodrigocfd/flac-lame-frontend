@@ -4,11 +4,11 @@
 StatusBar& StatusBar::create(HWND hOwner, int numPartsItWillHave)
 {
 	// The owner is considered resizable if it has the maximize button.
-	bool isStretch = (::GetWindowLongPtr(hOwner, GWL_STYLE) & WS_MAXIMIZEBOX) != 0;
+	bool isStretch = (GetWindowLongPtr(hOwner, GWL_STYLE) & WS_MAXIMIZEBOX) != 0;
 	
-	_sb = ::CreateWindowEx(0, STATUSCLASSNAME, 0,
+	_sb = CreateWindowEx(0, STATUSCLASSNAME, 0,
 		(isStretch ? SBARS_SIZEGRIP : 0) | WS_CHILD | WS_VISIBLE,
-		0, 0, 0, 0, hOwner, 0, (HINSTANCE)::GetWindowLongPtr(hOwner, GWLP_HINSTANCE), 0);
+		0, 0, 0, 0, hOwner, 0, (HINSTANCE)GetWindowLongPtr(hOwner, GWLP_HINSTANCE), 0);
 
 	_parts.realloc(numPartsItWillHave);
 	_lastInsertedPart = -1;

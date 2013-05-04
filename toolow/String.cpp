@@ -165,6 +165,13 @@ int String::find(wchar_t ch) const
 	return (int)(p - &_arr[0]); // return index of position
 }
 
+int String::find(const wchar_t *substr) const
+{
+	const wchar_t *p = ::wcsstr(this->str(), substr);
+	if(!p) return -1; // not found
+	return (int)(p - &_arr[0]); // return index of position
+}
+
 int String::findr(wchar_t ch) const
 {
 	const wchar_t *p = ::wcsrchr(this->str(), ch);

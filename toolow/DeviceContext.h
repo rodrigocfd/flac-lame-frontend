@@ -58,10 +58,12 @@ public:
 	DC&      setBkTransparent(bool yes) { ::SetBkMode(_hdc, yes ? TRANSPARENT : OPAQUE); return *this; }
 	DC&      setBkColor(COLORREF color=-1);
 	COLORREF getBkBrushColor();
-	DC&      setTextColor(COLORREF color)               { ::SetTextColor(_hdc, color); return *this; }
-	DC&      textOut(int x, int y, const wchar_t *text) { ::TextOut(_hdc, x, y, text, ::lstrlen(text)); return *this; }
+	DC&      setTextColor(COLORREF color)                             { ::SetTextColor(_hdc, color); return *this; }
+	DC&      textOut(int x, int y, const wchar_t *text, int numChars) { ::TextOut(_hdc, x, y, text, numChars); return *this; }
+	DC&      textOut(int x, int y, const wchar_t *text)               { return textOut(x, y, text, ::lstrlen(text)); }
 	DC&      drawText(int x, int y, int cx, int cy, const wchar_t *text, UINT fmtFlags=0);
-	SIZE     getTextExtent(const wchar_t *text)                                      { SIZE sz; ::GetTextExtentPoint32(_hdc, text, ::lstrlen(text), &sz); return sz; }
+	SIZE     getTextExtent(const wchar_t *text, int numChars)                        { SIZE sz; ::GetTextExtentPoint32(_hdc, text, numChars, &sz); return sz; }
+	SIZE     getTextExtent(const wchar_t *text)                                      { return getTextExtent(text, ::lstrlen(text)); }
 	DC&      fillRect(int left, int top, int right, int bottom, HBRUSH hBrush)       { RECT rc = { left, top, right, bottom }; ::FillRect(_hdc, &rc, hBrush); return *this; }
 	DC&      fillRgn(HRGN hrgn, HBRUSH hBrush)                                       { ::FillRgn(_hdc, hrgn, hBrush); return *this; }
 	DC&      polygon(const POINT *points, int numPoints)                             { ::Polygon(_hdc, points, numPoints); return *this; }
