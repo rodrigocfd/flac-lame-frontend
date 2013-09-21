@@ -5,6 +5,7 @@
 //
 
 #pragma once
+#include "Ptr.h"
 #include "Window.h"
 #include <CommCtrl.h>
 
@@ -13,24 +14,24 @@ public:
 	class Item {
 	public:
 		int i;
-		Item(int index, ListView *pList)                       : i(index), _list(pList) { }
-		void     remove()                                      { ListView_DeleteItem(_list->hWnd(), i); }
-		void     swapWith(int index);
-		Item&    ensureVisible();
-		bool     isVisible()                                   { return ListView_IsItemVisible(_list->hWnd(), i) == TRUE; }
-		Item&    setSelect(bool select)                        { ListView_SetItemState(_list->hWnd(), i, select ? LVIS_SELECTED : 0, LVIS_SELECTED); return *this; }
-		bool     isSelected()                                  { return (ListView_GetItemState(_list->hWnd(), i, LVIS_SELECTED) & LVIS_SELECTED) != 0; }
-		Item&    setFocus()                                    { ListView_SetItemState(_list->hWnd(), i, LVIS_FOCUSED, LVIS_FOCUSED); return *this; }
-		bool     isFocused()                                   { return (ListView_GetItemState(_list->hWnd(), i, LVIS_FOCUSED) & LVIS_FOCUSED) != 0; }
-		Item&    getRect(RECT *rc)                             { ListView_GetItemRect(_list->hWnd(), i, rc, LVIR_BOUNDS); return *this; }
-		wchar_t* getText(wchar_t *pBuf, int szBuf, int iCol=0) { ListView_GetItemText(_list->hWnd(), i, iCol, pBuf, szBuf); return pBuf; }
-		String*  getText(String *pBuf, int iCol=0);
-		Item&    setText(const wchar_t *text, int iCol=0)      { ListView_SetItemText(_list->hWnd(), i, iCol, (wchar_t*)text); return *this; }
-		Item&    setTextFmt(int iCol, const wchar_t *fmt, ...);
-		LPARAM   getParam();
-		Item&    setParam(LPARAM lp);
-		int      getIcon();
-		Item&    setIcon(int iconIdx);
+		Item(int index, ListView *pList)   : i(index), _list(pList) { }
+		void        remove()               { ListView_DeleteItem(_list->hWnd(), i); }
+		void        swapWith(int index);
+		Item&       ensureVisible();
+		bool        isVisible() const      { return ListView_IsItemVisible(_list->hWnd(), i) == TRUE; }
+		Item&       setSelect(bool select) { ListView_SetItemState(_list->hWnd(), i, select ? LVIS_SELECTED : 0, LVIS_SELECTED); return *this; }
+		bool        isSelected() const     { return (ListView_GetItemState(_list->hWnd(), i, LVIS_SELECTED) & LVIS_SELECTED) != 0; }
+		Item&       setFocus()             { ListView_SetItemState(_list->hWnd(), i, LVIS_FOCUSED, LVIS_FOCUSED); return *this; }
+		bool        isFocused() const      { return (ListView_GetItemState(_list->hWnd(), i, LVIS_FOCUSED) & LVIS_FOCUSED) != 0; }
+		Item&       getRect(RECT *rc)      { ListView_GetItemRect(_list->hWnd(), i, rc, LVIR_BOUNDS); return *this; }
+		wchar_t*    getText(wchar_t *pBuf, int szBuf, int iCol=0) const { ListView_GetItemText(_list->hWnd(), i, iCol, pBuf, szBuf); return pBuf; }
+		String*     getText(String *pBuf, int iCol=0) const;
+		Ptr<String> getText(int iCol=0) const                { Ptr<String> s(new String()); getText(s, iCol); return s; }
+		Item&       setText(const wchar_t *text, int iCol=0) { ListView_SetItemText(_list->hWnd(), i, iCol, (wchar_t*)text); return *this; }
+		LPARAM      getParam() const;
+		Item&       setParam(LPARAM lp);
+		int         getIcon() const;
+		Item&       setIcon(int iconIdx);
 	private:
 		ListView *_list;
 	};
@@ -44,14 +45,14 @@ public:
 		void removeAll()                    { ListView_DeleteAllItems(_list->hWnd()); }
 		Item find(const wchar_t *caption);
 		bool exists(const wchar_t *caption) { return find(caption).i != -1; }
-		int  countSelected()                { return ListView_GetSelectedCount(_list->hWnd()); }
+		int  countSelected() const          { return ListView_GetSelectedCount(_list->hWnd()); }
 		void select(const Array<int> *idx);
 		void selectAll()                    { ListView_SetItemState(_list->hWnd(), -1, LVIS_SELECTED, LVIS_SELECTED); }
 		void selectNone()                   { ListView_SetItemState(_list->hWnd(), -1, 0, LVIS_SELECTED); }
 		void removeSelected();
 		void getSelected(Array<int> *indexesBuf);
 		void getSelectedText(Array<String> *captionsBuf, int iCol=0);
-		int  getFocused()                   { return ListView_GetNextItem(_list->hWnd(), -1, LVNI_FOCUSED); }
+		int  getFocused() const             { return ListView_GetNextItem(_list->hWnd(), -1, LVNI_FOCUSED); }
 		void getAllText(Array<String> *captionsBuf, int iCol=0);
 	private:
 		ListView *_list;
@@ -79,7 +80,7 @@ public:
 	ListView& iconPush(int iconId);
 	ListView& iconPush(const wchar_t *fileExtension);
 
-	int       columnCount() { return Header_GetItemCount(ListView_GetHeader(hWnd())); }
+	int       columnCount() const { return Header_GetItemCount(ListView_GetHeader(hWnd())); }
 	ListView& columnAdd(const wchar_t *caption, int cx);
 	ListView& columnFit(int iCol);
 

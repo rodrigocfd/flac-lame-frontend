@@ -1,5 +1,6 @@
 
 #include "Window.h"
+#include "util.h"
 #include <Shlobj.h>
 
 WindowPopup::~WindowPopup()
@@ -46,18 +47,11 @@ static LRESULT CALLBACK _msgBoxHookProc(int code, WPARAM wp, LPARAM lp)
 	return CallNextHookEx(0, code, wp, lp);
 }
 
-int WindowPopup::messageBox(UINT uType, const wchar_t *caption, const wchar_t *fmt, ...)
+int WindowPopup::messageBox(const wchar_t *caption, const wchar_t *body, UINT uType)
 {
-	va_list args;
-	va_start(args, fmt);
-
-	String buf;
-	buf.fmtv(fmt, args);
-	va_end(args);
-
 	// The hook is set to center the message box window on parent.
 	_hHookMsgBox = SetWindowsHookEx(WH_CBT, _msgBoxHookProc, 0, GetCurrentThreadId());
-	return MessageBox(this->hWnd(), buf.str(), caption, uType);
+	return MessageBox(this->hWnd(), body, caption, uType);
 }
 
 bool WindowPopup::getFileOpen(const wchar_t *formattedFilter, String *pBuf)

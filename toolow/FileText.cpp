@@ -23,30 +23,33 @@ bool FileText::load(const FileMap *pfm)
 	if((pPast - pMem >= 3) && !memcmp(pMem, "\xEF\xBB\xBF", 3)) // UTF-8
 	{
 		pMem += 3; // skip BOM
-		int len = MultiByteToWideChar(CP_UTF8, 0, (const char*)pMem, pPast - pMem, 0, 0);
-		_text.reserve(len);
-		MultiByteToWideChar(CP_UTF8, 0, (const char*)pMem, pPast - pMem,
-			_text.ptrAt(0), len); // the whole file is loaded into a String as wchar_t
+		_text.fromUtf8(pMem, pPast - pMem); // the whole file is loaded into a String as wchar_t*/
 	}
 	else if((pPast - pMem >= 4) && !memcmp(pMem, "\x00\x00\xFE\xFF", 4)) // UTF-32 BE
 	{
 		pMem += 4;
+		return false;
 		//...
 	}
 	else if((pPast - pMem >= 4) && !memcmp(pMem, "\xFF\xFE\x00\x00", 4)) // UTF-32 LE
 	{
 		pMem += 4;
+		return false;
 		//...
 	}
 	else if((pPast - pMem >= 2) && !memcmp(pMem, "\xFE\xFF", 2)) // UTF-16 BE
 	{
 		pMem += 2;
-		//...
+		_text.reserve((int)(pPast - pMem) / 2);
+		for(int i = 0; i < (int)(pPast - pMem); i += 2)
+			_text[i / 2] = (wchar_t)MAKEWORD(*(pMem + i + 1), *(pMem + i));
 	}
 	else if((pPast - pMem >= 2) && !memcmp(pMem, "\xFF\xFE", 2)) // UTF-16 LE
 	{
 		pMem += 2;
-		//...
+		_text.reserve((int)(pPast - pMem) / 2);
+		for(int i = 0; i < (int)(pPast - pMem); i += 2)
+			_text[i / 2] = (wchar_t)MAKEWORD(*(pMem + i), *(pMem + i + 1));
 	}
 	else // ASCII
 	{
@@ -64,12 +67,12 @@ bool FileText::nextLine(String *pBuf)
 {
 	if(!*_p) return false; // runner pointer inside our _text String data block
 	
-	if(!_firstLine) { // avoid a 1st blank like to be skipped
+	if(_idxLine > -1) { // not 1st line; avoid a 1st blank like to be skipped
 		if( (*_p == L'\r' && *(_p + 1) == L'\n') || // CRLF || LFCR
 			(*_p == L'\n' && *(_p + 1) == L'\r') ) _p += 2;
 		else if(*_p == L'\r' || *_p == L'\n') ++_p; // CR || LF
 	}
-	_firstLine = false;
+	++_idxLine;
 	
 	wchar_t *pRun = _p;
 	while(*pRun && *pRun != L'\r' && *pRun != '\n') ++pRun;

@@ -4,21 +4,20 @@
 //
 
 #pragma once
+#include "../toolow/Ini.h"
 #include "../toolow/Thread.h"
-#include "../toolow/String.h"
 
 //__________________________________________________________________________________________________
 class Converter : public Thread {
 public:
 	enum Notification { WM_FILEDONE=WM_USER+1 };
-	Converter(HWND hParent, const wchar_t *src, bool delSrc, const wchar_t *quality, bool isVbr, const wchar_t *dest);
-	static bool PathsAreValid(String *pErr);
+	Converter(HWND hParent, Ini *pIni, const wchar_t *src, bool delSrc, const wchar_t *quality, bool isVbr, const wchar_t *dest);
+	static bool PathsAreValid(Ini *pIni, String *pErr);
 protected:
-	static String* _PathOfLame(String *pBuf);
-	static String* _PathOfFlac(String *pBuf);
 	void _doExec(String *cmdLine);
 
 	HWND    _hParent;
+	Ini     *_pIni;
 	String  _srcPath, _destPath;
 	bool    _delSrc;
 	wchar_t _quality[8];
@@ -28,8 +27,8 @@ protected:
 //__________________________________________________________________________________________________
 class ConverterMp3 : public Converter {
 public:
-	ConverterMp3(HWND hParent, const wchar_t *src, bool delSrc, const wchar_t *quality, bool isVbr, const wchar_t *dest=NULL)
-		: Converter(hParent, src, delSrc, quality, isVbr, dest) { }
+	ConverterMp3(HWND hParent, Ini *pIni, const wchar_t *src, bool delSrc, const wchar_t *quality, bool isVbr, const wchar_t *dest=NULL)
+		: Converter(hParent, pIni, src, delSrc, quality, isVbr, dest) { }
 private:
 	void onRun();
 };
@@ -37,8 +36,8 @@ private:
 //__________________________________________________________________________________________________
 class ConverterFlac : public Converter {
 public:
-	ConverterFlac(HWND hParent, const wchar_t *src, bool delSrc, const wchar_t *quality, const wchar_t *dest=NULL)
-		: Converter(hParent, src, delSrc, quality, false, dest) { }
+	ConverterFlac(HWND hParent, Ini *pIni, const wchar_t *src, bool delSrc, const wchar_t *quality, const wchar_t *dest=NULL)
+		: Converter(hParent, pIni, src, delSrc, quality, false, dest) { }
 private:
 	void onRun();
 };
@@ -46,8 +45,8 @@ private:
 //__________________________________________________________________________________________________
 class ConverterWav : public Converter {
 public:
-	ConverterWav(HWND hParent, const wchar_t *src, bool delSrc, const wchar_t *dest=NULL)
-		: Converter(hParent, src, delSrc, NULL, false, dest) { }
+	ConverterWav(HWND hParent, Ini *pIni, const wchar_t *src, bool delSrc, const wchar_t *dest=NULL)
+		: Converter(hParent, pIni, src, delSrc, NULL, false, dest) { }
 private:
 	void onRun();
 };

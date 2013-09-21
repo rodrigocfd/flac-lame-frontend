@@ -1,4 +1,5 @@
 //
+// Ordinary textbox automation.
 // Part of TOOLOW - Thin Object Oriented Layer Over Win32.
 //
 
@@ -20,6 +21,10 @@ public:
 	void        getTextLines(Array<String> *pBuf);
 	TextBox&    setFont(const Font *pFont);
 	const Font& getFont() const                 { return _font; }
+	TextBox&    selSetAll()                     { sendMessage(EM_SETSEL, 0, -1); return *this; }
+	TextBox&    selSet(int start, int length)   { sendMessage(EM_SETSEL, start, start + length); return *this; }
+	void        selGet(int *start, int *length);
+	TextBox&    selReplace(const wchar_t *text) { sendMessage(EM_REPLACESEL, TRUE, (LPARAM)text); return *this; }
 
 private:
 	static LRESULT CALLBACK _Proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, UINT_PTR idSubclass, DWORD_PTR refData);

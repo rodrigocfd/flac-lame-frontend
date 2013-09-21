@@ -1,5 +1,6 @@
 
 #include "TextBox.h"
+#include "util.h"
 #pragma comment(lib, "ComCtl32.lib")
 
 TextBox& TextBox::operator=(HWND hwnd)
@@ -29,6 +30,13 @@ TextBox& TextBox::setFont(const Font *pFont)
 	_font.cloneFrom(pFont); // since it's cloned, user font may be safely deleted
 	_font.apply(hWnd());
 	return *this;
+}
+
+void TextBox::selGet(int *start, int *length)
+{
+	int p1 = 0;
+	this->sendMessage(EM_GETSEL, (WPARAM)start, (LPARAM)&p1);
+	*length = p1 - (*start);
 }
 
 LRESULT CALLBACK TextBox::_Proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, UINT_PTR idSubclass, DWORD_PTR refData)

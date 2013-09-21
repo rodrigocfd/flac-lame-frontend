@@ -55,21 +55,7 @@ StatusBar& StatusBar::addResizablePart(float resizeWeight)
 	return *this;
 }
 
-StatusBar& StatusBar::setTextFmt(int iPart, const wchar_t *fmt, ...)
-{
-	va_list args;
-	va_start(args, fmt);
-	
-	String buf;
-	buf.fmtv(fmt, args);
-	
-	va_end(args);
-	this->setText(iPart, buf.str());
-
-	return *this;
-}
-
-void StatusBar::getText(int iPart, String *pBuf) const
+void StatusBar::getText(String *pBuf, int iPart) const
 {
 	int len = LOWORD(_sb.sendMessage(SB_GETTEXTLENGTH, iPart, 0));
 	pBuf->reserve(len);

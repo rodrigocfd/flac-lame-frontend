@@ -3,8 +3,8 @@
 #include "../toolow/util.h"
 #include "Converter.h"
 
-Converter::Converter(HWND hParent, const wchar_t *src, bool delSrc, const wchar_t *quality, bool isVbr, const wchar_t *dest)
-	: _hParent(hParent), _srcPath(src), _delSrc(delSrc), _isVbr(isVbr)
+Converter::Converter(HWND hParent, Ini *pIni, const wchar_t *src, bool delSrc, const wchar_t *quality, bool isVbr, const wchar_t *dest)
+	: _hParent(hParent), _pIni(pIni), _srcPath(src), _delSrc(delSrc), _isVbr(isVbr)
 {
 	if(dest) {
 		_destPath = dest;
@@ -16,46 +16,21 @@ Converter::Converter(HWND hParent, const wchar_t *src, bool delSrc, const wchar_
 		lstrcpy(_quality, quality);
 }
 
-bool Converter::PathsAreValid(String *pErr)
+bool Converter::PathsAreValid(Ini *pIni, String *pErr)
 {
-	// Search for INI file.
-	String path;
-	Dir::Exe(&path);
-	path.append(L"\\FlacLameFE.ini");
-	if(!File::Exists(path.str())) {
-		if(pErr) pErr->fmt(L"Could not find FlacLameFE.ini at:\n%s", path.str());
-		return false;
-	}
-
 	// Search for FLAC and LAME tools.
-	if(!File::Exists( Converter::_PathOfFlac(&path)->str() )) {
-		if(pErr) pErr->fmt(L"Could not find LAME tool at:\n%s", path.str());
+	if(!File::Exists( pIni->sections[L"Tools"][L"lame"].str() )) {
+		if(pErr) pErr->fmt(L"Could not find LAME tool at:\n%s", pIni->sections[L"Tools"][L"lame"].str());
 		return false;
 	}
-	if(!File::Exists( Converter::_PathOfLame(&path)->str() )) {
-		if(pErr) pErr->fmt(L"Could not find FLAC tool at:\n%s", path.str());
+	if(!File::Exists( pIni->sections[L"Tools"][L"flac"].str() )) {
+		if(pErr) pErr->fmt(L"Could not find FLAC tool at:\n%s", pIni->sections[L"Tools"][L"lame"].str());
 		return false;
 	}
 
 	// All good.
 	if(pErr) (*pErr) = L"";
 	return true;
-}
-
-String* Converter::_PathOfLame(String *pBuf)
-{
-	String ini;
-	Dir::Exe(&ini);
-	ini.append(L"\\FlacLameFE.ini"); // assembly INI file path
-	return Ini::Read(ini.str(), L"Tools", L"lame", pBuf); // return same passed string buffer
-}
-
-String* Converter::_PathOfFlac(String *pBuf)
-{
-	String ini;
-	Dir::Exe(&ini);
-	ini.append(L"\\FlacLameFE.ini"); // assembly INI file path
-	return Ini::Read(ini.str(), L"Tools", L"flac", pBuf); // return same passed string buffer
 }
 
 void Converter::_doExec(String *cmdLine)
@@ -74,14 +49,14 @@ void ConverterMp3::onRun()
 {
 	if(_srcPath.endsWith(L".flac") || _srcPath.endsWith(L".mp3")) { // needs intermediary WAV file
 		ConverterWav *towav = _srcPath.endsWith(L".flac") ?
-			new ConverterWav(0, _srcPath.str(), _delSrc, _destPath.str()) : // send WAV straight to new folder, if any
-			new ConverterWav(0, _srcPath.str(),
-				_destPath == L"" ? true : _delSrc, // if same destination folder, then delete source (will be replaced)
+			new ConverterWav(0, _pIni, _srcPath.str(), _delSrc, _destPath.str()) : // send WAV straight to new folder, if any
+			new ConverterWav(0, _pIni, _srcPath.str(),
+				_destPath.isEmpty() ? true : _delSrc, // if same destination folder, then delete source (will be replaced)
 				_destPath.str()); // send WAV straight to new folder, if any
 
 		towav->runSync(); // will halt until complete
 
-		if(_destPath != L"") {
+		if(!_destPath.isEmpty()) {
 			String name = &_srcPath[_srcPath.findr(L'\\') + 1]; // file name only
 			_srcPath.fmt(L"%s\\%s", _destPath.str(), name.str()); // our target WAV is now on destination folder
 			_destPath = L"";
@@ -95,13 +70,11 @@ void ConverterMp3::onRun()
 		return;
 	}
 
-	String lamePath;
-	Converter::_PathOfLame(&lamePath); // retrieve LAME tool path
 	String cmdLine;
 	cmdLine.fmt(L"\"%s\" -%s%s --noreplaygain \"%s\"",
-		lamePath.str(), (_isVbr ? L"V" : L"b"), _quality, _srcPath.str());
+		_pIni->sections[L"Tools"][L"lame"].str(), (_isVbr ? L"V" : L"b"), _quality, _srcPath.str());
 
-	if(_destPath != L"") { // different destination folder
+	if(!_destPath.isEmpty()) { // different destination folder
 		cmdLine.appendfmt(L" \"%s\\%s\"", _destPath.str(), &_srcPath[_srcPath.findr(L'\\') + 1]);
 		cmdLine[cmdLine.findr(L'.')] = L'\0';
 		cmdLine.append(L".mp3\""); // MP3 extension on destination file
@@ -119,14 +92,14 @@ void ConverterFlac::onRun()
 {
 	if(_srcPath.endsWith(L".flac") || _srcPath.endsWith(L".mp3")) { // needs intermediary WAV file
 		ConverterWav *towav = _srcPath.endsWith(L"mp3") ?
-			new ConverterWav(0, _srcPath.str(), _delSrc, _destPath.str()) : // send WAV straight to new folder, if any
-			new ConverterWav(0, _srcPath.str(),
-				_destPath == L"" ? true : _delSrc, // if same destination folder, then delete source (will be replaced)
+			new ConverterWav(0, _pIni, _srcPath.str(), _delSrc, _destPath.str()) : // send WAV straight to new folder, if any
+			new ConverterWav(0, _pIni, _srcPath.str(),
+				_destPath.isEmpty() ? true : _delSrc, // if same destination folder, then delete source (will be replaced)
 				_destPath.str()); // send WAV straight to new folder, if any
 
 		towav->runSync(); // will halt until complete
 
-		if(_destPath != L"") {
+		if(!_destPath.isEmpty()) {
 			String name = &_srcPath[_srcPath.findr(L'\\') + 1]; // file name only
 			_srcPath.fmt(L"%s\\%s", _destPath.str(), name.str()); // our target WAV is now on destination folder
 			_destPath = L"";
@@ -140,12 +113,11 @@ void ConverterFlac::onRun()
 		return;
 	}
 
-	String flacPath;
-	Converter::_PathOfFlac(&flacPath); // retrieve FLAC tool path
 	String cmdLine;
-	cmdLine.fmt(L"\"%s\" -%s -V --no-seektable \"%s\"", flacPath.str(), _quality, _srcPath.str());
+	cmdLine.fmt(L"\"%s\" -%s -V --no-seektable \"%s\"",
+		_pIni->sections[L"Tools"][L"flac"].str(), _quality, _srcPath.str());
 	
-	if(_destPath != L"") { // different destination folder
+	if(!_destPath.isEmpty()) { // different destination folder
 		cmdLine.appendfmt(L" -o \"%s\\%s\"", _destPath.str(), &_srcPath[_srcPath.findr(L'\\') + 1]);
 		cmdLine[cmdLine.findr(L'.')] = L'\0';
 		cmdLine.append(L".flac\""); // FLAC extension on destination file
@@ -164,21 +136,17 @@ void ConverterWav::onRun()
 	String cmdLine;
 
 	if(_srcPath.endsWith(L".mp3")) {
-		String lamePath;
-		Converter::_PathOfLame(&lamePath); // retrieve LAME tool path
-		cmdLine.fmt(L"\"%s\" --decode \"%s\"", lamePath.str(), _srcPath.str());
+		cmdLine.fmt(L"\"%s\" --decode \"%s\"", _pIni->sections[L"Tools"][L"lame"].str(), _srcPath.str());
 	} else if(_srcPath.endsWith(L".flac")) {
-		String flacPath;
-		Converter::_PathOfFlac(&flacPath); // retrieve FLAC tool path
-		cmdLine.fmt(L"\"%s\" -d \"%s\"", flacPath.str(), _srcPath.str());
-		if(_destPath != L"")
+		cmdLine.fmt(L"\"%s\" -d \"%s\"", _pIni->sections[L"Tools"][L"flac"].str(), _srcPath.str());
+		if(!_destPath.isEmpty())
 			cmdLine.append(L" -o"); // different destination folder requires flag
 	} else {
 		debug(L"Not a FLAC/MP3: %s\n", _srcPath.str());
 		return;
 	}
 
-	if(_destPath != L"") { // different destination folder
+	if(!_destPath.isEmpty()) { // different destination folder
 		cmdLine.appendfmt(L" \"%s\\%s\"", _destPath.str(), &_srcPath[_srcPath.findr(L'\\') + 1]);
 		cmdLine[cmdLine.findr(L'.')] = L'\0';
 		cmdLine.append(L".wav\""); // WAV extension on destination file

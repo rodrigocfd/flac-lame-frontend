@@ -4,6 +4,7 @@
 //
 
 #pragma once
+#include "Ptr.h"
 #include "Window.h"
 #include <CommCtrl.h>
 
@@ -41,11 +42,15 @@ public:
 		else sendMessage(CB_GETLBTEXT, i, (LPARAM)pBuf);
 		return pBuf;
 	}
-
 	String* itemGetText(int i, String *pBuf) {
 		pBuf->reserve((int)sendMessage(CB_GETLBTEXTLEN, i, 0));
 		sendMessage(CB_GETLBTEXT, i, (LPARAM)pBuf->ptrAt(0));
 		return pBuf;
+	}
+	Ptr<String> itemGetText(int i) {
+		Ptr<String> s(new String());
+		itemGetText(i, s);
+		return s;
 	}
 };
 
@@ -94,9 +99,9 @@ public:
 //
 class ProgressBar : public Window {
 public:
-	ProgressBar()                   { }
-	ProgressBar(HWND hwnd)          { operator=(hwnd); }
-	ProgressBar(const Window& wnd)  { operator=(wnd); }
+	ProgressBar()                         { }
+	ProgressBar(HWND hwnd)                { operator=(hwnd); }
+	ProgressBar(const Window& wnd)        { operator=(wnd); }
 	ProgressBar(const ProgressBar& other) { operator=(other); }
 
 	ProgressBar& operator=(HWND hwnd)                { *((Window*)this) = hwnd; return *this; }

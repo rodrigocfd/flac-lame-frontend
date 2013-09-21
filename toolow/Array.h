@@ -10,9 +10,10 @@
 
 template<typename T> class Array {
 public:
-	Array()                  : _ptr(0), _sz(0) { }
-	explicit Array(int size) : _ptr(0), _sz(0) { this->realloc(size); }
-	~Array()                 { this->free(); }
+	Array()                   : _ptr(NULL), _sz(0) { }
+	Array(const Array& other) : _ptr(NULL), _sz(0) { operator=(other); }
+	explicit Array(int size)  : _ptr(NULL), _sz(0) { this->realloc(size); }
+	~Array()                  { this->free(); }
 
 	int      size() const                { return _sz; }
 	const T& operator[](int index) const { return _ptr[index]; }
@@ -31,7 +32,14 @@ public:
 		if(!_sz) return *this;
 		for(int i = 0; i < _sz; ++i) _ptr[i].~T();
 		::free(_ptr);
-		_ptr = 0; _sz = 0;
+		_ptr = NULL; _sz = 0;
+		return *this;
+	}
+
+	Array& operator=(const Array& other) {
+		this->realloc(other._sz);
+		for(int i = 0; i < other._sz; ++i)
+			_ptr[i] = other._ptr[i];
 		return *this;
 	}
 

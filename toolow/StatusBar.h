@@ -12,10 +12,9 @@ public:
 	StatusBar& create(HWND hOwner, int numPartsItWillHave);
 	StatusBar& addFixedPart(BYTE sizePixels);
 	StatusBar& addResizablePart(float resizeWeight);
-	StatusBar& setText(int iPart, const wchar_t *text) { _sb.sendMessage(SB_SETTEXT, MAKEWPARAM(MAKEWORD(iPart, 0), 0), (LPARAM)text); return *this; }
-	StatusBar& setTextFmt(int iPart, const wchar_t *fmt, ...);
-	void       getText(int iPart, String *pBuf) const;
-	void       setIcon(int iPart, HICON hIcon)         { _sb.sendMessage(SB_SETICON, iPart, (LPARAM)hIcon); }
+	StatusBar& setText(const wchar_t *text, int iPart) { _sb.sendMessage(SB_SETTEXT, MAKEWPARAM(MAKEWORD(iPart, 0), 0), (LPARAM)text); return *this; }
+	void       getText(String *pBuf, int iPart) const;
+	void       setIcon(HICON hIcon, int iPart)         { _sb.sendMessage(SB_SETICON, iPart, (LPARAM)hIcon); }
 	void       doResize(WPARAM wp, LPARAM lp)          { if(wp != SIZE_MINIMIZED && _sb.hWnd()) _putParts(LOWORD(lp)); }
 
 private:

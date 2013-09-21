@@ -3,9 +3,9 @@
 #define _CRT_SECURE_NO_WARNINGS // _itow() VC2008
 
 #include <direct.h> // _wmkdir()
+#include "../toolow/DropFiles.h"
+#include "../toolow/EnumFiles.h"
 #include "../toolow/File.h"
-#include "../toolow/FileDrop.h"
-#include "../toolow/FileGlob.h"
 #include "../toolow/util.h"
 #include "MainDialog.h"
 #include "Converter.h"
@@ -63,10 +63,20 @@ void MainDialog::on_esc()
 
 void MainDialog::on_initDialog()
 {
-	// Validate tools.
+	// Validate and load INI file.
+	String iniPath;
+	GetPathTo::Exe(&iniPath)->append(L"\\FlacLameFE.ini");
+	m_ini.setPath(iniPath.str());
+
 	String err;
-	if(!Converter::PathsAreValid(&err)) {
-		this->messageBox(MB_ICONERROR, L"Fail", err.str());
+	if(!m_ini.load(&err)) {
+		this->messageBox(L"Fail", err.str(), MB_ICONERROR);
+		return;
+	}
+
+	// Validate tools.
+	if(!Converter::PathsAreValid(&m_ini, &err)) {
+		this->messageBox(L"Fail", err.str(), MB_ICONERROR);
 		this->sendMessage(WM_CLOSE, 0, 0); // halt program
 		return;
 	}
@@ -123,7 +133,7 @@ void MainDialog::on_initDialog()
 
 void MainDialog::on_dropFiles(WPARAM wp)
 {
-	FileDrop drop((HDROP)wp);
+	DropFiles drop((HDROP)wp);
 
 	for(int i = 0; i < drop.count(); ++i)
 	{
@@ -133,17 +143,17 @@ void MainDialog::on_dropFiles(WPARAM wp)
 		if(File::IsDir(filebuf)) // if a directory, add all files inside of it
 		{
 			wchar_t subfilebuf[MAX_PATH];
-			
-			FileGlob globMp3(filebuf, L"*.mp3");
-			while(globMp3.next(subfilebuf))
+	
+			EnumFiles findMp3(filebuf, L"*.mp3");
+			while(findMp3.next(subfilebuf))
 				do_fileToList(subfilebuf);
 
-			FileGlob globFlac(filebuf, L"*.flac");
-			while(globFlac.next(subfilebuf))
+			EnumFiles findFlac(filebuf, L"*.flac");
+			while(findFlac.next(subfilebuf))
 				do_fileToList(subfilebuf);
 
-			FileGlob globWav(filebuf, L"*.wav");
-			while(globWav.next(subfilebuf))
+			EnumFiles findWav(filebuf, L"*.wav");
+			while(findWav.next(subfilebuf))
 				do_fileToList(subfilebuf);
 		}
 		else
@@ -186,18 +196,19 @@ void MainDialog::on_run()
 	
 	if(lstrlen(destFolder)) {
 		if(!File::Exists(destFolder)) {
-			int q = this->messageBox(MB_ICONQUESTION | MB_YESNO, L"Create directory",
-				L"The following directory:\n%s\ndoes not exist. Create it?", destFolder);
+			int q = this->messageBox(L"Create directory",
+				fmt(L"The following directory:\n%s\ndoes not exist. Create it?", destFolder)->str(),
+				MB_ICONQUESTION | MB_YESNO);
 			if(q == IDYES) {
 				if(_wmkdir(destFolder) != 0) {
-					this->messageBox(MB_ICONERROR, L"Fail", L"The directory failed to be created:\n%s", destFolder);
+					this->messageBox(L"Fail", fmt(L"The directory failed to be created:\n%s", destFolder)->str(), MB_ICONERROR);
 					return; // halt
 				}
 			} else {
 				return; // halt
 			}
 		} else if(!File::IsDir(destFolder)) {
-			this->messageBox(MB_ICONERROR, L"Fail", L"The following path is not a directory:\n%s", destFolder);
+			this->messageBox(L"Fail", fmt(L"The following path is not a directory:\n%s", destFolder)->str(), MB_ICONERROR);
 			return; // halt
 		}
 	}
@@ -207,7 +218,7 @@ void MainDialog::on_run()
 	for(int i = 0; i < m_lstFiles.items.count(); ++i) {
 		wchar_t filebuf[MAX_PATH];
 		if( !File::Exists(m_lstFiles.items[i].getText(filebuf, ARRAYSIZE(filebuf))) ) {
-			this->messageBox(MB_ICONERROR, L"Fail", L"File does not exist:\n%s", filebuf);
+			this->messageBox(L"Fail", fmt(L"File does not exist:\n%s", filebuf)->str(), MB_ICONERROR);
 			return; // halt
 		}
 	}
@@ -234,9 +245,9 @@ void MainDialog::on_run()
 		wchar_t filebuf[MAX_PATH];
 		m_lstFiles.items[i].getText(filebuf, ARRAYSIZE(filebuf));
 
-		if(m_radMp3.isChecked())       convs[i] = new ConverterMp3(this->hWnd(), filebuf, delSrc, quality, isVbr, pDestFolder); // threads
-		else if(m_radFlac.isChecked()) convs[i] = new ConverterFlac(this->hWnd(), filebuf, delSrc, quality, pDestFolder);
-		else if(m_radWav.isChecked())  convs[i] = new ConverterWav(this->hWnd(), filebuf, delSrc, pDestFolder);
+		if(m_radMp3.isChecked())       convs[i] = new ConverterMp3(this->hWnd(), &m_ini, filebuf, delSrc, quality, isVbr, pDestFolder); // threads
+		else if(m_radFlac.isChecked()) convs[i] = new ConverterFlac(this->hWnd(), &m_ini, filebuf, delSrc, quality, pDestFolder);
+		else if(m_radWav.isChecked())  convs[i] = new ConverterWav(this->hWnd(), &m_ini, filebuf, delSrc, pDestFolder);
 	}
 
 	// Disable some controls.
@@ -256,7 +267,7 @@ void MainDialog::on_fileDone(LPARAM lp)
 {
 	--m_numFilesToProcess;
 	int tot = m_lstFiles.items.count();
-	this->setTextFmt(L"FLAC/LAME front end [RUNNING... %d%%]", -(m_numFilesToProcess - tot) * 100 / tot); // progress count
+	this->setText(fmt(L"FLAC/LAME front end [RUNNING... %d%%]", -(m_numFilesToProcess - tot) * 100 / tot)->str()); // progress count
 
 	if(!m_numFilesToProcess) { // re-enable the controls
 		this->setXButton(true);
@@ -272,15 +283,16 @@ void MainDialog::on_fileDone(LPARAM lp)
 void MainDialog::do_fileToList(const wchar_t *file)
 {
 	int iType = -1;
-	if(endsWith(file, L".mp3"))       iType = 0;
-	else if(endsWith(file, L".flac")) iType = 1;
-	else if(endsWith(file, L".wav"))  iType = 2; // what type of audio file is this?
+	String sFile = file;
+	if(sFile.endsWith(L".mp3"))       iType = 0;
+	else if(sFile.endsWith(L".flac")) iType = 1;
+	else if(sFile.endsWith(L".wav"))  iType = 2; // what type of audio file is this?
 
 	if(iType == -1)
 		return; // bypass file if unaccepted format
 
-	if(!m_lstFiles.items.exists(file))
-		m_lstFiles.items.add(file, iType); // add only if not present yet
+	if(!m_lstFiles.items.exists(sFile.str()))
+		m_lstFiles.items.add(sFile.str(), iType); // add only if not present yet
 }
 
 void MainDialog::do_updateCounter(int newCount)

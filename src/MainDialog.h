@@ -4,6 +4,7 @@
 #include "../toolow/Resizer.h"
 #include "../toolow/ListView.h"
 #include "../toolow/Controls.h"
+#include "../toolow/Ini.h"
 
 class MainDialog : public DialogApp {
 private:
@@ -20,6 +21,7 @@ private:
 	void do_fileToList(const wchar_t *file);
 	void do_updateCounter(int newCount);
 
+	Ini      m_ini;
 	Resizer  m_resizer;
 	ListView m_lstFiles;
 	Combo    m_cmbCbr, m_cmbVbr, m_cmbFlac;

@@ -1,6 +1,7 @@
 
 #include "ListView.h"
 #include "Icon.h"
+#include "util.h"
 
 void ListView::Item::swapWith(int index)
 {
@@ -54,7 +55,7 @@ ListView::Item& ListView::Item::ensureVisible()
 	return *this;
 }
 
-String* ListView::Item::getText(String *pBuf, int iCol)
+String* ListView::Item::getText(String *pBuf, int iCol) const
 {
 	// http://forums.codeguru.com/showthread.php?351972-Getting-listView-item-text-length
 	LVITEM lvi = { 0 };
@@ -79,17 +80,7 @@ String* ListView::Item::getText(String *pBuf, int iCol)
 	return pBuf;
 }
 
-ListView::Item& ListView::Item::setTextFmt(int iCol, const wchar_t *fmt, ...)
-{
-	va_list args;
-	va_start(args, fmt);
-	String buf; buf.fmtv(fmt, args);
-	va_end(args);
-	this->setText(buf.str(), iCol);
-	return *this;
-}
-
-LPARAM ListView::Item::getParam()
+LPARAM ListView::Item::getParam() const
 {
 	LVITEM lvi = { 0 };
 	lvi.iItem = this->i;
@@ -110,7 +101,7 @@ ListView::Item& ListView::Item::setParam(LPARAM lp)
 	return *this;
 }
 
-int ListView::Item::getIcon()
+int ListView::Item::getIcon() const
 {
 	LVITEM lvi = { 0 };
 	lvi.iItem = this->i;

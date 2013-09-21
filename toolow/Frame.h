@@ -6,6 +6,7 @@
 
 #pragma once
 #include "Window.h"
+#include "util.h"
 
 //__________________________________________________________________________________________________
 // Base class to any regular window.

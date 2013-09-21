@@ -21,7 +21,7 @@ String& String::reserve(int numCharsWithoutNull)
 			_arr[0] = L'\0';
 	}
 
-	_arr[numCharsWithoutNull] = L'\0'; // place terminating null
+	_arr[numCharsWithoutNull] = L'\0'; // place terminating null, always
 	return *this;
 }
 
@@ -40,6 +40,14 @@ String& String::append(wchar_t ch)
 	int newLen = this->len() + 1;
 	this->reserve(newLen);
 	_arr[newLen - 1] = ch;
+	return *this;
+}
+
+String& String::insert(int at, const wchar_t *s)
+{
+	if(at < 0) at = 0;
+	if(at >= this->len()) return this->append(s);
+	_arr.insert(at, s, ::lstrlen(s));
 	return *this;
 }
 
@@ -113,11 +121,46 @@ String& String::trim()
 	return *this;
 }
 
+String& String::getSubstr(const wchar_t *src, int start, int length)
+{
+	int hisLen = ::lstrlen(src);
+	if(hisLen && start <= hisLen - 1) {
+		if(start < 0) start = 0;
+		if(length <= 0) length = hisLen - start + length; // negative length acts as backwards index
+		if(length > 0) {
+			if(start + length > hisLen - 1) length = hisLen - start;
+
+			this->reserve(length);
+			for(int i = 0; i < length; ++i)
+				_arr[i] = src[i + start];
+		}
+	}
+	return *this;
+}
+
+bool String::startsWith(const wchar_t *s) const
+{
+	int ourLen = this->len(),
+		hisLen = ::lstrlen(s);
+	if(!ourLen || hisLen > ourLen) return false;
+	wchar_t *buf = (wchar_t*)::_alloca(sizeof(wchar_t) * (hisLen + 1));
+	::memcpy(buf, &_arr[0], sizeof(wchar_t) * hisLen);
+	buf[hisLen] = L'\0';
+	return !::lstrcmpi(buf, s); // case insensitive
+}
+
 bool String::endsWith(const wchar_t *s) const
 {
 	int ourLen = this->len(), hisLen = ::lstrlen(s);
 	if(ourLen >= hisLen)
 		return !::lstrcmpi(&_arr[ourLen - hisLen], s); // case insensitive
+	return false;
+}
+
+bool String::endsWith(wchar_t ch) const
+{
+	int ourLen = this->len();
+	if(ourLen) return _arr[ourLen - 1] == ch;
 	return false;
 }
 
@@ -165,9 +208,9 @@ int String::find(wchar_t ch) const
 	return (int)(p - &_arr[0]); // return index of position
 }
 
-int String::find(const wchar_t *substr) const
+int String::find(const wchar_t *substring) const
 {
-	const wchar_t *p = ::wcsstr(this->str(), substr);
+	const wchar_t *p = ::wcsstr(this->str(), substring);
 	if(!p) return -1; // not found
 	return (int)(p - &_arr[0]); // return index of position
 }
@@ -226,7 +269,7 @@ String& String::invert()
 	return *this;
 }
 
-void String::explode(const wchar_t *delimiters, Array<String> *pBuf)
+void String::explode(const wchar_t *delimiters, Array<String> *pBuf) const
 {
 	// Count how many pieces we'll have after exploding.
 	int num = 0;
@@ -248,6 +291,14 @@ void String::explode(const wchar_t *delimiters, Array<String> *pBuf)
 		if(pBase[lenSub] == L'\0') break;
 		pBase += lenSub + 1;
 	}
+}
+
+String& String::fromUtf8(const BYTE *data, int length)
+{
+	int neededLen = ::MultiByteToWideChar(CP_UTF8, 0, (const char*)data, length, 0, 0);
+	this->reserve(neededLen);
+	::MultiByteToWideChar(CP_UTF8, 0, (const char*)data, length, &_arr[0], neededLen);
+	return *this;
 }
 
 int __cdecl String::Sort(const void *a, const void *b)

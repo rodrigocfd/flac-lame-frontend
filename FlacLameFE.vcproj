@@ -223,23 +223,7 @@
 			Name="toolow"
 			>
 			<File
-				RelativePath=".\toolow\Array.h"
-				>
-			</File>
-			<File
-				RelativePath=".\toolow\ComPt.h"
-				>
-			</File>
-			<File
 				RelativePath=".\toolow\Controls.h"
-				>
-			</File>
-			<File
-				RelativePath=".\toolow\Date.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\toolow\Date.h"
 				>
 			</File>
 			<File
@@ -251,19 +235,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\toolow\DropFiles.h"
+				>
+			</File>
+			<File
+				RelativePath=".\toolow\EnumFiles.h"
+				>
+			</File>
+			<File
 				RelativePath=".\toolow\File.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\toolow\File.h"
-				>
-			</File>
-			<File
-				RelativePath=".\toolow\FileDrop.h"
-				>
-			</File>
-			<File
-				RelativePath=".\toolow\FileGlob.h"
 				>
 			</File>
 			<File
@@ -287,11 +271,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\toolow\InitMenuPopup.h"
+				RelativePath=".\toolow\Ini.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\toolow\Internet.h"
+				RelativePath=".\toolow\Ini.h"
+				>
+			</File>
+			<File
+				RelativePath=".\toolow\InitMenuPopup.h"
 				>
 			</File>
 			<File
@@ -327,14 +315,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\toolow\String.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\toolow\String.h"
-				>
-			</File>
-			<File
 				RelativePath=".\toolow\TextBox.cpp"
 				>
 			</File>
@@ -343,19 +323,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\toolow\Thread.cpp"
+				RelativePath=".\toolow\Web.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\toolow\Thread.h"
-				>
-			</File>
-			<File
-				RelativePath=".\toolow\util.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\toolow\util.h"
+				RelativePath=".\toolow\Web.h"
 				>
 			</File>
 			<File
@@ -364,6 +336,14 @@
 			</File>
 			<File
 				RelativePath=".\toolow\WheelHover.h"
+				>
+			</File>
+			<File
+				RelativePath=".\toolow\Xml.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\toolow\Xml.h"
 				>
 			</File>
 			<Filter
@@ -427,6 +407,54 @@
 				</File>
 				<File
 					RelativePath=".\toolow\WindowPopup.cpp"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="core"
+				>
+				<File
+					RelativePath=".\toolow\Array.h"
+					>
+				</File>
+				<File
+					RelativePath=".\toolow\Date.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\toolow\Date.h"
+					>
+				</File>
+				<File
+					RelativePath=".\toolow\Hash.h"
+					>
+				</File>
+				<File
+					RelativePath=".\toolow\Ptr.h"
+					>
+				</File>
+				<File
+					RelativePath=".\toolow\String.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\toolow\String.h"
+					>
+				</File>
+				<File
+					RelativePath=".\toolow\Thread.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\toolow\Thread.h"
+					>
+				</File>
+				<File
+					RelativePath=".\toolow\util.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\toolow\util.h"
 					>
 				</File>
 			</Filter>

@@ -8,7 +8,7 @@ bool File::open(const wchar_t *path, File::Access access, String *pErr)
 	_hFile = CreateFile(path,
 		GENERIC_READ | (access == READWRITE ? GENERIC_WRITE : 0),
 		access == READWRITE ? 0 : FILE_SHARE_READ,
-		0, access == READWRITE ? OPEN_ALWAYS : OPEN_EXISTING, 0, 0);
+		0, access == READWRITE ? OPEN_ALWAYS : OPEN_EXISTING, 0, 0); // if file doesn't exist, will be created
 
 	if(_hFile == INVALID_HANDLE_VALUE) {
 		_hFile = 0;
@@ -25,6 +25,7 @@ bool File::setNewSize(int newSize, String *pErr)
 {
 	// This method will truncate or expand the file, according to the new size.
 	// It will probably fail if file was opened as read-only.
+	// Size zero will truncate the file.
 
 	if(!_hFile) {
 		if(pErr) *pErr = L"File has not been opened.";

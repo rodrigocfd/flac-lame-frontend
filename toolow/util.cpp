@@ -17,6 +17,18 @@ void debug(const wchar_t *fmt, ...)
 	OutputDebugString(buf.str());
 }
 
+Ptr<String> fmt(const wchar_t *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+
+	Ptr<String> s = new String(); // a smart pointer will be returned
+	s->fmtv(fmt, args);
+
+	va_end(args);
+	return s;
+}
+
 int round(float x)
 {
 	return (int)floor(x + 0.5); // <math.h>
@@ -181,7 +193,7 @@ void explodeQuotedStr(const wchar_t *quotedStr, Array<String> *pBuf)
 	}
 }
 
-String* Dir::Exe(String *pBuf)
+String* GetPathTo::Exe(String *pBuf)
 {
 	pBuf->reserve(MAX_PATH);
 	(*pBuf) = L"";
@@ -196,7 +208,7 @@ String* Dir::Exe(String *pBuf)
 	return pBuf; // return same passed buffer, won't have trailing backslash
 }
 
-String* Dir::_Folder(String *pBuf, BYTE cslid_id)
+String* GetPathTo::_Folder(String *pBuf, BYTE cslid_id)
 {
 	pBuf->reserve(MAX_PATH);
 	(*pBuf) = L"";
@@ -206,39 +218,4 @@ String* Dir::_Folder(String *pBuf, BYTE cslid_id)
 
 	SHGetFolderPath(0, cslids[cslid_id], 0, 0, pBuf->ptrAt(0)); // won't have trailing backslash
 	return pBuf; // return same passed buffer
-}
-
-String* Ini::Read(const wchar_t *path, const wchar_t *section, const wchar_t *key, String* pBuf)
-{
-	// Notice that, since Strings' size always increase, if the buffer
-	// was previously allocated with a value bigger than 128, this will
-	// speed up the size checks.
-
-	int baseBufLen = 0;
-	DWORD retCode = 0;
-	do {
-		baseBufLen += 128; // buffer increasing step, arbitrary!
-		pBuf->reserve(baseBufLen);
-		retCode = GetPrivateProfileString(section, key, L"",
-			pBuf->ptrAt(0), pBuf->reserved() + 1, path);
-	}
-	while(retCode == pBuf->reserved()); // if could not get all chars, try again
-	
-	return pBuf;
-}
-
-int Ini::Read(const wchar_t *path, const wchar_t *section, const wchar_t *key)
-{
-	// Won't use GetPrivateProfileInt because we'll
-	// want to read negative numbers too.
-	wchar_t buf[16] = { 0 };
-	GetPrivateProfileString(section, key, L"0", buf, ARRAYSIZE(buf), path);
-	return _wtoi(buf); // assumes the number can be converted
-}
-
-void Ini::Write(const wchar_t *path, const wchar_t *section, const wchar_t *key, int n)
-{
-	wchar_t buf[16];
-	_itow(n, buf, 10);
-	Ini::Write(path, section, key, buf);
 }

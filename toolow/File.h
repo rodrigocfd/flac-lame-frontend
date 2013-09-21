@@ -20,6 +20,7 @@ public:
 	int    size()        { return ::GetFileSize(_hFile, 0); }
 	bool   open(const wchar_t *path, Access access, String *pErr=0);
 	bool   setNewSize(int newSize, String *pErr=0);
+	bool   truncate(String *pErr=0) { return setNewSize(0, pErr); }
 	bool   getContent(Array<BYTE> *pBuf, String *pErr=0);
 	bool   write(const Array<BYTE> *pData, String *pErr=0) { return write(&(*pData)[0], pData->size(), pErr); }
 	bool   write(const BYTE *pData, int sz, String *pErr=0);
@@ -61,17 +62,19 @@ private:
 //
 class FileText {
 public:
-	FileText() : _p(0) { }
+	FileText() : _p(0), _idxLine(-1) { }
 	
 	bool load(const wchar_t *path, String *pErr=0);
 	bool load(const FileMap *pfm);
 	bool nextLine(String *pBuf);
-	void rewind() { _p = _text.ptrAt(0); _firstLine = true; }
+	int  curLineIndex() const { return _idxLine; }
+	void rewind()             { _p = _text.ptrAt(0); _idxLine = -1; }
 	
+	const String* text() const { return &_text; }
 	static bool Write(const wchar_t *path, const wchar_t *data, String *pErr=0);
 	
 private:
 	String   _text;
 	wchar_t *_p;
-	bool     _firstLine;
+	int      _idxLine;
 };

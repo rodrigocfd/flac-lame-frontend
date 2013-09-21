@@ -6,14 +6,14 @@
 #pragma once
 #include <Windows.h>
 
-class FileGlob {
+class EnumFiles {
 public:
-	FileGlob(const wchar_t *pattern) : _hFind(0) {
+	EnumFiles(const wchar_t *pattern) : _hFind(0) {
 		::SecureZeroMemory(&_wfd, sizeof(_wfd));
 		_pattern = ::_wcsdup(pattern); // example of pattern: L"*.mp3"
 	}
 
-	FileGlob(const wchar_t *path, const wchar_t *pattern) : _hFind(0) {
+	EnumFiles(const wchar_t *path, const wchar_t *pattern) : _hFind(0) {
 		::SecureZeroMemory(&_wfd, sizeof(_wfd));
 		bool hasBackslash = path[lstrlen(path) - 1] == L'\\';
 		_pattern = (wchar_t*)::malloc(sizeof(wchar_t) * (
@@ -25,7 +25,7 @@ public:
 		::lstrcat(_pattern, pattern); // assembly path + pattern
 	}
 
-	~FileGlob() {
+	~EnumFiles() {
 		::free(_pattern);
 		if(_hFind && _hFind != INVALID_HANDLE_VALUE)
 			::FindClose(_hFind);

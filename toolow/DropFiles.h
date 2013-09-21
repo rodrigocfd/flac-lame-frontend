@@ -6,11 +6,11 @@
 #pragma once
 #include "String.h"
 
-class FileDrop {
+class DropFiles {
 public:
-	FileDrop(HDROP hDrop) : _hDrop(hDrop), _count(::DragQueryFile(_hDrop, 0xFFFFFFFF, 0, 0)) { }
-	~FileDrop()           { ::DragFinish(_hDrop); }
-	int count() const     { return _count; }
+	DropFiles(HDROP hDrop) : _hDrop(hDrop), _count(::DragQueryFile(_hDrop, 0xFFFFFFFF, 0, 0)) { }
+	~DropFiles()           { ::DragFinish(_hDrop); }
+	int count() const      { return _count; }
 
 	wchar_t* get(int i, wchar_t *pBuf) {
 		::DragQueryFile(_hDrop, i, pBuf, MAX_PATH);
