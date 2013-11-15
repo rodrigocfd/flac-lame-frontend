@@ -1,6 +1,30 @@
 
 #include "Date.h"
 
+Date& Date::setNow()
+{
+	SYSTEMTIME st1 = { 0 };
+	GetSystemTime(&st1);
+
+	TIME_ZONE_INFORMATION tzi = { 0 };
+	GetTimeZoneInformation(&tzi);
+	SystemTimeToTzSpecificLocalTime(&tzi, &st1, &_st);
+
+	return *this;
+}
+
+Date& Date::setFromFt(const FILETIME *ft)
+{
+	SYSTEMTIME st1 = { 0 };
+	FileTimeToSystemTime(ft, &st1);
+
+	TIME_ZONE_INFORMATION tzi = { 0 };
+	GetTimeZoneInformation(&tzi);
+	SystemTimeToTzSpecificLocalTime(&tzi, &st1, &_st);
+
+	return *this;
+}
+
 Date& Date::setFromMs(LONGLONG ms)
 {
 	SecureZeroMemory(&_st, sizeof(SYSTEMTIME));

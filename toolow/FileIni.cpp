@@ -1,14 +1,19 @@
+//
+// INI file automation, in-memory hash storage.
+// Cloudy evening of September 17, 2013.
+// Part of TOOLOW - Thin Object Oriented Layer Over Win32.
+//
 
-#include "Ini.h"
+#include "File.h"
 
-bool Ini::load(String *pErr)
+bool File::Ini::load(String *pErr)
 {
 	if(_path.isEmpty()) {
 		*pErr = L"INI path not set.";
 		return false;
 	}
 
-	FileText fin;
+	File::Text fin;
 	if(!fin.load(_path.str(), pErr)) {
 		if(pErr) pErr->insert(0, L"INI file failed to load.\n");
 		return false;
@@ -41,7 +46,7 @@ bool Ini::load(String *pErr)
 	return true;
 }
 
-bool Ini::serialize(String *pErr) const
+bool File::Ini::serialize(String *pErr) const
 {
 	if(_path.isEmpty()) {
 		*pErr = L"INI path not set.";
@@ -62,7 +67,7 @@ bool Ini::serialize(String *pErr) const
 		out.append(L"\r\n");
 	}
 
-	if(!FileText::Write(_path.str(), out.str(), pErr)) {
+	if(!File::WriteUtf8(_path.str(), out.str(), pErr)) {
 		pErr->insert(0, L"INI file serialization failed.\n");
 		return false;
 	}
@@ -71,7 +76,7 @@ bool Ini::serialize(String *pErr) const
 	return true;
 }
 
-int Ini::_countSections(FileText *fin) const
+int File::Ini::_countSections(File::Text *fin) const
 {
 	int count = 0;
 	String line;

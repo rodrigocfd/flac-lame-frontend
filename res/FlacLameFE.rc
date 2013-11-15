@@ -27,18 +27,18 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE
+1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE
+2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE
+3 TEXTINCLUDE 
 BEGIN
     "\r\n"
     "\0"
@@ -74,6 +74,17 @@ BEGIN
     LTEXT           "Level",LBL_LEVEL,54,247,18,8
     COMBOBOX        CMB_FLAC,78,245,29,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Delete original file",CHK_DELSRC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,186,204,75,10
+    LTEXT           "Number of threads",IDC_STATIC,187,225,68,8
+    COMBOBOX        CMB_NUMTHREADS,258,223,29,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+END
+
+DLG_RUNNIN DIALOGEX 0, 0, 198, 36
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Running..."
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Status",LBL_STATUS,6,5,185,8
+    CONTROL         "",PRO_STATUS,"msctls_progress32",WS_BORDER,4,19,190,14
 END
 
 
@@ -92,8 +103,8 @@ ICO_MAIN                ICON                    "Ron Burgundy.ico"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,1
- PRODUCTVERSION 1,0,0,1
+ FILEVERSION 1,1,0,0
+ PRODUCTVERSION 1,1,0,0
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -111,13 +122,13 @@ BEGIN
             VALUE "Comments", "FLAC/LAME graphical front end."
             VALUE "CompanyName", "Rodrigo Cesar de Freitas Dias"
             VALUE "FileDescription", "FLAC/LAME graphical front end."
-            VALUE "FileVersion", "1, 0, 0, 1"
+            VALUE "FileVersion", "1.1.0"
             VALUE "InternalName", "FlacLameFE"
             VALUE "LegalCopyright", "Copyright (C) 2013"
             VALUE "LegalTrademarks", "Rodrigo Cesar de Freitas Dias"
             VALUE "OriginalFilename", "FlacLame.exe"
             VALUE "ProductName", "FLAC/LAME graphical front end."
-            VALUE "ProductVersion", "1.0.0"
+            VALUE "ProductVersion", "1.1.0"
         END
     END
     BLOCK "VarFileInfo"

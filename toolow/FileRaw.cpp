@@ -1,19 +1,64 @@
 
 #include "File.h"
 
-bool File::open(const wchar_t *path, File::Access access, String *pErr)
+Date File::LastModified(const wchar_t *path)
+{
+	WIN32_FILE_ATTRIBUTE_DATA fad = { 0 };
+	GetFileAttributesEx(path, GetFileExInfoStandard, &fad);
+	return Date(&fad.ftLastWriteTime); // already converted to current timezone
+}
+
+Date File::Created(const wchar_t *path)
+{
+	WIN32_FILE_ATTRIBUTE_DATA fad = { 0 };
+	GetFileAttributesEx(path, GetFileExInfoStandard, &fad);
+	return Date(&fad.ftCreationTime); // already converted to current timezone
+}
+
+bool File::WriteUtf8(const wchar_t *path, const wchar_t *data, String *pErr)
+{
+	bool isUtf8 = false;
+	int dataLen = lstrlen(data);
+	for(int i = 0; i < dataLen; ++i) {
+		if(data[i] > 127) {
+			isUtf8 = true;
+			break;
+		}
+	}
+	
+	File::Raw fout;
+	if(!fout.open(path, Access::READWRITE, pErr))
+		return false;
+	if(fout.size() && !fout.setNewSize(0, pErr)) // if already exists, truncate to empty
+		return false;
+	
+	// If the text doesn't have any char to make it UTF-8, it'll
+	// be simply converted to plain ASCII.
+	int newLen = WideCharToMultiByte(CP_UTF8, 0, data, dataLen, 0, 0, 0, 0);
+	Array<BYTE> outBuf(newLen + (isUtf8 ? 3 : 0));
+	if(isUtf8)
+		memcpy(&outBuf[0], "\xEF\xBB\xBF", 3); // write UTF-8 BOM
+	WideCharToMultiByte(CP_UTF8, 0, data, dataLen, (char*)&outBuf[isUtf8 ? 3 : 0], newLen, 0, 0);
+	if(!fout.write(&outBuf, pErr)) // one single write() to all data, better performance
+		return false;
+	
+	if(pErr) *pErr = L"";
+	return true;
+}
+
+bool File::Raw::open(const wchar_t *path, File::Access::Type access, String *pErr)
 {
 	close(); // make sure everything was properly cleaned up
 
 	_hFile = CreateFile(path,
-		GENERIC_READ | (access == READWRITE ? GENERIC_WRITE : 0),
-		access == READWRITE ? 0 : FILE_SHARE_READ,
-		0, access == READWRITE ? OPEN_ALWAYS : OPEN_EXISTING, 0, 0); // if file doesn't exist, will be created
+		GENERIC_READ | (access == Access::READWRITE ? GENERIC_WRITE : 0),
+		access == Access::READWRITE ? 0 : FILE_SHARE_READ,
+		0, access == Access::READWRITE ? OPEN_ALWAYS : OPEN_EXISTING, 0, 0); // if file doesn't exist, will be created
 
 	if(_hFile == INVALID_HANDLE_VALUE) {
 		_hFile = 0;
 		if(pErr) pErr->fmt(L"CreateFile() failed to open file as %s, error code %d.",
-			access == READONLY ? L"read-only" : L"read-write", GetLastError());
+			access == Access::READONLY ? L"read-only" : L"read-write", GetLastError());
 		return false;
 	}
 	
@@ -21,7 +66,7 @@ bool File::open(const wchar_t *path, File::Access access, String *pErr)
 	return true;
 }
 
-bool File::setNewSize(int newSize, String *pErr)
+bool File::Raw::setNewSize(int newSize, String *pErr)
 {
 	// This method will truncate or expand the file, according to the new size.
 	// It will probably fail if file was opened as read-only.
@@ -59,7 +104,7 @@ bool File::setNewSize(int newSize, String *pErr)
 	return true;
 }
 
-bool File::getContent(Array<BYTE> *pBuf, String *pErr)
+bool File::Raw::getContent(Array<BYTE> *pBuf, String *pErr)
 {
 	if(!_hFile) {
 		if(pErr) *pErr = L"File has not been opened.";
@@ -77,7 +122,7 @@ bool File::getContent(Array<BYTE> *pBuf, String *pErr)
 	return true;
 }
 
-bool File::write(const BYTE *pData, int sz, String *pErr)
+bool File::Raw::write(const BYTE *pData, int sz, String *pErr)
 {
 	if(!_hFile) {
 		if(pErr) *pErr = L"File has not been opened.";
@@ -96,7 +141,7 @@ bool File::write(const BYTE *pData, int sz, String *pErr)
 	return true;
 }
 
-bool File::rewind(String *pErr)
+bool File::Raw::rewind(String *pErr)
 {
 	if(!_hFile) {
 		if(pErr) *pErr = L"File has not been opened.";

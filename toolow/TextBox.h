@@ -18,6 +18,7 @@ public:
 	TextBox&    operator=(HWND hwnd);
 	TextBox&    operator=(const Window& wnd)    { return operator=(wnd.hWnd()); }
 	TextBox&    operator=(const TextBox& other) { return operator=(other.hWnd()); }
+	int         getTextLen() const              { return ::GetWindowTextLength(hWnd()); }
 	void        getTextLines(Array<String> *pBuf);
 	TextBox&    setFont(const Font *pFont);
 	const Font& getFont() const                 { return _font; }

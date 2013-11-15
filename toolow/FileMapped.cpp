@@ -2,7 +2,7 @@
 #include "File.h"
 #include "util.h"
 
-void FileMap::close()
+void File::Mapped::close()
 {
 	if(_pMem) { UnmapViewOfFile(_pMem); _pMem = 0; }
 	if(_hMap) { CloseHandle(_hMap); _hMap = 0; }
@@ -10,10 +10,10 @@ void FileMap::close()
 	_size = 0;
 }
 
-bool FileMap::open(const wchar_t *path, File::Access access, String *pErr)
+bool File::Mapped::open(const wchar_t *path, File::Access::Type access, String *pErr)
 {
 	this->close(); // make sure everything was properly cleaned up
-
+	
 	// Open file.
 	if(!_file.open(path, access, pErr)) {
 		this->close();
@@ -22,7 +22,7 @@ bool FileMap::open(const wchar_t *path, File::Access access, String *pErr)
 
 	// Mapping into memory.
 	_hMap = CreateFileMapping(_file.hFile(), 0,
-		access == File::READWRITE ? PAGE_READWRITE : PAGE_READONLY, 0, 0, 0);
+		access == Access::READWRITE ? PAGE_READWRITE : PAGE_READONLY, 0, 0, 0);
 	if(!_hMap) {
 		this->close();
 		if(pErr) pErr->fmt(L"CreateFileMapping() failed to create file mapping, error code %d.",
@@ -32,7 +32,7 @@ bool FileMap::open(const wchar_t *path, File::Access access, String *pErr)
 
 	// Get pointer to data block.
 	_pMem = MapViewOfFile(_hMap,
-		access == File::READWRITE ? FILE_MAP_WRITE : FILE_MAP_READ, 0, 0, 0);
+		access == Access::READWRITE ? FILE_MAP_WRITE : FILE_MAP_READ, 0, 0, 0);
 	if(!_pMem) {
 		this->close();
 		if(pErr) pErr->fmt(L"MapViewOfFile() failed to map view of file, error code %d.",
@@ -45,7 +45,7 @@ bool FileMap::open(const wchar_t *path, File::Access access, String *pErr)
 	return true;
 }
 
-bool FileMap::setNewSize(int newSize, String *pErr)
+bool File::Mapped::setNewSize(int newSize, String *pErr)
 {
 	// This method will truncate or expand the file, according to the new size.
 	// It will probably fail if file was opened as read-only.
@@ -86,7 +86,7 @@ bool FileMap::setNewSize(int newSize, String *pErr)
 	return true;
 }
 
-bool FileMap::getContent(Array<BYTE> *pBuf, int offset, int numBytes, String *pErr)
+bool File::Mapped::getContent(Array<BYTE> *pBuf, int offset, int numBytes, String *pErr)
 {
 	if(!_hMap || !_pMem || !_file.hFile()) {
 		if(pErr) *pErr = L"File is not mapped into memory.";
@@ -105,7 +105,7 @@ bool FileMap::getContent(Array<BYTE> *pBuf, int offset, int numBytes, String *pE
 	return true;
 }
 
-bool FileMap::getContent(String *pBuf, int offset, int numChars, String *pErr)
+bool File::Mapped::getContent(String *pBuf, int offset, int numChars, String *pErr)
 {
 	Array<BYTE> byteBuf;
 	if(!this->getContent(&byteBuf, offset, numChars, pErr))

@@ -33,11 +33,11 @@ namespace Web
 	class Downloader : protected ErrorBase {
 	public:
 		explicit Downloader(Ptr<Connection> pCon)           : _pCon(pCon), _pReferrer(new String), _pRequestHeaders(new Array<String>), _hWndNotify(0), _msgNotify(0) { }
-		explicit Downloader(const wchar_t *userAgent)       : _pCon(new Connection(userAgent)), _pReferrer(new String), _pRequestHeaders(new Array<String>), _hWndNotify(0), _msgNotify(0) { _pCon->connect(); }
+		explicit Downloader(const wchar_t *userAgent)       : _pCon(new Connection(userAgent)), _pReferrer(new String), _pRequestHeaders(new Array<String>), _hWndNotify(0), _msgNotify(0) { }
 		Downloader& setReferrer(const wchar_t *referrer)    { *_pReferrer = referrer; return *this; }
 		Downloader& addRequestHeader(const wchar_t *header) { _pRequestHeaders->append(header); return *this; }
 		Downloader& registerNotify(HWND hWnd, UINT msgCode) { _hWndNotify = hWnd; _msgNotify = msgCode; return *this; }
-		bool        download(const wchar_t *address, const wchar_t *verb=L"GET");
+		bool        download(const wchar_t *address, const wchar_t *verb=L"GET", String *pErr=0);
 	private:
 		Ptr<Connection>    _pCon;
 		Ptr<String>        _pReferrer;

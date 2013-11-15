@@ -3,7 +3,7 @@
 #include "../toolow/util.h"
 #include "Converter.h"
 
-Converter::Converter(HWND hParent, Ini *pIni, const wchar_t *src, bool delSrc, const wchar_t *quality, bool isVbr, const wchar_t *dest)
+Converter::Converter(HWND hParent, File::Ini *pIni, const wchar_t *src, bool delSrc, const wchar_t *quality, bool isVbr, const wchar_t *dest)
 	: _hParent(hParent), _pIni(pIni), _srcPath(src), _delSrc(delSrc), _isVbr(isVbr)
 {
 	if(dest) {
@@ -16,7 +16,7 @@ Converter::Converter(HWND hParent, Ini *pIni, const wchar_t *src, bool delSrc, c
 		lstrcpy(_quality, quality);
 }
 
-bool Converter::PathsAreValid(Ini *pIni, String *pErr)
+bool Converter::PathsAreValid(File::Ini *pIni, String *pErr)
 {
 	// Search for FLAC and LAME tools.
 	if(!File::Exists( pIni->sections[L"Tools"][L"lame"].str() )) {

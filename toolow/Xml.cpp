@@ -64,7 +64,7 @@ bool Xml::parse(const wchar_t *str)
 
 bool Xml::load(const wchar_t *file, String *pErr)
 {
-	FileText fin;
+	File::Text fin;
 	if(!fin.load(file, pErr)) return false;
 	return this->parse(fin.text()->str());
 }

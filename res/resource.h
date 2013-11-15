@@ -4,6 +4,7 @@
 //
 #define DLG_MAIN                        101
 #define ICO_MAIN                        102
+#define DLG_RUNNIN                      104
 #define LST_FILES                       1001
 #define RAD_MP3                         1002
 #define RAD_FLAC                        1003
@@ -20,14 +21,17 @@
 #define BTN_DEST                        1014
 #define LBL_DEST                        1015
 #define FRA_CONV                        1016
+#define CMB_NUMTHREADS                  1017
+#define PRO_STATUS                      1018
+#define LBL_STATUS                      1019
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        104
+#define _APS_NEXT_RESOURCE_VALUE        105
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1017
+#define _APS_NEXT_CONTROL_VALUE         1020
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

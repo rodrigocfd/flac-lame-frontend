@@ -194,6 +194,14 @@
 				RelativePath=".\src\MainDialog.h"
 				>
 			</File>
+			<File
+				RelativePath=".\src\RunninDialog.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\RunninDialog.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -239,19 +247,23 @@
 				>
 			</File>
 			<File
-				RelativePath=".\toolow\EnumFiles.h"
-				>
-			</File>
-			<File
-				RelativePath=".\toolow\File.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\toolow\File.h"
 				>
 			</File>
 			<File
-				RelativePath=".\toolow\FileMap.cpp"
+				RelativePath=".\toolow\FileEnum.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\toolow\FileIni.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\toolow\FileMapped.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\toolow\FileRaw.cpp"
 				>
 			</File>
 			<File
@@ -268,14 +280,6 @@
 			</File>
 			<File
 				RelativePath=".\toolow\Icon.h"
-				>
-			</File>
-			<File
-				RelativePath=".\toolow\Ini.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\toolow\Ini.h"
 				>
 			</File>
 			<File

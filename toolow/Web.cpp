@@ -50,6 +50,11 @@ void Web::Connection::disconnect()
 
 bool Web::Connection::connect(String *pErr)
 {
+	if(!WinHttpCheckPlatform()) {
+		*pErr = L"This platform is not supported by WinHTTP.";
+		return false;
+	}
+
 	this->disconnect();
 	_hSession = WinHttpOpen(_userAgent.str(),
 		WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
@@ -61,13 +66,18 @@ bool Web::Connection::connect(String *pErr)
 	return true;
 }
 
-bool Web::Downloader::download(const wchar_t *address, const wchar_t *verb)
+bool Web::Downloader::download(const wchar_t *address, const wchar_t *verb, String *pErr)
 {
 	if(!_hWndNotify || !_msgNotify)
 		return false; // without a window to receive the stuff, download will be useless
 
+	if(!_pCon->hSession()) // if not connected yet, attempts to
+		if(!_pCon->connect(pErr))
+			return false;
+
 	_Worker *dlw = new _Worker(_pCon, _pReferrer, _pRequestHeaders, _hWndNotify, _msgNotify, address, verb);
 	dlw->runAsync();
+	if(pErr) *pErr = L"";
 	return true;
 }
 
@@ -93,7 +103,7 @@ void Web::Downloader::_Worker::onRun()
 	
 	if(!_pCon->hSession()) {
 		Web::Status *pStatus = new Status(Web::Status::FAILED); // should be consumed by receiver
-		pStatus->msg = L"Automatic WinHttpOpen() call failed for some reason.";
+		pStatus->msg = L"WinHttpOpen() call failed for some reason, no session handle.";
 		PostMessage(_hWndNotify, _msgNotify, 0, (LPARAM)pStatus);
 		return;
 	}

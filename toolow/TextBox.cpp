@@ -7,7 +7,7 @@ TextBox& TextBox::operator=(HWND hwnd)
 {
 	const int IDSUBCLASS = 1;
 
-	if(this->hWnd())
+	if(this->hWnd()) // remove any previous subclassing of us, will be reassigned
 		RemoveWindowSubclass(this->hWnd(), _Proc, IDSUBCLASS);
 
 	*((Window*)this) = hwnd;

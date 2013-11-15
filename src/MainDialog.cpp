@@ -4,10 +4,10 @@
 
 #include <direct.h> // _wmkdir()
 #include "../toolow/DropFiles.h"
-#include "../toolow/EnumFiles.h"
 #include "../toolow/File.h"
 #include "../toolow/util.h"
 #include "MainDialog.h"
+#include "RunninDialog.h"
 #include "Converter.h"
 #include "../res/resource.h"
 
@@ -15,10 +15,9 @@ INT_PTR MainDialog::msgHandler(UINT msg, WPARAM wp, LPARAM lp)
 {
 	switch(msg)
 	{
-	case WM_INITDIALOG:          on_initDialog(); break;
-	case WM_SIZE:                m_resizer.doResize(wp, lp); m_lstFiles.columnFit(0); return TRUE;
-	case WM_DROPFILES:           on_dropFiles(wp); return TRUE;
-	case Converter::WM_FILEDONE: on_fileDone(lp); return TRUE;
+	case WM_INITDIALOG: on_initDialog(); break;
+	case WM_SIZE:       m_resizer.doResize(wp, lp); m_lstFiles.columnFit(0); return TRUE;
+	case WM_DROPFILES:  on_dropFiles(wp); return TRUE;
 
 	case WM_COMMAND:
 		switch(LOWORD(wp))
@@ -103,14 +102,14 @@ void MainDialog::on_initDialog()
 	const wchar_t *cbrRates[] = {
 		L"32 kbps", L"40 kbps", L"48 kbps", L"56 kbps", L"64 kbps", L"80 kbps", L"96 kbps", L"112 kbps",
 		L"128 kbps; default", L"160 kbps", L"192 kbps", L"224 kbps", L"256 kbps", L"320 kbps" };
-	m_cmbCbr.itemAdd(14, cbrRates);
+	m_cmbCbr.itemAdd(ARRAYSIZE(cbrRates), cbrRates);
 	m_cmbCbr.itemSetSelected(8);
 
 	m_cmbVbr = this->getChild(CMB_VBR);
 	const wchar_t *vbrRates[] = {
 		L"0 (~245 kbps)", L"1 (~225 kbps)", L"2 (~190 kbps)", L"3 (~175 kbps)", L"4 (~165 kbps); default",
 		L"5 (~130 kbps)", L"6 (~115 kbps)", L"7 (~100 kbps)", L"8 (~85 kbps)", L"9 (~65 kbps)" };
-	m_cmbVbr.itemAdd(10, vbrRates);
+	m_cmbVbr.itemAdd(ARRAYSIZE(vbrRates), vbrRates);
 	m_cmbVbr.itemSetSelected(4);
 
 	m_cmbFlac = this->getChild(CMB_FLAC);
@@ -120,6 +119,19 @@ void MainDialog::on_initDialog()
 		m_cmbFlac.itemAdd(num);
 	}
 	m_cmbFlac.itemSetSelected(7);
+
+	m_cmbNumThreads = this->getChild(CMB_NUMTHREADS);
+	const wchar_t *numThreads[] = { L"1", L"2", L"4", L"8" };
+	m_cmbNumThreads.itemAdd(ARRAYSIZE(numThreads), numThreads);
+	SYSTEM_INFO si = { 0 };
+	GetSystemInfo(&si);
+	switch(si.dwNumberOfProcessors) {
+		case 1: m_cmbNumThreads.itemSetSelected(0); break;
+		case 2: m_cmbNumThreads.itemSetSelected(1); break;
+		case 4: m_cmbNumThreads.itemSetSelected(2); break;
+		case 8: m_cmbNumThreads.itemSetSelected(3); break;
+		default: m_cmbNumThreads.itemSetSelected(0);
+	}
 
 	// Initializing radio buttons.
 	m_radMp3    = this->getChild(RAD_MP3); m_radMp3.setCheck(true, Radio::EmulateClick::EMULATE);
@@ -144,15 +156,15 @@ void MainDialog::on_dropFiles(WPARAM wp)
 		{
 			wchar_t subfilebuf[MAX_PATH];
 	
-			EnumFiles findMp3(filebuf, L"*.mp3");
+			File::Enum findMp3(filebuf, L"*.mp3");
 			while(findMp3.next(subfilebuf))
 				do_fileToList(subfilebuf);
 
-			EnumFiles findFlac(filebuf, L"*.flac");
+			File::Enum findFlac(filebuf, L"*.flac");
 			while(findFlac.next(subfilebuf))
 				do_fileToList(subfilebuf);
 
-			EnumFiles findWav(filebuf, L"*.wav");
+			File::Enum findWav(filebuf, L"*.wav");
 			while(findWav.next(subfilebuf))
 				do_fileToList(subfilebuf);
 		}
@@ -212,7 +224,7 @@ void MainDialog::on_run()
 			return; // halt
 		}
 	}
-	wchar_t *pDestFolder = *destFolder ? destFolder : NULL; // path to output dir we'll use later
+	wchar_t *pDestFolder = *destFolder ? destFolder : NULL; // path to output dir we'll use
 
 	// Check the existence of each file added to list.
 	for(int i = 0; i < m_lstFiles.items.count(); ++i) {
@@ -222,10 +234,16 @@ void MainDialog::on_run()
 			return; // halt
 		}
 	}
+	Array<String> *pFiles = new Array<String>; // will be consumed by running dialog
+	m_lstFiles.items.getAllText(pFiles, 0);
 
 	// Retrieve settings.
 	bool delSrc = m_chkDelSrc.isChecked();
 	bool isVbr = m_radMp3Vbr.isChecked();
+
+	wchar_t chosenNumThread[8];
+	m_cmbNumThreads.itemGetText(m_cmbNumThreads.itemGetSelected(), chosenNumThread, ARRAYSIZE(chosenNumThread));
+	int numThreads = _wtoi(chosenNumThread);
 	
 	wchar_t quality[32] = { 0 };
 	if(m_radMp3.isChecked()) {
@@ -237,47 +255,16 @@ void MainDialog::on_run()
 	else if(m_radFlac.isChecked())
 		m_cmbFlac.itemGetText(m_cmbFlac.itemGetSelected(), quality, ARRAYSIZE(quality)); // text is quality setting itself
 
-	m_numFilesToProcess = m_lstFiles.items.count(); // will be decreased in WM_FILEDONE handling
+	// Which format are we converting to?
+	RunninDialog::Target::Type targetType = RunninDialog::Target::NONE;
+	
+	if(m_radMp3.isChecked())       targetType = RunninDialog::Target::MP3;
+	else if(m_radFlac.isChecked()) targetType = RunninDialog::Target::FLAC;
+	else if(m_radWav.isChecked())  targetType = RunninDialog::Target::WAV;
 
-	// Proceed to the file conversion.
-	Array<Thread*> convs(m_numFilesToProcess);
-	for(int i = 0; i < m_numFilesToProcess; ++i) {
-		wchar_t filebuf[MAX_PATH];
-		m_lstFiles.items[i].getText(filebuf, ARRAYSIZE(filebuf));
-
-		if(m_radMp3.isChecked())       convs[i] = new ConverterMp3(this->hWnd(), &m_ini, filebuf, delSrc, quality, isVbr, pDestFolder); // threads
-		else if(m_radFlac.isChecked()) convs[i] = new ConverterFlac(this->hWnd(), &m_ini, filebuf, delSrc, quality, pDestFolder);
-		else if(m_radWav.isChecked())  convs[i] = new ConverterWav(this->hWnd(), &m_ini, filebuf, delSrc, pDestFolder);
-	}
-
-	// Disable some controls.
-	m_lstFiles.setFocus();
-	this->setText(L"FLAC/LAME front end [RUNNING... 0%]");
-	this->getChild(BTN_RUN).setEnable(false);
-	this->getChild(TXT_DEST).setEnable(false); this->getChild(BTN_DEST).setEnable(false);
-	m_radMp3.setEnable(false); m_radMp3Cbr.setEnable(false); m_radMp3Vbr.setEnable(false);
-	m_radFlac.setEnable(false); m_radWav.setEnable(false);
-	m_chkDelSrc.setEnable(false);
-	this->setXButton(false);
-
-	Thread::RunParallelAsync(&convs); // notifications will be caught on onFileDone()
-}
-
-void MainDialog::on_fileDone(LPARAM lp)
-{
-	--m_numFilesToProcess;
-	int tot = m_lstFiles.items.count();
-	this->setText(fmt(L"FLAC/LAME front end [RUNNING... %d%%]", -(m_numFilesToProcess - tot) * 100 / tot)->str()); // progress count
-
-	if(!m_numFilesToProcess) { // re-enable the controls
-		this->setXButton(true);
-		m_chkDelSrc.setEnable(true);
-		m_radMp3.setEnable(true); m_radMp3Cbr.setEnable(true); m_radMp3Vbr.setEnable(true);
-		m_radFlac.setEnable(true); m_radWav.setEnable(true);
-		this->getChild(TXT_DEST).setEnable(true); this->getChild(BTN_DEST).setEnable(true);
-		this->getChild(BTN_RUN).setEnable(true);
-		this->setText(L"FLAC/LAME front end");
-	}
+	// Finally invoke dialog.
+	RunninDialog rd(numThreads, targetType, pFiles, delSrc, isVbr, quality, &m_ini, pDestFolder);
+	rd.show(this);
 }
 
 void MainDialog::do_fileToList(const wchar_t *file)

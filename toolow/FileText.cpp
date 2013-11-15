@@ -7,15 +7,15 @@
 
 #include "File.h"
 
-bool FileText::load(const wchar_t *path, String *pErr)
+bool File::Text::load(const wchar_t *path, String *pErr)
 {
-	FileMap fm;
-	if(!fm.open(path, File::READONLY, pErr))
+	File::Mapped fm;
+	if(!fm.open(path, Access::READONLY, pErr))
 		return false;
 	return this->load(&fm);
 }
 
-bool FileText::load(const FileMap *pfm)
+bool File::Text::load(const File::Mapped *pfm)
 {
 	BYTE *pMem = pfm->pMem(); // the file reading is made upon a memory-mapped file
 	BYTE *pPast = pfm->pPastMem();
@@ -63,7 +63,7 @@ bool FileText::load(const FileMap *pfm)
 	return true;
 }
 
-bool FileText::nextLine(String *pBuf)
+bool File::Text::nextLine(String *pBuf)
 {
 	if(!*_p) return false; // runner pointer inside our _text String data block
 	
@@ -80,36 +80,5 @@ bool FileText::nextLine(String *pBuf)
 	pBuf->copyFrom(_p, pRun - _p); // line won't have CR nor LF at end
 	
 	_p = pRun; // consume
-	return true;
-}
-
-bool FileText::Write(const wchar_t *path, const wchar_t *data, String *pErr)
-{
-	bool isUtf8 = false;
-	int dataLen = lstrlen(data);
-	for(int i = 0; i < dataLen; ++i) {
-		if(data[i] > 127) {
-			isUtf8 = true;
-			break;
-		}
-	}
-	
-	File fout;
-	if(!fout.open(path, File::READWRITE, pErr))
-		return false;
-	if(fout.size() && !fout.setNewSize(0, pErr)) // if already exists, truncate to empty
-		return false;
-	
-	// If the text doesn't have any char to make it UTF-8, it'll
-	// be simply converted to plain ASCII.
-	int newLen = WideCharToMultiByte(CP_UTF8, 0, data, dataLen, 0, 0, 0, 0);
-	Array<BYTE> outBuf(newLen + (isUtf8 ? 3 : 0));
-	if(isUtf8)
-		memcpy(&outBuf[0], "\xEF\xBB\xBF", 3); // write UTF-8 BOM
-	WideCharToMultiByte(CP_UTF8, 0, data, dataLen, (char*)&outBuf[isUtf8 ? 3 : 0], newLen, 0, 0);
-	if(!fout.write(&outBuf, pErr)) // one single write() to all data, better performance
-		return false;
-	
-	if(pErr) *pErr = L"";
 	return true;
 }
