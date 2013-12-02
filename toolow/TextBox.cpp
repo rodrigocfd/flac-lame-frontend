@@ -10,8 +10,9 @@ TextBox& TextBox::operator=(HWND hwnd)
 	if(this->hWnd()) // remove any previous subclassing of us, will be reassigned
 		RemoveWindowSubclass(this->hWnd(), _Proc, IDSUBCLASS);
 
-	*((Window*)this) = hwnd;
-	SetWindowSubclass(this->hWnd(), _Proc, IDSUBCLASS, 0);
+	*((Window*)this) = hwnd; // invoke operator=() of base Window class
+	_notifyKeyUp = 0;
+	SetWindowSubclass(this->hWnd(), _Proc, IDSUBCLASS, (DWORD_PTR)this);
 	return *this;
 }
 
@@ -41,6 +42,8 @@ void TextBox::selGet(int *start, int *length)
 
 LRESULT CALLBACK TextBox::_Proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, UINT_PTR idSubclass, DWORD_PTR refData)
 {
+	TextBox *pSelf = (TextBox*)refData;
+
 	switch(msg)
 	{
 	case WM_KEYDOWN:
@@ -58,6 +61,9 @@ LRESULT CALLBACK TextBox::_Proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, UINT_
 			SendMessage(hWnd, EM_SETSEL, 0, -1);
 			return DLGC_WANTCHARS;
 		}
+		break;
+	case WM_KEYUP:
+		if(pSelf->_notifyKeyUp) pSelf->getParent().sendMessage(pSelf->_notifyKeyUp, wp, lp);
 		break;
 	case WM_NCDESTROY:
 		RemoveWindowSubclass(hWnd, _Proc, idSubclass);

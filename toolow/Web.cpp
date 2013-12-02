@@ -264,8 +264,8 @@ void Web::Downloader::_Worker::_BuildResponseHeader(const String *rh, Hash<Strin
 			(*pHash)[L""] = lines[i]; // empty key
 		} else {
 			String key, val;
-			key.getSubstr(lines[i].str(), 0, colonIdx);
-			val.getSubstr(lines[i].str(), colonIdx + 1).trim();
+			key.getSubstrFrom(lines[i].str(), 0, colonIdx);
+			val.getSubstrFrom(lines[i].str(), colonIdx + 1).trim();
 			(*pHash)[key] = val;
 		}
 	}

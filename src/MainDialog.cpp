@@ -271,9 +271,9 @@ void MainDialog::do_fileToList(const wchar_t *file)
 {
 	int iType = -1;
 	String sFile = file;
-	if(sFile.endsWith(L".mp3"))       iType = 0;
-	else if(sFile.endsWith(L".flac")) iType = 1;
-	else if(sFile.endsWith(L".wav"))  iType = 2; // what type of audio file is this?
+	if(sFile.endsWith(L".mp3", String::INSENS))       iType = 0;
+	else if(sFile.endsWith(L".flac", String::INSENS)) iType = 1;
+	else if(sFile.endsWith(L".wav", String::INSENS))  iType = 2; // what type of audio file is this?
 
 	if(iType == -1)
 		return; // bypass file if unaccepted format

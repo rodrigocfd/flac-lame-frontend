@@ -25,7 +25,7 @@ bool File::Ini::load(String *pErr)
 	while(fin.nextLine(&line)) {
 		if(line[0] == L'[' && line.endsWith(L']')) { // begin section
 			String sectionName;
-			sectionName.getSubstr(line.str(), 1, -1);
+			sectionName.getSubstrFrom(line.str(), 1, -1);
 			this->sections[sectionName] = Hash<String>(); // new section is an empty hash
 			continue;
 		}
@@ -33,8 +33,8 @@ bool File::Ini::load(String *pErr)
 			int idxEq = line.find(L'=');
 			if(idxEq > -1) {
 				String keyName, valStr;
-				keyName.getSubstr(line.str(), 0, idxEq);
-				valStr.getSubstr(line.str(), idxEq + 1);
+				keyName.getSubstrFrom(line.str(), 0, idxEq);
+				valStr.getSubstrFrom(line.str(), idxEq + 1);
 
 				Hash<String> *pLastSection = &this->sections.at(this->sections.size() - 1)->val;
 				(*pLastSection)[keyName.trim()] = valStr.trim();

@@ -8,7 +8,7 @@ Converter::Converter(HWND hParent, File::Ini *pIni, const wchar_t *src, bool del
 {
 	if(dest) {
 		_destPath = dest;
-		if(_destPath.endsWith(L"\\"))
+		if(_destPath.endsWith(L'\\'))
 			_destPath[_destPath.len() - 1] = L'\0'; // store path with no final backslash
 	}
 
@@ -47,8 +47,8 @@ void Converter::_doExec(String *cmdLine)
 
 void ConverterMp3::onRun()
 {
-	if(_srcPath.endsWith(L".flac") || _srcPath.endsWith(L".mp3")) { // needs intermediary WAV file
-		ConverterWav *towav = _srcPath.endsWith(L".flac") ?
+	if(_srcPath.endsWith(L".flac", String::INSENS) || _srcPath.endsWith(L".mp3", String::INSENS)) { // needs intermediary WAV file
+		ConverterWav *towav = _srcPath.endsWith(L".flac", String::INSENS) ?
 			new ConverterWav(0, _pIni, _srcPath.str(), _delSrc, _destPath.str()) : // send WAV straight to new folder, if any
 			new ConverterWav(0, _pIni, _srcPath.str(),
 				_destPath.isEmpty() ? true : _delSrc, // if same destination folder, then delete source (will be replaced)
@@ -65,7 +65,7 @@ void ConverterMp3::onRun()
 		_srcPath[_srcPath.findr(L'.')] = L'\0';
 		_srcPath.append(L".wav"); // our source is now a WAV
 		_delSrc = true; // delete the WAV at end
-	} else if(!_srcPath.endsWith(L".wav")) {
+	} else if(!_srcPath.endsWith(L".wav", String::INSENS)) {
 		debug(L"Not a FLAC/MP3/WAV: %s\n", _srcPath.str());
 		return;
 	}
@@ -90,8 +90,8 @@ void ConverterMp3::onRun()
 
 void ConverterFlac::onRun()
 {
-	if(_srcPath.endsWith(L".flac") || _srcPath.endsWith(L".mp3")) { // needs intermediary WAV file
-		ConverterWav *towav = _srcPath.endsWith(L"mp3") ?
+	if(_srcPath.endsWith(L".flac", String::INSENS) || _srcPath.endsWith(L".mp3", String::INSENS)) { // needs intermediary WAV file
+		ConverterWav *towav = _srcPath.endsWith(L".mp3", String::INSENS) ?
 			new ConverterWav(0, _pIni, _srcPath.str(), _delSrc, _destPath.str()) : // send WAV straight to new folder, if any
 			new ConverterWav(0, _pIni, _srcPath.str(),
 				_destPath.isEmpty() ? true : _delSrc, // if same destination folder, then delete source (will be replaced)
@@ -108,7 +108,7 @@ void ConverterFlac::onRun()
 		_srcPath[_srcPath.findr(L'.')] = L'\0';
 		_srcPath.append(L".wav"); // our source is now a WAV
 		_delSrc = true; // delete the WAV at end
-	} else if(!_srcPath.endsWith(L".wav")) {
+	} else if(!_srcPath.endsWith(L".wav", String::INSENS)) {
 		debug(L"Not a FLAC/WAV: %s\n", _srcPath.str());
 		return;
 	}
@@ -135,9 +135,9 @@ void ConverterWav::onRun()
 {
 	String cmdLine;
 
-	if(_srcPath.endsWith(L".mp3")) {
+	if(_srcPath.endsWith(L".mp3", String::INSENS)) {
 		cmdLine.fmt(L"\"%s\" --decode \"%s\"", _pIni->sections[L"Tools"][L"lame"].str(), _srcPath.str());
-	} else if(_srcPath.endsWith(L".flac")) {
+	} else if(_srcPath.endsWith(L".flac", String::INSENS)) {
 		cmdLine.fmt(L"\"%s\" -d \"%s\"", _pIni->sections[L"Tools"][L"flac"].str(), _srcPath.str());
 		if(!_destPath.isEmpty())
 			cmdLine.append(L" -o"); // different destination folder requires flag

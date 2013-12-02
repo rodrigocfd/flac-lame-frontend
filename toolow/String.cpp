@@ -1,14 +1,23 @@
 
-#pragma warning(disable:4996)
+#pragma warning(disable:4996) // _vsnwprintf, wcsncpy
 #include <stdio.h>
 #include "String.h"
+
+#define STR_ALLOC_STACK_OR_HEAP(ptr, nchars) \
+	(ptr) = ((nchars) * sizeof(wchar_t) > 1024 * 2) ? \
+		(wchar_t*)::malloc(sizeof(wchar_t) * (nchars)) : \
+		(wchar_t*)::_alloca(sizeof(wchar_t) * (nchars))
+
+#define STR_FREE_STACK_OR_HEAP(ptr, nchars) \
+	if((nchars) * sizeof(wchar_t) > 1024 * 2) \
+		::free(ptr)
 
 String& String::operator=(const wchar_t *s)
 {
 	int newLen = ::lstrlen(s);
 	if(!_arr.size() && !newLen) return *this; // still unallocated and no new string: do nothing
-	this->reserve(newLen);
-	::lstrcpy(&_arr[0], s);
+	this->reserve(newLen); // also places terminating null
+	::memcpy(&_arr[0], s, sizeof(wchar_t) * newLen);
 	return *this;
 }
 
@@ -20,7 +29,6 @@ String& String::reserve(int numCharsWithoutNull)
 		if(firstAlloc)
 			_arr[0] = L'\0';
 	}
-
 	_arr[numCharsWithoutNull] = L'\0'; // place terminating null, always
 	return *this;
 }
@@ -29,9 +37,9 @@ String& String::append(const wchar_t *s)
 {
 	if(!_arr.size()) return operator=(s);
 	int ourLen = this->len();
-	int newLen = ::lstrlen(s) + ourLen;
-	this->reserve(newLen);
-	::lstrcpy(&_arr[ourLen], s);
+	int theirLen = ::lstrlen(s);
+	this->reserve(ourLen + theirLen); // also places terminating null
+	::memcpy(&_arr[ourLen], s, sizeof(wchar_t) * theirLen);
 	return *this;
 }
 
@@ -121,7 +129,7 @@ String& String::trim()
 	return *this;
 }
 
-String& String::getSubstr(const wchar_t *src, int start, int length)
+String& String::getSubstrFrom(const wchar_t *src, int start, int length)
 {
 	int hisLen = ::lstrlen(src);
 	if(hisLen && start <= hisLen - 1) {
@@ -138,23 +146,92 @@ String& String::getSubstr(const wchar_t *src, int start, int length)
 	return *this;
 }
 
-bool String::startsWith(const wchar_t *s) const
+bool String::equals(const wchar_t *s, String::Case c, String::Diacritics d) const
 {
-	int ourLen = this->len(),
-		hisLen = ::lstrlen(s);
-	if(!ourLen || hisLen > ourLen) return false;
-	wchar_t *buf = (wchar_t*)::_alloca(sizeof(wchar_t) * (hisLen + 1));
-	::memcpy(buf, &_arr[0], sizeof(wchar_t) * hisLen);
-	buf[hisLen] = L'\0';
-	return !::lstrcmpi(buf, s); // case insensitive
+	wchar_t *us = NULL,           *them = NULL;
+	int      ourLen = this->len(), theirLen = ::lstrlen(s);
+
+	if(d == IGNOREDIACR) { // duplicate both strings to remove the diacritics
+		STR_ALLOC_STACK_OR_HEAP(us, ourLen + 1);
+		::memcpy(us, &_arr[0], sizeof(wchar_t) * (ourLen + 1));
+		_RemDiacr(us);
+
+		STR_ALLOC_STACK_OR_HEAP(them, theirLen + 1);
+		::memcpy(them, s, sizeof(wchar_t) * (theirLen + 1));
+		_RemDiacr(them);
+	} else {
+		us = (wchar_t*)this->str();
+		them = (wchar_t*)s;
+	}
+
+	bool bRet = (c == INSENS) ? !::lstrcmpi(us, them) : !::lstrcmp(us, them);
+
+	if(d == IGNOREDIACR) {
+		STR_FREE_STACK_OR_HEAP(us, ourLen + 1);
+		STR_FREE_STACK_OR_HEAP(them, theirLen + 1);
+	}
+
+	return bRet;
 }
 
-bool String::endsWith(const wchar_t *s) const
+bool String::startsWith(const wchar_t *s, String::Case c, String::Diacritics d) const
 {
-	int ourLen = this->len(), hisLen = ::lstrlen(s);
-	if(ourLen >= hisLen)
-		return !::lstrcmpi(&_arr[ourLen - hisLen], s); // case insensitive
-	return false;
+	wchar_t *us = NULL,           *them = NULL;
+	int      ourLen = this->len(), theirLen = ::lstrlen(s);
+
+	if(!ourLen || theirLen > ourLen) return false;
+
+	STR_ALLOC_STACK_OR_HEAP(us, theirLen + 1);
+	::memcpy(us, &_arr[0], sizeof(wchar_t) * theirLen);
+	us[theirLen] = L'\0';
+
+	if(d == IGNOREDIACR) {
+		_RemDiacr(us);
+
+		STR_ALLOC_STACK_OR_HEAP(them, theirLen + 1);
+		::memcpy(them, s, sizeof(wchar_t) * (theirLen + 1));
+		_RemDiacr(them);
+	} else {
+		them = (wchar_t*)s;
+	}
+
+	bool bRet = (c == INSENS) ? !::lstrcmpi(us, them) : !::lstrcmp(us, them);
+
+	STR_FREE_STACK_OR_HEAP(us, theirLen + 1);
+	if(d == IGNOREDIACR)
+		STR_FREE_STACK_OR_HEAP(them, theirLen + 1);
+
+	return bRet;
+}
+
+bool String::endsWith(const wchar_t *s, String::Case c, String::Diacritics d) const
+{
+	wchar_t *us = NULL,           *them = NULL;
+	int      ourLen = this->len(), theirLen = ::lstrlen(s);
+
+	if(!ourLen || theirLen > ourLen) return false;
+
+	if(d == IGNOREDIACR) {
+		STR_ALLOC_STACK_OR_HEAP(us, theirLen + 1);
+		::memcpy(us, &_arr[ourLen - theirLen], sizeof(wchar_t) * (theirLen + 1));
+		_RemDiacr(us);
+
+		STR_ALLOC_STACK_OR_HEAP(them, theirLen + 1);
+		::memcpy(them, s, sizeof(wchar_t) * (theirLen + 1));
+		_RemDiacr(them);
+	} else {
+		us = (wchar_t*)&_arr[ourLen - theirLen];
+		them = (wchar_t*)s;
+	}
+
+	bool bRet = (c == INSENS) ? !::lstrcmpi(us, them) : !::lstrcmp(us, them);
+
+	if(d == IGNOREDIACR) {
+		STR_FREE_STACK_OR_HEAP(us, theirLen + 1);
+		STR_FREE_STACK_OR_HEAP(them, theirLen + 1);
+	}
+
+	return bRet;
 }
 
 bool String::endsWith(wchar_t ch) const
@@ -208,11 +285,38 @@ int String::find(wchar_t ch) const
 	return (int)(p - &_arr[0]); // return index of position
 }
 
-int String::find(const wchar_t *substring) const
+int String::find(const wchar_t *substring, String::Case c, String::Diacritics d) const
 {
-	const wchar_t *p = ::wcsstr(this->str(), substring);
-	if(!p) return -1; // not found
-	return (int)(p - &_arr[0]); // return index of position
+	wchar_t *us = NULL,           *them = NULL;
+	int      ourLen = this->len(), theirLen = ::lstrlen(substring);
+
+	if(!ourLen || theirLen > ourLen) return -1;
+
+	if(c == INSENS || d == IGNOREDIACR) { // duplicate both strings to remove the diacritics and/or lowercase
+		STR_ALLOC_STACK_OR_HEAP(us, ourLen + 1);
+		::memcpy(us, &_arr[0], sizeof(wchar_t) * (ourLen + 1));
+		if(c == INSENS) ::CharLower(us);
+		if(d == IGNOREDIACR) _RemDiacr(us);
+
+		STR_ALLOC_STACK_OR_HEAP(them, theirLen + 1);
+		::memcpy(them, substring, sizeof(wchar_t) * (theirLen + 1));
+		if(c == INSENS) ::CharLower(them);
+		if(d == IGNOREDIACR) _RemDiacr(them);
+	} else {
+		us = (wchar_t*)this->str();
+		them = (wchar_t*)substring;
+	}
+
+	int iRet = -1;
+	wchar_t *p = ::wcsstr(us, them);
+	if(p) iRet = (int)(p - us); // index of position
+
+	if(c == INSENS || d == IGNOREDIACR) {
+		STR_FREE_STACK_OR_HEAP(us, ourLen + 1);
+		STR_FREE_STACK_OR_HEAP(them, theirLen + 1);
+	}
+
+	return iRet;
 }
 
 int String::findr(wchar_t ch) const
@@ -222,15 +326,32 @@ int String::findr(wchar_t ch) const
 	return (int)(p - &_arr[0]); // return index of position
 }
 
-String& String::replace(const wchar_t *target, const wchar_t *replacement)
+String& String::replace(const wchar_t *target, const wchar_t *replacement, String::Case c, String::Diacritics d)
 {
-	int targetLen = ::lstrlen(target);
+	wchar_t *targetNorm = NULL,            *usNorm = NULL;
+	int      targetLen = ::lstrlen(target), usLen = this->len();
+
+	if(c == INSENS || d == IGNOREDIACR) { // duplicate target and str() to remove diacritics and/or lowercase
+		STR_ALLOC_STACK_OR_HEAP(targetNorm, targetLen + 1);
+		::memcpy(targetNorm, target, sizeof(wchar_t) * (targetLen + 1));
+		if(c == INSENS) ::CharLower(targetNorm);
+		if(d == IGNOREDIACR) _RemDiacr(targetNorm);
+
+		STR_ALLOC_STACK_OR_HEAP(usNorm, usLen + 1);
+		::memcpy(usNorm, &_arr[0], sizeof(wchar_t) * (usLen + 1));
+		if(c == INSENS) ::CharLower(usNorm);
+		if(d == IGNOREDIACR) _RemDiacr(usNorm);
+	} else {
+		targetNorm = (wchar_t*)target;
+		usNorm = (wchar_t*)this->str();
+	}
+
 	int replacementLen = ::lstrlen(replacement);
 
 	// Count occurrences of target.
 	int occurrences = 0;
-	const wchar_t *p = &_arr[0];
-	while(p = ::wcsstr(p, target)) {
+	const wchar_t *p = usNorm;
+	while(p = ::wcsstr(p, targetNorm)) {
 		++occurrences;
 		p += targetLen; // go beyond
 	}
@@ -241,19 +362,25 @@ String& String::replace(const wchar_t *target, const wchar_t *replacement)
 
 	// Copy the string with the replacements made.
 	wchar_t *pBuf = &buf[0];
-	const wchar_t *base = &_arr[0];
-	p = &_arr[0];
-	while(p = ::wcsstr(p, target)) {
-		::wcsncpy(pBuf, base, (int)(p - base) + 1); // number of chars includes the terminating null
-		pBuf += p - base; // go beyond
-		::wcsncpy(pBuf, replacement, replacementLen + 1); // number of chars includes the terminating null
-		pBuf += replacementLen; // go beyond
-		p += targetLen; // go beyond
-		base = p; // go beyond
+	const wchar_t *base = usNorm, *orig = &_arr[0];
+	p = usNorm;
+	while(p = ::wcsstr(p, targetNorm)) {
+		::memcpy(pBuf, orig, sizeof(wchar_t) * (int)(p - base)); // copy chars until before replacement
+		pBuf += p - base;
+		::memcpy(pBuf, replacement, sizeof(wchar_t) * replacementLen);
+		pBuf += replacementLen;
+		p += targetLen;
+		base = p;
+		orig += p - base;
 	}
-	::wcsncpy(pBuf, base, ::lstrlen(base) + 1); // copy rest of original string, including terminating null
+	::lstrcpy(pBuf, base); // copy rest of original string, including terminating null
 	
 	_arr.swap(&buf._arr); // now the new buf is us, our old buffer will be released
+
+	if(c == INSENS || d == IGNOREDIACR) {
+		STR_FREE_STACK_OR_HEAP(targetNorm, targetLen + 1);
+		STR_FREE_STACK_OR_HEAP(usNorm, usLen + 1);
+	}
 	return *this;
 }
 
@@ -304,4 +431,15 @@ String& String::fromUtf8(const BYTE *data, int length)
 int __cdecl String::Sort(const void *a, const void *b)
 {
 	return ::lstrcmpi( ((const String*)a)->str(), ((const String*)b)->str() ); // callback to qsort()
+}
+
+void String::_RemDiacr(wchar_t *txt)
+{
+	const wchar_t *diacritics   = L"ÁáÀàÃãÂâÄäÉéÈèÊêËëÍíÌìÎîÏïÓóÒòÕõÔôÖöÚúÙùÛûÜüÇçÅåĞğÑñØøİı";
+	const wchar_t *replacements = L"AaAaAaAaAaEeEeEeEeIiIiIiIiOoOoOoOoOoUuUuUuUuCcAaDdNnOoYy";
+
+	for(int s = 0, length = ::lstrlen(txt); s < length; ++s)
+		for(int d = 0; d < 56; ++d) // yes, hand-counted string length
+			if(txt[s] == diacritics[d])
+				txt[s] = replacements[d];
 }

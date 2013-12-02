@@ -10,21 +10,21 @@
 
 template<typename T> class Array {
 public:
-	Array()                   : _ptr(NULL), _sz(0) { }
-	Array(const Array& other) : _ptr(NULL), _sz(0) { operator=(other); }
-	explicit Array(int size)  : _ptr(NULL), _sz(0) { this->realloc(size); }
-	~Array()                  { this->free(); }
+	Array()                    : _ptr(NULL), _sz(0) { }
+	Array(const Array& other)  : _ptr(NULL), _sz(0) { operator=(other); }
+	explicit Array(int length) : _ptr(NULL), _sz(0) { this->realloc(length); }
+	~Array()                   { this->free(); }
 
 	int      size() const                { return _sz; }
 	const T& operator[](int index) const { return _ptr[index]; }
 	T&       operator[](int index)       { return _ptr[index]; }
 
-	Array& realloc(int size) {
-		if(!size) return this->free();
-		for(int i = size; i < _sz; ++i) _ptr[i].~T(); // when size < _sz, call destructors
-		_ptr = (T*)::realloc(_ptr, sizeof(T) * size);
-		for(int i = _sz; i < size; ++i) new(_ptr + i) T; // when size > _sz, call constructors
-		_sz = size;
+	Array& realloc(int length) {
+		if(!length) return this->free();
+		for(int i = length; i < _sz; ++i) _ptr[i].~T(); // when size < _sz, call destructors
+		_ptr = (T*)::realloc(_ptr, sizeof(T) * length);
+		for(int i = _sz; i < length; ++i) new(_ptr + i) T; // when size > _sz, call constructors
+		_sz = length;
 		return *this;
 	}
 

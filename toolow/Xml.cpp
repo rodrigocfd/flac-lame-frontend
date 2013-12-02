@@ -8,7 +8,7 @@ void Xml::Node::getChildrenByName(const wchar_t *elemName, Array<Xml::Node*> *no
 	int howMany = 0;
 	int firstIndex = -1, lastIndex = -1;
 	for(int i = 0; i < this->children.size(); ++i) {
-		if(this->children[i].name.equalSens(elemName)) {
+		if(this->children[i].name.equals(elemName, String::SENS)) {
 			++howMany;
 			if(firstIndex == -1) firstIndex = i;
 			lastIndex = i;
@@ -18,7 +18,7 @@ void Xml::Node::getChildrenByName(const wchar_t *elemName, Array<Xml::Node*> *no
 	nodeBuf->realloc(howMany);
 	howMany = 0;
 	for(int i = firstIndex; i <= lastIndex; ++i)
-		if(this->children[i].name.equalSens(elemName))
+		if(this->children[i].name.equals(elemName, String::SENS))
 			(*nodeBuf)[howMany++] = &this->children[i];
 }
 
@@ -26,7 +26,7 @@ Xml::Node* Xml::Node::firstChildByName(const wchar_t *elemName)
 {
 	int iChild = -1;
 	for(int i = 0; i < this->children.size(); ++i) {
-		if(this->children[i].name.equalSens(elemName)) { // case-sensitive
+		if(this->children[i].name.equals(elemName, String::SENS)) { // case-sensitive
 			iChild = i;
 			break;
 		}

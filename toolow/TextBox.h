@@ -10,7 +10,7 @@
 
 class TextBox : public Window {
 public:
-	TextBox()                     { }
+	TextBox()                     : _notifyKeyUp(0) { }
 	TextBox(HWND hwnd)            { operator=(hwnd); }
 	TextBox(const Window& wnd)    { operator=(wnd); }
 	TextBox(const TextBox& other) { operator=(other); }
@@ -26,9 +26,11 @@ public:
 	TextBox&    selSet(int start, int length)   { sendMessage(EM_SETSEL, start, start + length); return *this; }
 	void        selGet(int *start, int *length);
 	TextBox&    selReplace(const wchar_t *text) { sendMessage(EM_REPLACESEL, TRUE, (LPARAM)text); return *this; }
+	TextBox&    notifyKeyUp(UINT msg)           { _notifyKeyUp = msg; return *this; }
 
 private:
 	static LRESULT CALLBACK _Proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, UINT_PTR idSubclass, DWORD_PTR refData);
 
 	Font _font;
+	UINT _notifyKeyUp;
 };

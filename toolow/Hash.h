@@ -66,9 +66,11 @@ private:
 	int _szUsed;
 
 	int _byKey(const wchar_t *keyName) const {
-		for(int i = 0; i < _szUsed; ++i) // linear search
-			if(_elems[i].key.equalSens(keyName)) // an empty string is also a valid key
+		for(int i = 0; i < _szUsed; ++i) { // linear search
+			const String *s = &_elems[i].key;
+			if(_elems[i].key.equals(keyName, String::SENS)) // an empty string is also a valid key
 				return i;
+		}
 		return -1; // not found
 	}
 };
