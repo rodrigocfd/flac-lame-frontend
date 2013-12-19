@@ -1,7 +1,13 @@
 
 #include "File.h"
-#include "Shlobj.h"
+#include <direct.h> // _wmkdir()
+#include <Shlobj.h>
 #pragma comment(lib, "Shell32.lib") // SHGetFolderPath
+
+bool File::CreateDir(const wchar_t *path)
+{
+	return ::_wmkdir(path) == 0;
+}
 
 Date File::DateLastModified(const wchar_t *path)
 {

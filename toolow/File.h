@@ -9,8 +9,9 @@
 
 namespace File
 {
-	inline bool   IsDir(const wchar_t *path)  { return (::GetFileAttributes(path) & FILE_ATTRIBUTE_DIRECTORY) != 0; }
 	inline bool   Exists(const wchar_t *path) { return ::GetFileAttributes(path) != INVALID_FILE_ATTRIBUTES; }
+	inline bool   IsDir(const wchar_t *path)  { return (::GetFileAttributes(path) & FILE_ATTRIBUTE_DIRECTORY) != 0; }
+	bool          CreateDir(const wchar_t *path);
 	Date          DateLastModified(const wchar_t *path);
 	Date          DateCreated(const wchar_t *path);
 	String        GetExePath();
@@ -20,7 +21,7 @@ namespace File
 	inline void   ChangeExtensionTo(String *path, const wchar_t *ext) { (*path)[path->findr(L'.')] = L'\0'; path->append(ext); }
 	inline String ExtractPath(const wchar_t *path)                    { String ret = path; ret[ ret.findr(L'\\') ] = L'\0'; return ret; }
 	inline const wchar_t* ExtractFileName(const String *path)         { return path->ptrAt(path->findr(L'\\') + 1); }
-	bool        WriteUtf8(const wchar_t *path, const wchar_t *data, String *pErr=0);
+	bool          WriteUtf8(const wchar_t *path, const wchar_t *data, String *pErr=0);
 
 	enum class Access { READONLY, READWRITE };
 
@@ -90,7 +91,7 @@ namespace File
 		bool serialize(String *pErr=0) const;
 	private:
 		String _path;
-		int _countSections(File::Text *fin) const;
+		int    _countSections(File::Text *fin) const;
 	};
 
 	class Enum { // automation for directory enumeration

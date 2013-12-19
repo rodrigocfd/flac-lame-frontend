@@ -2,7 +2,6 @@
 #define _CRT_SECURE_NO_DEPRECATE // _itow() VC2005
 #define _CRT_SECURE_NO_WARNINGS // _itow() VC2008
 
-#include <direct.h> // _wmkdir()
 #include "../toolow/File.h"
 #include "../toolow/util.h"
 #include "MainDialog.h"
@@ -160,8 +159,7 @@ void MainDialog::on_dropFiles(WPARAM wp)
 			File::Enum findWav(dropFiles[i].str(), L"*.wav");
 			while(findWav.next(subfilebuf))
 				do_fileToList(subfilebuf);
-		}
-		else {
+		} else {
 			do_fileToList(dropFiles[i].str()); // add single file
 		}
 	}
@@ -204,7 +202,7 @@ void MainDialog::on_run()
 				FMT(L"The following directory:\n%s\ndoes not exist. Create it?", destFolder.str()),
 				MB_ICONQUESTION | MB_YESNO);
 			if(q == IDYES) {
-				if(_wmkdir(destFolder.str()) != 0) {
+				if(!File::CreateDir( destFolder.str() )) {
 					this->messageBox(L"Fail", FMT(L"The directory failed to be created:\n%s", destFolder.str()), MB_ICONERROR);
 					return; // halt
 				}
@@ -242,9 +240,9 @@ void MainDialog::on_run()
 		int ii = pCmbQ->itemGetSelected();
 		pCmbQ->itemGetText(pCmbQ->itemGetSelected(), quality, ARRAYSIZE(quality));
 		*wcschr(quality, L' ') = 0; // first characters of chosen option are the quality setting itself
-	}
-	else if(m_radFlac.isChecked())
+	} else if(m_radFlac.isChecked()) {
 		m_cmbFlac.itemGetText(m_cmbFlac.itemGetSelected(), quality, ARRAYSIZE(quality)); // text is quality setting itself
+	}
 
 	// Which format are we converting to?
 	RunninDialog::Target targetType = RunninDialog::Target::NONE;
