@@ -10,17 +10,17 @@ TextBox& TextBox::operator=(HWND hwnd)
 	if(this->hWnd()) // remove any previous subclassing of us, will be reassigned
 		RemoveWindowSubclass(this->hWnd(), _Proc, IDSUBCLASS);
 
-	*((Window*)this) = hwnd; // invoke operator=() of base Window class
+	((Window*)this)->operator=(hwnd);
 	_notifyKeyUp = 0;
 	SetWindowSubclass(this->hWnd(), _Proc, IDSUBCLASS, (DWORD_PTR)this);
 	return *this;
 }
 
-void TextBox::getTextLines(Array<String> *pBuf)
+Array<String> TextBox::getTextLines()
 {
 	String text;
 	this->getText(&text);
-	text.explode(L"\r\n", pBuf);
+	return text.explode(L"\r\n");
 }
 
 TextBox& TextBox::setFont(const Font *pFont)

@@ -122,7 +122,7 @@ ListView::Item& ListView::Item::setIcon(int iconIdx)
 	return *this;
 }
 
-ListView::Item ListView::Items::add(const wchar_t *caption, int iconIdx, int at)
+ListView::Item ListView::ItemsProxy::add(const wchar_t *caption, int iconIdx, int at)
 {
 	LVITEM lvi = { 0 };
 	lvi.iItem = (at == -1 ? 0x0FFFFFFF : at);
@@ -133,7 +133,15 @@ ListView::Item ListView::Items::add(const wchar_t *caption, int iconIdx, int at)
 	return Item(ListView_InsertItem(_list->hWnd(), &lvi), _list); // return index of newly inserted item
 }
 
-ListView::Item ListView::Items::find(const wchar_t *caption)
+Array<ListView::Item> ListView::ItemsProxy::getAll() const
+{
+	Array<Item> ret(this->count()); // alloc return array
+	for(int i = 0; i < ret.size(); ++i)
+		ret[i] = Item(i, this->_list);
+	return ret;
+}
+
+ListView::Item ListView::ItemsProxy::find(const wchar_t *caption)
 {
 	LVFINDINFO lfi = { 0 };
 	lfi.flags = LVFI_STRING; // search is case-insensitive
@@ -142,14 +150,14 @@ ListView::Item ListView::Items::find(const wchar_t *caption)
 	return Item(ListView_FindItem(_list->hWnd(), -1, &lfi), _list); // returns -1 if not found
 }
 
-void ListView::Items::select(const Array<int> *idx)
+void ListView::ItemsProxy::select(const Array<int> *idx)
 {
 	// Select the items whose indexes have been passed in the array.
 	for(int i = 0; i < idx->size(); ++i)
 		ListView_SetItemState(_list->hWnd(), (*idx)[i], LVIS_SELECTED, LVIS_SELECTED);
 }
 
-void ListView::Items::removeSelected()
+void ListView::ItemsProxy::removeSelected()
 {
 	_list->setRedraw(false);
 	int i = -1;
@@ -158,35 +166,17 @@ void ListView::Items::removeSelected()
 	_list->setRedraw(true);
 }
 
-void ListView::Items::getSelected(Array<int> *indexesBuf)
+Array<ListView::Item> ListView::ItemsProxy::getSelected() const
 {
-	indexesBuf->realloc(this->countSelected());
+	Array<Item> items(this->countSelected()); // alloc return array
 	int iBase = -1, iOutBuf = 0;
 
 	for(;;) {
 		iBase = ListView_GetNextItem(_list->hWnd(), iBase, LVNI_SELECTED);
 		if(iBase == -1) break;
-		(*indexesBuf)[iOutBuf++] = iBase;
+		items[iOutBuf++] = Item(iBase, this->_list);
 	}
-}
-
-void ListView::Items::getSelectedText(Array<String> *captionsBuf, int iCol)
-{
-	captionsBuf->realloc(this->countSelected());
-	int iBase = -1, iOutBuf = 0;
-
-	for(;;) {
-		iBase = ListView_GetNextItem(_list->hWnd(), iBase, LVNI_SELECTED);
-		if(iBase == -1) break;
-		(*this)[iBase].getText(&(*captionsBuf)[iOutBuf++], iCol); // subject to Item::getText() allocation routine
-	}
-}
-
-void ListView::Items::getAllText(Array<String> *captionsBuf, int iCol)
-{
-	captionsBuf->realloc(this->count());
-	for(int i = 0; i < captionsBuf->size(); ++i)
-		(*this)[i].getText(&(*captionsBuf)[i], iCol); // subject to Item::getText() allocation routine
+	return items;
 }
 
 ListView& ListView::operator=(HWND hwnd)
@@ -196,9 +186,9 @@ ListView& ListView::operator=(HWND hwnd)
 	if(this->hWnd()) // if previously assigned, remove previous subclassing
 		RemoveWindowSubclass(this->hWnd(), _Proc, IDSUBCLASS);
 
-	*((Window*)this) = hwnd;
+	((Window*)this)->operator=(hwnd);
 	SetWindowSubclass(this->hWnd(), _Proc, IDSUBCLASS, (DWORD_PTR)this);
-	items = Items(this); // initialize internal object
+	items = ItemsProxy(this); // initialize internal object
 	_ctxMenuId = 0; // ID of context popup menu
 	return *this;
 }
@@ -217,7 +207,7 @@ ListView& ListView::iconPush(const wchar_t *fileExtension)
 {
 	HIMAGELIST hImg = this->_proceedImageList();
 	if(!hImg) {
-		debug(L"ERROR: Imagelist creation failure.\n");
+		dbg(L"ERROR: Imagelist creation failure.\n");
 	} else {
 		Icon expicon; // icon will be released at the end of this scope block
 		expicon.getFromExplorer(fileExtension);

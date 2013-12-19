@@ -13,7 +13,7 @@ public:
 	StatusBar& addFixedPart(BYTE sizePixels);
 	StatusBar& addResizablePart(float resizeWeight);
 	StatusBar& setText(const wchar_t *text, int iPart) { _sb.sendMessage(SB_SETTEXT, MAKEWPARAM(MAKEWORD(iPart, 0), 0), (LPARAM)text); return *this; }
-	void       getText(String *pBuf, int iPart) const;
+	String     getText(int iPart) const;
 	void       setIcon(HICON hIcon, int iPart)         { _sb.sendMessage(SB_SETICON, iPart, (LPARAM)hIcon); }
 	void       doResize(WPARAM wp, LPARAM lp)          { if(wp != SIZE_MINIMIZED && _sb.hWnd()) _putParts(LOWORD(lp)); }
 

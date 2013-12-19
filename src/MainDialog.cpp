@@ -3,7 +3,6 @@
 #define _CRT_SECURE_NO_WARNINGS // _itow() VC2008
 
 #include <direct.h> // _wmkdir()
-#include "../toolow/DropFiles.h"
 #include "../toolow/File.h"
 #include "../toolow/util.h"
 #include "MainDialog.h"
@@ -63,13 +62,12 @@ void MainDialog::on_esc()
 void MainDialog::on_initDialog()
 {
 	// Validate and load INI file.
-	String iniPath;
-	GetPathTo::Exe(&iniPath)->append(L"\\FlacLameFE.ini");
-	m_ini.setPath(iniPath.str());
+	m_ini.setPath( File::GetExePath().append(L"\\FlacLameFE.ini").str() );
 
 	String err;
 	if(!m_ini.load(&err)) {
 		this->messageBox(L"Fail", err.str(), MB_ICONERROR);
+		this->sendMessage(WM_CLOSE, 0, 0); // halt program
 		return;
 	}
 
@@ -82,11 +80,11 @@ void MainDialog::on_initDialog()
 
 	// Layout control when resizing.
 	m_resizer.create(16)
-		.add(this->hWnd(), LST_FILES, Resizer::RESIZE, Resizer::RESIZE)
-		.add(this->hWnd(), TXT_DEST, Resizer::RESIZE, Resizer::REPOS)
-		.addById(Resizer::RENONE, Resizer::REPOS, this->hWnd(), 12,
+		.add(this->hWnd(), LST_FILES, Resizer::Do::RESIZE, Resizer::Do::RESIZE)
+		.add(this->hWnd(), TXT_DEST, Resizer::Do::RESIZE, Resizer::Do::REPOS)
+		.addById(Resizer::Do::RENONE, Resizer::Do::REPOS, this->hWnd(), 12,
 			LBL_DEST, FRA_CONV, RAD_MP3, RAD_FLAC, RAD_WAV, RAD_CBR, RAD_VBR, LBL_LEVEL, CMB_CBR, CMB_VBR, CMB_FLAC, CHK_DELSRC)
-		.addById(Resizer::REPOS, Resizer::REPOS, this->hWnd(), 2,
+		.addById(Resizer::Do::REPOS, Resizer::Do::REPOS, this->hWnd(), 2,
 			BTN_DEST, BTN_RUN);
 
 	// Main listview initialization.
@@ -145,33 +143,28 @@ void MainDialog::on_initDialog()
 
 void MainDialog::on_dropFiles(WPARAM wp)
 {
-	DropFiles drop((HDROP)wp);
+	Array<String> dropFiles = this->getDroppedFiles((HDROP)wp);
 
-	for(int i = 0; i < drop.count(); ++i)
-	{
-		wchar_t filebuf[MAX_PATH];
-		drop.get(i, filebuf); // retrieve dropped file path
-
-		if(File::IsDir(filebuf)) // if a directory, add all files inside of it
-		{
+	for(int i = 0; i < dropFiles.size(); ++i) {
+		if(File::IsDir( dropFiles[i].str() )) { // if a directory, add all files inside of it
 			wchar_t subfilebuf[MAX_PATH];
 	
-			File::Enum findMp3(filebuf, L"*.mp3");
+			File::Enum findMp3(dropFiles[i].str(), L"*.mp3");
 			while(findMp3.next(subfilebuf))
 				do_fileToList(subfilebuf);
 
-			File::Enum findFlac(filebuf, L"*.flac");
+			File::Enum findFlac(dropFiles[i].str(), L"*.flac");
 			while(findFlac.next(subfilebuf))
 				do_fileToList(subfilebuf);
 
-			File::Enum findWav(filebuf, L"*.wav");
+			File::Enum findWav(dropFiles[i].str(), L"*.wav");
 			while(findWav.next(subfilebuf))
 				do_fileToList(subfilebuf);
 		}
-		else
-			do_fileToList(filebuf); // add single file
+		else {
+			do_fileToList(dropFiles[i].str()); // add single file
+		}
 	}
-
 	do_updateCounter( m_lstFiles.items.count() );
 }
 
@@ -203,39 +196,37 @@ void MainDialog::on_selectRate()
 void MainDialog::on_run()
 {
 	// Validate destination folder, if any.
-	wchar_t destFolder[MAX_PATH];
-	this->getChild(TXT_DEST).getText(destFolder, ARRAYSIZE(destFolder));
+	String destFolder = this->getChild(TXT_DEST).getText();
 	
-	if(lstrlen(destFolder)) {
-		if(!File::Exists(destFolder)) {
+	if(!destFolder.isEmpty()) {
+		if(!File::Exists( destFolder.str() )) {
 			int q = this->messageBox(L"Create directory",
-				fmt(L"The following directory:\n%s\ndoes not exist. Create it?", destFolder)->str(),
+				FMT(L"The following directory:\n%s\ndoes not exist. Create it?", destFolder.str()),
 				MB_ICONQUESTION | MB_YESNO);
 			if(q == IDYES) {
-				if(_wmkdir(destFolder) != 0) {
-					this->messageBox(L"Fail", fmt(L"The directory failed to be created:\n%s", destFolder)->str(), MB_ICONERROR);
+				if(_wmkdir(destFolder.str()) != 0) {
+					this->messageBox(L"Fail", FMT(L"The directory failed to be created:\n%s", destFolder.str()), MB_ICONERROR);
 					return; // halt
 				}
 			} else {
 				return; // halt
 			}
-		} else if(!File::IsDir(destFolder)) {
-			this->messageBox(L"Fail", fmt(L"The following path is not a directory:\n%s", destFolder)->str(), MB_ICONERROR);
+		} else if(!File::IsDir( destFolder.str() )) {
+			this->messageBox(L"Fail", FMT(L"The following path is not a directory:\n%s", destFolder.str()), MB_ICONERROR);
 			return; // halt
 		}
 	}
-	wchar_t *pDestFolder = *destFolder ? destFolder : NULL; // path to output dir we'll use
 
 	// Check the existence of each file added to list.
-	for(int i = 0; i < m_lstFiles.items.count(); ++i) {
-		wchar_t filebuf[MAX_PATH];
-		if( !File::Exists(m_lstFiles.items[i].getText(filebuf, ARRAYSIZE(filebuf))) ) {
-			this->messageBox(L"Fail", fmt(L"File does not exist:\n%s", filebuf)->str(), MB_ICONERROR);
+	Array<String> files = m_lstFiles.items.getAll().transform<String>(
+		[](int i, const ListView::Item& elem)->String { return elem.getText(0); }
+	);
+	for(int i = 0; i < files.size(); ++i) {
+		if(!File::Exists( files[i].str() )) {
+			this->messageBox(L"Fail", FMT(L"File does not exist:\n%s", files[i].str()), MB_ICONERROR);
 			return; // halt
 		}
 	}
-	Array<String> *pFiles = new Array<String>; // will be consumed by running dialog
-	m_lstFiles.items.getAllText(pFiles, 0);
 
 	// Retrieve settings.
 	bool delSrc = m_chkDelSrc.isChecked();
@@ -256,14 +247,14 @@ void MainDialog::on_run()
 		m_cmbFlac.itemGetText(m_cmbFlac.itemGetSelected(), quality, ARRAYSIZE(quality)); // text is quality setting itself
 
 	// Which format are we converting to?
-	RunninDialog::Target::Type targetType = RunninDialog::Target::NONE;
+	RunninDialog::Target targetType = RunninDialog::Target::NONE;
 	
 	if(m_radMp3.isChecked())       targetType = RunninDialog::Target::MP3;
 	else if(m_radFlac.isChecked()) targetType = RunninDialog::Target::FLAC;
 	else if(m_radWav.isChecked())  targetType = RunninDialog::Target::WAV;
 
 	// Finally invoke dialog.
-	RunninDialog rd(numThreads, targetType, pFiles, delSrc, isVbr, quality, &m_ini, pDestFolder);
+	RunninDialog rd(numThreads, targetType, &files, delSrc, isVbr, quality, &m_ini, &destFolder);
 	rd.show(this);
 }
 
@@ -271,9 +262,9 @@ void MainDialog::do_fileToList(const wchar_t *file)
 {
 	int iType = -1;
 	String sFile = file;
-	if(sFile.endsWith(L".mp3", String::INSENS))       iType = 0;
-	else if(sFile.endsWith(L".flac", String::INSENS)) iType = 1;
-	else if(sFile.endsWith(L".wav", String::INSENS))  iType = 2; // what type of audio file is this?
+	if(sFile.endsWith(L".mp3", String::Case::INSENS))       iType = 0;
+	else if(sFile.endsWith(L".flac", String::Case::INSENS)) iType = 1;
+	else if(sFile.endsWith(L".wav", String::Case::INSENS))  iType = 2; // what type of audio file is this?
 
 	if(iType == -1)
 		return; // bypass file if unaccepted format
@@ -287,7 +278,7 @@ void MainDialog::do_updateCounter(int newCount)
 	// Update counter on Run button.
 	String caption;
 	
-	if(newCount) caption.fmt(L"&Run (%d)", newCount);
+	if(newCount) caption.format(L"&Run (%d)", newCount);
 	else caption = L"&Run";
 
 	this->getChild(BTN_RUN)

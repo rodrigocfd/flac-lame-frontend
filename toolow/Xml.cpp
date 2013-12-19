@@ -3,30 +3,33 @@
 #include "File.h"
 #pragma comment(lib, "msxml2.lib")
 
-void Xml::Node::getChildrenByName(const wchar_t *elemName, Array<Xml::Node*> *nodeBuf)
+Array<Xml::Node*> Xml::Node::getChildrenByName(const wchar_t *elemName, String::Case sens)
 {
 	int howMany = 0;
 	int firstIndex = -1, lastIndex = -1;
 	for(int i = 0; i < this->children.size(); ++i) {
-		if(this->children[i].name.equals(elemName, String::SENS)) {
+		if(this->children[i].name.equals(elemName, sens)) {
 			++howMany;
 			if(firstIndex == -1) firstIndex = i;
 			lastIndex = i;
 		}
 	}
 
-	nodeBuf->realloc(howMany);
+	Array<Node*> nodeBuf(howMany); // alloc return array
+
 	howMany = 0;
 	for(int i = firstIndex; i <= lastIndex; ++i)
-		if(this->children[i].name.equals(elemName, String::SENS))
-			(*nodeBuf)[howMany++] = &this->children[i];
+		if(this->children[i].name.equals(elemName, sens))
+			nodeBuf[howMany++] = &this->children[i];
+	
+	return nodeBuf;
 }
 
-Xml::Node* Xml::Node::firstChildByName(const wchar_t *elemName)
+Xml::Node* Xml::Node::firstChildByName(const wchar_t *elemName, String::Case sens)
 {
 	int iChild = -1;
 	for(int i = 0; i < this->children.size(); ++i) {
-		if(this->children[i].name.equals(elemName, String::SENS)) { // case-sensitive
+		if(this->children[i].name.equals(elemName, sens)) {
 			iChild = i;
 			break;
 		}
@@ -106,9 +109,7 @@ void Xml::_BuildNode(ComPtr<IXMLDOMNode> xmlnode, Xml::Node *nodebuf)
 			} else if(type == NODE_ELEMENT) {
 				_BuildNode(child, &nodebuf->children[childCount++]); // recursively
 			} else {
-				String msg;
-				msg.fmt(L"Unhandled node type: %d.\n", type);
-				OutputDebugString(msg.str());
+				// (L"Unhandled node type: %d.\n", type);
 			}
 		}
 	} else {

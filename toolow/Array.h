@@ -12,6 +12,7 @@ template<typename T> class Array {
 public:
 	Array()                    : _ptr(NULL), _sz(0) { }
 	Array(const Array& other)  : _ptr(NULL), _sz(0) { operator=(other); }
+	Array(Array&& other)       : _ptr(NULL), _sz(0) { operator=((Array&&)other); }
 	explicit Array(int length) : _ptr(NULL), _sz(0) { this->realloc(length); }
 	~Array()                   { this->free(); }
 
@@ -40,6 +41,12 @@ public:
 		this->realloc(other._sz);
 		for(int i = 0; i < other._sz; ++i)
 			_ptr[i] = other._ptr[i];
+		return *this;
+	}
+	Array& operator=(Array&& other) {
+		this->free();
+		_ptr = other._ptr; _sz = other._sz;
+		other._ptr = 0;    other._sz = 0;
 		return *this;
 	}
 
@@ -81,19 +88,48 @@ public:
 		return *this;
 	}
 
-	Array& swap(Array *pOther) {
-		T *tmpPtr = _ptr;      int tmpSz = _sz;
-		_ptr = pOther->_ptr;   _sz = pOther->_sz;
-		pOther->_ptr = tmpPtr; pOther->_sz = tmpSz;
+	Array& swap(Array& other) {
+		T *tmpPtr = _ptr;    int tmpSz = _sz;
+		_ptr = other._ptr;   _sz = other._sz;
+		other._ptr = tmpPtr; other._sz = tmpSz;
 		return *this;
 	}
 
-	Array& sort(int (__cdecl *CompareFunc)(const void*, const void*)) {
-		::qsort(_ptr, _sz, sizeof(T), CompareFunc);
+	template<typename F> Array filter(F&& callback) {
+		// Example usage:
+		// Array<float> nums;
+		// Array<float> filtered = nums.filter([](int i, const float& elem)->bool { return elem < 25; });
+		Array ret;
+		for(int i = 0; i < _sz; ++i)
+			if(callback(i, _ptr[i]))
+				ret.append(_ptr[i]);
+		return ret;
+	}
+
+	template<typename X, typename F> Array<X> transform(F&& callback) {
+		// Example usage:
+		// Array<int> nums;
+		// Array<float> trans = nums.transform<float>([](int i, const int& elem)->float { return (float)elem; });
+		Array<X> ret;
+		for(int i = 0; i < _sz; ++i)
+			ret.append(callback(i, _ptr[i]));
+		return ret;
+	}
+
+	template<typename F> Array& sort(F&& callback) {
+		// Example usage:
+		// Array<float> nums;
+		// nums.sort([](const float& a, const float& b)->int { return (int)(a - b); });
+		::qsort_s(_ptr, _sz, sizeof(T), this->_SortCompare<F>, &callback);
 		return *this;
 	}
 
 private:
 	T  *_ptr;
 	int _sz;
+
+	template<typename F> static int __cdecl _SortCompare(void *compareFunc, const void *a, const void *b) {
+		F *callback = (F*)compareFunc;
+		return (*callback)(*((const T*)a), *((const T*)b));
+	}
 };

@@ -5,7 +5,7 @@ Frame::~Frame()
 {
 }
 
-ATOM Frame::Register(const wchar_t *className, Frame::Cursor::Type cursor, int iconId, SysColor::Value bg)
+ATOM Frame::Register(const wchar_t *className, Frame::Cursor cursor, int iconId, SysColor bg)
 {
 	HINSTANCE hInst = GetModuleHandle(0);
 	WNDCLASSEX wc = { 0 };
@@ -14,7 +14,7 @@ ATOM Frame::Register(const wchar_t *className, Frame::Cursor::Type cursor, int i
 	wc.lpfnWndProc   = Frame::_WindowProc;
 	wc.hInstance     = hInst;
 	wc.lpszClassName = className;
-	wc.hbrBackground = (HBRUSH)(bg + 1); // http://www.newobjects.com/pages/ndl/alp%5Caf-sysColor.htm
+	wc.hbrBackground = (HBRUSH)((int)bg + 1); // http://www.newobjects.com/pages/ndl/alp%5Caf-sysColor.htm
 	wc.hCursor       = LoadCursor(0, MAKEINTRESOURCE(cursor));
 	wc.style         = CS_DBLCLKS;
 	

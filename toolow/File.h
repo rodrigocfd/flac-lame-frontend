@@ -9,13 +9,20 @@
 
 namespace File
 {
-	inline bool IsDir(const wchar_t *path)  { return (::GetFileAttributes(path) & FILE_ATTRIBUTE_DIRECTORY) != 0; }
-	inline bool Exists(const wchar_t *path) { return ::GetFileAttributes(path) != INVALID_FILE_ATTRIBUTES; }
-	Date        LastModified(const wchar_t *path);
-	Date        Created(const wchar_t *path);
+	inline bool   IsDir(const wchar_t *path)  { return (::GetFileAttributes(path) & FILE_ATTRIBUTE_DIRECTORY) != 0; }
+	inline bool   Exists(const wchar_t *path) { return ::GetFileAttributes(path) != INVALID_FILE_ATTRIBUTES; }
+	Date          DateLastModified(const wchar_t *path);
+	Date          DateCreated(const wchar_t *path);
+	String        GetExePath();
+	String        GetDesktopPath();
+	String        GetMyDocsPath();
+	String        GetRoamingPath();
+	inline void   ChangeExtensionTo(String *path, const wchar_t *ext) { (*path)[path->findr(L'.')] = L'\0'; path->append(ext); }
+	inline String ExtractPath(const wchar_t *path)                    { String ret = path; ret[ ret.findr(L'\\') ] = L'\0'; return ret; }
+	inline const wchar_t* ExtractFileName(const String *path)         { return path->ptrAt(path->findr(L'\\') + 1); }
 	bool        WriteUtf8(const wchar_t *path, const wchar_t *data, String *pErr=0);
 
-	struct Access { enum Type { READONLY, READWRITE }; };
+	enum class Access { READONLY, READWRITE };
 
 	class Raw { // automation to a HANDLE of a file
 	public:
@@ -25,7 +32,7 @@ namespace File
 		HANDLE hFile() const { return _hFile; }
 		void   close()       { if(_hFile) { ::CloseHandle(_hFile); _hFile = 0; } }
 		int    size()        { return ::GetFileSize(_hFile, 0); }
-		bool   open(const wchar_t *path, Access::Type access, String *pErr=0);
+		bool   open(const wchar_t *path, Access access, String *pErr=0);
 		bool   setNewSize(int newSize, String *pErr=0);
 		bool   truncate(String *pErr=0) { return setNewSize(0, pErr); }
 		bool   getContent(Array<BYTE> *pBuf, String *pErr=0);
@@ -42,7 +49,7 @@ namespace File
 		~Mapped() { close(); }
 
 		void  close();
-		bool  open(const wchar_t *path, Access::Type access, String *pErr=0);
+		bool  open(const wchar_t *path, Access access, String *pErr=0);
 		int   size() const     { return _size; }
 		BYTE* pMem() const     { return (BYTE*)_pMem; }
 		BYTE* pPastMem() const { return pMem() + size(); }
@@ -93,6 +100,7 @@ namespace File
 		~Enum();
 
 		wchar_t* next(wchar_t *buf);
+		String*  next(String *pBuf);
 	private:
 		HANDLE          _hFind;
 		WIN32_FIND_DATA _wfd;

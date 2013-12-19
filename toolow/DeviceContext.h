@@ -14,22 +14,22 @@
 //
 class Pen {
 public:
-	struct Style { enum Value { SOLID=PS_SOLID, DASH=PS_DASH, DOT=PS_DOT, DASHDOT=PS_DASHDOT, DASHDOTDOT=PS_DASHDOTDOT }; };
-	Pen(Style::Value style, int width, COLORREF color) : _hPen(::CreatePen(style, width, color)) { }
-	~Pen()                                             { ::DeleteObject(_hPen); }
-	HPEN hPen() const                                  { return _hPen; }
+	enum class Style { SOLID=PS_SOLID, DASH=PS_DASH, DOT=PS_DOT, DASHDOT=PS_DASHDOT, DASHDOTDOT=PS_DASHDOTDOT };
+	Pen(Style style, int width, COLORREF color) : _hPen(::CreatePen((int)style, width, color)) { }
+	~Pen()                                      { ::DeleteObject(_hPen); }
+	HPEN hPen() const                           { return _hPen; }
 private:
 	HPEN _hPen;
 };
 
 class Brush {
 public:
-	struct Pattern { enum Value { BDIAGONAL=HS_BDIAGONAL, CROSS=HS_CROSS, DIAGCROSS=HS_DIAGCROSS, FDIAGONAL=HS_FDIAGONAL, HORIZONTAL=HS_HORIZONTAL, VERTICAL=HS_VERTICAL }; };
-	Brush(COLORREF color)                       : _hBrush(::CreateSolidBrush(color)) { }
-	Brush(Pattern::Value hatch, COLORREF color) : _hBrush(::CreateHatchBrush(hatch, color)) { }
-	Brush(SysColor::Value color)                : _hBrush(::GetSysColorBrush(color)) { }
-	~Brush()                                    { ::DeleteObject(_hBrush); }
-	HBRUSH hBrush() const                       { return _hBrush; }
+	enum class Pattern { BDIAGONAL=HS_BDIAGONAL, CROSS=HS_CROSS, DIAGCROSS=HS_DIAGCROSS, FDIAGONAL=HS_FDIAGONAL, HORIZONTAL=HS_HORIZONTAL, VERTICAL=HS_VERTICAL };
+	Brush(COLORREF color)                : _hBrush(::CreateSolidBrush(color)) { }
+	Brush(Pattern hatch, COLORREF color) : _hBrush(::CreateHatchBrush((int)hatch, color)) { }
+	Brush(SysColor color)                : _hBrush(::GetSysColorBrush((int)color)) { }
+	~Brush()                             { ::DeleteObject(_hBrush); }
+	HBRUSH hBrush() const                { return _hBrush; }
 private:
 	HBRUSH _hBrush;
 };

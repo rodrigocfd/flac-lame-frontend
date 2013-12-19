@@ -21,23 +21,21 @@ bool File::Ini::load(String *pErr)
 
 	this->sections.removeAll().reserve( this->_countSections(&fin) );
 
-	String line;
+	String line, name, valstr; // name/val declared here to save reallocs
 	while(fin.nextLine(&line)) {
-		if(line[0] == L'[' && line.endsWith(L']')) { // begin section
-			String sectionName;
-			sectionName.getSubstrFrom(line.str(), 1, -1);
-			this->sections[sectionName] = Hash<String>(); // new section is an empty hash
+		if(line[0] == L'[' && line.endsWith(L']')) { // begin section found
+			name.copyFrom(line.ptrAt(1), line.len() - 2);
+			this->sections[name] = Hash<String>(); // new section is an empty hash
 			continue;
 		}
-		if(this->sections.size() && line.len()) {
+		if(this->sections.size() && line.len()) { // keys will be read only if within a section
 			int idxEq = line.find(L'=');
 			if(idxEq > -1) {
-				String keyName, valStr;
-				keyName.getSubstrFrom(line.str(), 0, idxEq);
-				valStr.getSubstrFrom(line.str(), idxEq + 1);
+				name.copyFrom(line.ptrAt(0), idxEq);
+				valstr.copyFrom(line.ptrAt(idxEq + 1), line.len() - (idxEq + 1));
 
 				Hash<String> *pLastSection = &this->sections.at(this->sections.size() - 1)->val;
-				(*pLastSection)[keyName.trim()] = valStr.trim();
+				(*pLastSection)[name.trim()] = valstr.trim();
 			}
 		}
 	}

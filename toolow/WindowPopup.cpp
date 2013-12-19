@@ -1,6 +1,5 @@
 
 #include "Window.h"
-#include "util.h"
 #include <Shlobj.h>
 
 WindowPopup::~WindowPopup()
@@ -86,10 +85,9 @@ bool WindowPopup::getFileOpen(const wchar_t *formattedFilter, Array<String> *pAr
 	ofn.Flags       = OFN_FILEMUSTEXIST | OFN_ALLOWMULTISELECT | OFN_EXPLORER | OFN_ENABLESIZING;
 
 	if(GetOpenFileName(&ofn)) {
-		Array<String> strs;
-		explodeMultiStr(&multiBuf[0], &strs);
+		Array<String> strs = String::ExplodeMulti(&multiBuf[0]);
 		if(!strs.size()) {
-			debug(L"No multiple strings on GetOpenFileName().\n");
+			dbg(L"No multiple strings on GetOpenFileName().\n");
 			return false;
 		}
 
@@ -105,16 +103,16 @@ bool WindowPopup::getFileOpen(const wchar_t *formattedFilter, Array<String> *pAr
 				(*pArrBuf)[i] = (*basePath);
 				(*pArrBuf)[i].append(L"\\").append(strs[i + 1]); // concat folder + file
 			}
-			pArrBuf->sort(String::Sort);
+			pArrBuf->sort([](const String& a, const String& b)->int { return String::LexicalCompare(a, b, String::Case::INSENS); });
 		}
 		return true;
 	}
 	
 	DWORD errNo = CommDlgExtendedError();
 	if(errNo == FNERR_BUFFERTOOSMALL)
-		debug(L"GetOpenFileName: buffer too small (%d bytes).", multiBuf.size() + 1);
+		dbg(L"GetOpenFileName: buffer too small (%d bytes).", multiBuf.size() + 1);
 	else
-		debug(L"GetOpenFileName: failed with error %d.", errNo);
+		dbg(L"GetOpenFileName: failed with error %d.", errNo);
 	return false;
 }
 
@@ -141,25 +139,25 @@ bool WindowPopup::getFileSave(const wchar_t *formattedFilter, String *pBuf, cons
 
 bool WindowPopup::getFolderChoose(String *pBuf)
 {
-	::CoInitialize(0);
+	CoInitialize(0);
 
 	/*LPITEMIDLIST pidlRoot = 0;
 	if(defFolder)
-		::SHParseDisplayName(defFolder, NULL, &pidlRoot, 0, NULL);*/
+		SHParseDisplayName(defFolder, NULL, &pidlRoot, 0, NULL);*/
 
 	BROWSEINFO bi = { 0 };
 	bi.hwndOwner = this->hWnd();
 	bi.ulFlags   = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
 
-	PIDLIST_ABSOLUTE pidl = ::SHBrowseForFolder(&bi);
+	PIDLIST_ABSOLUTE pidl = SHBrowseForFolder(&bi);
 	if(!pidl)
 		return false; // user cancelled
 
 	wchar_t buf[MAX_PATH] = { 0 };
-	if(!::SHGetPathFromIDList(pidl, buf))
+	if(!SHGetPathFromIDList(pidl, buf))
 		return false; // some weird error
 
-	::CoUninitialize();
+	CoUninitialize();
 	(*pBuf) = buf;
 	return true;
 }
@@ -172,4 +170,17 @@ void WindowPopup::setXButton(bool enable)
 		UINT dwExtra = enable ? MF_ENABLED : (MF_DISABLED | MF_GRAYED);
 		EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | dwExtra);
 	}
+}
+
+Array<String> WindowPopup::getDroppedFiles(HDROP hDrop)
+{
+	Array<String> ret(DragQueryFile(hDrop, 0xFFFFFFFF, 0, 0)); // alloc return array
+
+	for(int i = 0; i < ret.size(); ++i) {
+		ret[i].reserve(DragQueryFile(hDrop, i, 0, 0));
+		DragQueryFile(hDrop, i, ret[i].ptrAt(0), ret[i].reserved() + 1);
+	}
+
+	DragFinish(hDrop);
+	return ret;
 }

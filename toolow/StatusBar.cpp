@@ -55,11 +55,13 @@ StatusBar& StatusBar::addResizablePart(float resizeWeight)
 	return *this;
 }
 
-void StatusBar::getText(String *pBuf, int iPart) const
+String StatusBar::getText(int iPart) const
 {
 	int len = LOWORD(_sb.sendMessage(SB_GETTEXTLENGTH, iPart, 0));
-	pBuf->reserve(len);
-	_sb.sendMessage(SB_GETTEXT, iPart, (LPARAM)pBuf->ptrAt(0));
+	String ret;
+	ret.reserve(len);
+	_sb.sendMessage(SB_GETTEXT, iPart, (LPARAM)ret.ptrAt(0));
+	return ret;
 }
 
 void StatusBar::_putParts(int cx)

@@ -7,7 +7,7 @@ Resizer& Resizer::create(int numCtrls)
 	return *this;
 }
 
-Resizer& Resizer::add(HWND hCtrl, Resizer::Behavior modeHorz, Resizer::Behavior modeVert)
+Resizer& Resizer::add(HWND hCtrl, Resizer::Do modeHorz, Resizer::Do modeVert)
 {
 	if(_idxLastInserted >= _ctrls.size() - 1) // protection against buffer overflow
 		_ctrls.realloc(_ctrls.size() + 1);
@@ -30,12 +30,12 @@ Resizer& Resizer::add(HWND hCtrl, Resizer::Behavior modeHorz, Resizer::Behavior 
 	return *this;
 }
 
-Resizer& Resizer::add(HWND hParent, int ctrlId, Resizer::Behavior modeHorz, Resizer::Behavior modeVert)
+Resizer& Resizer::add(HWND hParent, int ctrlId, Resizer::Do modeHorz, Resizer::Do modeVert)
 {
 	return this->add(GetDlgItem(hParent, ctrlId), modeHorz, modeVert);
 }
 
-Resizer& Resizer::addByHwnd(Resizer::Behavior modeHorz, Resizer::Behavior modeVert, int howMany, ...)
+Resizer& Resizer::addByHwnd(Resizer::Do modeHorz, Resizer::Do modeVert, int howMany, ...)
 {
 	va_list marker;
 	va_start(marker, howMany);
@@ -47,7 +47,7 @@ Resizer& Resizer::addByHwnd(Resizer::Behavior modeHorz, Resizer::Behavior modeVe
 	return *this;
 }
 
-Resizer& Resizer::addById(Resizer::Behavior modeHorz, Resizer::Behavior modeVert, HWND hParent, int howMany, ...)
+Resizer& Resizer::addById(Resizer::Do modeHorz, Resizer::Do modeVert, HWND hParent, int howMany, ...)
 {
 	va_list marker;
 	va_start(marker, howMany);
@@ -71,22 +71,22 @@ void Resizer::doResize(WPARAM wp, LPARAM lp)
 			_Ctrl *pCtrl = &_ctrls[i]; // current child control being worked with
 
 			UINT uFlags = SWP_NOZORDER;
-			if(pCtrl->modeHorz == REPOS && pCtrl->modeVert == REPOS) // reposition both vert & horz
+			if(pCtrl->modeHorz == Do::REPOS && pCtrl->modeVert == Do::REPOS) // reposition both vert & horz
 				uFlags |= SWP_NOSIZE;
-			else if(pCtrl->modeHorz == RESIZE && pCtrl->modeVert == RESIZE) // resize both vert & horz
+			else if(pCtrl->modeHorz == Do::RESIZE && pCtrl->modeVert == Do::RESIZE) // resize both vert & horz
 				uFlags |= SWP_NOMOVE;
 
 			DeferWindowPos(hdwp, pCtrl->hWnd, 0,
-				pCtrl->modeHorz == REPOS ?
+				pCtrl->modeHorz == Do::REPOS ?
 					cx - _szOrig.cx + pCtrl->rcOrig.left :
 					pCtrl->rcOrig.left, // keep original pos
-				pCtrl->modeVert == REPOS ?
+				pCtrl->modeVert == Do::REPOS ?
 					cy - _szOrig.cy + pCtrl->rcOrig.top :
 					pCtrl->rcOrig.top, // keep original pos
-				pCtrl->modeHorz == RESIZE ?
+				pCtrl->modeHorz == Do::RESIZE ?
 					cx - _szOrig.cx + pCtrl->rcOrig.right - pCtrl->rcOrig.left :
 					pCtrl->rcOrig.right - pCtrl->rcOrig.left, // keep original width
-				pCtrl->modeVert == RESIZE ?
+				pCtrl->modeVert == Do::RESIZE ?
 					cy - _szOrig.cy + pCtrl->rcOrig.bottom - pCtrl->rcOrig.top :
 					pCtrl->rcOrig.bottom - pCtrl->rcOrig.top, // keep original height
 				uFlags);

@@ -2,6 +2,9 @@ Debug/
 Release/
 *.aps
 *.ncb
+*.opensdf
 *.rar
+*.sdf
 *.suo
 *.user
+TODO.txt

@@ -5,22 +5,22 @@
 
 RunninDialog::RunninDialog(
 	int            numThreads,
-	Target::Type   targetType,
+	Target         targetType,
 	Array<String> *pFiles,
 	bool           delSrc,
 	bool           isVbr,
 	const wchar_t *quality,
 	File::Ini     *pIni,
-	const wchar_t *pDestFolder)
+	String        *pDestFolder)
 {
-	m_numThreads = numThreads;debug(L"THREADS: %d\n", m_numThreads);
+	m_numThreads = numThreads;
 	m_targetType = targetType;
 	m_pFiles = pFiles;
 	m_delSrc = delSrc;
 	m_isVbr = isVbr;
 	lstrcpy(m_quality, quality);
 	m_pIni = pIni;
-	m_destFolder = pDestFolder;
+	m_pDestFolder = pDestFolder;
 	m_filesDone = 0; // incremented after each processing
 }
 
@@ -40,7 +40,7 @@ void RunninDialog::on_initDialog()
 	m_prog = this->getChild(PRO_STATUS);
 	
 	m_prog.setRange(0, m_pFiles->size());
-	m_lbl.setText(fmt(L"0 of %d files finished...", m_pFiles->size())->str());
+	m_lbl.setText( FMT(L"0 of %d files finished...", m_pFiles->size()) );
 	
 	// Proceed to the file conversion straight away.
 	int firstRun = (m_numThreads < m_pFiles->size()) ? m_numThreads : m_pFiles->size(); // limit parallel processing
@@ -49,13 +49,13 @@ void RunninDialog::on_initDialog()
 		const wchar_t *file = (*m_pFiles)[i].str();
 		switch(m_targetType) {
 			case Target::MP3:
-				convs[i] = new ConverterMp3(this->hWnd(), m_pIni, file, m_delSrc, m_quality, m_isVbr, m_destFolder.str());
+				convs[i] = new ConverterMp3(this->hWnd(), m_pIni, file, m_delSrc, m_quality, m_isVbr, m_pDestFolder->str());
 				break;
 			case Target::FLAC:
-				convs[i] = new ConverterFlac(this->hWnd(), m_pIni, file, m_delSrc, m_quality, m_destFolder.str());
+				convs[i] = new ConverterFlac(this->hWnd(), m_pIni, file, m_delSrc, m_quality, m_pDestFolder->str());
 				break;
 			case Target::WAV:
-				convs[i] = new ConverterWav(this->hWnd(), m_pIni, file, m_delSrc, m_destFolder.str());
+				convs[i] = new ConverterWav(this->hWnd(), m_pIni, file, m_delSrc, m_pDestFolder->str());
 		}
 	}
 
@@ -68,12 +68,12 @@ void RunninDialog::on_fileDone(LPARAM lp)
 {
 	++m_filesDone;
 	m_prog.setPos(m_filesDone);
-	m_lbl.setText(fmt(L"%d of %d files finished...", m_filesDone, m_pFiles->size())->str());
+	m_lbl.setText( FMT(L"%d of %d files finished...", m_filesDone, m_pFiles->size()) );
 
 	if(m_filesDone >= m_pFiles->size()) { // all files have been processed
 		Date fin;
 		this->messageBox(L"Conversion finished",
-			fmt(L"%d files processed in %.2f seconds.", m_pFiles->size(), (double)fin.minus(m_time0) / 1000)->str(),
+			FMT(L"%d files processed in %.2f seconds.", m_pFiles->size(), (double)fin.minus(m_time0) / 1000),
 			MB_ICONINFORMATION);
 		this->sendMessage(WM_CLOSE, 0, 0);
 	}
@@ -82,13 +82,13 @@ void RunninDialog::on_fileDone(LPARAM lp)
 	const wchar_t *file = (*m_pFiles)[m_numThreads + m_filesDone - 1].str();
 	switch(m_targetType) {
 		case Target::MP3:
-			conv = new ConverterMp3(this->hWnd(), m_pIni, file, m_delSrc, m_quality, m_isVbr, m_destFolder.str());
+			conv = new ConverterMp3(this->hWnd(), m_pIni, file, m_delSrc, m_quality, m_isVbr, m_pDestFolder->str());
 			break;
 		case Target::FLAC:
-			conv = new ConverterFlac(this->hWnd(), m_pIni, file, m_delSrc, m_quality, m_destFolder.str());
+			conv = new ConverterFlac(this->hWnd(), m_pIni, file, m_delSrc, m_quality, m_pDestFolder->str());
 			break;
 		case Target::WAV:
-			conv = new ConverterWav(this->hWnd(), m_pIni, file, m_delSrc, m_destFolder.str());
+			conv = new ConverterWav(this->hWnd(), m_pIni, file, m_delSrc, m_pDestFolder->str());
 	}
 	conv->runAsync();
 }

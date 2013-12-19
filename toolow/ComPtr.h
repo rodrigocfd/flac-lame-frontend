@@ -8,46 +8,6 @@
 #include <Windows.h>
 #include <ObjBase.h>
 
-template<typename T> class Ptr {
-public:
-	Ptr()                 : _ptr(NULL), _counter(0) { }
-	Ptr(T *ptr)           : _ptr(NULL), _counter(0) { operator=(ptr); }
-	Ptr(const Ptr& other) : _ptr(NULL), _counter(0) { operator=(other); }
-	~Ptr() {
-		if(_counter) {
-			if(!--(*_counter)) {
-				delete _ptr; _ptr = NULL;
-				delete _counter; _counter = 0;
-			}
-		}
-	}
-	Ptr& operator=(T *ptr) {
-		this->~Ptr();
-		if(ptr) {
-			_ptr = ptr; // take ownership
-			_counter = new int(1); // start counter
-		}
-		return *this;
-	}
-	Ptr& operator=(const Ptr& other) {
-		if(this != &other) {
-			this->~Ptr();
-			_ptr = other._ptr;
-			_counter = other._counter;
-			if(_counter) ++(*_counter);
-		}
-		return *this;
-	}
-	bool isNull() const  { return _ptr == NULL; }
-	T& operator*()       { return *_ptr; }
-	T* operator->()      { return _ptr; }
-	operator T*() const  { return _ptr; }
-private:
-	T   *_ptr;
-	int *_counter;
-};
-
-
 template<typename T> class ComPtr {
 public:
 	ComPtr()                    : _ptr(NULL) { }

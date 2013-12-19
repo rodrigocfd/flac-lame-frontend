@@ -1,4 +1,5 @@
 
+#pragma warning(disable:4996) // GetVersionEx is deprecated for Win8.1, won't affect current behaviour
 #include "Font.h"
 
 Font& Font::create(const wchar_t *name, int size, bool bold, bool italic)

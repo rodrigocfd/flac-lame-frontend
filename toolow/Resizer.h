@@ -11,7 +11,7 @@
 
 class Resizer {
 public:
-	enum Behavior {
+	enum class Do {
 		REPOS,  // control size is fixed; control moves around anchored
 		RESIZE, // control size stretches; control doesn't move
 		RENONE  // control doesn't move or resize
@@ -20,18 +20,18 @@ public:
 	Resizer() : _idxLastInserted(-1) { }
 
 	Resizer& create(int numCtrls);
-	Resizer& add(HWND hCtrl, Behavior modeHorz, Behavior modeVert);
-	Resizer& add(HWND hParent, int ctrlId, Behavior modeHorz, Behavior modeVert);
-	Resizer& addByHwnd(Behavior modeHorz, Behavior modeVert, int howMany, ...);
-	Resizer& addById(Behavior modeHorz, Behavior modeVert, HWND hParent, int howMany, ...);
+	Resizer& add(HWND hCtrl, Do modeHorz, Do modeVert);
+	Resizer& add(HWND hParent, int ctrlId, Do modeHorz, Do modeVert);
+	Resizer& addByHwnd(Do modeHorz, Do modeVert, int howMany, ...);
+	Resizer& addById(Do modeHorz, Do modeVert, HWND hParent, int howMany, ...);
 	void     doResize(WPARAM wp, LPARAM lp);
 
 private:
 	struct _Ctrl {
-		HWND     hWnd;     // handle to child window
-		RECT     rcOrig;   // original coordinates relative to parent
-		Behavior modeHorz; // horizontal mode
-		Behavior modeVert; // vertical mode
+		HWND hWnd;     // handle to child window
+		RECT rcOrig;   // original coordinates relative to parent
+		Do   modeHorz; // horizontal mode
+		Do   modeVert; // vertical mode
 	};
 
 	Array<_Ctrl> _ctrls;

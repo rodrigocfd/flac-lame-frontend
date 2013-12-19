@@ -4,13 +4,13 @@
 
 void File::Mapped::close()
 {
-	if(_pMem) { UnmapViewOfFile(_pMem); _pMem = 0; }
-	if(_hMap) { CloseHandle(_hMap); _hMap = 0; }
+	if(_pMem) { ::UnmapViewOfFile(_pMem); _pMem = NULL; }
+	if(_hMap) { ::CloseHandle(_hMap); _hMap = NULL; }
 	_file.close();
 	_size = 0;
 }
 
-bool File::Mapped::open(const wchar_t *path, File::Access::Type access, String *pErr)
+bool File::Mapped::open(const wchar_t *path, File::Access access, String *pErr)
 {
 	this->close(); // make sure everything was properly cleaned up
 	
@@ -21,22 +21,22 @@ bool File::Mapped::open(const wchar_t *path, File::Access::Type access, String *
 	}
 
 	// Mapping into memory.
-	_hMap = CreateFileMapping(_file.hFile(), 0,
-		access == Access::READWRITE ? PAGE_READWRITE : PAGE_READONLY, 0, 0, 0);
+	_hMap = ::CreateFileMapping(_file.hFile(), NULL,
+		access == Access::READWRITE ? PAGE_READWRITE : PAGE_READONLY, 0, 0, NULL);
 	if(!_hMap) {
+		DWORD err = ::GetLastError();
 		this->close();
-		if(pErr) pErr->fmt(L"CreateFileMapping() failed to create file mapping, error code %d.",
-			GetLastError());
+		if(pErr) pErr->format(L"CreateFileMapping() failed to create file mapping, error code %d.", err);
 		return false;
 	}
 
 	// Get pointer to data block.
-	_pMem = MapViewOfFile(_hMap,
+	_pMem = ::MapViewOfFile(_hMap,
 		access == Access::READWRITE ? FILE_MAP_WRITE : FILE_MAP_READ, 0, 0, 0);
 	if(!_pMem) {
+		DWORD err = ::GetLastError();
 		this->close();
-		if(pErr) pErr->fmt(L"MapViewOfFile() failed to map view of file, error code %d.",
-			GetLastError());
+		if(pErr) pErr->format(L"MapViewOfFile() failed to map view of file, error code %d.", err);
 		return false;
 	}
 
@@ -56,8 +56,8 @@ bool File::Mapped::setNewSize(int newSize, String *pErr)
 	}
 
 	// Unmap file, but keep it open.
-	UnmapViewOfFile(_pMem);
-	CloseHandle(_hMap);
+	::UnmapViewOfFile(_pMem);
+	::CloseHandle(_hMap);
 
 	// Truncate/expand file.
 	if(!_file.setNewSize(newSize, pErr)) {
@@ -66,17 +66,17 @@ bool File::Mapped::setNewSize(int newSize, String *pErr)
 	}
 
 	// Remap into memory.
-	if(!( _hMap = CreateFileMapping(_file.hFile(), 0, PAGE_READWRITE, 0, 0, 0) )) {
+	if(!( _hMap = ::CreateFileMapping(_file.hFile(), 0, PAGE_READWRITE, 0, 0, NULL) )) {
+		DWORD err = ::GetLastError();
 		this->close();
-		if(pErr) pErr->fmt(L"CreateFileMapping() failed to recreate file mapping, error code %d.",
-			GetLastError());
+		if(pErr) pErr->format(L"CreateFileMapping() failed to recreate file mapping, error code %d.", err);
 		return false;
 	}
 
 	// Get new pointer to data block, old one just became invalid!
-	if(!( _pMem = MapViewOfFile(_hMap, FILE_MAP_WRITE, 0, 0, 0) )) {
+	if(!( _pMem = ::MapViewOfFile(_hMap, FILE_MAP_WRITE, 0, 0, 0) )) {
 		this->close();
-		if(pErr) pErr->fmt(L"MapViewOfFile() failed to remap view of file, error code %d.",
+		if(pErr) pErr->format(L"MapViewOfFile() failed to remap view of file, error code %d.",
 			GetLastError());
 		return false;
 	}
@@ -99,7 +99,7 @@ bool File::Mapped::getContent(Array<BYTE> *pBuf, int offset, int numBytes, Strin
 	}
 	
 	pBuf->realloc(numBytes);
-	memcpy(&(*pBuf)[0], this->pMem(), numBytes * sizeof(BYTE));
+	::memcpy(&(*pBuf)[0], this->pMem(), numBytes * sizeof(BYTE));
 	
 	if(pErr) *pErr = L"";
 	return true;

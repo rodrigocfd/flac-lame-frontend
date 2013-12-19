@@ -13,11 +13,11 @@
 //
 class Frame : virtual public Window {
 public:
-	struct Cursor { enum Type { ARROW=32512, IBEAM=32513, CROSS=32515, HAND=32649, NO=32648, SIZEALL=32646, SIZENESW=32643, SIZENS=32645, SIZENWSE=32642, SIZEWE=32644 }; };
+	enum class Cursor { ARROW=32512, IBEAM=32513, CROSS=32515, HAND=32649, NO=32648, SIZEALL=32646, SIZENESW=32643, SIZENS=32645, SIZENWSE=32642, SIZEWE=32644 };
 public:
 	virtual ~Frame() = 0;
 	void invalidateRect(bool bgErase=true) { ::InvalidateRect(hWnd(), 0, bgErase); }
-	static ATOM Register(const wchar_t *className, Cursor::Type cursor=Cursor::ARROW, int iconId=0, SysColor::Value bg=SysColor::BUTTON);
+	static ATOM Register(const wchar_t *className, Cursor cursor=Cursor::ARROW, int iconId=0, SysColor bg=SysColor::BUTTON);
 protected:
 	virtual LRESULT msgHandler(UINT msg, WPARAM wp, LPARAM lp);
 	static LRESULT CALLBACK _WindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
