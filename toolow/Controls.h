@@ -24,11 +24,10 @@ public:
 	int    itemCount()               { return (int)sendMessage(CB_GETCOUNT, 0, 0); }
 	Combo& itemSetSelected(int i)    { sendMessage(CB_SETCURSEL, i, 0); return *this; }
 	int    itemGetSelected()         { return (int)sendMessage(CB_GETCURSEL, 0, 0); }
-	Combo& itemAdd(const wchar_t *s) { sendMessage(CB_ADDSTRING, 0, (LPARAM)s); return *this; }
-
-	Combo& itemAdd(int howMany, const wchar_t **pStrs) {
-		for(int i = 0; i < howMany; ++i) // automation for an array of strings
-			itemAdd(pStrs[i]);
+	
+	Combo& itemAdd(std::initializer_list<const wchar_t*> arrStr) {
+		for(int i = 0; i < (int)arrStr.size(); ++i)
+			sendMessage(CB_ADDSTRING, 0, (LPARAM)*(arrStr.begin() + i));
 		return *this;
 	}
 
@@ -65,15 +64,13 @@ public:
 	ListBox& operator=(const Window& wnd)    { return operator=(wnd.hWnd()); }
 	ListBox& operator=(const ListBox& other) { return operator=(other.hWnd()); }
 	
-	int      itemCount()               { return (int)sendMessage(LB_GETCOUNT, 0, 0); }
-	ListBox& itemAdd(const wchar_t *s) { sendMessage(LB_ADDSTRING, 0, (LPARAM)s); return *this; }
-	
-	ListBox& itemAdd(int howMany, const wchar_t **pStrs) {
-		for(int i = 0; i < howMany; ++i) // automation for an array of strings
-			itemAdd(pStrs[i]);
+	ListBox& itemAdd(std::initializer_list<const wchar_t*> arrStr) {
+		for(int i = 0; i < (int)arrStr.size(); ++i)
+			sendMessage(LB_ADDSTRING, 0, (LPARAM)*(arrStr.begin() + i));
 		return *this;
 	}
 
+	int itemCount() { return (int)sendMessage(LB_GETCOUNT, 0, 0); }
 	int itemCountSelected() {
 		int cou = (int)sendMessage(LB_GETSELCOUNT, 0, 0);
 		if(cou == LB_ERR) // we have a single-selection listbox, zero or one items can be selected

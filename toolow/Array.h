@@ -10,11 +10,12 @@
 
 template<typename T> class Array {
 public:
-	Array()                    : _ptr(NULL), _sz(0) { }
-	Array(const Array& other)  : _ptr(NULL), _sz(0) { operator=(other); }
-	Array(Array&& other)       : _ptr(NULL), _sz(0) { operator=((Array&&)other); }
-	explicit Array(int length) : _ptr(NULL), _sz(0) { this->realloc(length); }
-	~Array()                   { this->free(); }
+	Array()                             : _ptr(NULL), _sz(0) { }
+	Array(const Array& other)           : _ptr(NULL), _sz(0) { operator=(other); }
+	Array(Array&& other)                : _ptr(NULL), _sz(0) { operator=((Array&&)other); }
+	Array(std::initializer_list<T> arr) : _ptr(NULL), _sz(0) { operator=(arr); }
+	explicit Array(int length)          : _ptr(NULL), _sz(0) { this->realloc(length); }
+	~Array()                            { this->free(); }
 
 	int      size() const                { return _sz; }
 	const T& operator[](int index) const { return _ptr[index]; }
@@ -47,6 +48,12 @@ public:
 		this->free();
 		_ptr = other._ptr; _sz = other._sz; // steal pointer
 		other._ptr = NULL; other._sz = 0;
+		return *this;
+	}
+	Array& operator=(std::initializer_list<T> arr) {
+		this->realloc((int)arr.size());
+		for(int i = 0; i < (int)arr.size(); ++i)
+			_ptr[i] = *(arr.begin() + i); // thanks to C++11 horrible design, this thing is necessary
 		return *this;
 	}
 

@@ -79,12 +79,11 @@ void MainDialog::on_initDialog()
 
 	// Layout control when resizing.
 	m_resizer.create(16)
-		.add(this->hWnd(), LST_FILES, Resizer::Do::RESIZE, Resizer::Do::RESIZE)
-		.add(this->hWnd(), TXT_DEST, Resizer::Do::RESIZE, Resizer::Do::REPOS)
-		.addById(Resizer::Do::RENONE, Resizer::Do::REPOS, this->hWnd(), 12,
-			LBL_DEST, FRA_CONV, RAD_MP3, RAD_FLAC, RAD_WAV, RAD_CBR, RAD_VBR, LBL_LEVEL, CMB_CBR, CMB_VBR, CMB_FLAC, CHK_DELSRC)
-		.addById(Resizer::Do::REPOS, Resizer::Do::REPOS, this->hWnd(), 2,
-			BTN_DEST, BTN_RUN);
+		.add({ LST_FILES }, this->hWnd(), Resizer::Do::RESIZE, Resizer::Do::RESIZE)
+		.add({ TXT_DEST }, this->hWnd(), Resizer::Do::RESIZE, Resizer::Do::REPOS)
+		.add({ LBL_DEST, FRA_CONV, RAD_MP3, RAD_FLAC, RAD_WAV, RAD_CBR, RAD_VBR, LBL_LEVEL, CMB_CBR, CMB_VBR, CMB_FLAC, CHK_DELSRC },
+			this->hWnd(), Resizer::Do::RENONE, Resizer::Do::REPOS)
+		.add({ BTN_DEST, BTN_RUN }, this->hWnd(), Resizer::Do::REPOS, Resizer::Do::REPOS);
 
 	// Main listview initialization.
 	m_lstFiles = this->getChild(LST_FILES);
@@ -96,30 +95,21 @@ void MainDialog::on_initDialog()
 
 	// Initializing comboboxes.
 	m_cmbCbr = this->getChild(CMB_CBR);
-	const wchar_t *cbrRates[] = {
-		L"32 kbps", L"40 kbps", L"48 kbps", L"56 kbps", L"64 kbps", L"80 kbps", L"96 kbps", L"112 kbps",
-		L"128 kbps; default", L"160 kbps", L"192 kbps", L"224 kbps", L"256 kbps", L"320 kbps" };
-	m_cmbCbr.itemAdd(ARRAYSIZE(cbrRates), cbrRates);
+	m_cmbCbr.itemAdd({ L"32 kbps", L"40 kbps", L"48 kbps", L"56 kbps", L"64 kbps", L"80 kbps", L"96 kbps", L"112 kbps",
+		L"128 kbps; default", L"160 kbps", L"192 kbps", L"224 kbps", L"256 kbps", L"320 kbps" });
 	m_cmbCbr.itemSetSelected(8);
 
 	m_cmbVbr = this->getChild(CMB_VBR);
-	const wchar_t *vbrRates[] = {
-		L"0 (~245 kbps)", L"1 (~225 kbps)", L"2 (~190 kbps)", L"3 (~175 kbps)", L"4 (~165 kbps); default",
-		L"5 (~130 kbps)", L"6 (~115 kbps)", L"7 (~100 kbps)", L"8 (~85 kbps)", L"9 (~65 kbps)" };
-	m_cmbVbr.itemAdd(ARRAYSIZE(vbrRates), vbrRates);
+	m_cmbVbr.itemAdd({ L"0 (~245 kbps)", L"1 (~225 kbps)", L"2 (~190 kbps)", L"3 (~175 kbps)", L"4 (~165 kbps); default",
+		L"5 (~130 kbps)", L"6 (~115 kbps)", L"7 (~100 kbps)", L"8 (~85 kbps)", L"9 (~65 kbps)" });
 	m_cmbVbr.itemSetSelected(4);
 
 	m_cmbFlac = this->getChild(CMB_FLAC);
-	for(int i = 1; i <= 8; ++i) {
-		wchar_t num[8];
-		_itow(i, num, 10);
-		m_cmbFlac.itemAdd(num);
-	}
+	m_cmbFlac.itemAdd({ L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8" });
 	m_cmbFlac.itemSetSelected(7);
 
 	m_cmbNumThreads = this->getChild(CMB_NUMTHREADS);
-	const wchar_t *numThreads[] = { L"1", L"2", L"4", L"8" };
-	m_cmbNumThreads.itemAdd(ARRAYSIZE(numThreads), numThreads);
+	m_cmbNumThreads.itemAdd({ L"1", L"2", L"4", L"8" });
 	SYSTEM_INFO si = { 0 };
 	GetSystemInfo(&si);
 	switch(si.dwNumberOfProcessors) {

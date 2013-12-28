@@ -7,12 +7,26 @@ Resizer& Resizer::create(int numCtrls)
 	return *this;
 }
 
-Resizer& Resizer::add(HWND hCtrl, Resizer::Do modeHorz, Resizer::Do modeVert)
+Resizer& Resizer::add(std::initializer_list<HWND> hChildren, Do modeHorz, Do modeVert)
+{
+	for(int i = 0; i < (int)hChildren.size(); ++i)
+		this->_addOne(*(hChildren.begin() + i), modeHorz, modeVert);
+	return *this;
+}
+
+Resizer& Resizer::add(std::initializer_list<int> ctrlIds, HWND hParent, Do modeHorz, Do modeVert)
+{
+	for(int i = 0; i < (int)ctrlIds.size(); ++i)
+		this->_addOne(GetDlgItem(hParent, *(ctrlIds.begin() + i)), modeHorz, modeVert);
+	return *this;
+}
+
+void Resizer::_addOne(HWND hCtrl, Do modeHorz, Do modeVert)
 {
 	if(_idxLastInserted >= _ctrls.size() - 1) // protection against buffer overflow
 		_ctrls.realloc(_ctrls.size() + 1);
 
-	if(_idxLastInserted == -1) { // first call to add()
+	if(_idxLastInserted == -1) { // first call to _addOne()
 		RECT rcP;
 		GetClientRect(GetParent(hCtrl), &rcP);
 		_szOrig.cx = rcP.right;
@@ -27,36 +41,6 @@ Resizer& Resizer::add(HWND hCtrl, Resizer::Do modeHorz, Resizer::Do modeVert)
 	GetWindowRect(pCtrl->hWnd, &pCtrl->rcOrig);
 	ScreenToClient(GetParent(hCtrl), (POINT*)&pCtrl->rcOrig);
 	ScreenToClient(GetParent(hCtrl), (POINT*)&pCtrl->rcOrig.right); // client coordinates relative to parent
-	return *this;
-}
-
-Resizer& Resizer::add(HWND hParent, int ctrlId, Resizer::Do modeHorz, Resizer::Do modeVert)
-{
-	return this->add(GetDlgItem(hParent, ctrlId), modeHorz, modeVert);
-}
-
-Resizer& Resizer::addByHwnd(Resizer::Do modeHorz, Resizer::Do modeVert, int howMany, ...)
-{
-	va_list marker;
-	va_start(marker, howMany);
-
-	for(int i = 0; i < howMany; ++i)
-		this->add(va_arg(marker, HWND), modeHorz, modeVert); // user should pass HWND of each child to be added
-	
-	va_end(marker);
-	return *this;
-}
-
-Resizer& Resizer::addById(Resizer::Do modeHorz, Resizer::Do modeVert, HWND hParent, int howMany, ...)
-{
-	va_list marker;
-	va_start(marker, howMany);
-
-	for(int i = 0; i < howMany; ++i)
-		this->add(GetDlgItem(hParent, va_arg(marker, int)), modeHorz, modeVert); // user should pass item ID of each child
-	
-	va_end(marker);
-	return *this;
 }
 
 void Resizer::doResize(WPARAM wp, LPARAM lp)

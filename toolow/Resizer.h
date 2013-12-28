@@ -20,13 +20,13 @@ public:
 	Resizer() : _idxLastInserted(-1) { }
 
 	Resizer& create(int numCtrls);
-	Resizer& add(HWND hCtrl, Do modeHorz, Do modeVert);
-	Resizer& add(HWND hParent, int ctrlId, Do modeHorz, Do modeVert);
-	Resizer& addByHwnd(Do modeHorz, Do modeVert, int howMany, ...);
-	Resizer& addById(Do modeHorz, Do modeVert, HWND hParent, int howMany, ...);
+	Resizer& add(std::initializer_list<HWND> hChildren, Do modeHorz, Do modeVert);
+	Resizer& add(std::initializer_list<int> ctrlIds, HWND hParent, Do modeHorz, Do modeVert);
 	void     doResize(WPARAM wp, LPARAM lp);
 
 private:
+	void _addOne(HWND hCtrl, Do modeHorz, Do modeVert);
+
 	struct _Ctrl {
 		HWND hWnd;     // handle to child window
 		RECT rcOrig;   // original coordinates relative to parent
