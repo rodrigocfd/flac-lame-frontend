@@ -18,12 +18,12 @@ bool Internet::download(const wchar_t *address, const wchar_t *verb, String *pEr
 	_hSession = WinHttpOpen(_userAgent.str(),
 		WINHTTP_ACCESS_TYPE_DEFAULT_PROXY, WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
 	if(!_hSession) {
-		if(pErr) _Format(L"WinHttpOpen", GetLastError(), pErr);
+		if(pErr) this->_Format(L"WinHttpOpen", GetLastError(), pErr);
 		return false;
 	}
 
-	_Worker *dlw = new _Worker(_hSession, _referrer.str(), &_requestHeaders, _hWndNotify, _msgNotify, address, verb);
-	dlw->runAsync();
+	_Worker *worker = new _Worker(_hSession, _referrer.str(), &_requestHeaders, _hWndNotify, _msgNotify, address, verb);
+	worker->runAsync();
 	if(pErr) *pErr = L"";
 	return true; // _Worker will be responsible to call WinHttpCloseHandle on _hSession
 }
@@ -71,8 +71,8 @@ void Internet::_Worker::onRun()
 	_hConnect = WinHttpConnect(_hSession, url.host(), url.port(), 0);
 	if(!_hConnect) {
 		DWORD dwErr = GetLastError();
-		_cleanup();
-		_notifyError(dwErr, L"WinHttpConnect");
+		this->_cleanup();
+		this->_notifyError(dwErr, L"WinHttpConnect");
 		return;
 	}
 
@@ -85,8 +85,8 @@ void Internet::_Worker::onRun()
 		url.isHttps() ? WINHTTP_FLAG_SECURE : 0);
 	if(!_hRequest) {
 		DWORD dwErr = GetLastError();
-		_cleanup();
-		_notifyError(dwErr, L"WinHttpOpenRequest");
+		this->_cleanup();
+		this->_notifyError(dwErr, L"WinHttpOpenRequest");
 		return;
 	}
 
@@ -94,8 +94,8 @@ void Internet::_Worker::onRun()
 	for(int i = 0; i < _requestHeaders.size(); ++i) {
 		if(!WinHttpAddRequestHeaders(_hRequest, _requestHeaders[i].str(), (ULONG)-1L, WINHTTP_ADDREQ_FLAG_ADD)) {
 			DWORD dwErr = GetLastError();
-			_cleanup();
-			_notifyError(dwErr, L"WinHttpAddRequestHeaders");
+			this->_cleanup();
+			this->_notifyError(dwErr, L"WinHttpAddRequestHeaders");
 			return;
 		}
 	}
@@ -103,16 +103,16 @@ void Internet::_Worker::onRun()
 	// Send the request to server.
 	if(!WinHttpSendRequest(_hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0)) {
 		DWORD dwErr = GetLastError();
-		_cleanup();
-		_notifyError(dwErr, L"WinHttpSendRequest");
+		this->_cleanup();
+		this->_notifyError(dwErr, L"WinHttpSendRequest");
 		return;
 	}
 
 	// Receive the response from server.
 	if(!WinHttpReceiveResponse(_hRequest, 0)) {
 		DWORD dwErr = GetLastError();
-		_cleanup();
-		_notifyError(dwErr, L"WinHttpReceiveResponse");
+		this->_cleanup();
+		this->_notifyError(dwErr, L"WinHttpReceiveResponse");
 		return;
 	}
 
@@ -128,11 +128,11 @@ void Internet::_Worker::onRun()
 	rawRH.reserve(dwSize / sizeof(wchar_t) - 1);
 	if(!WinHttpQueryHeaders(_hRequest, WINHTTP_QUERY_RAW_HEADERS_CRLF, WINHTTP_HEADER_NAME_BY_INDEX, rawRH.ptrAt(0), &dwSize, WINHTTP_NO_HEADER_INDEX)) {
 		DWORD dwErr = GetLastError();
-		_cleanup();
-		_notifyError(dwErr, L"WinHttpQueryHeaders");
+		this->_cleanup();
+		this->_notifyError(dwErr, L"WinHttpQueryHeaders");
 		return;
 	}
-	_buildResponseHeader(&rawRH, &status.responseHeader);
+	status.responseHeader = this->_buildResponseHeader(&rawRH);
 	SendMessage(_hWndNotify, _msgNotify, (WPARAM)Status::Flag::STARTED, (LPARAM)&status);
 
 	// Check if server informed content length.
@@ -149,16 +149,16 @@ void Internet::_Worker::onRun()
 		dwSize = 0;
 		if(!WinHttpQueryDataAvailable(_hRequest, &dwSize)) { // how many bytes are about to come
 			DWORD dwErr = GetLastError();
-			_cleanup();
-			_notifyError(dwErr, L"WinHttpQueryDataAvailable");
+			this->_cleanup();
+			this->_notifyError(dwErr, L"WinHttpQueryDataAvailable");
 			return;
 		}
 		int prevSz = status.buffer.size();
 		status.buffer.realloc(prevSz + dwSize); // grow buffer
 		if(!WinHttpReadData(_hRequest, (void*)&status.buffer[prevSz], dwSize, &dwDownloaded)) { // receive the bytes
 			DWORD dwErr = GetLastError();
-			_cleanup();
-			_notifyError(dwErr, L"WinHttpReadData");
+			this->_cleanup();
+			this->_notifyError(dwErr, L"WinHttpReadData");
 			return;
 		}
 		status.flag = Status::Flag::PROGRESS;
@@ -167,7 +167,7 @@ void Internet::_Worker::onRun()
 		SendMessage(_hWndNotify, _msgNotify, (WPARAM)Status::Flag::PROGRESS, (LPARAM)&status);
 	} while(dwSize > 0);
 
-	_cleanup();
+	this->_cleanup();
 
 	status.flag = Status::Flag::DONE;
 	status.pctDone = 1;
@@ -199,22 +199,25 @@ void Internet::_Worker::_notifyError(DWORD errCode, const wchar_t *funcName)
 		(LPARAM)&status); // send pointer to Status object
 }
 
-void Internet::_Worker::_buildResponseHeader(const String *rh, Hash<String> *pHash)
+Hash<String> Internet::_Worker::_buildResponseHeader(const String *rh)
 {
+	Hash<String>  hash;
 	Array<String> lines = rh->explode(L"\r\n");
-	pHash->removeAll();
-	String key, val; // declared here to save reallocs
+	String        key, val; // declared here to save reallocs
+
 	for(int i = 0; i < lines.size(); ++i) {
 		if(!lines[i].len()) continue;
 		int colonIdx = lines[i].find(L':');
 		if(colonIdx == -1) { // not a key/value pair, probably response line
-			(*pHash)[L""] = lines[i]; // empty key
+			hash[L""] = lines[i]; // empty key
 		} else {
 			key.copyFrom(lines[i].ptrAt(0), colonIdx);
 			val.copyFrom(lines[i].ptrAt(colonIdx + 1), lines[i].len() - (colonIdx + 1));
-			(*pHash)[key.trim()] = val.trim();
+			hash[key.trim()] = val.trim();
 		}
 	}
+
+	return hash;
 }
 
 Internet::Url::Url(const wchar_t *address)

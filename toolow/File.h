@@ -5,7 +5,6 @@
 #pragma once
 #include "Date.h"
 #include "Hash.h"
-#include "String.h"
 
 namespace File
 {

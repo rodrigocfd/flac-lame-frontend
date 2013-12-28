@@ -191,13 +191,9 @@
     <ClCompile Include="toolow\TextBox.cpp" />
     <ClCompile Include="toolow\Thread.cpp" />
     <ClCompile Include="toolow\util.cpp" />
-    <ClCompile Include="toolow\WheelHover.cpp" />
     <ClCompile Include="toolow\WindowCtrl.cpp" />
     <ClCompile Include="toolow\WindowPopup.cpp" />
     <ClCompile Include="toolow\Xml.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include=".gitignore" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="res\resource.h" />
@@ -225,7 +221,6 @@
     <ClInclude Include="toolow\TextBox.h" />
     <ClInclude Include="toolow\Thread.h" />
     <ClInclude Include="toolow\util.h" />
-    <ClInclude Include="toolow\WheelHover.h" />
     <ClInclude Include="toolow\Window.h" />
     <ClInclude Include="toolow\Xml.h" />
   </ItemGroup>

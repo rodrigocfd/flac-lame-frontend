@@ -51,16 +51,20 @@ class WindowPopup : virtual public Window {
 public:
 	virtual ~WindowPopup() = 0;
 protected:
-	Window getChild(int id) { return Window(::GetDlgItem(hWnd(), id)); }
+	Window getChild(int id)        { return Window(::GetDlgItem(hWnd(), id)); }
 	int    messageBox(const wchar_t *caption, const wchar_t *body, UINT uType=0);
 	bool   getFileOpen(const wchar_t *formattedFilter, String *pBuf);
 	bool   getFileOpen(const wchar_t *formattedFilter, Array<String> *pBuf);
 	bool   getFileSave(const wchar_t *formattedFilter, String *pBuf, const wchar_t *defFile=0);
 	bool   getFolderChoose(String *pBuf);
 	void   setXButton(bool enable);
-	bool   isMinimized() { return ::IsIconic(hWnd()) == TRUE; }
-	bool   isMaximized() { return ::IsZoomed(hWnd()) == TRUE; }
+	bool   isMinimized()           { return ::IsIconic(hWnd()) == TRUE; }
+	bool   isMaximized()           { return ::IsZoomed(hWnd()) == TRUE; }
 	Array<String> getDroppedFiles(HDROP hDrop);
+	void   setWheelHoverBehavior() { ::EnumChildWindows(hWnd(), _WheelHoverApply, 0); }
+private:
+	static BOOL    CALLBACK _WheelHoverApply(HWND hChild, LPARAM lp);
+	static LRESULT CALLBACK _WheelHoverProc(HWND hChild, UINT msg, WPARAM wp, LPARAM lp, UINT_PTR idSubclass, DWORD_PTR refData);
 };
 
 //__________________________________________________________________________________________________

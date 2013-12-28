@@ -46,7 +46,7 @@ private:
 		void onRun();
 		void _cleanup();
 		void _notifyError(DWORD errCode, const wchar_t *funcName);
-		void _buildResponseHeader(const String *rh, Hash<String> *pHash);
+		Hash<String> _buildResponseHeader(const String *rh);
 	};
 
 public:

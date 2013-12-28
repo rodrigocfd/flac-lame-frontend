@@ -10,7 +10,7 @@
 //__________________________________________________________________________________________________
 class Converter : public Thread {
 public:
-	enum Notification { WM_FILEDONE=WM_USER+1 };
+	enum class Alert { FILEDONE=WM_APP+1 };
 	Converter(HWND hParent, File::Ini *pIni, const wchar_t *src, bool delSrc, const wchar_t *quality, bool isVbr, const wchar_t *dest);
 	static bool PathsAreValid(File::Ini *pIni, String *pErr);
 protected:

@@ -138,6 +138,9 @@ void MainDialog::on_initDialog()
 	m_radWav    = this->getChild(RAD_WAV);
 
 	m_chkDelSrc = this->getChild(CHK_DELSRC);
+
+	// Mousewheel on hovering, not only focus.
+	this->setWheelHoverBehavior();
 }
 
 void MainDialog::on_dropFiles(WPARAM wp)

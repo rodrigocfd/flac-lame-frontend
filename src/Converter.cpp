@@ -85,7 +85,7 @@ void ConverterMp3::onRun()
 	// Notify parent on conclusion.
 	// Notice that intermediary WAV conversions initialize HWND with zero, thus not notificating.
 	if(_hParent)
-		SendMessage(_hParent, WM_FILEDONE, 0, 0);
+		SendMessage(_hParent, (UINT)Alert::FILEDONE, 0, 0);
 }
 
 void ConverterFlac::onRun()
@@ -128,7 +128,7 @@ void ConverterFlac::onRun()
 	// Notify parent on conclusion.
 	// Notice that intermediary WAV conversions initialize HWND with zero, thus not notificating.
 	if(_hParent)
-		SendMessage(_hParent, WM_FILEDONE, 0, 0);
+		SendMessage(_hParent, (UINT)Alert::FILEDONE, 0, 0);
 }
 
 void ConverterWav::onRun()
@@ -157,5 +157,5 @@ void ConverterWav::onRun()
 	// Notify parent on conclusion.
 	// Notice that intermediary WAV conversions initialize HWND with zero, thus not notificating.
 	if(_hParent)
-		SendMessage(_hParent, WM_FILEDONE, 0, 0);
+		SendMessage(_hParent, (UINT)Alert::FILEDONE, 0, 0);
 }

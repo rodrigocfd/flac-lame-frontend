@@ -28,8 +28,8 @@ INT_PTR RunninDialog::msgHandler(UINT msg, WPARAM wp, LPARAM lp)
 {
 	switch(msg)
 	{
-	case WM_INITDIALOG:          on_initDialog(); break;
-	case Converter::WM_FILEDONE: on_fileDone(lp); return TRUE;
+	case WM_INITDIALOG:                    on_initDialog(); break;
+	case (UINT)Converter::Alert::FILEDONE: on_fileDone(lp); return TRUE;
 	}
 	return DialogModal::msgHandler(msg, wp, lp);
 }

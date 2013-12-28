@@ -112,9 +112,6 @@
     <ClCompile Include="toolow\TextBox.cpp">
       <Filter>TOOLOW\other</Filter>
     </ClCompile>
-    <ClCompile Include="toolow\WheelHover.cpp">
-      <Filter>TOOLOW\other</Filter>
-    </ClCompile>
     <ClCompile Include="toolow\Xml.cpp">
       <Filter>TOOLOW\other</Filter>
     </ClCompile>
@@ -130,11 +127,6 @@
     <ClCompile Include="toolow\File.cpp">
       <Filter>TOOLOW\other</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include=".gitignore">
-      <Filter>Resource Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="res\resource.h">
@@ -204,9 +196,6 @@
       <Filter>TOOLOW\other</Filter>
     </ClInclude>
     <ClInclude Include="toolow\TextBox.h">
-      <Filter>TOOLOW\other</Filter>
-    </ClInclude>
-    <ClInclude Include="toolow\WheelHover.h">
       <Filter>TOOLOW\other</Filter>
     </ClInclude>
     <ClInclude Include="toolow\Xml.h">

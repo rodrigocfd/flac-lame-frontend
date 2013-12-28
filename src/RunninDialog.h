@@ -18,7 +18,7 @@ public:
 		bool           isVbr,
 		const wchar_t *quality,
 		File::Ini     *pIni,
-		String        *pDestFolder);
+		String        *pDestFolder );
 	
 	int show(Window *parent) { return DialogModal::show(parent, DLG_RUNNIN); }
 

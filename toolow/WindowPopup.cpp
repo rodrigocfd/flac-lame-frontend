@@ -177,10 +177,42 @@ Array<String> WindowPopup::getDroppedFiles(HDROP hDrop)
 	Array<String> ret(DragQueryFile(hDrop, 0xFFFFFFFF, 0, 0)); // alloc return array
 
 	for(int i = 0; i < ret.size(); ++i) {
-		ret[i].reserve(DragQueryFile(hDrop, i, 0, 0));
+		ret[i].reserve(DragQueryFile(hDrop, i, 0, 0)); // alloc path string
 		DragQueryFile(hDrop, i, ret[i].ptrAt(0), ret[i].reserved() + 1);
 	}
 
 	DragFinish(hDrop);
 	return ret;
+}
+
+BOOL CALLBACK WindowPopup::_WheelHoverApply(HWND hChild, LPARAM lp)
+{
+	// Callback to EnumChildWindows(), will run on each child.
+	static int uniqueSubId = 1;
+	SetWindowSubclass(hChild, _WheelHoverProc, uniqueSubId++, (DWORD_PTR)GetParent(hChild)); // yes, subclass every control
+	return TRUE;
+}
+
+LRESULT CALLBACK WindowPopup::_WheelHoverProc(HWND hChild, UINT msg, WPARAM wp, LPARAM lp, UINT_PTR idSubclass, DWORD_PTR refData)
+{
+	switch(msg)
+	{
+	case WM_MOUSEWHEEL:
+		if(!(LOWORD(wp) & 0x0800)) { // bitflag not set, this is the first and unprocessed WM_MOUSEWHEEL passage
+			HWND hParent = (HWND)refData;
+			POINT pt = { LOWORD(lp), HIWORD(lp) };
+			ScreenToClient(hParent, &pt); // to client coordinates relative to parent
+			SendMessage(ChildWindowFromPoint(hParent, pt), // window below cursor
+				WM_MOUSEWHEEL,
+				MAKEWPARAM(LOWORD(wp) | 0x0800, HIWORD(wp)), // set 0x0800 bitflag and kick to window below cursor
+				lp);
+			return 0; // halt processing
+		} else { // bitflag is set, WM_MOUSEWHEEL has been kicked here and can be safely processed
+			wp &= ~0x0800; // unset bitflag
+			break; // finally dispatch to default processing
+		}
+	case WM_NCDESTROY:
+		RemoveWindowSubclass(hChild, _WheelHoverProc, idSubclass); // http://blogs.msdn.com/b/oldnewthing/archive/2003/11/11/55653.aspx
+	}
+	return DefSubclassProc(hChild, msg, wp, lp);
 }

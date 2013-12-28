@@ -40,13 +40,13 @@ public:
 	Array& operator=(const Array& other) {
 		this->realloc(other._sz);
 		for(int i = 0; i < other._sz; ++i)
-			_ptr[i] = other._ptr[i];
+			_ptr[i] = other._ptr[i]; // call operator=() on each element
 		return *this;
 	}
 	Array& operator=(Array&& other) {
 		this->free();
-		_ptr = other._ptr; _sz = other._sz;
-		other._ptr = 0;    other._sz = 0;
+		_ptr = other._ptr; _sz = other._sz; // steal pointer
+		other._ptr = NULL; other._sz = 0;
 		return *this;
 	}
 
@@ -110,9 +110,9 @@ public:
 		// Example usage:
 		// Array<int> nums;
 		// Array<float> trans = nums.transform<float>([](int i, const int& elem)->float { return (float)elem; });
-		Array<X> ret;
+		Array<X> ret(_sz); // prealloc
 		for(int i = 0; i < _sz; ++i)
-			ret.append(callback(i, _ptr[i]));
+			ret[i] = callback(i, _ptr[i]); // invokes operator= on elements
 		return ret;
 	}
 
