@@ -82,7 +82,7 @@ void MainDialog::on_initDialog()
 		.add({ LST_FILES }, this->hWnd(), Resizer::Do::RESIZE, Resizer::Do::RESIZE)
 		.add({ TXT_DEST }, this->hWnd(), Resizer::Do::RESIZE, Resizer::Do::REPOS)
 		.add({ LBL_DEST, FRA_CONV, RAD_MP3, RAD_FLAC, RAD_WAV, RAD_CBR, RAD_VBR, LBL_LEVEL, CMB_CBR, CMB_VBR, CMB_FLAC, CHK_DELSRC },
-			this->hWnd(), Resizer::Do::RENONE, Resizer::Do::REPOS)
+			this->hWnd(), Resizer::Do::NOTHING, Resizer::Do::REPOS)
 		.add({ BTN_DEST, BTN_RUN }, this->hWnd(), Resizer::Do::REPOS, Resizer::Do::REPOS);
 
 	// Main listview initialization.

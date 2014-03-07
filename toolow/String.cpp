@@ -46,6 +46,24 @@ String& String::append(const wchar_t *s)
 	return *this;
 }
 
+String& String::append(std::initializer_list<const wchar_t*> arr)
+{
+	int *newLens = (int*)::_alloca(sizeof(int) * arr.size());
+	int moreLen = 0;
+	for(int i = 0, tot = (int)arr.size(); i < tot; ++i)
+		moreLen += ( newLens[i] = ::lstrlen(*(arr.begin() + i)) );
+	
+	int ourLen = this->len();
+	this->reserve(ourLen + moreLen);
+	wchar_t *pRun = &_arr[ourLen];
+	for(int i = 0, tot = (int)arr.size(); i < tot; ++i) {
+		WCHAR_CPY(pRun, *(arr.begin() + i), newLens[i]);
+		pRun += newLens[i];
+	}
+
+	return *this;
+}
+
 String& String::append(wchar_t ch)
 {
 	int newLen = this->len() + 1;

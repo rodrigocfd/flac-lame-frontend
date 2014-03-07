@@ -3,8 +3,6 @@
 
 DialogModal::~DialogModal()
 {
-	// Note:
-	// To remove icon from a resizing modal, use EXSTYLE WS_EX_DLGMODALFRAME.
 }
 
 int DialogModal::show(Window *parent, int dialogId, int accelTableId)

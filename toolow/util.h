@@ -15,6 +15,7 @@ inline bool between(int x, int a, int b) { return x > a && x < b; }
 int         rounds(float x);
 int         rounds(double x);
 int         ceilmult(int n, int multiple);
+int         indexOfBin(const BYTE *pData, int dataLen, const wchar_t *what, bool asWideChar);
 DWORD       exec(const wchar_t *cmdLine);
 DWORD       shellOpen(const wchar_t *file);
 void        popMenu(HWND hDlg, int popupMenuId, int x, int y, HWND hWndCoordsRelativeTo);

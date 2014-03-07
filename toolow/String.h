@@ -33,6 +33,7 @@ public:
 	int            reserved() const               { return _arr.size() - 1; }
 	String&        append(const String& other)    { return append(other.str()); }
 	String&        append(const wchar_t *s);
+	String&        append(std::initializer_list<const wchar_t*> arr);
 	String&        append(wchar_t ch);
 	String&        insert(int at, const wchar_t *s);
 	String&        formatv(const wchar_t *fmt, va_list args, int at=0);
@@ -43,9 +44,9 @@ public:
 	String&        copyFrom(const wchar_t *src, int numChars);
 	String&        appendFrom(const wchar_t *src, int numChars);
 	String&        trim();
-	String&        removeDiacritics()                                                       { if(!this->isEmpty()) this->_RemDiacr(&_arr[0]); return *this; }
-	bool           equals(const wchar_t *s, Case c, Diacritics d=Diacritics::KEEP) const    { return !this->LexicalCompare(this->str(), s, c, d); }
-	bool           equals(const String& other, Case c, Diacritics d=Diacritics::KEEP) const { return !this->LexicalCompare(this->str(), other.str(), c, d); }
+	String&        removeDiacritics()                                                       { if(!this->isEmpty()) String::_RemDiacr(&_arr[0]); return *this; }
+	bool           equals(const wchar_t *s, Case c, Diacritics d=Diacritics::KEEP) const    { return !String::LexicalCompare(this->str(), s, c, d); }
+	bool           equals(const String& other, Case c, Diacritics d=Diacritics::KEEP) const { return !String::LexicalCompare(this->str(), other.str(), c, d); }
 	bool           beginsWith(const wchar_t *s, Case c, Diacritics d=Diacritics::KEEP) const;
 	bool           endsWith(const wchar_t *s, Case c, Diacritics d=Diacritics::KEEP) const;
 	bool           endsWith(wchar_t ch) const;
@@ -65,7 +66,7 @@ public:
 	static Array<String> ExplodeQuoted(const wchar_t *quotedStr);
 	static Array<String> ExplodeMulti(const wchar_t *multiStr);
 	static int           LexicalCompare(const wchar_t *a, const wchar_t *b, Case c, Diacritics d=Diacritics::KEEP);
-	static int           LexicalCompare(const String& a, const String& b, Case c, Diacritics d=Diacritics::KEEP) { return LexicalCompare(a.str(), b.str(), c, d); }
+	static int           LexicalCompare(const String& a, const String& b, Case c, Diacritics d=Diacritics::KEEP) { return String::LexicalCompare(a.str(), b.str(), c, d); }
 
 private:
 	Array<wchar_t> _arr;

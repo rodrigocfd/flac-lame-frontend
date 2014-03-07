@@ -52,7 +52,7 @@ public:
 	}
 	Array& operator=(std::initializer_list<T> arr) {
 		this->realloc((int)arr.size());
-		for(int i = 0; i < (int)arr.size(); ++i)
+		for(int i = 0, sz = (int)arr.size(); i < sz; ++i)
 			_ptr[i] = *(arr.begin() + i); // thanks to C++11 horrible design, this thing is necessary
 		return *this;
 	}
@@ -77,12 +77,14 @@ public:
 		_sz += howMany;
 		return *this;
 	}
-	Array& insert(int atIndex, const Array<T> *other) { return this->insert(atIndex, other->_ptr, other->_sz); }
-	Array& insert(int atIndex, const T& obj)          { return this->insert(atIndex, &obj, 1); }
+	Array& insert(int atIndex, std::initializer_list<T> arr) { return this->insert(atIndex, arr.begin(), (int)arr.size()); }
+	Array& insert(int atIndex, const Array<T> *other)        { return this->insert(atIndex, other->_ptr, other->_sz); }
+	Array& insert(int atIndex, const T& obj)                 { return this->insert(atIndex, &obj, 1); }
 	
-	Array& append(const T *arr, int howMany) { return this->insert(_sz, arr, howMany); }
-	Array& append(const Array<T> *other)     { return this->append(other->_ptr, other->_sz); }
-	Array& append(const T& obj)              { return this->append(&obj, 1); }
+	Array& append(const T *arr, int howMany)    { return this->insert(_sz, arr, howMany); }
+	Array& append(std::initializer_list<T> arr) { return this->append(arr.begin(), (int)arr.size()); }
+	Array& append(const Array<T> *other)        { return this->append(other->_ptr, other->_sz); }
+	Array& append(const T& obj)                 { return this->append(&obj, 1); }
 
 	Array& move(int index, int newIndex) {
 		if(index >= _sz || newIndex >= _sz) return *this;
@@ -127,7 +129,7 @@ public:
 		// Example usage:
 		// Array<float> nums;
 		// nums.sort([](const float& a, const float& b)->int { return (int)(a - b); });
-		::qsort_s(_ptr, _sz, sizeof(T), this->_SortCompare<F>, &callback);
+		::qsort_s(_ptr, _sz, sizeof(T), this->_SortShim<F>, &callback);
 		return *this;
 	}
 
@@ -135,7 +137,7 @@ private:
 	T  *_ptr;
 	int _sz;
 
-	template<typename F> static int __cdecl _SortCompare(void *compareFunc, const void *a, const void *b) {
+	template<typename F> static int __cdecl _SortShim(void *compareFunc, const void *a, const void *b) {
 		F *callback = (F*)compareFunc;
 		return (*callback)(*((const T*)a), *((const T*)b));
 	}

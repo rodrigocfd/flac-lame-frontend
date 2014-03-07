@@ -47,6 +47,8 @@ public:
 		itemGetText(i, &ret);
 		return ret;
 	}
+
+	Combo& itemRemoveAll() { sendMessage(CB_RESETCONTENT, 0, 0); return *this; }
 };
 
 //__________________________________________________________________________________________________
@@ -104,6 +106,8 @@ public:
 		itemGetText(i, &ret);
 		return ret;
 	}
+
+	ListBox& itemRemoveAll() { sendMessage(LB_RESETCONTENT, 0, 0); return *this; }
 };
 
 //__________________________________________________________________________________________________
@@ -162,6 +166,7 @@ public:
 
 	ProgressBar& setRange(int min, int max) { sendMessage(PBM_SETRANGE, 0, MAKELPARAM(min, max)); return *this; }
 	ProgressBar& setPos(int pos)            { sendMessage(PBM_SETPOS, pos, 0); return *this; }
+	ProgressBar& setPos(double pos)         { return setPos(int(pos + 0.5)); }
 	int          getPos()                   { return (int)sendMessage(PBM_GETPOS, 0, 0); }
 	
 	ProgressBar& animateMarquee(bool animate) {

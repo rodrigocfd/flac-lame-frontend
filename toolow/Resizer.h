@@ -14,7 +14,7 @@ public:
 	enum class Do {
 		REPOS,  // control size is fixed; control moves around anchored
 		RESIZE, // control size stretches; control doesn't move
-		RENONE  // control doesn't move or resize
+		NOTHING // control doesn't move or resize
 	};
 
 	Resizer() : _idxLastInserted(-1) { }

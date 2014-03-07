@@ -6,17 +6,17 @@ WindowPopup::~WindowPopup()
 {
 }
 
-static HHOOK _hHookMsgBox = 0;
+static HHOOK _hHookMsgBox = NULL;
+static HWND  _hWndParent = NULL;
 static LRESULT CALLBACK _msgBoxHookProc(int code, WPARAM wp, LPARAM lp)
 {
 	// http://www.codeguru.com/cpp/w-p/win32/messagebox/print.php/c4541
 	if(code == HCBT_ACTIVATE)
 	{
 		HWND hMsgbox = (HWND)wp;
-		HWND hParent = GetForegroundWindow();
 		RECT rcMsgbox, rcParent;
 
-		if(hMsgbox && hParent && GetWindowRect(hMsgbox, &rcMsgbox) && GetWindowRect(hParent, &rcParent))
+		if(hMsgbox && _hWndParent && GetWindowRect(hMsgbox, &rcMsgbox) && GetWindowRect(_hWndParent, &rcParent))
 		{
 			RECT  rcScreen = { 0 };
 			POINT pos = { 0 };
@@ -49,6 +49,7 @@ static LRESULT CALLBACK _msgBoxHookProc(int code, WPARAM wp, LPARAM lp)
 int WindowPopup::messageBox(const wchar_t *caption, const wchar_t *body, UINT uType)
 {
 	// The hook is set to center the message box window on parent.
+	_hWndParent = this->hWnd();
 	_hHookMsgBox = SetWindowsHookEx(WH_CBT, _msgBoxHookProc, 0, GetCurrentThreadId());
 	return MessageBox(this->hWnd(), body, caption, uType);
 }

@@ -22,6 +22,27 @@ int ceilmult(int n, int multiple)
 	return n + multiple - remainder - (n < 0 ? multiple : 0); // bugfix for negative numbers
 }
 
+int indexOfBin(const BYTE *pData, int dataLen, const wchar_t *what, bool asWideChar)
+{
+	// Returns the position of a string within a binary data block, if present.
+
+	int whatlen = lstrlen(what);
+	int pWhatSz = whatlen * (asWideChar ? 2 : 1);
+	BYTE *pWhat = (BYTE*)_alloca(pWhatSz * sizeof(BYTE));
+	if(asWideChar) {
+		memcpy(pWhat, what, whatlen * sizeof(wchar_t)); // simply copy the wide string, each char+zero
+	} else {
+		for(int i = 0; i < whatlen; ++i)
+			pWhat[i] = LOBYTE(what[i]); // raw conversion from wchar_t to char
+	}
+
+	for(int i = 0; i < dataLen; ++i)
+		if(!memcmp(pData + i, pWhat, pWhatSz * sizeof(BYTE)))
+			return i;
+	
+	return -1; // not found
+}
+
 DWORD exec(const wchar_t *cmdLine)
 {
 	SECURITY_ATTRIBUTES sa = { 0 };

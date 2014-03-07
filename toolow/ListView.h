@@ -70,11 +70,11 @@ public:
 	ListView& operator=(const Window& wnd)     { return operator=(wnd.hWnd()); }
 	ListView& operator=(const ListView& other) { operator=(other.hWnd()); _ctxMenuId = other._ctxMenuId; return *this; }
 
-	ListView&  setFullRowSelect()         { ListView_SetExtendedListViewStyle(hWnd(), LVS_EX_FULLROWSELECT); return *this; }
-	ListView&  setRedraw(bool doRedraw)   { sendMessage(WM_SETREDRAW, (WPARAM)(BOOL)doRedraw, 0); return *this; }
-	ListView&  setContextMenu(int menuId) { _ctxMenuId = menuId; return *this; }
-	ListView&  setView(View view)         { ListView_SetView(hWnd(), (DWORD)view); return *this; }
-	View       getView() const            { return (View)ListView_GetView(hWnd()); }
+	ListView& setFullRowSelect()         { ListView_SetExtendedListViewStyle(hWnd(), LVS_EX_FULLROWSELECT); return *this; }
+	ListView& setRedraw(bool doRedraw)   { sendMessage(WM_SETREDRAW, (WPARAM)(BOOL)doRedraw, 0); return *this; }
+	ListView& setContextMenu(int menuId) { _ctxMenuId = menuId; return *this; }
+	ListView& setView(View view)         { ListView_SetView(hWnd(), (DWORD)view); return *this; }
+	View      getView() const            { return (View)ListView_GetView(hWnd()); }
 	
 	ListView& iconPush(int iconId);
 	ListView& iconPush(const wchar_t *fileExtension);

@@ -46,6 +46,7 @@ private:
 
 //__________________________________________________________________________________________________
 // Mix-in class to any popup window.
+// To remove icon from a resizing modal, use EXSTYLE WS_EX_DLGMODALFRAME.
 //
 class WindowPopup : virtual public Window {
 public:

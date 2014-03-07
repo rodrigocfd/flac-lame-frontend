@@ -1,5 +1,5 @@
 //
-// Smart pointer with reference counting, for ordinary and COM pointers.
+// Smart pointer automation for COM pointers.
 // Night of Friday, September 13, 2013.
 // Part of TOOLOW - Thin Object Oriented Layer Over Win32.
 //
@@ -13,6 +13,7 @@ public:
 	ComPtr()                    : _ptr(NULL) { }
 	ComPtr(const ComPtr& other) : _ptr(NULL) { operator=(other); }
 	~ComPtr()                   { this->release(); }
+	
 	ComPtr& operator=(const ComPtr& other) {
 		if(this != &other) {
 			this->~ComPtr();
@@ -21,12 +22,14 @@ public:
 		}
 		return *this;
 	}
+	
 	void release() {
 		if(_ptr) {
 			_ptr->Release();
 			_ptr = NULL;
 		}
 	}
+	
 	bool coCreateInstance(REFCLSID rclsid) {
 		return _ptr ? false :
 			SUCCEEDED(::CoCreateInstance(rclsid, 0, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&_ptr)));
@@ -39,11 +42,13 @@ public:
 		return !_ptr ? false :
 			SUCCEEDED(_ptr->QueryInterface(riid, (void**)comPtr));
 	}
+
 	bool isNull() const { return _ptr == NULL; }
 	T&   operator*()    { return *_ptr; }
 	T*   operator->()   { return _ptr; }
 	T**  operator&()    { return &_ptr; }
 	operator T*() const { return _ptr; }
+
 private:
 	T *_ptr;
 };
