@@ -1,5 +1,5 @@
 //
-// Device context related operations.
+// GDI device context automation.
 // Friday night of October 28, 2011.
 // Double-buffered at evening of Thursday, November 3, 2011.
 // Class hierarchy at morning of Thursday, December 29, 2011.
@@ -10,34 +10,32 @@
 #include "util.h"
 
 //__________________________________________________________________________________________________
-// Auxiliary pen and brush classes.
-//
-class Pen {
-public:
-	enum class Style { SOLID=PS_SOLID, DASH=PS_DASH, DOT=PS_DOT, DASHDOT=PS_DASHDOT, DASHDOTDOT=PS_DASHDOTDOT };
-	Pen(Style style, int width, COLORREF color) : _hPen(::CreatePen((int)style, width, color)) { }
-	~Pen()                                      { ::DeleteObject(_hPen); }
-	HPEN hPen() const                           { return _hPen; }
-private:
-	HPEN _hPen;
-};
-
-class Brush {
-public:
-	enum class Pattern { BDIAGONAL=HS_BDIAGONAL, CROSS=HS_CROSS, DIAGCROSS=HS_DIAGCROSS, FDIAGONAL=HS_FDIAGONAL, HORIZONTAL=HS_HORIZONTAL, VERTICAL=HS_VERTICAL };
-	Brush(COLORREF color)                : _hBrush(::CreateSolidBrush(color)) { }
-	Brush(Pattern hatch, COLORREF color) : _hBrush(::CreateHatchBrush((int)hatch, color)) { }
-	Brush(SysColor color)                : _hBrush(::GetSysColorBrush((int)color)) { }
-	~Brush()                             { ::DeleteObject(_hBrush); }
-	HBRUSH hBrush() const                { return _hBrush; }
-private:
-	HBRUSH _hBrush;
-};
-
-//__________________________________________________________________________________________________
 // Base device context class with basic operations.
 //
 class DC {
+public:
+	class Pen {
+	public:
+		enum class Style { SOLID=PS_SOLID, DASH=PS_DASH, DOT=PS_DOT, DASHDOT=PS_DASHDOT, DASHDOTDOT=PS_DASHDOTDOT };
+		Pen(Style style, int width, COLORREF color) : _hPen(::CreatePen((int)style, width, color)) { }
+		~Pen()                                      { ::DeleteObject(_hPen); }
+		HPEN hPen() const                           { return _hPen; }
+	private:
+		HPEN _hPen;
+	};
+
+	class Brush {
+	public:
+		enum class Pattern { BDIAGONAL=HS_BDIAGONAL, CROSS=HS_CROSS, DIAGCROSS=HS_DIAGCROSS, FDIAGONAL=HS_FDIAGONAL, HORIZONTAL=HS_HORIZONTAL, VERTICAL=HS_VERTICAL };
+		Brush(COLORREF color)                : _hBrush(::CreateSolidBrush(color)) { }
+		Brush(Pattern hatch, COLORREF color) : _hBrush(::CreateHatchBrush((int)hatch, color)) { }
+		Brush(SysColor color)                : _hBrush(::GetSysColorBrush((int)color)) { }
+		~Brush()                             { ::DeleteObject(_hBrush); }
+		HBRUSH hBrush() const                { return _hBrush; }
+	private:
+		HBRUSH _hBrush;
+	};
+
 public:
 	int cx, cy;
 

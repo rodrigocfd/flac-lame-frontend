@@ -42,8 +42,14 @@ Font& Font::apply(HWND hWnd)
 
 Font& Font::applyOnChildren(HWND hWnd)
 {
-	if(_hFont)
-		EnumChildWindows(hWnd, _ApplyOnChild, (LPARAM)_hFont); // propagate to children
+	if(_hFont) {
+		// http://stackoverflow.com/questions/18367641/use-createthread-with-a-lambda
+		EnumChildWindows(hWnd, [](HWND hWnd, LPARAM lp)->BOOL { // propagate to children
+			SendMessage(hWnd, WM_SETFONT,
+				(WPARAM)(HFONT)lp, MAKELPARAM(FALSE, 0)); // will run on each child
+			return TRUE;
+		}, (LPARAM)_hFont);
+	}
 	return *this;
 }
 
@@ -52,7 +58,11 @@ bool Font::Exists(const wchar_t *name)
 	// http://cboard.cprogramming.com/windows-programming/90066-how-determine-if-font-support-unicode.html
 	bool isInstalled = false;
 	HDC hdc = GetDC(0);
-	EnumFontFamilies(hdc, name, (FONTENUMPROC)_EnumFontFamProc, (LPARAM)&isInstalled);
+	EnumFontFamilies(hdc, name, (FONTENUMPROC)[](const LOGFONT *lpelf, const TEXTMETRIC *lpntm, DWORD fontType, LPARAM lp)->int {
+		bool *pIsInstalled = (bool*)lp;
+		*pIsInstalled = true; // if we're here, font does exist
+		return 0;
+	}, (LPARAM)&isInstalled);
 	ReleaseDC(0, hdc);
 	return isInstalled;
 }
@@ -78,17 +88,4 @@ void Font::_LogfontToInfo(const LOGFONT *lf, Font::Info *pInfo)
 	pInfo->size = -(lf->lfHeight + 3);
 	pInfo->bold = (lf->lfWeight == FW_BOLD);
 	pInfo->italic = (lf->lfItalic == TRUE);
-}
-
-BOOL CALLBACK Font::_ApplyOnChild(HWND hWnd, LPARAM lp)
-{
-	SendMessage(hWnd, WM_SETFONT,
-		(WPARAM)(HFONT)lp, MAKELPARAM(FALSE, 0)); // will run on each child
-	return TRUE;
-}
-
-int CALLBACK Font::_EnumFontFamProc(ENUMLOGFONT *lpelf, NEWTEXTMETRIC *lpntm, DWORD FontType, LPARAM lp)
-{
-	*((bool*)lp) = true; // if we're here, font does exist
-	return 0;
 }

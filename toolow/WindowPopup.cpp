@@ -186,12 +186,15 @@ Array<String> WindowPopup::getDroppedFiles(HDROP hDrop)
 	return ret;
 }
 
-BOOL CALLBACK WindowPopup::_WheelHoverApply(HWND hChild, LPARAM lp)
+void WindowPopup::setWheelHoverBehavior()
 {
-	// Callback to EnumChildWindows(), will run on each child.
-	static int uniqueSubId = 1;
-	SetWindowSubclass(hChild, _WheelHoverProc, uniqueSubId++, (DWORD_PTR)GetParent(hChild)); // yes, subclass every control
-	return TRUE;
+	// http://stackoverflow.com/questions/18367641/use-createthread-with-a-lambda
+	EnumChildWindows(this->hWnd(), [](HWND hChild, LPARAM lp)->BOOL {
+		static int uniqueSubId = 1;
+		SetWindowSubclass(hChild, _WheelHoverProc, uniqueSubId++,
+			(DWORD_PTR)GetParent(hChild)); // yes, subclass every control
+		return TRUE;
+	}, NULL);
 }
 
 LRESULT CALLBACK WindowPopup::_WheelHoverProc(HWND hChild, UINT msg, WPARAM wp, LPARAM lp, UINT_PTR idSubclass, DWORD_PTR refData)

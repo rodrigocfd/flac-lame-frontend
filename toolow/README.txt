@@ -19,28 +19,29 @@ Window event model
 
 There are two types of windows to be created: those called "frames", which are
 created through CreateWindowEx calls, and the "dialogs", which rely upon dialog
-resources. To create a window, extend one of the final classes shown below.
+resources. To create a window, extend one of the final classes (marked with an
+asterisk) shown below.
 
 Class hierarchy for the Frame family:
 
           +-- WindowCtrl <---+
-          |                  +---- FrameCtrl
+          |                  +---- FrameCtrl*
           |         <--------+
           +-- Frame
-Window <--+         <--------+                 +-- FrameApp
+Window <--+         <--------+                 +-- FrameApp*
           |                  +-- FramePopup <--+
-          +-- WindowPopup <--+                 +-- FrameModal
+          +-- WindowPopup <--+                 +-- FrameModal*
 
 
 Class hierarchy for the Dialog family:
 
           +-- WindowCtrl <---+
-          |                  +---- DialogCtrl
+          |                  +---- DialogCtrl*
           |          <-------+
           +-- Dialog
-Window <--+          <-------+                  +-- DialogApp
+Window <--+          <-------+                  +-- DialogApp*
           |                  +-- DialogPopup <--+
-          +-- WindowPopup <--+                  +-- DialogModal
+          +-- WindowPopup <--+                  +-- DialogModal*
 
 
 There must be only one App class. It's the main window of the program, which

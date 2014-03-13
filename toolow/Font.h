@@ -35,6 +35,4 @@ private:
 	HFONT _hFont;
 
 	static void _LogfontToInfo(const LOGFONT *lf, Info *pInfo);
-	static BOOL CALLBACK _ApplyOnChild(HWND hWnd, LPARAM lp);
-	static int  CALLBACK _EnumFontFamProc(ENUMLOGFONT *lpelf, NEWTEXTMETRIC *lpntm, DWORD FontType, LPARAM lp);
 };

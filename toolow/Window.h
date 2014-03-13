@@ -62,9 +62,8 @@ protected:
 	bool   isMinimized()           { return ::IsIconic(hWnd()) == TRUE; }
 	bool   isMaximized()           { return ::IsZoomed(hWnd()) == TRUE; }
 	Array<String> getDroppedFiles(HDROP hDrop);
-	void   setWheelHoverBehavior() { ::EnumChildWindows(hWnd(), _WheelHoverApply, 0); }
+	void   setWheelHoverBehavior();
 private:
-	static BOOL    CALLBACK _WheelHoverApply(HWND hChild, LPARAM lp);
 	static LRESULT CALLBACK _WheelHoverProc(HWND hChild, UINT msg, WPARAM wp, LPARAM lp, UINT_PTR idSubclass, DWORD_PTR refData);
 };
 

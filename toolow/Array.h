@@ -20,6 +20,8 @@ public:
 	int      size() const                { return _sz; }
 	const T& operator[](int index) const { return _ptr[index]; }
 	T&       operator[](int index)       { return _ptr[index]; }
+	const T& last(int revIndex=0) const  { return _ptr[_sz - revIndex - 1]; }
+	T&       last(int revIndex=0)        { return _ptr[_sz - revIndex - 1]; }
 
 	Array& realloc(int length) {
 		if(!length) return this->free();
