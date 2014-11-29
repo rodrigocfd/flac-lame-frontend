@@ -1,94 +1,93 @@
 
 #include "RunninDialog.h"
-#include "Converter.h"
-#include "../toolow/util.h"
+#include "Convert.h"
 
 RunninDialog::RunninDialog(
-	int            numThreads,
-	Target         targetType,
-	Array<String> *pFiles,
-	bool           delSrc,
-	bool           isVbr,
-	const wchar_t *quality,
-	File::Ini     *pIni,
-	String        *pDestFolder)
+	int                  numThreads,
+	Target               targetType,
+	const Array<String>& files,
+	bool                 delSrc,
+	bool                 isVbr,
+	const String&        quality,
+	const File::Ini&     ini,
+	const String&        destFolder )
+	: m_numThreads(numThreads), m_targetType(targetType), m_files(files), m_delSrc(delSrc), m_isVbr(isVbr),
+		m_quality(quality), m_ini(ini), m_destFolder(destFolder), m_curFile(0), m_filesDone(0)
 {
-	m_numThreads = numThreads;
-	m_targetType = targetType;
-	m_pFiles = pFiles;
-	m_delSrc = delSrc;
-	m_isVbr = isVbr;
-	lstrcpy(m_quality, quality);
-	m_pIni = pIni;
-	m_pDestFolder = pDestFolder;
-	m_filesDone = 0; // incremented after each processing
+	// m_curFile and m_filesDone are incremented after each processing.
 }
 
 INT_PTR RunninDialog::msgHandler(UINT msg, WPARAM wp, LPARAM lp)
 {
 	switch(msg)
 	{
-	case WM_INITDIALOG:                    on_initDialog(); break;
-	case (UINT)Converter::Alert::FILEDONE: on_fileDone(lp); return TRUE;
+	case WM_INITDIALOG: this->onInitDialog(); break;
 	}
 	return DialogModal::msgHandler(msg, wp, lp);
 }
 
-void RunninDialog::on_initDialog()
+void RunninDialog::onInitDialog()
 {
 	m_lbl = this->getChild(LBL_STATUS);
 	m_prog = this->getChild(PRO_STATUS);
 	
-	m_prog.setRange(0, m_pFiles->size());
-	m_lbl.setText( FMT(L"0 of %d files finished...", m_pFiles->size()) );
+	m_prog.setRange(0, m_files.size());
+	m_lbl.setText( String::Fmt(L"0 of %d files finished...", m_files.size()) ); // initial text
+	m_time0.setNow(); // start timer
+	this->setXButton(false);
 	
 	// Proceed to the file conversion straight away.
-	int firstRun = (m_numThreads < m_pFiles->size()) ? m_numThreads : m_pFiles->size(); // limit parallel processing
-	Array<Thread*> convs(firstRun);
-	for(int i = 0; i < firstRun; ++i) {
-		const wchar_t *file = (*m_pFiles)[i].str();
-		switch(m_targetType) {
-			case Target::MP3:
-				convs[i] = new ConverterMp3(this->hWnd(), m_pIni, file, m_delSrc, m_quality, m_isVbr, m_pDestFolder->str());
-				break;
-			case Target::FLAC:
-				convs[i] = new ConverterFlac(this->hWnd(), m_pIni, file, m_delSrc, m_quality, m_pDestFolder->str());
-				break;
-			case Target::WAV:
-				convs[i] = new ConverterWav(this->hWnd(), m_pIni, file, m_delSrc, m_pDestFolder->str());
-		}
-	}
-
-	this->setXButton(false);
-	m_time0.setNow();
-	Thread::RunParallelAsync(&convs); // notifications will be caught on fileDone()
+	int batchSz = (m_numThreads < m_files.size()) ? m_numThreads : m_files.size(); // limit parallel processing
+	for(int i = 0; i < batchSz; ++i)
+		System::Thread([=]() { this->doProcessNextFile(); });
 }
 
-void RunninDialog::on_fileDone(LPARAM lp)
+void RunninDialog::doProcessNextFile()
 {
-	++m_filesDone;
-	m_prog.setPos(m_filesDone);
-	m_lbl.setText( FMT(L"%d of %d files finished...", m_filesDone, m_pFiles->size()) );
+	int index = m_curFile++;
+	if(index >= m_files.size()) return;
 
-	if(m_filesDone >= m_pFiles->size()) { // all files have been processed
-		Date fin;
-		this->messageBox(L"Conversion finished",
-			FMT(L"%d files processed in %.2f seconds.", m_pFiles->size(), (double)fin.minus(m_time0) / 1000),
-			MB_ICONINFORMATION);
-		this->sendMessage(WM_CLOSE, 0, 0);
-	}
+	const String& file = m_files[index];
+	bool good = true;
+	String err;
 
-	Thread *conv = NULL;
-	const wchar_t *file = (*m_pFiles)[m_numThreads + m_filesDone - 1].str();
 	switch(m_targetType) {
 		case Target::MP3:
-			conv = new ConverterMp3(this->hWnd(), m_pIni, file, m_delSrc, m_quality, m_isVbr, m_pDestFolder->str());
+			good = Convert::ToMp3(m_ini, file, m_destFolder, m_delSrc, m_quality, m_isVbr, &err);
 			break;
 		case Target::FLAC:
-			conv = new ConverterFlac(this->hWnd(), m_pIni, file, m_delSrc, m_quality, m_pDestFolder->str());
+			good = Convert::ToFlac(m_ini, file, m_destFolder, m_delSrc, m_quality, &err);
 			break;
 		case Target::WAV:
-			conv = new ConverterWav(this->hWnd(), m_pIni, file, m_delSrc, m_pDestFolder->str());
+			good = Convert::ToWav(m_ini, file, m_destFolder, m_delSrc, &err);
 	}
-	conv->runAsync();
+
+	if(!good) {
+		m_curFile = m_files.size(); // error, so avoid further processing
+		this->sendFunction([=]() {
+			this->messageBox(L"Conversion failed",
+				String::Fmt(L"File #%d:\n%s\n%s", index, file.str(), err.str()),
+				MB_ICONERROR);
+			this->endDialog(IDCANCEL);
+		});
+	} else {
+		++m_filesDone;
+
+		this->sendFunction([=]() { // update GUI
+			m_prog.setPos(m_filesDone);
+			m_lbl.setText( String::Fmt(L"%d of %d files finished...", m_filesDone, m_files.size()) );
+		});
+			
+		if(m_filesDone < m_files.size()) { // more files to come
+			this->doProcessNextFile();
+		} else { // finished all processing
+			this->sendFunction([=]() {
+				Date fin;
+				this->messageBox(L"Conversion finished",
+					String::Fmt(L"%d files processed in %.2f seconds.", m_files.size(), (double)fin.minus(m_time0) / 1000),
+					MB_ICONINFORMATION);
+				this->endDialog(IDOK);
+			});
+		}
+	}
 }

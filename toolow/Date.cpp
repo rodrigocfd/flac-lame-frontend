@@ -1,3 +1,9 @@
+//
+// Automation for date and time.
+// Part of TOOLOW - Thin Object Oriented Layer Over Win32.
+// @author Rodrigo Cesar de Freitas Dias
+// @see https://github.com/rodrigocfd/toolow
+//
 
 #include "Date.h"
 

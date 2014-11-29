@@ -1,3 +1,9 @@
+//
+// GDI device context automation.
+// Part of TOOLOW - Thin Object Oriented Layer Over Win32.
+// @author Rodrigo Cesar de Freitas Dias
+// @see https://github.com/rodrigocfd/toolow
+//
 
 #include "DeviceContext.h"
 
@@ -47,6 +53,7 @@ DC& DC::polygon(int left, int top, int right, int bottom)
 	};
 	return this->polygon(pts, 4);
 }
+
 
 DCBuffered::DCBuffered(HWND hwnd)
 	: DCSimple(hwnd)

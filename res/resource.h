@@ -24,6 +24,7 @@
 #define CMB_NUMTHREADS                  1017
 #define PRO_STATUS                      1018
 #define LBL_STATUS                      1019
+#define LBL_NUMTHREADS                  1020
 
 // Next default values for new objects
 // 
@@ -31,7 +32,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        105
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1020
+#define _APS_NEXT_CONTROL_VALUE         1021
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

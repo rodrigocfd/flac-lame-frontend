@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -74,7 +72,7 @@ BEGIN
     LTEXT           "Level",LBL_LEVEL,54,247,18,8
     COMBOBOX        CMB_FLAC,78,245,29,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Delete original file",CHK_DELSRC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,186,204,75,10
-    LTEXT           "Number of threads",IDC_STATIC,187,225,68,8
+    LTEXT           "Number of threads",LBL_NUMTHREADS,187,225,68,8
     COMBOBOX        CMB_NUMTHREADS,258,223,29,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
 END
 
@@ -137,7 +135,22 @@ BEGIN
     END
 END
 
-#endif    // English (U.S.) resources
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    DLG_MAIN, DIALOG
+    BEGIN
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

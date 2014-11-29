@@ -1,3 +1,9 @@
+//
+// Font automation.
+// Part of TOOLOW - Thin Object Oriented Layer Over Win32.
+// @author Rodrigo Cesar de Freitas Dias
+// @see https://github.com/rodrigocfd/toolow
+//
 
 #pragma warning(disable:4996) // GetVersionEx is deprecated for Win8.1, won't affect current behaviour
 #include "Font.h"
@@ -15,22 +21,24 @@ Font& Font::create(const wchar_t *name, int size, bool bold, bool italic)
 	return *this;
 }
 
-Font& Font::cloneFrom(const Font *pFont)
+Font& Font::cloneFrom(const Font& font)
 {
 	this->release();
 
 	LOGFONT lf = { 0 };
-	GetObject(pFont->_hFont, sizeof(LOGFONT), &lf);
+	GetObject(font._hFont, sizeof(LOGFONT), &lf);
 	_hFont = CreateFontIndirect(&lf);
 	return *this;
 }
 
-Font::Info* Font::getInfo(Font::Info *pInfo) const
+Font::Info Font::getInfo() const
 {
 	LOGFONT lf = { 0 };
 	GetObject(_hFont, sizeof(LOGFONT), &lf);
-	_LogfontToInfo(&lf, pInfo);
-	return pInfo; // return same passed buffer
+	
+	Info info;
+	_LogfontToInfo(&lf, &info);
+	return info;
 }
 
 Font& Font::apply(HWND hWnd)
@@ -57,17 +65,17 @@ bool Font::Exists(const wchar_t *name)
 {
 	// http://cboard.cprogramming.com/windows-programming/90066-how-determine-if-font-support-unicode.html
 	bool isInstalled = false;
-	HDC hdc = GetDC(0);
+	HDC hdc = GetDC(nullptr);
 	EnumFontFamilies(hdc, name, (FONTENUMPROC)[](const LOGFONT *lpelf, const TEXTMETRIC *lpntm, DWORD fontType, LPARAM lp)->int {
 		bool *pIsInstalled = (bool*)lp;
 		*pIsInstalled = true; // if we're here, font does exist
 		return 0;
 	}, (LPARAM)&isInstalled);
-	ReleaseDC(0, hdc);
+	ReleaseDC(nullptr, hdc);
 	return isInstalled;
 }
 
-void Font::GetDefaultDialogFontInfo(Font::Info *pInfo)
+Font::Info Font::GetDefaultDialogFontInfo()
 {
 	OSVERSIONINFO ovi = { 0 };
 	ovi.dwOSVersionInfoSize = sizeof(ovi);
@@ -79,7 +87,9 @@ void Font::GetDefaultDialogFontInfo(Font::Info *pInfo)
 		ncm.cbSize -= sizeof(ncm.iBorderWidth);
 	SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0); // default system font
 
-	_LogfontToInfo(&ncm.lfMenuFont, pInfo);
+	Info info;
+	_LogfontToInfo(&ncm.lfMenuFont, &info);
+	return info;
 }
 
 void Font::_LogfontToInfo(const LOGFONT *lf, Font::Info *pInfo)

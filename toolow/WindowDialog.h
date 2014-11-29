@@ -1,7 +1,8 @@
 //
-// Realm of the dialog windows, those who take a DLGPROC as a procedure and
-// are created through a dialog resource.
+// Realm of the dialog windows, those who take a DLGPROC as a procedure and are created through a dialog resource.
 // Part of TOOLOW - Thin Object Oriented Layer Over Win32.
+// @author Rodrigo Cesar de Freitas Dias
+// @see https://github.com/rodrigocfd/toolow
 //
 
 #pragma once
@@ -25,8 +26,11 @@ class DialogPopup : public Dialog, public WindowPopup {
 public:
 	virtual ~DialogPopup() = 0;
 protected:
-	virtual INT_PTR msgHandler(UINT msg, WPARAM wp, LPARAM lp);
+	virtual INT_PTR msgHandler(UINT msg, WPARAM wp, LPARAM lp) override;
 	BOOL endDialog(INT_PTR nResult);
+private:
+	WindowPopup::_setWheelHoverBehavior;
+	WindowPopup::_handleSendOrPostFunction;
 };
 
 //__________________________________________________________________________________________________
@@ -37,7 +41,7 @@ public:
 	virtual ~DialogApp() = 0;
 	virtual int run(HINSTANCE hInst, int cmdShow, int dialogId, int iconId=0, int accelTableId=0);
 protected:
-	virtual INT_PTR msgHandler(UINT msg, WPARAM wp, LPARAM lp);
+	virtual INT_PTR msgHandler(UINT msg, WPARAM wp, LPARAM lp) override;
 private:
 	Dialog::_DialogProc;
 };
@@ -50,7 +54,7 @@ public:
 	virtual ~DialogModal() = 0;
 	virtual int show(Window *parent, int dialogId, int accelTableId=0);
 protected:
-	virtual INT_PTR msgHandler(UINT msg, WPARAM wp, LPARAM lp);
+	virtual INT_PTR msgHandler(UINT msg, WPARAM wp, LPARAM lp) override;
 private:
 	Dialog::_DialogProc;
 };
@@ -63,7 +67,7 @@ public:
 	virtual ~DialogCtrl() = 0;
 	virtual void create(int id, Window *parent, int x, int y, int cx, int cy);
 protected:
-	virtual INT_PTR msgHandler(UINT msg, WPARAM wp, LPARAM lp);
+	virtual INT_PTR msgHandler(UINT msg, WPARAM wp, LPARAM lp) override;
 private:
 	WindowCtrl::_drawBorders;
 };

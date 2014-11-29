@@ -1,7 +1,13 @@
+//
+// ListView control handling.
+// Part of TOOLOW - Thin Object Oriented Layer Over Win32.
+// @author Rodrigo Cesar de Freitas Dias
+// @see https://github.com/rodrigocfd/toolow
+//
 
+#include "Controls.h"
 #include "ListView.h"
-#include "Icon.h"
-#include "util.h"
+#include "System.h"
 
 void ListView::Item::swapWith(int index)
 {
@@ -10,10 +16,10 @@ void ListView::Item::swapWith(int index)
 	int numCols = this->_list->columnCount();
 	String oldTxt, newTxt;
 	for(int c = 0; c < numCols; ++c) { // swap texts of all columns
-		this->getText(&oldTxt, c); // get both texts
-		newItem.getText(&newTxt, c);
-		this->setText(newTxt.str(), c); // swap the texts
-		newItem.setText(oldTxt.str(), c);
+		this->getText(oldTxt, c); // get both texts
+		newItem.getText(newTxt, c);
+		this->setText(newTxt, c); // swap the texts
+		newItem.setText(oldTxt, c);
 	}
 
 	LPARAM oldp = this->getParam(); // swap LPARAMs
@@ -30,8 +36,7 @@ ListView::Item& ListView::Item::ensureVisible()
 	if(_list->getView() == View::VW_DETAILS) {
 		// In details view, ListView_EnsureVisible() won't center the item vertically.
 		// This new implementation has this behavior.
-		RECT rc = { 0 };
-		_list->getClientRect(&rc);
+		RECT rc = _list->getClientRect();
 		int cyList = rc.bottom; // total height of list
 
 		SecureZeroMemory(&rc, sizeof(rc));
@@ -55,7 +60,7 @@ ListView::Item& ListView::Item::ensureVisible()
 	return *this;
 }
 
-String* ListView::Item::getText(String *pBuf, int iCol) const
+String& ListView::Item::getText(String& buf, int iCol) const
 {
 	// http://forums.codeguru.com/showthread.php?351972-Getting-listView-item-text-length
 	LVITEM lvi = { 0 };
@@ -70,14 +75,14 @@ String* ListView::Item::getText(String *pBuf, int iCol) const
 	int retCode = 0;
 	do {
 		baseBufLen += 128; // buffer increasing step, arbitrary!
-		pBuf->reserve(baseBufLen);
-		lvi.cchTextMax = pBuf->reserved() + 1;
-		lvi.pszText = pBuf->ptrAt(0);
+		buf.reserve(baseBufLen);
+		lvi.cchTextMax = buf.reserved() + 1;
+		lvi.pszText = buf.ptrAt(0);
 		retCode = (int)_list->sendMessage(LVM_GETITEMTEXT, this->i, (LPARAM)&lvi);
 	}
-	while(retCode == pBuf->reserved()); // if could not get all chars, try again
+	while(retCode == buf.reserved()); // if could not get all chars, try again
 
-	return pBuf;
+	return buf;
 }
 
 LPARAM ListView::Item::getParam() const
@@ -122,6 +127,7 @@ ListView::Item& ListView::Item::setIcon(int iconIdx)
 	return *this;
 }
 
+
 ListView::Item ListView::ItemsProxy::add(const wchar_t *caption, int iconIdx, int at)
 {
 	LVITEM lvi = { 0 };
@@ -150,11 +156,11 @@ ListView::Item ListView::ItemsProxy::find(const wchar_t *caption)
 	return Item(ListView_FindItem(_list->hWnd(), -1, &lfi), _list); // returns -1 if not found
 }
 
-void ListView::ItemsProxy::select(const Array<int> *idx)
+void ListView::ItemsProxy::select(const Array<int>& idx)
 {
 	// Select the items whose indexes have been passed in the array.
-	for(int i = 0; i < idx->size(); ++i)
-		ListView_SetItemState(_list->hWnd(), (*idx)[i], LVIS_SELECTED, LVIS_SELECTED);
+	for(int i = 0; i < idx.size(); ++i)
+		ListView_SetItemState(_list->hWnd(), idx[i], LVIS_SELECTED, LVIS_SELECTED);
 }
 
 void ListView::ItemsProxy::removeSelected()
@@ -178,6 +184,7 @@ Array<ListView::Item> ListView::ItemsProxy::getSelected() const
 	}
 	return items;
 }
+
 
 ListView& ListView::operator=(HWND hwnd)
 {
@@ -242,8 +249,7 @@ ListView& ListView::columnFit(int iCol)
 		}
 	}
 
-	RECT rc;
-	this->getClientRect(&rc); // listview client area
+	RECT rc = this->getClientRect(); // listview client area
 	ListView_SetColumnWidth(this->hWnd(), iCol,
 		rc.right /*- GetSystemMetrics(SM_CXVSCROLL)*/ - cxUsed); // fit the rest of available space
 	return *this;
@@ -279,7 +285,7 @@ int ListView::_showCtxMenu(bool followCursor)
 		coords = lvhti.pt;
 		itemBelowCursor = lvhti.iItem; // -1 if none
 		if(itemBelowCursor != -1) { // an item was right-clicked
-			if(!hasCtrl() && !hasShift()) {
+			if(!System::HasCtrl() && !System::HasShift()) {
 				if((ListView_GetItemState(this->hWnd(), itemBelowCursor, LVIS_SELECTED) & LVIS_SELECTED) == 0) {
 					// If right-clicked item isn't currently selected, unselect all and select just it.
 					ListView_SetItemState(this->hWnd(), -1, 0, LVIS_SELECTED);
@@ -288,7 +294,7 @@ int ListView::_showCtxMenu(bool followCursor)
 				ListView_SetItemState(this->hWnd(), itemBelowCursor, LVIS_FOCUSED, LVIS_FOCUSED); // focus clicked
 			}
 		} else { // no item was right-clicked
-			if(!hasCtrl() && !hasShift())
+			if(!System::HasCtrl() && !System::HasShift())
 				ListView_SetItemState(this->hWnd(), -1, 0, LVIS_SELECTED); // unselect all
 		}
 		this->setFocus(); // because a right-click won't set the focus by default
@@ -307,7 +313,7 @@ int ListView::_showCtxMenu(bool followCursor)
 
 	// The popup menu is created with hDlg as parent, so the menu messages go to it.
 	// The lvhti coordinates are relative to listview, and will be mapped into screen-relative.
-	popMenu(this->getParent().hWnd(), _ctxMenuId, coords.x, coords.y, this->hWnd());
+	System::PopMenu(this->getParent().hWnd(), _ctxMenuId, coords.x, coords.y, this->hWnd());
 	return itemBelowCursor; // -1 if none
 }
 
@@ -316,7 +322,7 @@ LRESULT CALLBACK ListView::_Proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, UINT
 	switch(msg)
 	{
 	case WM_GETDLGCODE:
-		if(lp && wp == 'A' && hasCtrl()) { // Ctrl+A to select all items
+		if(lp && wp == 'A' && System::HasCtrl()) { // Ctrl+A to select all items
 			((MSG*)lp)->wParam = 0; // prevent propagation, therefore beep
 			ListView_SetItemState(hWnd, -1, LVIS_SELECTED, LVIS_SELECTED);
 			return DLGC_WANTCHARS;
