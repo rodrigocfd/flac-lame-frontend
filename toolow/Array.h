@@ -125,21 +125,6 @@ public:
 		return *this;
 	}
 
-	void each(function<void(int i, T& elem)> callback) {
-		// Example usage:
-		// Array<int> nums;
-		// nums.each([](int i, int& elem) { elem += 10; });
-		for(int i = 0; i < _sz; ++i)
-			callback(i, _ptr[i]);
-	}
-	void each(function<void(int i, const T& elem)> callback) const {
-		// Example usage:
-		// Array<int> nums;
-		// nums.each([](int i, const int& elem) { int x = elem; });
-		for(int i = 0; i < _sz; ++i)
-			callback(i, _ptr[i]);
-	}
-
 	template<typename Ty> Array<Ty> transform(function<Ty(int i, const T& elem)> callback) {
 		// Example usage:
 		// Array<int> nums;
@@ -172,4 +157,31 @@ public:
 		}, &callback);
 		return *this;
 	}
+
+	// Allows the use of C++11 for-range loops.
+	class Iter { // http://www.cprogramming.com/c++11/c++11-ranged-for-loop.html
+	private:
+		int _pos;
+		Array *_pArr;
+	public:
+		Iter(Array *pArr, int pos) : _pos(pos), _pArr(pArr) { }
+		bool operator!=(const Iter& other) const { return _pos != other._pos; }
+		T& operator*() { return (*_pArr)[_pos]; }
+		const Iter& operator++() { ++_pos; return *this; }
+	};
+	class IterConst {
+	private:
+		int _pos;
+		const Array *_pArr;
+	public:
+		IterConst(const Array *pArr, int pos) : _pos(pos), _pArr(pArr) { }
+		bool operator!=(const Iter& other) const { return _pos != other._pos; }
+		const T& operator*() const { return (*_pArr)[_pos]; }
+		T& operator*() { return (*_pArr)[_pos]; }
+		const Iter& operator++() { ++_pos; return *this; }
+	};
+	Iter      begin()       { return Iter(this, 0); }
+    Iter      end()         { return Iter(this, this->size()); }
+	IterConst begin() const { return IterConst(this, 0); }
+    IterConst end() const   { return IterConst(this, this->size()); }
 };

@@ -132,23 +132,23 @@ void MainDialog::onDropFiles(WPARAM wp)
 {
 	Array<String> dropFiles = this->getDroppedFiles((HDROP)wp);
 
-	for(int i = 0; i < dropFiles.size(); ++i) {
-		if(File::IsDir( dropFiles[i].str() )) { // if a directory, add all files inside of it
+	for(const String& drop : dropFiles) {
+		if(File::IsDir(drop)) { // if a directory, add all files inside of it
 			wchar_t subfilebuf[MAX_PATH];
 	
-			File::Listing findMp3(dropFiles[i], L"*.mp3");
+			File::Listing findMp3(drop, L"*.mp3");
 			while(findMp3.next(subfilebuf))
 				this->doFileToList(subfilebuf);
 
-			File::Listing findFlac(dropFiles[i], L"*.flac");
+			File::Listing findFlac(drop, L"*.flac");
 			while(findFlac.next(subfilebuf))
 				this->doFileToList(subfilebuf);
 
-			File::Listing findWav(dropFiles[i], L"*.wav");
+			File::Listing findWav(drop, L"*.wav");
 			while(findWav.next(subfilebuf))
 				this->doFileToList(subfilebuf);
 		} else {
-			this->doFileToList(dropFiles[i]); // add single file
+			this->doFileToList(drop); // add single file
 		}
 	}
 	this->doUpdateCounter( m_lstFiles.items.count() );
@@ -209,10 +209,10 @@ void MainDialog::onRun()
 	Array<String> files = m_lstFiles.items.getAll().transform<String>(
 		[](int i, const ListView::Item& elem)->String { return elem.getText(0); }
 	);
-	for(int i = 0; i < files.size(); ++i) { // each filepath
-		if(!File::Exists(files[i])) {
+	for(const String& f : files) { // each filepath
+		if(!File::Exists(f)) {
 			this->messageBox(L"Fail",
-				String::Fmt(L"Process aborted, file does not exist:\n%s", files[i].str()), MB_ICONERROR);
+				String::Fmt(L"Process aborted, file does not exist:\n%s", f.str()), MB_ICONERROR);
 			return; // halt
 		}
 	}
