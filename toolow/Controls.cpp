@@ -168,7 +168,7 @@ Combo& Combo::itemAdd(initializer_list<const wchar_t*> arrStr)
 wchar_t* Combo::itemGetText(int i, wchar_t *pBuf, int szBuf) const
 {
 	int len = (int)this->sendMessage(CB_GETLBTEXTLEN, i, 0) + 1;
-	if(szBuf < len) *pBuf = 0; // buffer is too small
+	if(szBuf < len) *pBuf = L'\0'; // buffer is too small
 	else this->sendMessage(CB_GETLBTEXT, i, (LPARAM)pBuf);
 	return pBuf;
 }
@@ -216,11 +216,11 @@ wchar_t* ListBox::itemGetText(int i, wchar_t *pBuf, int szBuf) const
 	return pBuf;
 }
 
-String* ListBox::itemGetText(int i, String *pBuf) const
+String& ListBox::itemGetText(int i, String& buf) const
 {
-	pBuf->reserve((int)this->sendMessage(LB_GETTEXTLEN, i, 0));
-	this->sendMessage(LB_GETTEXT, i, (LPARAM)pBuf->ptrAt(0));
-	return pBuf;
+	buf.reserve((int)this->sendMessage(LB_GETTEXTLEN, i, 0));
+	this->sendMessage(LB_GETTEXT, i, (LPARAM)buf.ptrAt(0));
+	return buf;
 }
 
 
@@ -245,7 +245,7 @@ StatusBar& StatusBar::create(HWND hOwner, int numPartsItWillHave)
 {
 	// The owner is considered resizable if it has the maximize button.
 	bool isStretch = (GetWindowLongPtr(hOwner, GWL_STYLE) & WS_MAXIMIZEBOX) != 0;
-	
+
 	_sb = CreateWindowEx(0, STATUSCLASSNAME, nullptr,
 		(isStretch ? SBARS_SIZEGRIP : 0) | WS_CHILD | WS_VISIBLE,
 		0, 0, 0, 0, hOwner, nullptr, (HINSTANCE)GetWindowLongPtr(hOwner, GWLP_HINSTANCE), 0);

@@ -44,7 +44,7 @@ DWORD System::Exec(const wchar_t *cmdLine)
 	PROCESS_INFORMATION pi = { 0 };
 	DWORD dwExitCode = 1; // returned by executed program
 
-	if(CreateProcess(0, cmdLine2, &sa, 0, FALSE, 0, 0, 0, &si, &pi)) {
+	if(CreateProcess(nullptr, cmdLine2, &sa, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi)) {
 		WaitForSingleObject(pi.hProcess, INFINITE); // the program flow is stopped here to wait
 		GetExitCodeProcess(pi.hProcess, &dwExitCode);
 		CloseHandle(pi.hThread);
@@ -57,7 +57,7 @@ DWORD System::Exec(const wchar_t *cmdLine)
 
 DWORD System::ShellOpen(const wchar_t *file)
 {
-	return (DWORD)ShellExecute(0, L"open", file, 0, 0, SW_SHOWNORMAL);
+	return (DWORD)ShellExecute(nullptr, L"open", file, nullptr, nullptr, SW_SHOWNORMAL);
 }
 
 void System::PopMenu(HWND hDlg, int popupMenuId, int x, int y, HWND hWndCoordsRelativeTo)
@@ -65,11 +65,11 @@ void System::PopMenu(HWND hDlg, int popupMenuId, int x, int y, HWND hWndCoordsRe
 	// Shows a popup context menu, anchored at the given coordinates.
 	// The passed coordinates can be relative to any window.
 
-	HMENU hMenu = LoadMenu(GetModuleHandle(0), MAKEINTRESOURCE(popupMenuId));
+	HMENU hMenu = LoadMenu(GetModuleHandle(nullptr), MAKEINTRESOURCE(popupMenuId));
 	POINT ptDlg = { x, y }; // receives coordinates relative to hDlg
 	ClientToScreen(hWndCoordsRelativeTo ? hWndCoordsRelativeTo : hDlg, &ptDlg); // to screen coordinates
 	SetForegroundWindow(hDlg);
-	TrackPopupMenu(GetSubMenu(hMenu, 0), 0, ptDlg.x, ptDlg.y, 0, hDlg, 0); // owned by dialog, so messages go to it
+	TrackPopupMenu(GetSubMenu(hMenu, 0), 0, ptDlg.x, ptDlg.y, 0, hDlg, nullptr); // owned by dialog, so messages go to it
 	PostMessage(hDlg, WM_NULL, 0, 0); // http://msdn.microsoft.com/en-us/library/ms648002%28VS.85%29.aspx
 	DestroyMenu(hMenu);
 }

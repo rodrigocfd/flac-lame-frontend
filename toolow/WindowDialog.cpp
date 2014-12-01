@@ -43,7 +43,7 @@ INT_PTR DialogPopup::msgHandler(UINT msg, WPARAM wp, LPARAM lp)
 	case WM_INITDIALOG:
 		if(!hSysFont.hFont()) {
 			Font::Info nfof = Font::GetDefaultDialogFontInfo();
-			hSysFont.create(&nfof);
+			hSysFont.create(nfof);
 		}
 		hSysFont.applyOnChildren(this->hWnd());
 		this->_setWheelHoverBehavior(); // mousewheel working on cursor hovering, not only when control is focused

@@ -70,7 +70,7 @@ String& ListView::Item::getText(String& buf, int iCol) const
 	// Notice that, since Strings' size always increase, if the buffer
 	// was previously allocated with a value bigger than 128, this will
 	// speed up the size checks.
-	
+
 	int baseBufLen = 0;
 	int retCode = 0;
 	do {
@@ -141,10 +141,15 @@ ListView::Item ListView::ItemsProxy::add(const wchar_t *caption, int iconIdx, in
 
 Array<ListView::Item> ListView::ItemsProxy::getAll() const
 {
-	Array<Item> ret(this->count()); // alloc return array
-	for(int i = 0; i < ret.size(); ++i)
-		ret[i] = Item(i, this->_list);
-	return ret;
+    int totItems = this->count();
+
+    Array<Item> items; // a big array with all items in list
+    items.reserve(totItems);
+
+    for(int i = 0; i < totItems; ++i)
+        items.append( Item(i, this->_list) );
+
+	return items;
 }
 
 ListView::Item ListView::ItemsProxy::find(const wchar_t *caption)
@@ -174,13 +179,14 @@ void ListView::ItemsProxy::removeSelected()
 
 Array<ListView::Item> ListView::ItemsProxy::getSelected() const
 {
-	Array<Item> items(this->countSelected()); // alloc return array
-	int iBase = -1, iOutBuf = 0;
+    Array<Item> items;
+    items.reserve(this->countSelected());
 
+	int iBase = -1;
 	for(;;) {
 		iBase = ListView_GetNextItem(_list->hWnd(), iBase, LVNI_SELECTED);
 		if(iBase == -1) break;
-		items[iOutBuf++] = Item(iBase, this->_list);
+        items.append( Item(iBase, this->_list) );
 	}
 	return items;
 }

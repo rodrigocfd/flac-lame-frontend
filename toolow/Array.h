@@ -167,7 +167,7 @@ public:
 		Iter(Array *pArr, int pos) : _pos(pos), _pArr(pArr) { }
 		bool operator!=(const Iter& other) const { return _pos != other._pos; }
 		T& operator*() { return (*_pArr)[_pos]; }
-		const Iter& operator++() { ++_pos; return *this; }
+		Iter& operator++() { ++_pos; return *this; }
 	};
 	class IterConst {
 	private:
@@ -175,10 +175,9 @@ public:
 		const Array *_pArr;
 	public:
 		IterConst(const Array *pArr, int pos) : _pos(pos), _pArr(pArr) { }
-		bool operator!=(const Iter& other) const { return _pos != other._pos; }
+		bool operator!=(const IterConst& other) const { return _pos != other._pos; }
 		const T& operator*() const { return (*_pArr)[_pos]; }
-		T& operator*() { return (*_pArr)[_pos]; }
-		const Iter& operator++() { ++_pos; return *this; }
+		const IterConst& operator++() { ++_pos; return *this; }
 	};
 	Iter      begin()       { return Iter(this, 0); }
     Iter      end()         { return Iter(this, this->size()); }

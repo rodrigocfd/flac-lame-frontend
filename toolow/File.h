@@ -42,18 +42,20 @@ namespace File
 	class Raw final { // automation to a HANDLE of a file
 	private:
 		HANDLE _hFile;
+		Access _access;
 	public:
-		Raw()  : _hFile(nullptr) { }
+		Raw()  : _hFile(nullptr), _access(Access::READONLY) { }
 		~Raw() { close(); }
 
 		HANDLE hFile() const { return _hFile; }
-		void   close()       { if(_hFile) { ::CloseHandle(_hFile); _hFile = nullptr; } }
+		Access getAccess() const { return _access; }
+		void   close();
 		int    size() const  { return ::GetFileSize(_hFile, nullptr); }
 		bool   open(const wchar_t *path, Access access, String *pErr=nullptr);
 		bool   open(const String& path, Access access, String *pErr=nullptr) { return open(path.str(), access, pErr); }
 		bool   setNewSize(int newSize, String *pErr=nullptr);
 		bool   truncate(String *pErr=nullptr)                                { return setNewSize(0, pErr); }
-		bool   getContent(Array<BYTE> *pBuf, String *pErr=nullptr) const;
+		bool   getContent(Array<BYTE>& buf, String *pErr=nullptr) const;
 		bool   write(const Array<BYTE>& data, String *pErr=nullptr)          { return write(&data[0], data.size(), pErr); }
 		bool   write(const BYTE *pData, int sz, String *pErr=nullptr);
 		bool   rewind(String *pErr=nullptr);
@@ -69,6 +71,7 @@ namespace File
 		Mapped() : _hMap(nullptr), _pMem(nullptr), _size(0) { }
 		~Mapped() { close(); }
 
+		Access getAccess() const { return _file.getAccess(); }
 		void  close();
 		bool  open(const wchar_t *path, Access access, String *pErr=nullptr);
 		bool  open(const String& path, Access access, String *pErr=nullptr) { return open(path.str(), access, pErr); }
@@ -76,22 +79,22 @@ namespace File
 		BYTE* pMem() const     { return (BYTE*)_pMem; }
 		BYTE* pPastMem() const { return pMem() + size(); }
 		bool  setNewSize(int newSize, String *pErr=nullptr);
-		bool  getContent(Array<BYTE> *pBuf, int offset=0, int numBytes=-1, String *pErr=nullptr) const;
-		bool  getContent(String *pBuf, int offset=0, int numChars=-1, String *pErr=nullptr) const;
+		bool  getContent(Array<BYTE>& buf, int offset=0, int numBytes=-1, String *pErr=nullptr) const;
+		bool  getContent(String& buf, int offset=0, int numChars=-1, String *pErr=nullptr) const;
 	};
 
-	class Text final { // automation to text files
+	class Text final { // automation to read text files line-by-line
 	private:
 		String   _text;
 		wchar_t *_p;
 		int      _idxLine;
 	public:
 		Text() : _p(nullptr), _idxLine(-1) { }
-		
+
 		bool          load(const wchar_t *path, String *pErr=nullptr);
 		bool          load(const String& path, String *pErr=nullptr) { return load(path.str(), pErr); }
-		bool          load(const Mapped *pfm);
-		bool          nextLine(String *pBuf);
+		bool          load(const Mapped& fm);
+		bool          nextLine(String& buf);
 		int           curLineIndex() const { return _idxLine; }
 		void          rewind()             { _p = _text.ptrAt(0); _idxLine = -1; }
 		const String* text() const         { return &_text; }
@@ -123,7 +126,7 @@ namespace File
 		Listing(const String& path, const wchar_t *pattern) : Listing(path.str(), pattern) { }
 		~Listing();
 
-		wchar_t* next(wchar_t *buf);
-		String*  next(String *pBuf);
+		bool next(wchar_t *buf);
+		bool next(String& buf);
 	};
 }

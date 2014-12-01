@@ -66,13 +66,13 @@ bool File::WriteUtf8(const wchar_t *path, const wchar_t *data, String *pErr)
 			break;
 		}
 	}
-	
+
 	File::Raw fout;
 	if(!fout.open(path, Access::READWRITE, pErr))
 		return false;
 	if(fout.size() && !fout.setNewSize(0, pErr)) // if already exists, truncate to empty
 		return false;
-	
+
 	// If the text doesn't have any char to make it UTF-8, it'll
 	// be simply converted to plain ASCII.
 	int newLen = WideCharToMultiByte(CP_UTF8, 0, data, dataLen, nullptr, 0, nullptr, nullptr);
@@ -82,7 +82,7 @@ bool File::WriteUtf8(const wchar_t *path, const wchar_t *data, String *pErr)
 	WideCharToMultiByte(CP_UTF8, 0, data, dataLen, (char*)&outBuf[isUtf8 ? 3 : 0], newLen, nullptr, nullptr);
 	if(!fout.write(outBuf, pErr)) // one single write() to all data, better performance
 		return false;
-	
+
 	if(pErr) *pErr = L"";
 	return true;
 }
@@ -138,7 +138,7 @@ bool File::Unzip(const wchar_t *zip, const wchar_t *destFolder, String *pErr)
 		if(pErr) *pErr = L"IShellDispatch::NameSpace() failed on directory name.";
 		return false;
 	}
-    
+
 	FolderItems *pFilesInside = nullptr;
 	pZippedFile->Items(&pFilesInside);
 	if(!pFilesInside) {
@@ -218,6 +218,15 @@ int File::IndexOfBin(const BYTE *pData, int dataLen, const wchar_t *what, bool a
 }
 
 
+void File::Raw::close()
+{
+	if(_hFile) {
+		CloseHandle(_hFile);
+		_hFile = nullptr;
+		_access = Access::READONLY;
+	}
+}
+
 bool File::Raw::open(const wchar_t *path, File::Access access, String *pErr)
 {
 	this->close(); // make sure everything was properly cleaned up
@@ -234,7 +243,8 @@ bool File::Raw::open(const wchar_t *path, File::Access access, String *pErr)
 			(access == Access::READONLY) ? L"read-only" : L"read-write", GetLastError());
 		return false;
 	}
-	
+
+	_access = access; // keep for future checks
 	if(pErr) *pErr = L"";
 	return true;
 }
@@ -242,11 +252,15 @@ bool File::Raw::open(const wchar_t *path, File::Access access, String *pErr)
 bool File::Raw::setNewSize(int newSize, String *pErr)
 {
 	// This method will truncate or expand the file, according to the new size.
-	// It will probably fail if file was opened as read-only.
 	// Size zero will truncate the file.
 
 	if(!_hFile) {
 		if(pErr) *pErr = L"File has not been opened.";
+		return false;
+	}
+
+	if(_access == Access::READONLY) {
+		if(pErr) *pErr = L"File is opened for read-only access.";
 		return false;
 	}
 
@@ -277,17 +291,17 @@ bool File::Raw::setNewSize(int newSize, String *pErr)
 	return true;
 }
 
-bool File::Raw::getContent(Array<BYTE> *pBuf, String *pErr) const
+bool File::Raw::getContent(Array<BYTE>& buf, String *pErr) const
 {
 	if(!_hFile) {
 		if(pErr) *pErr = L"File has not been opened.";
 		return false;
 	}
 
-	pBuf->resize(this->size());
+	buf.resize(this->size());
 	DWORD bytesRead = 0;
-	if(!ReadFile(_hFile, &(*pBuf)[0], pBuf->size(), &bytesRead, nullptr)) {
-		if(pErr) *pErr = String::Fmt(L"ReadFile() failed to read %d bytes.", pBuf->size());
+	if(!ReadFile(_hFile, &buf[0], buf.size(), &bytesRead, nullptr)) {
+		if(pErr) *pErr = String::Fmt(L"ReadFile() failed to read %d bytes.", buf.size());
 		return false;
 	}
 
@@ -299,6 +313,11 @@ bool File::Raw::write(const BYTE *pData, int sz, String *pErr)
 {
 	if(!_hFile) {
 		if(pErr) *pErr = L"File has not been opened.";
+		return false;
+	}
+
+	if(_access == Access::READONLY) {
+		if(pErr) *pErr = L"File is opened for read-only access.";
 		return false;
 	}
 
@@ -340,7 +359,7 @@ void File::Mapped::close()
 bool File::Mapped::open(const wchar_t *path, File::Access access, String *pErr)
 {
 	this->close(); // make sure everything was properly cleaned up
-	
+
 	// Open file.
 	if(!_file.open(path, access, pErr)) {
 		this->close();
@@ -413,7 +432,7 @@ bool File::Mapped::setNewSize(int newSize, String *pErr)
 	return true;
 }
 
-bool File::Mapped::getContent(Array<BYTE> *pBuf, int offset, int numBytes, String *pErr) const
+bool File::Mapped::getContent(Array<BYTE>& buf, int offset, int numBytes, String *pErr) const
 {
 	if(!_hMap || !_pMem || !_file.hFile()) {
 		if(pErr) *pErr = L"File is not mapped into memory.";
@@ -424,24 +443,24 @@ bool File::Mapped::getContent(Array<BYTE> *pBuf, int offset, int numBytes, Strin
 	} else if(numBytes == -1 || offset + numBytes > _size) {
 		numBytes = _size - offset; // avoid reading beyond EOF
 	}
-	
-	pBuf->resize(numBytes);
-	memcpy(&(*pBuf)[0], this->pMem(), numBytes * sizeof(BYTE));
-	
+
+	buf.resize(numBytes);
+	memcpy(&buf[0], this->pMem(), numBytes * sizeof(BYTE));
+
 	if(pErr) *pErr = L"";
 	return true;
 }
 
-bool File::Mapped::getContent(String *pBuf, int offset, int numChars, String *pErr) const
+bool File::Mapped::getContent(String& buf, int offset, int numChars, String *pErr) const
 {
 	Array<BYTE> byteBuf;
-	if(!this->getContent(&byteBuf, offset, numChars, pErr))
+	if(!this->getContent(byteBuf, offset, numChars, pErr))
 		return false;
 
-	pBuf->reserve(byteBuf.size());
+	buf.reserve(byteBuf.size());
 	for(int i = 0; i < byteBuf.size(); ++i)
-		(*pBuf)[i] = (wchar_t)byteBuf[i]; // raw conversion
-	
+		buf[i] = (wchar_t)byteBuf[i]; // raw conversion
+
 	if(pErr) *pErr = L"";
 	return true;
 }
@@ -453,14 +472,14 @@ bool File::Text::load(const wchar_t *path, String *pErr)
 	if(!fm.open(path, Access::READONLY, pErr))
 		return false;
 	if(pErr) *pErr = L"";
-	return this->load(&fm);
+	return this->load(fm);
 }
 
-bool File::Text::load(const File::Mapped *pfm)
+bool File::Text::load(const File::Mapped& fm)
 {
-	BYTE *pMem = pfm->pMem(); // the file reading is made upon a memory-mapped file
-	BYTE *pPast = pfm->pPastMem();
-	
+	BYTE *pMem = fm.pMem(); // the file reading is made upon a memory-mapped file
+	BYTE *pPast = fm.pPastMem();
+
 	if((pPast - pMem >= 3) && !memcmp(pMem, "\xEF\xBB\xBF", 3)) // UTF-8
 	{
 		pMem += 3; // skip BOM
@@ -504,22 +523,22 @@ bool File::Text::load(const File::Mapped *pfm)
 	return true;
 }
 
-bool File::Text::nextLine(String *pBuf)
+bool File::Text::nextLine(String& buf)
 {
 	if(!*_p) return false; // runner pointer inside our _text String data block
-	
+
 	if(_idxLine > -1) { // not 1st line; avoid a 1st blank like to be skipped
 		if( (*_p == L'\r' && *(_p + 1) == L'\n') || // CRLF || LFCR
 			(*_p == L'\n' && *(_p + 1) == L'\r') ) _p += 2;
 		else if(*_p == L'\r' || *_p == L'\n') ++_p; // CR || LF
 	}
 	++_idxLine;
-	
+
 	wchar_t *pRun = _p;
 	while(*pRun && *pRun != L'\r' && *pRun != '\n') ++pRun;
-	pBuf->reserve((int)(pRun - _p));
-	pBuf->copyFrom(_p, (int)(pRun - _p)); // line won't have CR nor LF at end
-	
+	buf.reserve((int)(pRun - _p));
+	buf.copyFrom(_p, (int)(pRun - _p)); // line won't have CR nor LF at end
+
 	_p = pRun; // consume
 	return true;
 }
@@ -533,7 +552,7 @@ bool File::Ini::load(String *pErr)
 	}
 
 	File::Text fin;
-	if(!fin.load(_path.str(), pErr)) {
+	if(!fin.load(_path, pErr)) {
 		if(pErr) pErr->insert(0, L"INI file failed to load.\n");
 		return false;
 	}
@@ -541,7 +560,7 @@ bool File::Ini::load(String *pErr)
 	this->sections.removeAll().reserve( this->_countSections(&fin) );
 
 	String line, name, valstr; // name/val declared here to save reallocs
-	while(fin.nextLine(&line)) {
+	while(fin.nextLine(line)) {
 		if(line[0] == L'[' && line.endsWithCS(L']')) { // begin section found
 			name.copyFrom(line.ptrAt(1), line.len() - 2);
 			this->sections[name] = Hash<String>(); // new section is an empty hash
@@ -553,8 +572,8 @@ bool File::Ini::load(String *pErr)
 				name.copyFrom(line.ptrAt(0), idxEq);
 				valstr.copyFrom(line.ptrAt(idxEq + 1), line.len() - (idxEq + 1));
 
-				Hash<String> *pLastSection = &this->sections.at(this->sections.size() - 1)->val;
-				(*pLastSection)[name.trim()] = valstr.trim();
+				Hash<String>& lastSection = this->sections.at(this->sections.size() - 1)->val;
+				lastSection[name.trim()] = valstr.trim();
 			}
 		}
 	}
@@ -573,14 +592,14 @@ bool File::Ini::serialize(String *pErr) const
 	String out;
 	for(int i = 0; i < this->sections.size(); ++i) {
 		const Hash<Hash<String>>::Elem *section = this->sections.at(i);
-		out.append(L'[').append( section->key.str() ).append(L"]\r\n");
+		out.append(L'[').append(section->key).append(L"]\r\n");
 
 		const Hash<String> *entries = &section->val;
 		for(int j = 0; j < entries->size(); ++j) {
 			const Hash<String>::Elem *entry = entries->at(j);
-			out.append( entry->key.str() ).append(L'=').append( entry->val.str() ).append(L"\r\n");
+			out.append(entry->key).append(L'=').append(entry->val).append(L"\r\n");
 		}
-		
+
 		out.append(L"\r\n");
 	}
 
@@ -598,7 +617,7 @@ int File::Ini::_countSections(File::Text *fin) const
 	int count = 0;
 	String line;
 	fin->rewind();
-	while(fin->nextLine(&line))
+	while(fin->nextLine(line))
 		if(line[0] == L'[' && line.endsWithCS(L']'))
 			++count;
 	fin->rewind();
@@ -634,18 +653,18 @@ File::Listing::~Listing()
 		FindClose(_hFind);
 }
 
-wchar_t* File::Listing::next(wchar_t *buf)
+bool File::Listing::next(wchar_t *buf)
 {
 	if(!_hFind) { // first call to method
 		if((_hFind = FindFirstFile(_pattern, &_wfd)) == INVALID_HANDLE_VALUE) { // init iteration
 			_hFind = nullptr;
-			return nullptr; // no files found at all
+			return false; // no files found at all
 		}
 	} else { // subsequent calls
 		if(!FindNextFile(_hFind, &_wfd)) {
 			FindClose(_hFind);
 			_hFind = nullptr;
-			return nullptr; // search finished
+			return false; // search finished
 		}
 	}
 
@@ -657,17 +676,17 @@ wchar_t* File::Listing::next(wchar_t *buf)
 	} else {
 		lstrcpy(buf, _wfd.cFileName); // simply copy
 	}
-	
-	return buf; // same passed buffer
+
+	return true; // more to come, call again
 }
 
-String* File::Listing::next(String *pBuf)
+bool File::Listing::next(String& buf)
 {
 	wchar_t stackbuf[MAX_PATH];
 	if(this->next(stackbuf)) {
-		*pBuf = stackbuf;
-		return pBuf;
+		buf = stackbuf;
+		return true; // more to come, call again
 	}
-	*pBuf = L"";
-	return nullptr; // search finished
+	buf = L"";
+	return false; // search finished
 }

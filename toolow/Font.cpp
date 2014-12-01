@@ -35,9 +35,9 @@ Font::Info Font::getInfo() const
 {
 	LOGFONT lf = { 0 };
 	GetObject(_hFont, sizeof(LOGFONT), &lf);
-	
+
 	Info info;
-	_LogfontToInfo(&lf, &info);
+	_LogfontToInfo(lf, info);
 	return info;
 }
 
@@ -88,14 +88,14 @@ Font::Info Font::GetDefaultDialogFontInfo()
 	SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0); // default system font
 
 	Info info;
-	_LogfontToInfo(&ncm.lfMenuFont, &info);
+	_LogfontToInfo(ncm.lfMenuFont, info);
 	return info;
 }
 
-void Font::_LogfontToInfo(const LOGFONT *lf, Font::Info *pInfo)
+void Font::_LogfontToInfo(const LOGFONT& lf, Font::Info& info)
 {
-	lstrcpy(pInfo->name, lf->lfFaceName);
-	pInfo->size = -(lf->lfHeight + 3);
-	pInfo->bold = (lf->lfWeight == FW_BOLD);
-	pInfo->italic = (lf->lfItalic == TRUE);
+	lstrcpy(info.name, lf.lfFaceName);
+	info.size = -(lf.lfHeight + 3);
+	info.bold = (lf.lfWeight == FW_BOLD);
+	info.italic = (lf.lfItalic == TRUE);
 }

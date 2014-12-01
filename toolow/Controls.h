@@ -104,7 +104,7 @@ public:
 	ListBox(HWND hwnd)            { operator=(hwnd); }
 	ListBox(const Window& wnd)    { operator=(wnd); }
 	ListBox(const ListBox& other) { operator=(other); }
-	
+
 	ListBox& operator=(HWND hwnd)            { ((Window*)this)->operator=(hwnd); return *this; }
 	ListBox& operator=(const Window& wnd)    { return operator=(wnd.hWnd()); }
 	ListBox& operator=(const ListBox& other) { return operator=(other.hWnd()); }
@@ -113,8 +113,8 @@ public:
 	int      itemCountSelected() const;
 	int      itemGetSelected(Array<int> *indexesBuf=nullptr) const;
 	wchar_t* itemGetText(int i, wchar_t *pBuf, int szBuf) const;
-	String*  itemGetText(int i, String *pBuf) const;
-	String   itemGetText(int i) const        { String ret; itemGetText(i, &ret); return ret; }
+	String&  itemGetText(int i, String& buf) const;
+	String   itemGetText(int i) const        { String ret; itemGetText(i, ret); return ret; }
 	ListBox& itemRemoveAll()                 { sendMessage(LB_RESETCONTENT, 0, 0); return *this; }
 };
 
