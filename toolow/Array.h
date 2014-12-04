@@ -54,9 +54,9 @@ public:
 	}
 
 	Array& operator=(const Array& other) {
-		this->resize(other._sz);
+		this->reserve(other._sz);
 		for (int i = 0; i < other._sz; ++i)
-			_ptr[i] = other._ptr[i]; // deep copy, call operator=() on each element
+			this->append(other._ptr[i]);
 		return *this;
 	}
 	Array& operator=(Array&& other) {
@@ -66,9 +66,8 @@ public:
 		return *this;
 	}
 	Array& operator=(initializer_list<T> vals) {
-		this->resize((int)vals.size());
-		for (int i = 0, sz = (int)vals.size(); i < sz; ++i)
-			_ptr[i] = *(vals.begin() + i); // thanks to C++11 horrible design, this thing is necessary
+		this->reserve((int)vals.size());
+		for (T& val : vals) this->append(val);
 		return *this;
 	}
 

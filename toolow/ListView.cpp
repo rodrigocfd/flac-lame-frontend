@@ -164,8 +164,8 @@ ListView::Item ListView::ItemsProxy::find(const wchar_t *caption)
 void ListView::ItemsProxy::select(const Array<int>& idx)
 {
 	// Select the items whose indexes have been passed in the array.
-	for (int i = 0; i < idx.size(); ++i)
-		ListView_SetItemState(_list->hWnd(), idx[i], LVIS_SELECTED, LVIS_SELECTED);
+	for (const int& index : idx)
+		ListView_SetItemState(_list->hWnd(), index, LVIS_SELECTED, LVIS_SELECTED);
 }
 
 void ListView::ItemsProxy::removeSelected()

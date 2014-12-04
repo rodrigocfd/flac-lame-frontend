@@ -16,15 +16,15 @@ Resizer& Resizer::create(int numCtrls)
 
 Resizer& Resizer::add(initializer_list<HWND> hChildren, Do modeHorz, Do modeVert)
 {
-	for (int i = 0; i < (int)hChildren.size(); ++i)
-		this->_addOne(*(hChildren.begin() + i), modeHorz, modeVert);
+	for (const HWND& hChild : hChildren)
+		this->_addOne(hChild, modeHorz, modeVert);
 	return *this;
 }
 
 Resizer& Resizer::add(initializer_list<int> ctrlIds, HWND hParent, Do modeHorz, Do modeVert)
 {
-	for (int i = 0; i < (int)ctrlIds.size(); ++i)
-		this->_addOne(GetDlgItem(hParent, *(ctrlIds.begin() + i)), modeHorz, modeVert);
+	for (const int& ctrlId : ctrlIds)
+		this->_addOne(GetDlgItem(hParent, ctrlId), modeHorz, modeVert);
 	return *this;
 }
 
@@ -60,28 +60,26 @@ LRESULT CALLBACK Resizer::_Proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, UINT_
 			int cy = HIWORD(lp);
 			if (pThis->_ctrls.size() && state != SIZE_MINIMIZED) { // only if created() was called; if minimized, no need to resize
 				HDWP hdwp = BeginDeferWindowPos(pThis->_ctrls.size());
-				for (int i = 0; i < pThis->_ctrls.size(); ++i) {
-					_Ctrl *pCtrl = &pThis->_ctrls[i]; // current child control being worked with
-
+				for (_Ctrl& ctrl : pThis->_ctrls) {
 					UINT uFlags = SWP_NOZORDER;
-					if (pCtrl->modeHorz == Do::REPOS && pCtrl->modeVert == Do::REPOS) // reposition both vert & horz
+					if (ctrl.modeHorz == Do::REPOS && ctrl.modeVert == Do::REPOS) // reposition both vert & horz
 						uFlags |= SWP_NOSIZE;
-					else if (pCtrl->modeHorz == Do::RESIZE && pCtrl->modeVert == Do::RESIZE) // resize both vert & horz
+					else if (ctrl.modeHorz == Do::RESIZE && ctrl.modeVert == Do::RESIZE) // resize both vert & horz
 						uFlags |= SWP_NOMOVE;
 
-					DeferWindowPos(hdwp, pCtrl->hWnd, nullptr,
-						pCtrl->modeHorz == Do::REPOS ?
-							cx - pThis->_szOrig.cx + pCtrl->rcOrig.left :
-							pCtrl->rcOrig.left, // keep original pos
-						pCtrl->modeVert == Do::REPOS ?
-							cy - pThis->_szOrig.cy + pCtrl->rcOrig.top :
-							pCtrl->rcOrig.top, // keep original pos
-						pCtrl->modeHorz == Do::RESIZE ?
-							cx - pThis->_szOrig.cx + pCtrl->rcOrig.right - pCtrl->rcOrig.left :
-							pCtrl->rcOrig.right - pCtrl->rcOrig.left, // keep original width
-						pCtrl->modeVert == Do::RESIZE ?
-							cy - pThis->_szOrig.cy + pCtrl->rcOrig.bottom - pCtrl->rcOrig.top :
-							pCtrl->rcOrig.bottom - pCtrl->rcOrig.top, // keep original height
+					DeferWindowPos(hdwp, ctrl.hWnd, nullptr,
+						ctrl.modeHorz == Do::REPOS ?
+							cx - pThis->_szOrig.cx + ctrl.rcOrig.left :
+							ctrl.rcOrig.left, // keep original pos
+						ctrl.modeVert == Do::REPOS ?
+							cy - pThis->_szOrig.cy + ctrl.rcOrig.top :
+							ctrl.rcOrig.top, // keep original pos
+						ctrl.modeHorz == Do::RESIZE ?
+							cx - pThis->_szOrig.cx + ctrl.rcOrig.right - ctrl.rcOrig.left :
+							ctrl.rcOrig.right - ctrl.rcOrig.left, // keep original width
+						ctrl.modeVert == Do::RESIZE ?
+							cy - pThis->_szOrig.cy + ctrl.rcOrig.bottom - ctrl.rcOrig.top :
+							ctrl.rcOrig.bottom - ctrl.rcOrig.top, // keep original height
 						uFlags);
 				}
 				EndDeferWindowPos(hdwp);
@@ -160,8 +158,8 @@ LRESULT CALLBACK TextBox::_Proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, UINT_
 
 Combo& Combo::itemAdd(initializer_list<const wchar_t*> arrStr)
 {
-	for (int i = 0; i < (int)arrStr.size(); ++i)
-		this->sendMessage(CB_ADDSTRING, 0, (LPARAM)*(arrStr.begin() + i));
+	for (const wchar_t *s : arrStr)
+		this->sendMessage(CB_ADDSTRING, 0, (LPARAM)s);
 	return *this;
 }
 
@@ -183,8 +181,8 @@ String* Combo::itemGetText(int i, String *pBuf) const
 
 ListBox& ListBox::itemAdd(initializer_list<const wchar_t*> arrStr)
 {
-	for (int i = 0; i < (int)arrStr.size(); ++i)
-		this->sendMessage(LB_ADDSTRING, 0, (LPARAM)*(arrStr.begin() + i));
+	for (const wchar_t *s : arrStr)
+		this->sendMessage(LB_ADDSTRING, 0, (LPARAM)s);
 	return *this;
 }
 
@@ -234,9 +232,17 @@ void Radio::setCheck(bool checked, Radio::EmulateClick emulateClick)
 
 ProgressBar& ProgressBar::animateMarquee(bool animate)
 {
-	SetWindowLongPtr(this->hWnd(), GWL_STYLE,
-		GetWindowLongPtr(this->hWnd(), GWL_STYLE) | PBS_MARQUEE); // set this on resource editor won't work
+	if (animate)
+		SetWindowLongPtr(this->hWnd(), GWL_STYLE, // set this on resource editor won't work
+			GetWindowLongPtr(this->hWnd(), GWL_STYLE) | PBS_MARQUEE);
+	
 	this->sendMessage(PBM_SETMARQUEE, (WPARAM)animate, 0);
+	
+	// http://stackoverflow.com/questions/23686724/how-to-reset-marquee-progress-bar
+	if (!animate)
+		SetWindowLongPtr(this->hWnd(), GWL_STYLE,
+			GetWindowLongPtr(this->hWnd(), GWL_STYLE) & ~PBS_MARQUEE);
+	
 	return *this;
 }
 
@@ -311,11 +317,11 @@ void StatusBar::_putParts(int cx)
 	float totalWeight = 0;
 	int   cxVariable = cx, cxTotal = cx;
 
-	for (int i = 0; i < _parts.size(); ++i) {
-		if (!_parts[i].resizeWeight) // fixed-width?
-			cxVariable -= _parts[i].sizePixels;
+	for (_Part& part : _parts) {
+		if (!part.resizeWeight) // fixed-width?
+			cxVariable -= part.sizePixels;
 		else
-			totalWeight += _parts[i].resizeWeight;
+			totalWeight += part.resizeWeight;
 	}
 
 	// Fill right edges array with the right edge of each part.

@@ -61,15 +61,13 @@ public:
 		// Example usage:
 		// Hash<int> nums;
 		// nums.each([](Hash<int>::Elem& elem) { elem.val += 10; });
-		for (int i = 0; i < _elems.size(); ++i)
-			callback(_elems[i]);
+		for (Elem& elem : _elems) callback(elem);
 	}
 	void each(function<void(const Elem& elem)> callback) const {
 		// Example usage:
 		// Hash<int> nums;
 		// nums.each([](const Hash<int>::Elem& elem) { int x = elem.val; });
-		for (int i = 0; i < _elems.size(); ++i)
-			callback(_elems[i]);
+		for (const Elem& elem : _elems) callback(elem);
 	}
 private:
 	int _byKey(const wchar_t *keyName) const {

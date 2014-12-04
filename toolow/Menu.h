@@ -43,8 +43,9 @@ public:
 		::InsertMenu(_hMenu, -1, MF_BYPOSITION | MF_STRING, cmdId, caption);
 		return *this;
 	}
-	Menu& enableItem(WORD cmdId, bool doEnable) {
-		::EnableMenuItem(_hMenu, cmdId, MF_BYCOMMAND | ((doEnable) ? MF_ENABLED : MF_GRAYED));
+	Menu& enableItem(initializer_list<WORD> cmdIds, bool doEnable) {
+		for (const WORD& cmd : cmdIds)
+			::EnableMenuItem(_hMenu, cmd, MF_BYCOMMAND | ((doEnable) ? MF_ENABLED : MF_GRAYED));
 		return *this;
 	}
 

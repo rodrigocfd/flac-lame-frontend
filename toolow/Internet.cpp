@@ -44,8 +44,8 @@ void Internet::Download::abort()
 
 Internet::Download& Internet::Download::addRequestHeaders(initializer_list<const wchar_t*> requestHeaders)
 {
-	for (int i = 0, sz = (int)requestHeaders.size(); i < sz; ++i)
-		_requestHeaders.append( *(requestHeaders.begin() + i) );
+	for (const wchar_t *rh : requestHeaders)
+		_requestHeaders.append(rh);
 	return *this;
 }
 
@@ -121,8 +121,8 @@ bool Internet::Download::_initHandles(String *pErr)
 bool Internet::Download::_contactServer(String *pErr)
 {
 	// Add the request headers to request handle.
-	for (int i = 0; i < _requestHeaders.size(); ++i) {
-		if (!WinHttpAddRequestHeaders(_hRequest, _requestHeaders[i].str(), (ULONG)-1L, WINHTTP_ADDREQ_FLAG_ADD)) {
+	for (String& rh : _requestHeaders) {
+		if (!WinHttpAddRequestHeaders(_hRequest, rh.str(), (ULONG)-1L, WINHTTP_ADDREQ_FLAG_ADD)) {
 			DWORD dwErr = GetLastError();
 			this->abort();
 			if (pErr) *pErr = _FormatErr(L"WinHttpAddRequestHeaders", dwErr);
@@ -174,14 +174,15 @@ bool Internet::Download::_parseHeaders(String *pErr)
 	Array<String> lines = rawReh.explode(L"\r\n");
 	String key, val;
 	key.reserve(32); val.reserve(32); // temp buffers to save reallocs
-	for (int i = 0; i < lines.size(); ++i) {
-		if (lines[i].isEmpty()) continue;
-		int colonIdx = lines[i].findCS(L':');
+
+	for (String& line : lines) {
+		if (line.isEmpty()) continue;
+		int colonIdx = line.findCS(L':');
 		if (colonIdx == -1) { // not a key/value pair, probably response line
-			_responseHeaders[L""] = lines[i]; // empty key
+			_responseHeaders[L""] = line; // empty key
 		} else {
-			key = lines[i].substr(0, colonIdx);
-			val = lines[i].substr(colonIdx + 1, lines[i].len() - (colonIdx + 1));
+			key = line.substr(0, colonIdx);
+			val = line.substr(colonIdx + 1, line.len() - (colonIdx + 1));
 			_responseHeaders[key.trim()] = val.trim();
 		}
 	}
