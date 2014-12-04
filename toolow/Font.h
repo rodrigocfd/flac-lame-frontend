@@ -41,7 +41,7 @@ public:
 	Font& operator=(Font&& other)      { _hFont = other._hFont; other.release(); return *this; }
 
 	HFONT hFont() const            { return _hFont; }
-	void  release()                { if(_hFont) { ::DeleteObject(_hFont); _hFont = nullptr; } }
+	void  release()                { if (_hFont) { ::DeleteObject(_hFont); _hFont = nullptr; } }
 	Font& create(const wchar_t *name, int size, bool bold=false, bool italic=false);
 	Font& create(const Info& info) { return create(info.name, info.size, info.bold, info.italic); }
 	Font& cloneFrom(const Font& font);

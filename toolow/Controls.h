@@ -191,7 +191,7 @@ public:
 	StatusBar& setText(const wchar_t *text, int iPart) { _sb.sendMessage(SB_SETTEXT, MAKEWPARAM(MAKEWORD(iPart, 0), 0), (LPARAM)text); return *this; }
 	String     getText(int iPart) const;
 	void       setIcon(HICON hIcon, int iPart)         { _sb.sendMessage(SB_SETICON, iPart, (LPARAM)hIcon); }
-	void       doResize(WPARAM wp, LPARAM lp)          { if(wp != SIZE_MINIMIZED && _sb.hWnd()) _putParts(LOWORD(lp)); }
+	void       doResize(WPARAM wp, LPARAM lp)          { if (wp != SIZE_MINIMIZED && _sb.hWnd()) _putParts(LOWORD(lp)); }
 private:
 	void _putParts(int cx);
 };
@@ -207,7 +207,7 @@ public:
 	~Icon() { this->free(); }
 
 	HICON hIcon() const          { return _hIcon; }
-	Icon& free()                 { if(_hIcon) ::DestroyIcon(_hIcon); return *this; }
+	Icon& free()                 { if (_hIcon) ::DestroyIcon(_hIcon); return *this; }
 	Icon& operator=(HICON hIcon) { _hIcon = hIcon; return *this; }
 	Icon& getFromExplorer(const wchar_t *fileExtension);
 	Icon& getFromResource(int iconId, int size, HINSTANCE hInst=nullptr);

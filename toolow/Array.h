@@ -27,24 +27,24 @@ public:
 	~Array()                       { this->resize(0).compact(); }
 
 	Array& reserve(int length) {
-		if(length > _stor) { // only grows
+		if (length > _stor) { // only grows
 			_ptr = (T*)::realloc(_ptr, sizeof(T) * length); // increase storage room
 			_stor = length;
 		}
 		return *this;
 	}
 	Array& resize(int length) {
-		if(length >= 0) {
-			for(int i = length; i < _sz; ++i) _ptr[i].~T(); // when size < _sz, call destructors
+		if (length >= 0) {
+			for (int i = length; i < _sz; ++i) _ptr[i].~T(); // when size < _sz, call destructors
 			this->reserve(length);
-			for(int i = _sz; i < length; ++i) new(_ptr + i) T; // when size > _sz, call constructors
+			for (int i = _sz; i < length; ++i) new(_ptr + i) T; // when size > _sz, call constructors
 			_sz = length;
 		}
 		return *this;
 	}
 	Array& compact() {
 		_stor = _sz;
-		if(_stor) {
+		if (_stor) {
 			_ptr = (T*)::realloc(_ptr, sizeof(T) * _stor); // decrease storage room
 		} else {
 			::free(_ptr);
@@ -55,7 +55,7 @@ public:
 
 	Array& operator=(const Array& other) {
 		this->resize(other._sz);
-		for(int i = 0; i < other._sz; ++i)
+		for (int i = 0; i < other._sz; ++i)
 			_ptr[i] = other._ptr[i]; // deep copy, call operator=() on each element
 		return *this;
 	}
@@ -67,7 +67,7 @@ public:
 	}
 	Array& operator=(initializer_list<T> vals) {
 		this->resize((int)vals.size());
-		for(int i = 0, sz = (int)vals.size(); i < sz; ++i)
+		for (int i = 0, sz = (int)vals.size(); i < sz; ++i)
 			_ptr[i] = *(vals.begin() + i); // thanks to C++11 horrible design, this thing is necessary
 		return *this;
 	}
@@ -79,9 +79,9 @@ public:
 	T&       last()                      { return _ptr[_sz - 1]; }
 
 	Array& remove(int index) {
-		if(index >= 0 && index < _sz) {
+		if (index >= 0 && index < _sz) {
 			_ptr[index].~T();
-			if(index < _sz - 1)
+			if (index < _sz - 1)
 				::memmove(_ptr + index, _ptr + index + 1, (_sz - index - 1) * sizeof(T));
 			--_sz;
 		}
@@ -89,11 +89,11 @@ public:
 	}
 
 	Array& insert(int atIndex, const T *arr, int howMany) {
-		if(atIndex > _sz) atIndex = _sz; // avoid index out of bounds
+		if (atIndex > _sz) atIndex = _sz; // avoid index out of bounds
 		this->reserve(_sz + howMany);
-		if(atIndex < _sz)
+		if (atIndex < _sz)
 			::memmove(_ptr + atIndex + howMany, _ptr + atIndex, (_sz - atIndex) * sizeof(T));
-		for(int i = 0; i < howMany; ++i)
+		for (int i = 0; i < howMany; ++i)
 			new(_ptr + atIndex + i) T(arr[i]); // call copy constructor
 		_sz += howMany;
 		return *this;
@@ -108,7 +108,7 @@ public:
 	Array& append(const T& obj)              { return this->append(&obj, 1); }
 
 	Array& reorder(int index, int newIndex) {
-		if(index >= _sz || newIndex >= _sz) return *this;
+		if (index >= _sz || newIndex >= _sz) return *this;
 		T *tmp = (T*)::_alloca(sizeof(T));
 		::memcpy(tmp, _ptr + index, sizeof(T)); // store element to be moved
 		newIndex > index ?
@@ -130,7 +130,7 @@ public:
 		// Array<int> nums;
 		// Array<float> trans = nums.transform<float>([](int i, const int& elem)->float { return (float)elem; });
 		Array<Ty> ret(_sz); // prealloc
-		for(int i = 0; i < _sz; ++i)
+		for (int i = 0; i < _sz; ++i)
 			ret[i] = callback(i, _ptr[i]); // invokes operator= on elements
 		return ret;
 	}
@@ -140,8 +140,8 @@ public:
 		// Array<float> nums;
 		// Array<float> filtered = nums.filter([](int i, const float& elem)->bool { return elem < 25; });
 		Array ret;
-		for(int i = 0; i < _sz; ++i)
-			if(callback(i, _ptr[i]))
+		for (int i = 0; i < _sz; ++i)
+			if (callback(i, _ptr[i]))
 				ret.append(_ptr[i]);
 		return ret;
 	}

@@ -31,7 +31,7 @@ namespace File
 	class Path final { // path string utilities
 	public:
 		inline static void   ChangeExtension(String& path, const wchar_t *extWithoutDot) { path[path.findrCS(L'.') + 1] = L'\0'; path.append(extWithoutDot); }
-		inline static void   TrimBackslash(String& path)             { if(!path.isEmpty() && path.endsWithCS(L'\\')) path[path.len() - 1] = L'\0'; }
+		inline static void   TrimBackslash(String& path)             { if (!path.isEmpty() && path.endsWithCS(L'\\')) path[path.len() - 1] = L'\0'; }
 		inline static String GetPath(const wchar_t *path)            { String ret = path; ret[ ret.findrCS(L'\\') ] = L'\0'; return ret; }
 		inline static String GetPath(const String& path)             { return GetPath(path.str()); }
 		inline static const wchar_t* GetFilename(const String& path) { return path.ptrAt(path.findrCS(L'\\') + 1); }

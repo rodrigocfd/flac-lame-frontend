@@ -25,7 +25,7 @@ ATOM Frame::Register(const wchar_t *className, System::Cursor cursor, int iconId
 	wc.hCursor       = LoadCursor(nullptr, MAKEINTRESOURCE(cursor));
 	wc.style         = CS_DBLCLKS;
 
-	if(iconId) {
+	if (iconId) {
 		wc.hIcon = (HICON)LoadImage(hInst, MAKEINTRESOURCE(iconId), IMAGE_ICON, 32, 32, LR_DEFAULTCOLOR);
 		wc.hIconSm = (HICON)LoadImage(hInst, MAKEINTRESOURCE(iconId), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR);
 	}
@@ -41,7 +41,7 @@ LRESULT Frame::msgHandler(UINT msg, WPARAM wp, LPARAM lp)
 LRESULT CALLBACK Frame::_WindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
 	Frame *pSelf; // in run-time, will be a pointer to the derived-most class
-	if(msg == WM_NCCREATE) {
+	if (msg == WM_NCCREATE) {
 		pSelf = (Frame*)((CREATESTRUCT*)lp)->lpCreateParams; // passed on CreateWindowEx()
 		SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)pSelf); // store pointer to object into HWND room
 		*(Window*)pSelf = hwnd; // assign hWnd member
@@ -59,10 +59,10 @@ LRESULT FramePopup::msgHandler(UINT msg, WPARAM wp, LPARAM lp)
 {
 	static Font hSysFont; // to be shared among all regular container windows
 
-	switch(msg)
+	switch (msg)
 	{
 	case WM_CREATE:
-		if(!hSysFont.hFont()) {
+		if (!hSysFont.hFont()) {
 			Font::Info nfof = Font::GetDefaultDialogFontInfo();
 			hSysFont.create(nfof);
 		}
@@ -74,8 +74,8 @@ LRESULT FramePopup::msgHandler(UINT msg, WPARAM wp, LPARAM lp)
 		break;
 
 	case WM_ACTIVATE:
-		if(!HIWORD(wp)) { // it not in minimized state
-			if(LOWORD(wp) == WA_INACTIVE)
+		if (!HIWORD(wp)) { // it not in minimized state
+			if (LOWORD(wp) == WA_INACTIVE)
 				this->_hWndCurFocus = GetFocus(); // save currently focused window
 			else
 				SetFocus(this->_hWndCurFocus); // restore focus back
@@ -140,7 +140,7 @@ int FrameApp::run(HINSTANCE hInst, int cmdShow, ATOM atom, const wchar_t *captio
 	RECT rc = { 0, 0, cxClient, cyClient };
 	AdjustWindowRect(&rc, dwStyle, hMenu != 0); // compensate different theme window borders
 
-	if(!CreateWindowEx(droppable, // hWnd is set on WM_NCCREATE
+	if (!CreateWindowEx(droppable, // hWnd is set on WM_NCCREATE
 		(LPCWSTR)MAKELONG(atom, 0), caption, dwStyle,
 		rc.left + GetSystemMetrics(SM_CXSCREEN) / 2 - cxClient / 2, // center on screen
 		rc.top + GetSystemMetrics(SM_CYSCREEN) / 2 - cyClient / 2,
@@ -155,10 +155,10 @@ int FrameApp::run(HINSTANCE hInst, int cmdShow, ATOM atom, const wchar_t *captio
 
 	MSG msg = { 0 };
 	BOOL ret = 0;
-	while((ret = GetMessage(&msg, nullptr, 0, 0)) != 0) {
-		if(ret == -1) return -1; // failure
-		if(hAccel && TranslateAccelerator(this->hWnd(), hAccel, &msg)) continue;
-		if(IsDialogMessage(this->hWnd(), &msg)) continue;
+	while ((ret = GetMessage(&msg, nullptr, 0, 0)) != 0) {
+		if (ret == -1) return -1; // failure
+		if (hAccel && TranslateAccelerator(this->hWnd(), hAccel, &msg)) continue;
+		if (IsDialogMessage(this->hWnd(), &msg)) continue;
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
@@ -167,7 +167,7 @@ int FrameApp::run(HINSTANCE hInst, int cmdShow, ATOM atom, const wchar_t *captio
 
 LRESULT FrameApp::msgHandler(UINT msg, WPARAM wp, LPARAM lp)
 {
-	switch(msg)
+	switch (msg)
 	{
 	case WM_DESTROY:
 		PostQuitMessage(0);
@@ -203,8 +203,8 @@ int FrameModal::show(Window *parent, ATOM atom, const wchar_t *caption, int cxCl
 
 	// A new loop, so caller function is blocked and awaits modal to be closed.
 	MSG msg = { 0 };
-	while(IsWindow(this->hWnd()) && GetMessage(&msg, nullptr, 0, 0)) {
-		if(!(hAccel && TranslateAccelerator(this->hWnd(), hAccel, &msg)) && !IsDialogMessage(this->hWnd(), &msg)) {
+	while (IsWindow(this->hWnd()) && GetMessage(&msg, nullptr, 0, 0)) {
+		if (!(hAccel && TranslateAccelerator(this->hWnd(), hAccel, &msg)) && !IsDialogMessage(this->hWnd(), &msg)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
@@ -214,7 +214,7 @@ int FrameModal::show(Window *parent, ATOM atom, const wchar_t *caption, int cxCl
 
 LRESULT FrameModal::msgHandler(UINT msg, WPARAM wp, LPARAM lp)
 {
-	switch(msg)
+	switch (msg)
 	{
 	case WM_CLOSE:
 		this->getParent().setEnable(true); // re-enable parent window
@@ -243,10 +243,10 @@ void FrameCtrl::create(int id, Window *parent, ATOM atom, int x, int y, int cx, 
 
 LRESULT FrameCtrl::msgHandler(UINT msg, WPARAM wp, LPARAM lp)
 {
-	switch(msg)
+	switch (msg)
 	{
 	case WM_NCPAINT:
-		if(this->_drawBorders(wp, lp)) // themed borders
+		if (this->_drawBorders(wp, lp)) // themed borders
 			return 0;
 		break;
 	}

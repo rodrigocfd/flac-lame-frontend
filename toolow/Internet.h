@@ -19,7 +19,7 @@ struct Internet
 		~Session() { close(); }
 
 		HINTERNET hSession() const { return _hSession; }
-		void close() { if(_hSession) { ::WinHttpCloseHandle(_hSession); _hSession = nullptr; } }
+		void close() { if (_hSession) { ::WinHttpCloseHandle(_hSession); _hSession = nullptr; } }
 		bool init(String *pErr=nullptr, const wchar_t *userAgent=L"TOOLOW/1.0");
 	};
 

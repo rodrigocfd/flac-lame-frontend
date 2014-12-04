@@ -16,7 +16,7 @@ public:
 	
 	HMENU hMenu() const             { return _hMenu; }
 	int   size() const              { return ::GetMenuItemCount(_hMenu); }
-	void  destroy()                 { if(_hMenu) { ::DestroyMenu(_hMenu); _hMenu = nullptr; } }
+	void  destroy()                 { if (_hMenu) { ::DestroyMenu(_hMenu); _hMenu = nullptr; } }
 	Menu  getSubmenu(int pos) const { return Menu(::GetSubMenu(_hMenu, pos)); }
 	WORD  getCmdId(int pos) const   { return ::GetMenuItemID(_hMenu, pos); }
 
@@ -56,7 +56,7 @@ public:
 	}
 private:
 	void _checkDummyEntry() {
-		if(size() == 1 && ::GetMenuItemID(_hMenu, 0) == WM_APP-2)
+		if (size() == 1 && ::GetMenuItemID(_hMenu, 0) == WM_APP-2)
 			::DeleteMenu(_hMenu, 0, MF_BYPOSITION); // delete dummy, if any
 	}
 };

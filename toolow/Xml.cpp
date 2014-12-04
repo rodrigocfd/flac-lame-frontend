@@ -20,13 +20,13 @@ static void _ReadAttrs(ComPtr<IXMLDOMNode> xmlnode, Hash<String>& attrbuf)
 	attrs->get_length(&attrCount);
 	attrbuf.reserve(attrCount);
 
-	for(long i = 0; i < attrCount; ++i) {
+	for (long i = 0; i < attrCount; ++i) {
 		ComPtr<IXMLDOMNode> attr;
 		attrs->get_item(i, &attr);
 
 		DOMNodeType type;
 		attr->get_nodeType(&type);
-		if(type == NODE_ATTRIBUTE) {
+		if (type == NODE_ATTRIBUTE) {
 			BSTR bstr;
 			attr->get_nodeName(&bstr); // get attribute name
 
@@ -46,13 +46,13 @@ static int _CountChildNodes(ComPtr<IXMLDOMNodeList> nodeList)
 	long totalCount = 0;
 	nodeList->get_length(&totalCount); // includes text and actual element nodes
 	
-	for(long i = 0; i < totalCount; ++i) {
+	for (long i = 0; i < totalCount; ++i) {
 		ComPtr<IXMLDOMNode> child;
 		nodeList->get_item(i, &child);
 
 		DOMNodeType type;
 		child->get_nodeType(&type);
-		if(type == NODE_ELEMENT)
+		if (type == NODE_ELEMENT)
 			++childCount;
 	}
 
@@ -73,7 +73,7 @@ static void _BuildNode(ComPtr<IXMLDOMNode> xmlnode, Xml::Node& nodebuf)
 	// Process children, if any.
 	VARIANT_BOOL vb;
 	xmlnode->hasChildNodes(&vb);
-	if(vb) {
+	if (vb) {
 		ComPtr<IXMLDOMNodeList> nodeList;
 		xmlnode->get_childNodes(&nodeList);
 		nodebuf.children.resize(_CountChildNodes(nodeList));
@@ -82,18 +82,18 @@ static void _BuildNode(ComPtr<IXMLDOMNode> xmlnode, Xml::Node& nodebuf)
 		long totalCount = 0;
 		nodeList->get_length(&totalCount);
 
-		for(long i = 0; i < totalCount; ++i) {
+		for (long i = 0; i < totalCount; ++i) {
 			ComPtr<IXMLDOMNode> child;
 			nodeList->get_item(i, &child);
 
 			// Node can be text or an actual child node.
 			DOMNodeType type;
 			child->get_nodeType(&type);
-			if(type == NODE_TEXT) {
+			if (type == NODE_TEXT) {
 				xmlnode->get_text(&bstr);
 				nodebuf.value.append((wchar_t*)bstr);
 				SysFreeString(bstr);
-			} else if(type == NODE_ELEMENT) {
+			} else if (type == NODE_ELEMENT) {
 				_BuildNode(child, nodebuf.children[childCount++]); // recursively
 			} else {
 				// (L"Unhandled node type: %d.\n", type);
@@ -112,10 +112,10 @@ Array<Xml::Node*> Xml::Node::getChildrenByName(const wchar_t *elemName)
 {
 	int howMany = 0;
 	int firstIndex = -1, lastIndex = -1;
-	for(int i = 0; i < this->children.size(); ++i) {
-		if(this->children[i].name.equalsCI(elemName)) { // case-insensitive match
+	for (int i = 0; i < this->children.size(); ++i) {
+		if (this->children[i].name.equalsCI(elemName)) { // case-insensitive match
 			++howMany;
-			if(firstIndex == -1) firstIndex = i;
+			if (firstIndex == -1) firstIndex = i;
 			lastIndex = i;
 		}
 	}
@@ -123,8 +123,8 @@ Array<Xml::Node*> Xml::Node::getChildrenByName(const wchar_t *elemName)
 	Array<Node*> nodeBuf(howMany); // alloc return array
 
 	howMany = 0;
-	for(int i = firstIndex; i <= lastIndex; ++i)
-		if(this->children[i].name.equalsCI(elemName))
+	for (int i = firstIndex; i <= lastIndex; ++i)
+		if (this->children[i].name.equalsCI(elemName))
 			nodeBuf[howMany++] = &this->children[i];
 	
 	return nodeBuf;
@@ -133,8 +133,8 @@ Array<Xml::Node*> Xml::Node::getChildrenByName(const wchar_t *elemName)
 Xml::Node* Xml::Node::firstChildByName(const wchar_t *elemName)
 {
 	int iChild = -1;
-	for(int i = 0; i < this->children.size(); ++i) {
-		if(this->children[i].name.equalsCI(elemName)) { // case-insensitive match
+	for (int i = 0; i < this->children.size(); ++i) {
+		if (this->children[i].name.equalsCI(elemName)) { // case-insensitive match
 			iChild = i;
 			break;
 		}
@@ -173,6 +173,6 @@ bool Xml::parse(const wchar_t *str)
 bool Xml::load(const wchar_t *file, String *pErr)
 {
 	File::Text fin;
-	if(!fin.load(file, pErr)) return false;
+	if (!fin.load(file, pErr)) return false;
 	return this->parse(fin.text()->str());
 }

@@ -29,12 +29,12 @@ static HWND  _hWndParent = nullptr;
 static LRESULT CALLBACK _msgBoxHookProc(int code, WPARAM wp, LPARAM lp)
 {
 	// http://www.codeguru.com/cpp/w-p/win32/messagebox/print.php/c4541
-	if(code == HCBT_ACTIVATE)
+	if (code == HCBT_ACTIVATE)
 	{
 		HWND hMsgbox = (HWND)wp;
 		RECT rcMsgbox, rcParent;
 
-		if(hMsgbox && _hWndParent && GetWindowRect(hMsgbox, &rcMsgbox) && GetWindowRect(_hWndParent, &rcParent))
+		if (hMsgbox && _hWndParent && GetWindowRect(hMsgbox, &rcMsgbox) && GetWindowRect(_hWndParent, &rcParent))
 		{
 			RECT  rcScreen = { 0 };
 			POINT pos = { 0 };
@@ -46,13 +46,13 @@ static LRESULT CALLBACK _msgBoxHookProc(int code, WPARAM wp, LPARAM lp)
 			pos.y =	rcParent.top + (rcParent.bottom - rcParent.top) / 2 - (rcMsgbox.bottom - rcMsgbox.top) / 2;
 
 			// Screen out-of-bounds corrections.
-			if(pos.x < 0)
+			if (pos.x < 0)
 				pos.x = 0;
-			else if(pos.x + (rcMsgbox.right - rcMsgbox.left) > rcScreen.right)
+			else if (pos.x + (rcMsgbox.right - rcMsgbox.left) > rcScreen.right)
 				pos.x = rcScreen.right - (rcMsgbox.right - rcMsgbox.left);
-			if(pos.y < 0)
+			if (pos.y < 0)
 				pos.y = 0;
-			else if(pos.y + (rcMsgbox.bottom - rcMsgbox.top) > rcScreen.bottom)
+			else if (pos.y + (rcMsgbox.bottom - rcMsgbox.top) > rcScreen.bottom)
 				pos.y = rcScreen.bottom - (rcMsgbox.bottom - rcMsgbox.top);
 
 			MoveWindow(hMsgbox, pos.x, pos.y,
@@ -79,7 +79,7 @@ static Array<wchar_t> _formatFileFilter(const wchar_t *filterWithPipes)
 
 	Array<wchar_t> ret(lstrlen(filterWithPipes) + 2); // two terminating nulls
 	ret.last() = L'\0';
-	for(int i = 0; i < ret.size() - 1; ++i)
+	for (int i = 0; i < ret.size() - 1; ++i)
 		ret[i] = (filterWithPipes[i] != L'|') ? filterWithPipes[i] : L'\0';
 	return ret;
 }
@@ -99,7 +99,7 @@ bool WindowPopup::getFileOpen(const wchar_t *filter, String& buf)
 	ofn.Flags       = OFN_EXPLORER | OFN_ENABLESIZING | OFN_FILEMUSTEXIST;// | OFN_HIDEREADONLY;
 
 	bool ret = GetOpenFileName(&ofn) != 0;
-	if(ret) buf = tmpBuf;
+	if (ret) buf = tmpBuf;
 	return ret;
 }
 
@@ -118,20 +118,20 @@ bool WindowPopup::getFileOpen(const wchar_t *filter, Array<String>& arrBuf)
 	ofn.nMaxFile    = multiBuf.size() + 1; // including terminating null
 	ofn.Flags       = OFN_FILEMUSTEXIST | OFN_ALLOWMULTISELECT | OFN_EXPLORER | OFN_ENABLESIZING;
 
-	if(GetOpenFileName(&ofn)) {
+	if (GetOpenFileName(&ofn)) {
 		Array<String> strs = String::ExplodeMulti(&multiBuf[0]);
-		if(!strs.size()) {
+		if (!strs.size()) {
 			dbg(L"No multiple strings on GetOpenFileName().\n");
 			return false;
 		}
 
-		if(strs.size() == 1) { // if user selected only 1 file, the string is the full path, and that's all
+		if (strs.size() == 1) { // if user selected only 1 file, the string is the full path, and that's all
 			arrBuf.append(strs[0]);
 		} else { // user selected 2 or more files
 			String *basePath = &strs[0]; // 1st string is the base path; others are the filenames
 			arrBuf.resize(strs.size() - 1); // alloc return buffer
 
-			for(int i = 0; i < strs.size() - 1; ++i) {
+			for (int i = 0; i < strs.size() - 1; ++i) {
 				arrBuf[i].reserve(basePath->len() + strs[i + 1].len() + 1); // room for backslash
 				arrBuf[i] = (*basePath);
 				arrBuf[i].append(L"\\").append(strs[i + 1]); // concat folder + file
@@ -144,7 +144,7 @@ bool WindowPopup::getFileOpen(const wchar_t *filter, Array<String>& arrBuf)
 	}
 
 	DWORD errNo = CommDlgExtendedError();
-	if(errNo == FNERR_BUFFERTOOSMALL)
+	if (errNo == FNERR_BUFFERTOOSMALL)
 		dbg(L"GetOpenFileName: buffer too small (%d bytes).", multiBuf.size() + 1);
 	else
 		dbg(L"GetOpenFileName: failed with error %d.", errNo);
@@ -157,7 +157,7 @@ bool WindowPopup::getFileSave(const wchar_t *filter, String& buf, const wchar_t 
 	wchar_t tmpBuf[MAX_PATH] = { 0 };
 	Array<wchar_t> zfilter = _formatFileFilter(filter);
 
-	if(defFile)
+	if (defFile)
 		lstrcpy(tmpBuf, defFile);
 
 	ofn.lStructSize = sizeof(ofn);
@@ -169,7 +169,7 @@ bool WindowPopup::getFileSave(const wchar_t *filter, String& buf, const wchar_t 
 	ofn.lpstrDefExt = L"txt"; // apparently could be anything, will just force append of combo selected extension
 
 	bool ret = GetSaveFileName(&ofn) != 0;
-	if(ret) buf = tmpBuf;
+	if (ret) buf = tmpBuf;
 	return ret;
 }
 
@@ -178,7 +178,7 @@ bool WindowPopup::getFolderChoose(String& buf)
 	CoInitialize(nullptr);
 
 	//LPITEMIDLIST pidlRoot = 0;
-	//if(defFolder)
+	//if (defFolder)
 		//SHParseDisplayName(defFolder, nullptr, &pidlRoot, 0, nullptr);
 
 	BROWSEINFO bi = { 0 };
@@ -186,11 +186,11 @@ bool WindowPopup::getFolderChoose(String& buf)
 	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
 
 	PIDLIST_ABSOLUTE pidl = SHBrowseForFolder(&bi);
-	if(!pidl)
+	if (!pidl)
 		return false; // user cancelled
 
 	wchar_t tmpbuf[MAX_PATH] = { 0 };
-	if(!SHGetPathFromIDList(pidl, tmpbuf))
+	if (!SHGetPathFromIDList(pidl, tmpbuf))
 		return false; // some weird error
 
 	CoUninitialize();
@@ -202,7 +202,7 @@ void WindowPopup::setXButton(bool enable)
 {
 	// Enable/disable the X button to close the window; has no effect on Alt+F4.
 	HMENU hMenu = GetSystemMenu(this->hWnd(), FALSE);
-	if(hMenu) {
+	if (hMenu) {
 		UINT dwExtra = enable ? MF_ENABLED : (MF_DISABLED | MF_GRAYED);
 		EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | dwExtra);
 	}
@@ -212,7 +212,7 @@ Array<String> WindowPopup::getDroppedFiles(HDROP hDrop)
 {
 	Array<String> ret(DragQueryFile(hDrop, 0xFFFFFFFF, 0, 0)); // alloc return array
 
-	for(int i = 0; i < ret.size(); ++i) {
+	for (int i = 0; i < ret.size(); ++i) {
 		ret[i].reserve(DragQueryFile(hDrop, i, 0, 0)); // alloc path string
 		DragQueryFile(hDrop, i, ret[i].ptrAt(0), ret[i].reserved() + 1);
 	}
@@ -223,10 +223,10 @@ Array<String> WindowPopup::getDroppedFiles(HDROP hDrop)
 
 static LRESULT CALLBACK _wheelHoverProc(HWND hChild, UINT msg, WPARAM wp, LPARAM lp, UINT_PTR idSubclass, DWORD_PTR refData)
 {
-	switch(msg)
+	switch (msg)
 	{
 	case WM_MOUSEWHEEL:
-		if(!(LOWORD(wp) & 0x0800)) { // bitflag not set, this is the first and unprocessed WM_MOUSEWHEEL passage
+		if (!(LOWORD(wp) & 0x0800)) { // bitflag not set, this is the first and unprocessed WM_MOUSEWHEEL passage
 			HWND hParent = (HWND)refData;
 			POINT pt = { LOWORD(lp), HIWORD(lp) };
 			ScreenToClient(hParent, &pt); // to client coordinates relative to parent
@@ -283,7 +283,7 @@ WindowCtrl::~WindowCtrl()
 bool WindowCtrl::_drawBorders(WPARAM wp, LPARAM lp)
 {
 	// Intended to be called within WM_NCPAINT processing.
-	if((GetWindowLongPtr(this->hWnd(), GWL_EXSTYLE) & WS_EX_CLIENTEDGE) && IsThemeActive())
+	if ((GetWindowLongPtr(this->hWnd(), GWL_EXSTYLE) & WS_EX_CLIENTEDGE) && IsThemeActive())
 	{
 		DefWindowProc(this->hWnd(), WM_NCPAINT, wp, lp); // this will make system draw the scrollbar for us; days of struggling until this enlightenment
 

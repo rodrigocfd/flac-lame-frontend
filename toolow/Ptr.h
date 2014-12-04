@@ -17,7 +17,7 @@ public:
 	Ptr(const Ptr& other) : _ptr(nullptr), _counter(nullptr) { operator=(other); }
 
 	~Ptr() {
-		if(_counter && !--(*_counter)) {
+		if (_counter && !--(*_counter)) {
 			delete _ptr;     _ptr = nullptr;
 			delete _counter; _counter = nullptr;
 		}
@@ -25,7 +25,7 @@ public:
 
 	Ptr& operator=(T *ptr) {
 		this->~Ptr();
-		if(ptr) {
+		if (ptr) {
 			_ptr = ptr; // take ownership
 			_counter = new int(1); // start counter
 		}
@@ -33,11 +33,11 @@ public:
 	}
 
 	Ptr& operator=(const Ptr& other) {
-		if(this != &other) {
+		if (this != &other) {
 			this->~Ptr();
 			_ptr = other._ptr;
 			_counter = other._counter;
-			if(_counter) ++(*_counter);
+			if (_counter) ++(*_counter);
 		}
 		return *this;
 	}
@@ -59,16 +59,16 @@ public:
 	~ComPtr()                   { this->release(); }
 	
 	ComPtr& operator=(const ComPtr& other) {
-		if(this != &other) {
+		if (this != &other) {
 			this->~ComPtr();
 			_ptr = other._ptr;
-			if(_ptr) _ptr->AddRef();
+			if (_ptr) _ptr->AddRef();
 		}
 		return *this;
 	}
 	
 	void release() {
-		if(_ptr) {
+		if (_ptr) {
 			_ptr->Release();
 			_ptr = nullptr;
 		}

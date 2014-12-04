@@ -43,14 +43,14 @@ public:
 	const T& operator[](const String& key) const  { return operator[](key.str()); }
 	const T& operator[](const wchar_t *key) const {
 		int idx = this->_byKey(key);
-		if(idx == -1) // key not found
+		if (idx == -1) // key not found
 			return _elems[0].val; // not right... lame C++ won't allow null references!
 		return _elems[idx].val;
 	}
 	T& operator[](const String& key)  { return operator[](key.str()); }
 	T& operator[](const wchar_t *key) {
 		int idx = this->_byKey(key);
-		if(idx == -1) { // key not found, let's insert it
+		if (idx == -1) { // key not found, let's insert it
 			_elems.append(Elem(key)); // create entry with default constructor
 			idx = _elems.size() - 1;
 		}
@@ -61,20 +61,20 @@ public:
 		// Example usage:
 		// Hash<int> nums;
 		// nums.each([](Hash<int>::Elem& elem) { elem.val += 10; });
-		for(int i = 0; i < _elems.size(); ++i)
+		for (int i = 0; i < _elems.size(); ++i)
 			callback(_elems[i]);
 	}
 	void each(function<void(const Elem& elem)> callback) const {
 		// Example usage:
 		// Hash<int> nums;
 		// nums.each([](const Hash<int>::Elem& elem) { int x = elem.val; });
-		for(int i = 0; i < _elems.size(); ++i)
+		for (int i = 0; i < _elems.size(); ++i)
 			callback(_elems[i]);
 	}
 private:
 	int _byKey(const wchar_t *keyName) const {
-		for(int i = 0; i < _elems.size(); ++i) // linear search
-			if(_elems[i].key.equalsCS(keyName)) // an empty string is also a valid key
+		for (int i = 0; i < _elems.size(); ++i) // linear search
+			if (_elems[i].key.equalsCS(keyName)) // an empty string is also a valid key
 				return i;
 		return -1; // not found
 	}

@@ -31,9 +31,9 @@ void dbg(const String& s)
 
 String& String::operator=(const wchar_t *s)
 {
-	if(s) {
+	if (s) {
 		int newLen = lstrlen(s);
-		if(!_arr.size() && !newLen) return *this; // still unallocated and no new string: do nothing
+		if (!_arr.size() && !newLen) return *this; // still unallocated and no new string: do nothing
 		this->reserve(newLen); // also places terminating null
 		memcpy(&_arr[0], s, sizeof(wchar_t) * newLen);
 	}
@@ -42,10 +42,10 @@ String& String::operator=(const wchar_t *s)
 
 String& String::reserve(int numCharsWithoutNull)
 {
-	if(numCharsWithoutNull > _arr.size() - 1) { // grow only
+	if (numCharsWithoutNull > _arr.size() - 1) { // grow only
 		bool firstAlloc = _arr.size() == 0;
 		_arr.resize(numCharsWithoutNull + 1); // also make room for terminating null
-		if(firstAlloc)
+		if (firstAlloc)
 			_arr[0] = L'\0';
 	}
 	_arr[numCharsWithoutNull] = L'\0'; // place terminating null, always
@@ -54,7 +54,7 @@ String& String::reserve(int numCharsWithoutNull)
 
 String& String::append(const wchar_t *s)
 {
-	if(!_arr.size()) return operator=(s);
+	if (!_arr.size()) return operator=(s);
 	int ourLen = this->len();
 	int theirLen = lstrlen(s);
 	this->reserve(ourLen + theirLen); // also places terminating null
@@ -66,13 +66,13 @@ String& String::append(initializer_list<const wchar_t*> arr)
 {
 	int *newLens = (int*)_alloca(sizeof(int) * arr.size()); // lenghts of each string to be appended
 	int moreLen = 0; // sum of all lengthts
-	for(int i = 0, tot = (int)arr.size(); i < tot; ++i)
+	for (int i = 0, tot = (int)arr.size(); i < tot; ++i)
 		moreLen += ( newLens[i] = lstrlen(*(arr.begin() + i)) );
 	
 	int ourLen = this->len();
 	this->reserve(ourLen + moreLen); // make room for all strings to be appended
 	wchar_t *pRun = &_arr[ourLen];
-	for(int i = 0, tot = (int)arr.size(); i < tot; ++i) {
+	for (int i = 0, tot = (int)arr.size(); i < tot; ++i) {
 		memcpy(pRun, *(arr.begin() + i), sizeof(wchar_t) * newLens[i]); // copy new string into place
 		pRun += newLens[i];
 	}
@@ -90,8 +90,8 @@ String& String::append(wchar_t ch)
 
 String& String::insert(int at, const wchar_t *s)
 {
-	if(at < 0) at = 0;
-	if(at >= this->len()) return this->append(s);
+	if (at < 0) at = 0;
+	if (at >= this->len()) return this->append(s);
 	_arr.insert(at, s, lstrlen(s));
 	return *this;
 }
@@ -101,13 +101,13 @@ String String::substr(int start) const
 	// Following the behaviour of http://www.php.net/substr .
 	int ourLen = this->len();
 	String ret;
-	if(this->isEmpty()) {
+	if (this->isEmpty()) {
 		return ret;
-	} else if(start >= 0) {
-		if(start > ourLen - 1) return ret; // index out of bounds
+	} else if (start >= 0) {
+		if (start > ourLen - 1) return ret; // index out of bounds
 		ret.copyFrom(&_arr[start], ourLen - start);
 	} else {
-		if(-start > ourLen) return ret; // index out of bounds
+		if (-start > ourLen) return ret; // index out of bounds
 		ret.copyFrom(&_arr[ourLen + start], -start);
 	}
 	return ret;
@@ -118,24 +118,24 @@ String String::substr(int start, int length) const
 	// Following the behaviour of http://www.php.net/substr .
 	int ourLen = this->len();
 	String ret;
-	if(!length || this->isEmpty()) {
+	if (!length || this->isEmpty()) {
 		return ret;
-	} else if(start >= 0) { // positive start
-		if(start > ourLen - 1) return ret; // index out of bounds
-		if(length > 0) {
-			if(start + length > ourLen) length = ourLen - start;
+	} else if (start >= 0) { // positive start
+		if (start > ourLen - 1) return ret; // index out of bounds
+		if (length > 0) {
+			if (start + length > ourLen) length = ourLen - start;
 			ret.copyFrom(&_arr[start], length);
 		} else {
-			if(-length >= ourLen - start) return ret; // nothing to copy
+			if (-length >= ourLen - start) return ret; // nothing to copy
 			ret.copyFrom(&_arr[start], ourLen - start + length);
 		}
 	} else { // negative start
-		if(-start > ourLen) return ret; // index out of bounds
-		if(length > 0) {
-			if(length > -start) length = -start;
+		if (-start > ourLen) return ret; // index out of bounds
+		if (length > 0) {
+			if (length > -start) length = -start;
 			ret.copyFrom(&_arr[ourLen + start], length);
 		} else {
-			if(-length >= -start) return ret; // nothing to copy
+			if (-length >= -start) return ret; // nothing to copy
 			ret.copyFrom(&_arr[ourLen + start], (-start) + length);
 		}
 	}
@@ -163,20 +163,20 @@ String& String::trim()
 	int iFirst = 0, iLast = len - 1; // bounds
 	bool onlySpaces = true;
 	
-	for(int i = 0; i < len; ++i) {
-		if(!iswspace(_arr[i])) {
+	for (int i = 0; i < len; ++i) {
+		if (!iswspace(_arr[i])) {
 			iFirst = i;
 			onlySpaces = false;
 			break;
 		}
 	}
-	if(onlySpaces) {
-		if(_arr.size()) _arr[0] = L'\0';
+	if (onlySpaces) {
+		if (_arr.size()) _arr[0] = L'\0';
 		return *this;
 	}
 
-	for(int i = len - 1; i >= 0; --i) {
-		if(!iswspace(_arr[i])) {
+	for (int i = len - 1; i >= 0; --i) {
+		if (!iswspace(_arr[i])) {
 			iLast = i;
 			break;
 		}
@@ -188,15 +188,15 @@ String& String::trim()
 
 String& String::removeDiacritics()
 {
-	if(!this->isEmpty()) {
+	if (!this->isEmpty()) {
 		const wchar_t *diacritics   = L"ÁáÀàÃãÂâÄäÉéÈèÊêËëÍíÌìÎîÏïÓóÒòÕõÔôÖöÚúÙùÛûÜüÇçÅåÐðÑñØøÝýªº¹²³¢";
 		const wchar_t *replacements = L"AaAaAaAaAaEeEeEeEeIiIiIiIiOoOoOoOoOoUuUuUuUuCcAaDdNnOoYyao123c";
 
 		wchar_t *pTxt = &_arr[0];
-		while(*pTxt) {
+		while (*pTxt) {
 			const wchar_t *pDiac = diacritics, *pRepl = replacements;
-			while(*pDiac) {
-				if(*pTxt == *pDiac) *pTxt = *pRepl; // in-place replacement
+			while (*pDiac) {
+				if (*pTxt == *pDiac) *pTxt = *pRepl; // in-place replacement
 				++pDiac; ++pRepl;
 			}
 			++pTxt;
@@ -208,18 +208,18 @@ String& String::removeDiacritics()
 bool String::endsWithCS(wchar_t ch) const
 {
 	int ourLen = this->len();
-	if(ourLen) return _arr[ourLen - 1] == ch;
+	if (ourLen) return _arr[ourLen - 1] == ch;
 	return false;
 }
 
 bool String::isInt() const
 {
 	int len = this->len();
-	if(!len) return false;
+	if (!len) return false;
 
 	bool is = true;
-	for(int i = 0; i < len; ++i) {
-		if(!( _arr[i] >= L'0' && _arr[i] <= L'9' )) {
+	for (int i = 0; i < len; ++i) {
+		if (!( _arr[i] >= L'0' && _arr[i] <= L'9' )) {
 			is = false;
 			break;
 		}
@@ -230,18 +230,18 @@ bool String::isInt() const
 bool String::isFloat() const
 {
 	int len = this->len();
-	if(!len) return false;
+	if (!len) return false;
 
 	bool is = true, dotFound = false;
-	for(int i = 0; i < len; ++i) {
-		if(_arr[i] == L'.') {
-			if(dotFound) {
+	for (int i = 0; i < len; ++i) {
+		if (_arr[i] == L'.') {
+			if (dotFound) {
 				is = false;
 				break;
 			} else {
 				dotFound = true; // allows only 1 dot character
 			}
-		} else if(!( _arr[i] >= L'0' && _arr[i] <= L'9' )) {
+		} else if (!( _arr[i] >= L'0' && _arr[i] <= L'9' )) {
 			is = false;
 			break;
 		}
@@ -252,21 +252,21 @@ bool String::isFloat() const
 int String::findCS(wchar_t ch) const
 {
 	const wchar_t *p = wcschr(this->str(), ch);
-	if(!p) return -1; // not found
+	if (!p) return -1; // not found
 	return (int)(p - &_arr[0]); // return index of position
 }
 
 int String::findrCS(wchar_t ch) const
 {
 	const wchar_t *p = wcsrchr(this->str(), ch);
-	if(!p) return -1; // not found
+	if (!p) return -1; // not found
 	return (int)(p - &_arr[0]); // return index of position
 }
 
 String& String::invert()
 {
-	if(_arr.size()) {
-		for(int i = 0, j = this->len() - 1; i < j; ++i, --j) {
+	if (_arr.size()) {
+		for (int i = 0, j = this->len() - 1; i < j; ++i, --j) {
 			wchar_t ch = _arr[i];
 			_arr[i] = _arr[j];
 			_arr[j] = ch;
@@ -280,10 +280,10 @@ Array<String> String::explode(const wchar_t *delimiters) const
 	// Count how many pieces we'll have after exploding.
 	int num = 0;
 	const wchar_t *pBase = &_arr[0];
-	for(;;) {
+	for (;;) {
 		int lenSub = (int)wcscspn(pBase, delimiters);
-		if(lenSub) ++num;
-		if(pBase[lenSub] == L'\0') break;
+		if (lenSub) ++num;
+		if (pBase[lenSub] == L'\0') break;
 		pBase += lenSub + 1;
 	}
 	
@@ -292,10 +292,10 @@ Array<String> String::explode(const wchar_t *delimiters) const
 	// Grab each substring after explosion.
 	num = 0;
 	pBase = &_arr[0];
-	for(;;) {
+	for (;;) {
 		int lenSub = (int)wcscspn(pBase, delimiters);
-		if(lenSub) ret[num++].copyFrom(pBase, lenSub);
-		if(pBase[lenSub] == L'\0') break;
+		if (lenSub) ret[num++].copyFrom(pBase, lenSub);
+		if (pBase[lenSub] == L'\0') break;
 		pBase += lenSub + 1;
 	}
 	return ret;
@@ -313,7 +313,7 @@ String String::Fmt(const wchar_t *fmt, ...)
 String String::ParseUtf8(const BYTE *data, int length)
 {
 	String ret;
-	if(data && length) {
+	if (data && length) {
 		int neededLen = MultiByteToWideChar(CP_UTF8, 0, (const char*)data, length, 0, 0);
 		ret.reserve(neededLen);
 		MultiByteToWideChar(CP_UTF8, 0, (const char*)data, length, ret.ptrAt(0), neededLen);
@@ -329,22 +329,22 @@ Array<String> String::ExplodeQuoted(const wchar_t *quotedStr)
 	// Count number of strings.
 	int numStrings = 0;
 	const wchar_t *pRun = quotedStr;
-	while(*pRun) {
-		if(*pRun == L'\"') { // begin of quoted string
+	while (*pRun) {
+		if (*pRun == L'\"') { // begin of quoted string
 			++pRun; // point to 1st char of string
-			for(;;) {
-				if(!*pRun) {
+			for (;;) {
+				if (!*pRun) {
 					break; // won't compute open-quoted
-				} else if(*pRun == L'\"') {
+				} else if (*pRun == L'\"') {
 					++pRun; // point to 1st char after closing quote
 					++numStrings;
 					break;
 				}
 				++pRun;
 			}
-		} else if(!iswspace(*pRun)) { // 1st char of non-quoted string
+		} else if (!iswspace(*pRun)) { // 1st char of non-quoted string
 			++pRun; // point to 2nd char of string
-			while(*pRun && !iswspace(*pRun) && *pRun != L'\"') ++pRun; // passed string
+			while (*pRun && !iswspace(*pRun) && *pRun != L'\"') ++pRun; // passed string
 			++numStrings;
 		} else {
 			++pRun; // some white space
@@ -358,14 +358,14 @@ Array<String> String::ExplodeQuoted(const wchar_t *quotedStr)
 	pRun = quotedStr;
 	const wchar_t *pBase;
 	int i = 0;
-	while(*pRun) {
-		if(*pRun == L'\"') { // begin of quoted string
+	while (*pRun) {
+		if (*pRun == L'\"') { // begin of quoted string
 			++pRun; // point to 1st char of string
 			pBase = pRun;
-			for(;;) {
-				if(!*pRun) {
+			for (;;) {
+				if (!*pRun) {
 					break; // won't compute open-quoted
-				} else if(*pRun == L'\"') {
+				} else if (*pRun == L'\"') {
 					ret[i].copyFrom(pBase, (int)(pRun - pBase)); // copy to buffer
 					++i; // next string
 
@@ -374,10 +374,10 @@ Array<String> String::ExplodeQuoted(const wchar_t *quotedStr)
 				}
 				++pRun;
 			}
-		} else if(!iswspace(*pRun)) { // 1st char of non-quoted string
+		} else if (!iswspace(*pRun)) { // 1st char of non-quoted string
 			pBase = pRun;
 			++pRun; // point to 2nd char of string
-			while(*pRun && !iswspace(*pRun) && *pRun != L'\"') ++pRun; // passed string
+			while (*pRun && !iswspace(*pRun) && *pRun != L'\"') ++pRun; // passed string
 			
 			ret[i].copyFrom(pBase, (int)(pRun - pBase)); // copy to buffer
 			++i; // next string
@@ -398,7 +398,7 @@ Array<String> String::ExplodeMulti(const wchar_t *multiStr)
 	// Count number of null-delimited strings; string end with double null.
 	int numStrings = 0;
 	const wchar_t *pRun = multiStr;
-	while(*pRun) {
+	while (*pRun) {
 		++numStrings;
 		pRun += lstrlen(pRun) + 1;
 	}
@@ -408,7 +408,7 @@ Array<String> String::ExplodeMulti(const wchar_t *multiStr)
 
 	// Copy each string.	
 	pRun = multiStr;
-	for(int i = 0; i < numStrings; ++i) {
+	for (int i = 0; i < numStrings; ++i) {
 		ret[i] = pRun;
 		pRun += lstrlen(pRun) + 1;
 	}
@@ -418,39 +418,39 @@ Array<String> String::ExplodeMulti(const wchar_t *multiStr)
 
 bool String::_beginsWith(const wchar_t *s, bool isCS) const
 {
-	if(this->isEmpty()) return false;
+	if (this->isEmpty()) return false;
 
 	int theirLen = lstrlen(s);
-	if(theirLen > this->len()) return false;
+	if (theirLen > this->len()) return false;
 
 	return _Compare(&_arr[0], s, isCS, theirLen) == 0;
 }
 
 bool String::_endsWith(const wchar_t *s, bool isCS) const
 {
-	if(this->isEmpty()) return false;
+	if (this->isEmpty()) return false;
 
 	int ourLen = this->len();
 	int theirLen = lstrlen(s);
-	if(theirLen > ourLen) return false;
+	if (theirLen > ourLen) return false;
 
 	return _Compare(&_arr[ourLen - theirLen], s, isCS) == 0;
 }
 
 String& String::_replace(const wchar_t *target, const wchar_t *replacement, bool isCS)
 {
-	if(!target || !replacement || this->isEmpty()) return *this;
+	if (!target || !replacement || this->isEmpty()) return *this;
 
 	int ourLen = this->len(),
 		targLen = lstrlen(target),
 		replLen = lstrlen(replacement);
 	
-	if(!targLen || targLen > ourLen) return *this;
+	if (!targLen || targLen > ourLen) return *this;
 
 	// Count occurrences of target.
 	int occurrences = 0;
 	const wchar_t *p = &_arr[0];
-	while(p = _Find(p, target, isCS)) {
+	while (p = _Find(p, target, isCS)) {
 		++occurrences;
 		p += targLen; // go beyond
 	}
@@ -463,7 +463,7 @@ String& String::_replace(const wchar_t *target, const wchar_t *replacement, bool
 	wchar_t *pFinBuf = &finalBuf[0];
 	const wchar_t *base = &_arr[0], *orig = &_arr[0];
 	p = &_arr[0];
-	while(p = _Find(p, target, isCS)) {
+	while (p = _Find(p, target, isCS)) {
 		memcpy(pFinBuf, orig, sizeof(wchar_t) * (p - base)); // copy chars until before replacement
 		pFinBuf += p - base;
 		memcpy(pFinBuf, replacement, sizeof(wchar_t) * replLen);
@@ -490,14 +490,14 @@ String String::_Formatv(const wchar_t *fmt, va_list args)
 
 wchar_t String::_ChangeCase(wchar_t ch, bool toUpper)
 {
-	if(toUpper && (
+	if (toUpper && (
 		(ch >= L'a' && ch <= L'z') ||
 		(ch >= L'à' && ch <= L'ö') ||
 		(ch >= L'ø' && ch <= L'þ') ))
 	{
 		return ch - 32;
 	}
-	else if(!toUpper && (
+	else if (!toUpper && (
 		(ch >= L'A' && ch <= L'Z') ||
 		(ch >= L'À' && ch <= L'Ö') ||
 		(ch >= L'Ø' && ch <= L'Þ') ))
@@ -509,9 +509,9 @@ wchar_t String::_ChangeCase(wchar_t ch, bool toUpper)
 
 wchar_t* String::_ChangeCase(wchar_t *txt, bool toUpper)
 {
-	if(txt) {
+	if (txt) {
 		wchar_t *pTxt = txt;
-		while(*pTxt) {
+		while (*pTxt) {
 			*pTxt = _ChangeCase(*pTxt, toUpper);
 			++pTxt;
 		}
@@ -521,24 +521,24 @@ wchar_t* String::_ChangeCase(wchar_t *txt, bool toUpper)
 
 int String::_Compare(const wchar_t *a, const wchar_t *b, bool isCS, int numCharsToSee)
 {
-	if(!a && !b) return 0;
-	if(!a) return -1; else if(!b) return 1; // different strings
+	if (!a && !b) return 0;
+	if (!a) return -1; else if (!b) return 1; // different strings
 
 	int count = 0;
-	for(;;) {
-		if(!*a && !*b) return 0; // end of both strings reached
+	for (;;) {
+		if (!*a && !*b) return 0; // end of both strings reached
 
-		if(isCS && *a != *b) {
+		if (isCS && *a != *b) {
 			return (int)(*a - *b); // different strings
-		} else if(!isCS) {
+		} else if (!isCS) {
 			wchar_t aa = _ChangeCase(*a, true), // cache uppercase
 				bb = _ChangeCase(*b, true);
-			if(aa != bb)
+			if (aa != bb)
 				return aa - bb; // different strings
 		}
 
 		++a; ++b; ++count;
-		if(numCharsToSee && count == numCharsToSee) return 0;
+		if (numCharsToSee && count == numCharsToSee) return 0;
 	}
 	return -42; // never happens
 }
@@ -546,18 +546,18 @@ int String::_Compare(const wchar_t *a, const wchar_t *b, bool isCS, int numChars
 const wchar_t* String::_Find(const wchar_t *full, const wchar_t *what, bool isCS)
 {
 	int fullLen = lstrlen(full), whatLen = lstrlen(what);
-	if(!fullLen || !whatLen || whatLen > fullLen) return nullptr;
+	if (!fullLen || !whatLen || whatLen > fullLen) return nullptr;
 
 	const wchar_t *ourBase = full;
-	while(*ourBase) {
+	while (*ourBase) {
 		const wchar_t *ours = ourBase, *theirs = what;
-		for(;;) {			
-			if(isCS && *ours != *theirs) break;
-			else if(!isCS && _ChangeCase(*ours, true) != _ChangeCase(*theirs, true)) break;
+		for (;;) {			
+			if (isCS && *ours != *theirs) break;
+			else if (!isCS && _ChangeCase(*ours, true) != _ChangeCase(*theirs, true)) break;
 
 			++ours; ++theirs;
-			if(!*ours) return nullptr; // not found
-			if(!*theirs) return ourBase;
+			if (!*ours) return nullptr; // not found
+			if (!*theirs) return ourBase;
 		}
 		++ourBase;
 	}

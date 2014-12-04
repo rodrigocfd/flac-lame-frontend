@@ -47,8 +47,8 @@ public:
 	String&        copyFrom(const wchar_t *src, int numChars);
 	String&        appendFrom(const wchar_t *src, int numChars);
 	String&        trim();
-	String&        toUpper() { if(!isEmpty()) _ChangeCase(&_arr[0], true); return *this; }
-	String&        toLower() { if(!isEmpty()) _ChangeCase(&_arr[0], false); return *this; }
+	String&        toUpper() { if (!isEmpty()) _ChangeCase(&_arr[0], true); return *this; }
+	String&        toLower() { if (!isEmpty()) _ChangeCase(&_arr[0], false); return *this; }
 	String&        removeDiacritics();
 	bool           equalsCS(const wchar_t *s) const    { return (isEmpty() && !s) ? true : CompareCS(&_arr[0], s) == 0; }
 	bool           equalsCS(const String& other) const { return equalsCS(other.str()); }

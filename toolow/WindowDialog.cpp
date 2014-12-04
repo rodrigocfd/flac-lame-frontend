@@ -20,7 +20,7 @@ INT_PTR Dialog::msgHandler(UINT msg, WPARAM wp, LPARAM lp)
 INT_PTR CALLBACK Dialog::_DialogProc(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 {
 	Dialog *pSelf; // in run-time, will be a pointer to the derived-most class
-	if(msg == WM_INITDIALOG) {
+	if (msg == WM_INITDIALOG) {
 		pSelf = (Dialog*)lp; // passed on CreateDialogParam() or DialogBoxParam()
 		SetWindowLongPtr(hdlg, GWLP_USERDATA, (LONG_PTR)pSelf); // store pointer to object into HWND room
 		*((Window*)pSelf) = hdlg; // assign hWnd member
@@ -38,10 +38,10 @@ INT_PTR DialogPopup::msgHandler(UINT msg, WPARAM wp, LPARAM lp)
 {
 	static Font hSysFont; // to be shared among all regular dialog windows
 
-	switch(msg)
+	switch (msg)
 	{
 	case WM_INITDIALOG:
-		if(!hSysFont.hFont()) {
+		if (!hSysFont.hFont()) {
 			Font::Info nfof = Font::GetDefaultDialogFontInfo();
 			hSysFont.create(nfof);
 		}
@@ -75,7 +75,7 @@ int DialogApp::run(HINSTANCE hInst, int cmdShow, int dialogId, int iconId, int a
 	CreateDialogParam(hInst, MAKEINTRESOURCE(dialogId), nullptr,
 		Dialog::_DialogProc, (LPARAM)this); // pass pointer to object
 
-	if(iconId) {
+	if (iconId) {
 		this->sendMessage(WM_SETICON, ICON_SMALL,
 			(LPARAM)(HICON)LoadImage(hInst, MAKEINTRESOURCE(iconId), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR));
 		this->sendMessage(WM_SETICON, ICON_BIG,
@@ -85,15 +85,15 @@ int DialogApp::run(HINSTANCE hInst, int cmdShow, int dialogId, int iconId, int a
 	ShowWindow(this->hWnd(), cmdShow);
 
 	HACCEL hAccel = nullptr; // accelerators table
-	if(accelTableId)
+	if (accelTableId)
 		hAccel = LoadAccelerators(hInst, MAKEINTRESOURCE(accelTableId));
 
 	MSG msg = { 0 };
 	BOOL ret = 0;
-	while((ret = GetMessage(&msg, nullptr, 0, 0)) != 0) {
-		if(ret == -1) return -1; // failure
-		if(hAccel && TranslateAccelerator(this->hWnd(), hAccel, &msg)) continue;
-		if(IsDialogMessage(this->hWnd(), &msg)) continue;
+	while ((ret = GetMessage(&msg, nullptr, 0, 0)) != 0) {
+		if (ret == -1) return -1; // failure
+		if (hAccel && TranslateAccelerator(this->hWnd(), hAccel, &msg)) continue;
+		if (IsDialogMessage(this->hWnd(), &msg)) continue;
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
@@ -102,7 +102,7 @@ int DialogApp::run(HINSTANCE hInst, int cmdShow, int dialogId, int iconId, int a
 
 INT_PTR DialogApp::msgHandler(UINT msg, WPARAM wp, LPARAM lp)
 {
-	switch(msg)
+	switch (msg)
 	{
 	case WM_CLOSE:
 		DestroyWindow(this->hWnd());
@@ -128,7 +128,7 @@ int DialogModal::show(Window *parent, int dialogId, int accelTableId)
 
 INT_PTR DialogModal::msgHandler(UINT msg, WPARAM wp, LPARAM lp)
 {
-	switch(msg)
+	switch (msg)
 	{
 	case WM_INITDIALOG:
 		{
@@ -165,10 +165,10 @@ void DialogCtrl::create(int id, Window *parent, int x, int y, int cx, int cy)
 
 INT_PTR DialogCtrl::msgHandler(UINT msg, WPARAM wp, LPARAM lp)
 {
-	switch(msg)
+	switch (msg)
 	{
 	case WM_NCPAINT:
-		if(this->_drawBorders(wp, lp)) // themed borders
+		if (this->_drawBorders(wp, lp)) // themed borders
 			return TRUE;
 		break;
 	}

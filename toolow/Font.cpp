@@ -43,14 +43,14 @@ Font::Info Font::getInfo() const
 
 Font& Font::apply(HWND hWnd)
 {
-	if(_hFont)
+	if (_hFont)
 		SendMessage(hWnd, WM_SETFONT, (WPARAM)_hFont, MAKELPARAM(FALSE, 0)); // to window itself only
 	return *this;
 }
 
 Font& Font::applyOnChildren(HWND hWnd)
 {
-	if(_hFont) {
+	if (_hFont) {
 		// http://stackoverflow.com/questions/18367641/use-createthread-with-a-lambda
 		EnumChildWindows(hWnd, [](HWND hWnd, LPARAM lp)->BOOL { // propagate to children
 			SendMessage(hWnd, WM_SETFONT,
@@ -83,7 +83,7 @@ Font::Info Font::GetDefaultDialogFontInfo()
 
 	NONCLIENTMETRICS ncm = { 0 };
 	ncm.cbSize = sizeof(ncm);
-	if(ovi.dwMajorVersion < 6) // below Vista
+	if (ovi.dwMajorVersion < 6) // below Vista
 		ncm.cbSize -= sizeof(ncm.iBorderWidth);
 	SystemParametersInfo(SPI_GETNONCLIENTMETRICS, ncm.cbSize, &ncm, 0); // default system font
 

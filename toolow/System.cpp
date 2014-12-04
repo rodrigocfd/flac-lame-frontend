@@ -44,7 +44,7 @@ DWORD System::Exec(const wchar_t *cmdLine)
 	PROCESS_INFORMATION pi = { 0 };
 	DWORD dwExitCode = 1; // returned by executed program
 
-	if(CreateProcess(nullptr, cmdLine2, &sa, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi)) {
+	if (CreateProcess(nullptr, cmdLine2, &sa, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi)) {
 		WaitForSingleObject(pi.hProcess, INFINITE); // the program flow is stopped here to wait
 		GetExitCodeProcess(pi.hProcess, &dwExitCode);
 		CloseHandle(pi.hThread);
@@ -88,9 +88,9 @@ int CeilMult(int n, int multiple)
 {
 	// Ceil up to next multiple of.
 	// http://stackoverflow.com/questions/3407012/c-rounding-up-to-the-nearest-multiple-of-a-number
-	if(!multiple) return n;
+	if (!multiple) return n;
 	int remainder = n % multiple;
-	if(!remainder) return n;
+	if (!remainder) return n;
 	return n + multiple - remainder - (n < 0 ? multiple : 0); // bugfix for negative numbers
 }
 

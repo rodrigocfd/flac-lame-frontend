@@ -26,7 +26,7 @@ DC& DC::setBkColor(COLORREF color)
 COLORREF DC::getBkBrushColor()
 {
 	ULONG_PTR hbrBg = GetClassLongPtr(_hWnd, GCLP_HBRBACKGROUND);
-	if(hbrBg > 100) {
+	if (hbrBg > 100) {
 		// The hbrBackground is a brush handle, not a system color constant.
 		// This 100 value is arbitrary, based on system color constants like COLOR_BTNFACE.
 		LOGBRUSH logBrush;

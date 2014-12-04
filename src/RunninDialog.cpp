@@ -19,7 +19,7 @@ RunninDialog::RunninDialog(
 
 INT_PTR RunninDialog::msgHandler(UINT msg, WPARAM wp, LPARAM lp)
 {
-	switch(msg)
+	switch (msg)
 	{
 	case WM_INITDIALOG: this->onInitDialog(); break;
 	}
@@ -38,31 +38,31 @@ void RunninDialog::onInitDialog()
 	
 	// Proceed to the file conversion straight away.
 	int batchSz = (m_numThreads < m_files.size()) ? m_numThreads : m_files.size(); // limit parallel processing
-	for(int i = 0; i < batchSz; ++i)
+	for (int i = 0; i < batchSz; ++i)
 		System::Thread([=]() { this->doProcessNextFile(); });
 }
 
 void RunninDialog::doProcessNextFile()
 {
 	int index = m_curFile++;
-	if(index >= m_files.size()) return;
+	if (index >= m_files.size()) return;
 
 	const String& file = m_files[index];
 	bool good = true;
 	String err;
 
-	switch(m_targetType) {
-		case Target::MP3:
-			good = Convert::ToMp3(m_ini, file, m_destFolder, m_delSrc, m_quality, m_isVbr, &err);
-			break;
-		case Target::FLAC:
-			good = Convert::ToFlac(m_ini, file, m_destFolder, m_delSrc, m_quality, &err);
-			break;
-		case Target::WAV:
-			good = Convert::ToWav(m_ini, file, m_destFolder, m_delSrc, &err);
+	switch (m_targetType) {
+	case Target::MP3:
+		good = Convert::ToMp3(m_ini, file, m_destFolder, m_delSrc, m_quality, m_isVbr, &err);
+		break;
+	case Target::FLAC:
+		good = Convert::ToFlac(m_ini, file, m_destFolder, m_delSrc, m_quality, &err);
+		break;
+	case Target::WAV:
+		good = Convert::ToWav(m_ini, file, m_destFolder, m_delSrc, &err);
 	}
 
-	if(!good) {
+	if (!good) {
 		m_curFile = m_files.size(); // error, so avoid further processing
 		this->sendFunction([=]() {
 			this->messageBox(L"Conversion failed",
@@ -78,7 +78,7 @@ void RunninDialog::doProcessNextFile()
 			m_lbl.setText( String::Fmt(L"%d of %d files finished...", m_filesDone, m_files.size()) );
 		});
 			
-		if(m_filesDone < m_files.size()) { // more files to come
+		if (m_filesDone < m_files.size()) { // more files to come
 			this->doProcessNextFile();
 		} else { // finished all processing
 			this->sendFunction([=]() {
