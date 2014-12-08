@@ -82,7 +82,7 @@ void RunninDialog::doProcessNextFile()
 			this->doProcessNextFile();
 		} else { // finished all processing
 			this->sendFunction([=]() {
-				Date fin;
+				System::Date fin;
 				this->messageBox(L"Conversion finished",
 					String::Fmt(L"%d files processed in %.2f seconds.", m_files.size(), (double)fin.minus(m_time0) / 1000),
 					MB_ICONINFORMATION);

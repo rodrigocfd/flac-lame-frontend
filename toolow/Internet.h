@@ -1,16 +1,15 @@
 //
 // Automation for internet related operations.
-// Part of TOOLOW - Thin Object Oriented Layer Over Win32.
+// Part of WOLF - Win32 Object Lambda Framework.
 // @author Rodrigo Cesar de Freitas Dias
-// @see https://github.com/rodrigocfd/toolow
+// @see https://github.com/rodrigocfd/wolf
 //
 
 #pragma once
-#include "Hash.h"
+#include "DataStructs.h"
 #include <winhttp.h>
 
-struct Internet
-{
+struct Internet final {
 	class Session final {
 	private:
 		HINTERNET _hSession;

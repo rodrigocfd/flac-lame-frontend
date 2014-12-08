@@ -1,8 +1,8 @@
 //
-// System-related functions.
-// Part of TOOLOW - Thin Object Oriented Layer Over Win32.
+// OS-related functions.
+// Part of WOLF - Win32 Object Lambda Framework.
 // @author Rodrigo Cesar de Freitas Dias
-// @see https://github.com/rodrigocfd/toolow
+// @see https://github.com/rodrigocfd/wolf
 //
 
 #include "System.h"
@@ -74,26 +74,6 @@ void System::PopMenu(HWND hDlg, int popupMenuId, int x, int y, HWND hWndCoordsRe
 	DestroyMenu(hMenu);
 }
 
-int Rounds(float x)
-{
-	return (int)floor(x + 0.5); // <math.h>
-}
-
-int Rounds(double x)
-{
-	return (int)floor(x + 0.5); // <math.h>
-}
-
-int CeilMult(int n, int multiple)
-{
-	// Ceil up to next multiple of.
-	// http://stackoverflow.com/questions/3407012/c-rounding-up-to-the-nearest-multiple-of-a-number
-	if (!multiple) return n;
-	int remainder = n % multiple;
-	if (!remainder) return n;
-	return n + multiple - remainder - (n < 0 ? multiple : 0); // bugfix for negative numbers
-}
-
 String System::GetExePath()
 {
 	String ret;
@@ -131,4 +111,112 @@ String System::GetRoamingPath()
 	ret.reserve(MAX_PATH);
 	SHGetFolderPath(nullptr, CSIDL_APPDATA, nullptr, 0, ret.ptrAt(0)); // won't have trailing backslash
 	return ret;
+}
+
+
+int System::Math::Rounds(float x)
+{
+	return (int)floor(x + 0.5); // <math.h>
+}
+
+int System::Math::Rounds(double x)
+{
+	return (int)floor(x + 0.5); // <math.h>
+}
+
+int System::Math::CeilMult(int n, int multiple)
+{
+	// Ceil up to next multiple of.
+	// http://stackoverflow.com/questions/3407012/c-rounding-up-to-the-nearest-multiple-of-a-number
+	if (!multiple) return n;
+	int remainder = n % multiple;
+	if (!remainder) return n;
+	return n + multiple - remainder - (n < 0 ? multiple : 0); // bugfix for negative numbers
+}
+
+
+System::Date& System::Date::setNow()
+{
+	SYSTEMTIME st1 = { 0 };
+	GetSystemTime(&st1);
+
+	TIME_ZONE_INFORMATION tzi = { 0 };
+	GetTimeZoneInformation(&tzi);
+	SystemTimeToTzSpecificLocalTime(&tzi, &st1, &_st);
+
+	return *this;
+}
+
+System::Date& System::Date::setFromFt(const FILETIME *ft)
+{
+	SYSTEMTIME st1 = { 0 };
+	FileTimeToSystemTime(ft, &st1);
+
+	TIME_ZONE_INFORMATION tzi = { 0 };
+	GetTimeZoneInformation(&tzi);
+	SystemTimeToTzSpecificLocalTime(&tzi, &st1, &_st);
+
+	return *this;
+}
+
+System::Date& System::Date::setFromMs(LONGLONG ms)
+{
+	SecureZeroMemory(&_st, sizeof(SYSTEMTIME));
+	
+	_st.wMilliseconds = ms % 1000;
+	ms = (ms - _st.wMilliseconds) / 1000; // now in seconds
+	_st.wSecond = ms % 60;
+	ms = (ms - _st.wSecond) / 60; // now in minutes
+	_st.wMinute = ms % 60;
+	ms = (ms - _st.wMinute) / 60; // now in hours
+	_st.wHour = ms % 24;
+	ms = (ms - _st.wHour) / 24; // now in days
+
+	return *this;
+}
+
+LONGLONG System::Date::getTimestamp() const
+{
+	// http://www.frenk.com/2009/12/convert-filetime-to-unix-timestamp/
+	LARGE_INTEGER date, adjust;
+	_StToLi(_st, date);
+	adjust.QuadPart = 11644473600000 * 10000; // 100-nanoseconds = milliseconds * 10000
+	date.QuadPart -= adjust.QuadPart; // removes the diff between 1970 and 1601
+	//return date.QuadPart / 10000000; // converts back from 100-nanoseconds to seconds
+	return date.QuadPart / 10000; // to milliseconds; to printf use %I64u
+}
+
+LONGLONG System::Date::minus(const System::Date &other) const
+{
+	LARGE_INTEGER liUs, liThem;
+	_StToLi(_st, liUs);
+	_StToLi(other._st, liThem);
+	return (liUs.QuadPart - liThem.QuadPart) / 10000; // 100-nanoseconds to milliseconds; to printf use %I64u
+}
+
+System::Date& System::Date::addMs(LONGLONG ms)
+{
+	LARGE_INTEGER li;
+	_StToLi(_st, li);
+	li.QuadPart += ms * 10000; // milliseconds to 100-nanoseconds
+	_LiToSt(li, _st);
+	return *this;
+}
+
+void System::Date::_StToLi(const SYSTEMTIME& st, LARGE_INTEGER& li)
+{
+	FILETIME ft = { 0 };
+	SystemTimeToFileTime(&st, &ft);
+
+	li.HighPart = ft.dwHighDateTime;
+	li.LowPart = ft.dwLowDateTime;
+}
+
+void System::Date::_LiToSt(const LARGE_INTEGER& li, SYSTEMTIME& st)
+{
+	FILETIME ft = { 0 };
+	ft.dwHighDateTime = li.HighPart;
+	ft.dwLowDateTime = li.LowPart;
+
+	FileTimeToSystemTime(&ft, &st);
 }

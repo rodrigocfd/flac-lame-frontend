@@ -1,16 +1,14 @@
 //
 // GDI device context automation.
-// Part of TOOLOW - Thin Object Oriented Layer Over Win32.
+// Part of WOLF - Win32 Object Lambda Framework.
 // @author Rodrigo Cesar de Freitas Dias
-// @see https://github.com/rodrigocfd/toolow
+// @see https://github.com/rodrigocfd/wolf
 //
 
 #pragma once
 #include "System.h"
 
-//__________________________________________________________________________________________________
 // Base device context class with basic operations.
-//
 class DC {
 public:
 	class Pen final {
@@ -75,25 +73,21 @@ public:
 	DC&      drawEdge(int left, int top, int right, int bottom, int edge, int flags)     { RECT rc = { left, top, right, bottom }; return drawEdge(&rc, edge, flags); }
 };
 
-//__________________________________________________________________________________________________
-// For within WM_PAINT, uses BeginPaint/EndPaint.
-//
-class DCSimple : public DC {
-protected:
-	PAINTSTRUCT _ps;
-public:
-	explicit DCSimple(HWND hwnd) : DC(hwnd, ::BeginPaint(hwnd, &_ps)) { }
-	virtual ~DCSimple()          { ::EndPaint(_hWnd, &_ps); }
-};
+	// For within WM_PAINT, uses BeginPaint/EndPaint.
+	class DCSimple : public DC {
+	protected:
+		PAINTSTRUCT _ps;
+	public:
+		explicit DCSimple(HWND hwnd) : DC(hwnd, ::BeginPaint(hwnd, &_ps)) { }
+		virtual ~DCSimple()          { ::EndPaint(_hWnd, &_ps); }
+	};
 
-//__________________________________________________________________________________________________
-// For within WM_PAINT, uses BeginPaint/EndPaint with double-buffer.
-// You must return zero on WM_ERASEBKGND message.
-//
-class DCBuffered : public DCSimple {
-protected:
-	HBITMAP _hBmp, _hBmpOld;
-public:
-	explicit DCBuffered(HWND hwnd);
-	virtual ~DCBuffered();
-};
+	// For within WM_PAINT, uses BeginPaint/EndPaint with double-buffer.
+	// You must return zero on WM_ERASEBKGND message.
+	class DCBuffered : public DCSimple {
+	protected:
+		HBITMAP _hBmp, _hBmpOld;
+	public:
+		explicit DCBuffered(HWND hwnd);
+		virtual ~DCBuffered();
+	};

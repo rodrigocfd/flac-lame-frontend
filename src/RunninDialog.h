@@ -18,7 +18,7 @@ private:
 	const File::Ini&     m_ini;
 	const String&        m_destFolder;
 	int                  m_curFile, m_filesDone;
-	Date                 m_time0;
+	System::Date         m_time0;
 public:
 	RunninDialog(
 		int                  numThreads,

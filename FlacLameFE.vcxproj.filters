@@ -19,46 +19,40 @@
     <ClCompile Include="src\RunninDialog.cpp">
       <Filter>program</Filter>
     </ClCompile>
+    <ClCompile Include="src\Convert.cpp">
+      <Filter>program</Filter>
+    </ClCompile>
+    <ClCompile Include="toolow\Internet.cpp">
+      <Filter>toolow</Filter>
+    </ClCompile>
+    <ClCompile Include="toolow\Resources.cpp">
+      <Filter>toolow</Filter>
+    </ClCompile>
+    <ClCompile Include="toolow\String.cpp">
+      <Filter>toolow</Filter>
+    </ClCompile>
+    <ClCompile Include="toolow\System.cpp">
+      <Filter>toolow</Filter>
+    </ClCompile>
+    <ClCompile Include="toolow\Window.cpp">
+      <Filter>toolow</Filter>
+    </ClCompile>
+    <ClCompile Include="toolow\WindowDialog.cpp">
+      <Filter>toolow</Filter>
+    </ClCompile>
+    <ClCompile Include="toolow\WindowFrame.cpp">
+      <Filter>toolow</Filter>
+    </ClCompile>
     <ClCompile Include="toolow\Controls.cpp">
       <Filter>toolow</Filter>
     </ClCompile>
-    <ClCompile Include="toolow\Date.cpp">
+    <ClCompile Include="toolow\DataStructs.cpp">
       <Filter>toolow</Filter>
     </ClCompile>
     <ClCompile Include="toolow\DeviceContext.cpp">
       <Filter>toolow</Filter>
     </ClCompile>
     <ClCompile Include="toolow\File.cpp">
-      <Filter>toolow</Filter>
-    </ClCompile>
-    <ClCompile Include="toolow\Font.cpp">
-      <Filter>toolow</Filter>
-    </ClCompile>
-    <ClCompile Include="toolow\Internet.cpp">
-      <Filter>toolow</Filter>
-    </ClCompile>
-    <ClCompile Include="toolow\ListView.cpp">
-      <Filter>toolow</Filter>
-    </ClCompile>
-    <ClCompile Include="toolow\String.cpp">
-      <Filter>toolow</Filter>
-    </ClCompile>
-    <ClCompile Include="toolow\Window.cpp">
-      <Filter>toolow</Filter>
-    </ClCompile>
-    <ClCompile Include="toolow\Xml.cpp">
-      <Filter>toolow</Filter>
-    </ClCompile>
-    <ClCompile Include="toolow\System.cpp">
-      <Filter>toolow</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Convert.cpp">
-      <Filter>program</Filter>
-    </ClCompile>
-    <ClCompile Include="toolow\WindowDialog.cpp">
-      <Filter>toolow</Filter>
-    </ClCompile>
-    <ClCompile Include="toolow\WindowFrame.cpp">
       <Filter>toolow</Filter>
     </ClCompile>
   </ItemGroup>
@@ -72,13 +66,16 @@
     <ClInclude Include="src\RunninDialog.h">
       <Filter>program</Filter>
     </ClInclude>
+    <ClInclude Include="src\Convert.h">
+      <Filter>program</Filter>
+    </ClInclude>
     <ClInclude Include="toolow\Array.h">
       <Filter>toolow</Filter>
     </ClInclude>
     <ClInclude Include="toolow\Controls.h">
       <Filter>toolow</Filter>
     </ClInclude>
-    <ClInclude Include="toolow\Date.h">
+    <ClInclude Include="toolow\DataStructs.h">
       <Filter>toolow</Filter>
     </ClInclude>
     <ClInclude Include="toolow\DeviceContext.h">
@@ -87,22 +84,16 @@
     <ClInclude Include="toolow\File.h">
       <Filter>toolow</Filter>
     </ClInclude>
-    <ClInclude Include="toolow\Font.h">
-      <Filter>toolow</Filter>
-    </ClInclude>
-    <ClInclude Include="toolow\Hash.h">
-      <Filter>toolow</Filter>
-    </ClInclude>
     <ClInclude Include="toolow\Internet.h">
       <Filter>toolow</Filter>
     </ClInclude>
-    <ClInclude Include="toolow\ListView.h">
-      <Filter>toolow</Filter>
-    </ClInclude>
-    <ClInclude Include="toolow\Ptr.h">
+    <ClInclude Include="toolow\Resources.h">
       <Filter>toolow</Filter>
     </ClInclude>
     <ClInclude Include="toolow\String.h">
+      <Filter>toolow</Filter>
+    </ClInclude>
+    <ClInclude Include="toolow\System.h">
       <Filter>toolow</Filter>
     </ClInclude>
     <ClInclude Include="toolow\toolow.h">
@@ -111,22 +102,10 @@
     <ClInclude Include="toolow\Window.h">
       <Filter>toolow</Filter>
     </ClInclude>
-    <ClInclude Include="toolow\Xml.h">
-      <Filter>toolow</Filter>
-    </ClInclude>
-    <ClInclude Include="toolow\System.h">
-      <Filter>toolow</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Convert.h">
-      <Filter>program</Filter>
-    </ClInclude>
     <ClInclude Include="toolow\WindowDialog.h">
       <Filter>toolow</Filter>
     </ClInclude>
     <ClInclude Include="toolow\WindowFrame.h">
-      <Filter>toolow</Filter>
-    </ClInclude>
-    <ClInclude Include="toolow\Menu.h">
       <Filter>toolow</Filter>
     </ClInclude>
   </ItemGroup>

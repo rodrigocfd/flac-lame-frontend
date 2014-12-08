@@ -6,7 +6,7 @@
 //
 
 #include "WindowFrame.h"
-#include "Font.h"
+#include "Resources.h"
 
 Frame::~Frame()
 {

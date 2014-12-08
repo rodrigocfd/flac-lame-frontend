@@ -1,8 +1,8 @@
 //
-// Font automation.
-// Part of TOOLOW - Thin Object Oriented Layer Over Win32.
+// Automation for some resources.
+// Part of WOLF - Win32 Object Lambda Framework.
 // @author Rodrigo Cesar de Freitas Dias
-// @see https://github.com/rodrigocfd/toolow
+// @see https://github.com/rodrigocfd/wolf
 //
 
 #pragma once
@@ -26,7 +26,6 @@ public:
 			return *this;
 		}
 	};
-
 private:
 	HFONT _hFont;
 public:
@@ -53,4 +52,44 @@ public:
 	static Info GetDefaultDialogFontInfo();
 private:
 	static void _LogfontToInfo(const LOGFONT& lf, Info& info);
+};
+
+
+class Menu {
+private:
+	HMENU _hMenu;
+public:
+	Menu()            : _hMenu(nullptr) { }
+	Menu(HMENU hMenu) : _hMenu(hMenu) { }
+	
+	HMENU hMenu() const             { return _hMenu; }
+	int   size() const              { return ::GetMenuItemCount(_hMenu); }
+	void  destroy()                 { if (_hMenu) { ::DestroyMenu(_hMenu); _hMenu = nullptr; } }
+	Menu  getSubmenu(int pos) const { return Menu(::GetSubMenu(_hMenu, pos)); }
+	WORD  getCmdId(int pos) const   { return ::GetMenuItemID(_hMenu, pos); }
+	Menu& createMain(HWND owner);
+	Menu& createPopup();
+	Menu& appendSeparator();
+	Menu& appendItem(const wchar_t *caption, WORD cmdId);
+	Menu& enableItem(initializer_list<WORD> cmdIds, bool doEnable);
+	Menu  appendSubmenu(const wchar_t *caption);
+private:
+	void _checkDummyEntry();
+};
+
+
+class Icon final {
+private:
+	HICON _hIcon;
+public:
+	Icon()  : _hIcon(nullptr) { }
+	~Icon() { this->free(); }
+
+	HICON hIcon() const          { return _hIcon; }
+	Icon& free()                 { if (_hIcon) ::DestroyIcon(_hIcon); return *this; }
+	Icon& operator=(HICON hIcon) { _hIcon = hIcon; return *this; }
+	Icon& getFromExplorer(const wchar_t *fileExtension);
+	Icon& getFromResource(int iconId, int size, HINSTANCE hInst=nullptr);
+
+	static void IconToLabel(HWND hStatic, int idIconRes, BYTE size);
 };

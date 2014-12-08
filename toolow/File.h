@@ -1,32 +1,31 @@
 //
 // File handling.
-// Part of TOOLOW - Thin Object Oriented Layer Over Win32.
+// Part of WOLF - Win32 Object Lambda Framework.
 // @author Rodrigo Cesar de Freitas Dias
-// @see https://github.com/rodrigocfd/toolow
+// @see https://github.com/rodrigocfd/wolf
 //
 
 #pragma once
-#include "Date.h"
-#include "Hash.h"
+#include "System.h"
+#include "DataStructs.h"
 
-namespace File
-{
-	inline bool   Exists(const wchar_t *path)                      { return ::GetFileAttributes(path) != INVALID_FILE_ATTRIBUTES; }
-	inline bool   Exists(const String& path)                       { return Exists(path.str()); }
-	inline bool   IsDir(const wchar_t *path)                       { return (::GetFileAttributes(path) & FILE_ATTRIBUTE_DIRECTORY) != 0; }
-	inline bool   IsDir(const String& path)                        { return IsDir(path.str()); }
-	bool          Delete(const wchar_t *path, String *pErr=nullptr);
-	inline bool   Delete(const String& path, String *pErr=nullptr) { return Delete(path.str(), pErr); }
-	bool          CreateDir(const wchar_t *path);
-	inline bool   CreateDir(const String& path)                    { return CreateDir(path.str()); }
-	Date          DateLastModified(const wchar_t *path);
-	inline Date   DateLastModified(const String& path)             { return DateLastModified(path.str()); }
-	Date          DateCreated(const wchar_t *path);
-	inline Date   DateCreated(const String& path)                  { return DateCreated(path.str()); }
-	bool          WriteUtf8(const wchar_t *path, const wchar_t *data, String *pErr=nullptr);
-	bool          Unzip(const wchar_t *zip, const wchar_t *destFolder, String *pErr=nullptr);
-	inline bool   Unzip(const String& zip, const String& destFolder, String *pErr=nullptr) { return Unzip(zip.str(), destFolder.str(), pErr); }
-	int           IndexOfBin(const BYTE *pData, int dataLen, const wchar_t *what, bool asWideChar);
+struct File final {
+	static inline bool  Exists(const wchar_t *path)                      { return ::GetFileAttributes(path) != INVALID_FILE_ATTRIBUTES; }
+	static inline bool  Exists(const String& path)                       { return Exists(path.str()); }
+	static inline bool  IsDir(const wchar_t *path)                       { return (::GetFileAttributes(path) & FILE_ATTRIBUTE_DIRECTORY) != 0; }
+	static inline bool  IsDir(const String& path)                        { return IsDir(path.str()); }
+	static bool         Delete(const wchar_t *path, String *pErr=nullptr);
+	static inline bool  Delete(const String& path, String *pErr=nullptr) { return Delete(path.str(), pErr); }
+	static bool         CreateDir(const wchar_t *path);
+	static inline bool  CreateDir(const String& path)                    { return CreateDir(path.str()); }
+	static System::Date DateLastModified(const wchar_t *path);
+	static inline System::Date DateLastModified(const String& path)      { return DateLastModified(path.str()); }
+	static System::Date DateCreated(const wchar_t *path);
+	static inline System::Date DateCreated(const String& path)           { return DateCreated(path.str()); }
+	static bool         WriteUtf8(const wchar_t *path, const wchar_t *data, String *pErr=nullptr);
+	static bool         Unzip(const wchar_t *zip, const wchar_t *destFolder, String *pErr=nullptr);
+	static inline bool  Unzip(const String& zip, const String& destFolder, String *pErr=nullptr) { return Unzip(zip.str(), destFolder.str(), pErr); }
+	static int          IndexOfBin(const BYTE *pData, int dataLen, const wchar_t *what, bool asWideChar);
 
 	class Path final { // path string utilities
 	public:
@@ -129,4 +128,4 @@ namespace File
 		bool next(wchar_t *buf);
 		bool next(String& buf);
 	};
-}
+};

@@ -1,8 +1,8 @@
 //
 // Ordinary string implementation, ever growing, with buffer capabilities.
-// Part of TOOLOW - Thin Object Oriented Layer Over Win32.
+// Part of WOLF - Win32 Object Lambda Framework.
 // @author Rodrigo Cesar de Freitas Dias
-// @see https://github.com/rodrigocfd/toolow
+// @see https://github.com/rodrigocfd/wolf
 //
 
 #pragma warning(disable:4996) // _vsnwprintf

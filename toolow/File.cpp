@@ -1,12 +1,11 @@
 //
 // File handling.
-// Part of TOOLOW - Thin Object Oriented Layer Over Win32.
+// Part of WOLF - Win32 Object Lambda Framework.
 // @author Rodrigo Cesar de Freitas Dias
-// @see https://github.com/rodrigocfd/toolow
+// @see https://github.com/rodrigocfd/wolf
 //
 
 #include "File.h"
-#include "Ptr.h"
 #include <direct.h> // _wmkdir()
 #include <Shlobj.h>
 
@@ -42,18 +41,18 @@ bool File::CreateDir(const wchar_t *path)
 	return _wmkdir(path) == 0;
 }
 
-Date File::DateLastModified(const wchar_t *path)
+System::Date File::DateLastModified(const wchar_t *path)
 {
 	WIN32_FILE_ATTRIBUTE_DATA fad = { 0 };
 	GetFileAttributesEx(path, GetFileExInfoStandard, &fad);
-	return Date(&fad.ftLastWriteTime); // already converted to current timezone
+	return System::Date(&fad.ftLastWriteTime); // already converted to current timezone
 }
 
-Date File::DateCreated(const wchar_t *path)
+System::Date File::DateCreated(const wchar_t *path)
 {
 	WIN32_FILE_ATTRIBUTE_DATA fad = { 0 };
 	GetFileAttributesEx(path, GetFileExInfoStandard, &fad);
-	return Date(&fad.ftCreationTime); // already converted to current timezone
+	return System::Date(&fad.ftCreationTime); // already converted to current timezone
 }
 
 bool File::WriteUtf8(const wchar_t *path, const wchar_t *data, String *pErr)

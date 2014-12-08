@@ -6,7 +6,7 @@
 //
 
 #include "WindowDialog.h"
-#include "Font.h"
+#include "Resources.h"
 
 Dialog::~Dialog()
 {

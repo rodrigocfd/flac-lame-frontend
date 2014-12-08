@@ -167,18 +167,16 @@
     <ClCompile Include="src\MainDialog.cpp" />
     <ClCompile Include="src\RunninDialog.cpp" />
     <ClCompile Include="toolow\Controls.cpp" />
-    <ClCompile Include="toolow\Date.cpp" />
+    <ClCompile Include="toolow\DataStructs.cpp" />
     <ClCompile Include="toolow\DeviceContext.cpp" />
     <ClCompile Include="toolow\File.cpp" />
-    <ClCompile Include="toolow\Font.cpp" />
     <ClCompile Include="toolow\Internet.cpp" />
-    <ClCompile Include="toolow\ListView.cpp" />
+    <ClCompile Include="toolow\Resources.cpp" />
     <ClCompile Include="toolow\String.cpp" />
     <ClCompile Include="toolow\System.cpp" />
     <ClCompile Include="toolow\Window.cpp" />
     <ClCompile Include="toolow\WindowDialog.cpp" />
     <ClCompile Include="toolow\WindowFrame.cpp" />
-    <ClCompile Include="toolow\Xml.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="res\resource.h" />
@@ -187,22 +185,17 @@
     <ClInclude Include="src\RunninDialog.h" />
     <ClInclude Include="toolow\Array.h" />
     <ClInclude Include="toolow\Controls.h" />
-    <ClInclude Include="toolow\Date.h" />
+    <ClInclude Include="toolow\DataStructs.h" />
     <ClInclude Include="toolow\DeviceContext.h" />
     <ClInclude Include="toolow\File.h" />
-    <ClInclude Include="toolow\Font.h" />
-    <ClInclude Include="toolow\Hash.h" />
     <ClInclude Include="toolow\Internet.h" />
-    <ClInclude Include="toolow\ListView.h" />
-    <ClInclude Include="toolow\Menu.h" />
-    <ClInclude Include="toolow\Ptr.h" />
+    <ClInclude Include="toolow\Resources.h" />
     <ClInclude Include="toolow\String.h" />
     <ClInclude Include="toolow\System.h" />
     <ClInclude Include="toolow\toolow.h" />
     <ClInclude Include="toolow\Window.h" />
     <ClInclude Include="toolow\WindowDialog.h" />
     <ClInclude Include="toolow\WindowFrame.h" />
-    <ClInclude Include="toolow\Xml.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\FlacLameFE.rc" />
