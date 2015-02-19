@@ -1,21 +1,26 @@
-//
-// File handling.
-// Part of WOLF - Win32 Object Lambda Framework.
-// @author Rodrigo Cesar de Freitas Dias
-// @see https://github.com/rodrigocfd/wolf
-//
+/*!
+ * File handling.
+ * Part of OWL - Object Win32 Library.
+ * @author Rodrigo Cesar de Freitas Dias
+ * @see https://github.com/rodrigocfd/wolf
+ */
 
 #include "File.h"
+#include "StrUtil.h"
+#include <algorithm>
 #include <direct.h> // _wmkdir()
 #include <Shlobj.h>
+using namespace owl;
+using std::unordered_map;
+using std::vector;
+using std::wstring;
 
-bool File::Delete(const wchar_t *path, String *pErr)
+bool File::Delete(const wchar_t *path, wstring *pErr)
 {
 	if (IsDir(path)) {
 		// http://stackoverflow.com/questions/1468774/why-am-i-having-problems-recursively-deleting-directories
-		wchar_t szDir[MAX_PATH + 1]; // +1 for the double null terminate
+		wchar_t szDir[MAX_PATH + 1] = { 0 }; // +1 for the double null terminate
 		lstrcpy(szDir, path);
-		szDir[lstrlen(szDir) + 1] = L'\0'; // double null terminate
 
 		SHFILEOPSTRUCTW fos = { 0 };
 		fos.wFunc = FO_DELETE;
@@ -28,11 +33,11 @@ bool File::Delete(const wchar_t *path, String *pErr)
 		}
 	} else {
 		if (!DeleteFile(path)) {
-			if (pErr) *pErr = String::Fmt(L"DeleteFile() failed, error code %d.", GetLastError());
+			if (pErr) *pErr = Sprintf(L"DeleteFile() failed, error code %d.", GetLastError());
 			return false;
 		}
 	}
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 
@@ -41,21 +46,21 @@ bool File::CreateDir(const wchar_t *path)
 	return _wmkdir(path) == 0;
 }
 
-System::Date File::DateLastModified(const wchar_t *path)
+Date File::DateLastModified(const wchar_t *path)
 {
 	WIN32_FILE_ATTRIBUTE_DATA fad = { 0 };
 	GetFileAttributesEx(path, GetFileExInfoStandard, &fad);
-	return System::Date(&fad.ftLastWriteTime); // already converted to current timezone
+	return Date(fad.ftLastWriteTime); // already converted to current timezone
 }
 
-System::Date File::DateCreated(const wchar_t *path)
+Date File::DateCreated(const wchar_t *path)
 {
 	WIN32_FILE_ATTRIBUTE_DATA fad = { 0 };
 	GetFileAttributesEx(path, GetFileExInfoStandard, &fad);
-	return System::Date(&fad.ftCreationTime); // already converted to current timezone
+	return Date(fad.ftCreationTime); // already converted to current timezone
 }
 
-bool File::WriteUtf8(const wchar_t *path, const wchar_t *data, String *pErr)
+bool File::WriteUtf8(const wchar_t *path, const wchar_t *data, wstring *pErr)
 {
 	bool isUtf8 = false;
 	int dataLen = lstrlen(data);
@@ -67,72 +72,76 @@ bool File::WriteUtf8(const wchar_t *path, const wchar_t *data, String *pErr)
 	}
 
 	File::Raw fout;
-	if (!fout.open(path, Access::READWRITE, pErr))
+	if (!fout.open(path, Access::READWRITE, pErr)) {
 		return false;
-	if (fout.size() && !fout.setNewSize(0, pErr)) // if already exists, truncate to empty
+	}
+	if (fout.size() && !fout.setNewSize(0, pErr)) { // if already exists, truncate to empty
 		return false;
+	}
 
 	// If the text doesn't have any char to make it UTF-8, it'll
 	// be simply converted to plain ASCII.
 	int newLen = WideCharToMultiByte(CP_UTF8, 0, data, dataLen, nullptr, 0, nullptr, nullptr);
-	Array<BYTE> outBuf(newLen + (isUtf8 ? 3 : 0));
-	if (isUtf8)
-		memcpy(&outBuf[0], "\xEF\xBB\xBF", 3); // write UTF-8 BOM
-	WideCharToMultiByte(CP_UTF8, 0, data, dataLen, (char*)&outBuf[isUtf8 ? 3 : 0], newLen, nullptr, nullptr);
-	if (!fout.write(outBuf, pErr)) // one single write() to all data, better performance
+	vector<BYTE> outBuf(newLen + (isUtf8 ? 3 : 0));
+	if (isUtf8) memcpy(&outBuf[0], "\xEF\xBB\xBF", 3); // write UTF-8 BOM
+	WideCharToMultiByte(CP_UTF8, 0, data, dataLen,
+		reinterpret_cast<char*>(&outBuf[isUtf8 ? 3 : 0]), newLen, nullptr, nullptr);
+	if (!fout.write(outBuf, pErr)) { // one single write() to all data, better performance
 		return false;
-
-	if (pErr) *pErr = L"";
+	}
+	if (pErr) pErr->clear();
 	return true;
 }
 
-bool File::Unzip(const wchar_t *zip, const wchar_t *destFolder, String *pErr)
+bool File::Unzip(const wchar_t *zip, const wchar_t *destFolder, wstring *pErr)
 {
 	if (!Exists(zip)) {
-		if (pErr) *pErr = String::Fmt(L"File doesn't exist: \"%s\".", zip);
+		if (pErr) *pErr = Sprintf(L"File doesn't exist: \"%s\".", zip);
 		return false;
 	}
 	if (!Exists(destFolder)) {
-		if (pErr) *pErr = String::Fmt(L"Output directory doesn't exist: \"%s\".", destFolder);
+		if (pErr) *pErr = Sprintf(L"Output directory doesn't exist: \"%s\".", destFolder);
 		return false;
 	}
 
 	// http://social.msdn.microsoft.com/Forums/vstudio/en-US/45668d18-2840-4887-87e1-4085201f4103/visual-c-to-unzip-a-zip-file-to-a-specific-directory
 	CoInitialize(nullptr);
 
-	ComPtr<IShellDispatch> pISD;
-	if (!pISD.coCreateInstance(CLSID_Shell, IID_IShellDispatch)) {
+	IShellDispatch *pISD = nullptr;
+	if (FAILED( CoCreateInstance(CLSID_Shell, nullptr, CLSCTX_INPROC_SERVER,
+		IID_IShellDispatch, reinterpret_cast<void**>(&pISD)) ))
+	{
 		if (pErr) *pErr = L"CoCreateInstance failed on IID_IShellDispatch.";
 		return false;
 	}
 
 	BSTR bstrZipFile = SysAllocString(zip);
-	VARIANT InZipFile;
-	InZipFile.vt = VT_BSTR;
-	InZipFile.bstrVal = bstrZipFile;
+	VARIANT inZipFile = { 0 };
+	inZipFile.vt = VT_BSTR;
+	inZipFile.bstrVal = bstrZipFile;
 
 	Folder *pZippedFile = nullptr;
-	pISD->NameSpace(InZipFile, &pZippedFile);
+	pISD->NameSpace(inZipFile, &pZippedFile);
 	if (!pZippedFile) {
 		SysFreeString(bstrZipFile);
-		pISD.release();
+		pISD->Release();
 		CoUninitialize();
 		if (pErr) *pErr = L"IShellDispatch::NameSpace() failed on zip file name.";
 		return false;
 	}
 
 	BSTR bstrFolder = SysAllocString(destFolder);
-	VARIANT OutFolder;
-	OutFolder.vt = VT_BSTR;
-	OutFolder.bstrVal = bstrFolder;
+	VARIANT outFolder = { 0 };
+	outFolder.vt = VT_BSTR;
+	outFolder.bstrVal = bstrFolder;
 
 	Folder *pDestination = nullptr;
-	pISD->NameSpace(OutFolder, &pDestination);
+	pISD->NameSpace(outFolder, &pDestination);
 	if (!pDestination) {
 		SysFreeString(bstrFolder);
 		pZippedFile->Release();
 		SysFreeString(bstrZipFile);
-		pISD.release();
+		pISD->Release();
 		CoUninitialize();
 		if (pErr) *pErr = L"IShellDispatch::NameSpace() failed on directory name.";
 		return false;
@@ -145,7 +154,7 @@ bool File::Unzip(const wchar_t *zip, const wchar_t *destFolder, String *pErr)
 		SysFreeString(bstrFolder);
 		pZippedFile->Release();
 		SysFreeString(bstrZipFile);
-		pISD.release();
+		pISD->Release();
 		CoUninitialize();
 		if (pErr) *pErr = L"Folder::Items() failed.";
 		return false;
@@ -159,24 +168,24 @@ bool File::Unzip(const wchar_t *zip, const wchar_t *destFolder, String *pErr)
 		SysFreeString(bstrFolder);
 		pZippedFile->Release();
 		SysFreeString(bstrZipFile);
-		pISD.release();
+		pISD->Release();
 		CoUninitialize();
 		if (pErr) *pErr = L"FolderItems::get_Count() failed.";
 		return false;
 	}
 
 	IDispatch *pItem = nullptr;
-	pFilesInside->QueryInterface(IID_IDispatch, (void**)&pItem);
+	pFilesInside->QueryInterface(IID_IDispatch, reinterpret_cast<void**>(&pItem));
 
-	VARIANT Item;
-	Item.vt = VT_DISPATCH;
-	Item.pdispVal = pItem;
+	VARIANT item = { 0 };
+	item.vt = VT_DISPATCH;
+	item.pdispVal = pItem;
 
-	VARIANT Options;
-	Options.vt = VT_I4;
-	Options.lVal = 1024 | 512 | 16 | 4; // http://msdn.microsoft.com/en-us/library/bb787866(VS.85).aspx
+	VARIANT options = { 0 };
+	options.vt = VT_I4;
+	options.lVal = 1024 | 512 | 16 | 4; // http://msdn.microsoft.com/en-us/library/bb787866(VS.85).aspx
 
-	bool okay = SUCCEEDED(pDestination->CopyHere(Item, Options));
+	bool okay = SUCCEEDED(pDestination->CopyHere(item, options));
 
 	pItem->Release();
 	pFilesInside->Release();
@@ -184,36 +193,66 @@ bool File::Unzip(const wchar_t *zip, const wchar_t *destFolder, String *pErr)
 	SysFreeString(bstrFolder);
 	pZippedFile->Release();
 	SysFreeString(bstrZipFile);
-	pISD.release();
+	pISD->Release();
 	CoUninitialize();
 
 	if (!okay) {
 		if (pErr) *pErr = L"Folder::CopyHere() failed.";
 		return false;
 	}
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 
-int File::IndexOfBin(const BYTE *pData, int dataLen, const wchar_t *what, bool asWideChar)
+int File::IndexOfBin(const BYTE *pData, size_t dataLen, const wchar_t *what, bool asWideChar)
 {
 	// Returns the position of a string within a binary data block, if present.
 
-	int whatlen = lstrlen(what);
-	int pWhatSz = whatlen * (asWideChar ? 2 : 1);
-	BYTE *pWhat = (BYTE*)_alloca(pWhatSz * sizeof(BYTE));
+	size_t whatlen = lstrlen(what);
+	size_t pWhatSz = whatlen * (asWideChar ? 2 : 1);
+	BYTE *pWhat = static_cast<BYTE*>(_alloca(pWhatSz * sizeof(BYTE)));
 	if (asWideChar) {
 		memcpy(pWhat, what, whatlen * sizeof(wchar_t)); // simply copy the wide string, each char+zero
 	} else {
-		for (int i = 0; i < whatlen; ++i)
+		for (size_t i = 0; i < whatlen; ++i) {
 			pWhat[i] = LOBYTE(what[i]); // raw conversion from wchar_t to char
+		}
 	}
 
-	for (int i = 0; i < dataLen; ++i)
-		if (!memcmp(pData + i, pWhat, pWhatSz * sizeof(BYTE)))
-			return i;
-
+	for (size_t i = 0; i < dataLen; ++i) {
+		if (!memcmp(pData + i, pWhat, pWhatSz * sizeof(BYTE))) {
+			return static_cast<int>(i);
+		}
+	}
 	return -1; // not found
+}
+
+
+void File::Path::ChangeExtension(wstring& path, const wchar_t *extWithoutDot)
+{
+	path.resize(StrFind(path, L'.') + 1); // truncate after the dot
+	path.append(extWithoutDot);
+}
+
+void File::Path::TrimBackslash(wstring& path)
+{
+	if (!path.empty() && path.back() == L'\\') {
+		path.resize(path.length() - 1);
+	}
+}
+
+wstring File::Path::GetPath(const wchar_t *path)
+{
+	wstring ret = path;
+	ret.resize(StrRFind(ret, L'\\')); // also remove trailing backslash
+	return ret;
+}
+
+wstring File::Path::GetFilename(const wstring& path)
+{
+	wstring ret = path;
+	ret.erase(0, StrRFind(ret, L'\\') + 1);
+	return ret;
 }
 
 
@@ -226,7 +265,7 @@ void File::Raw::close()
 	}
 }
 
-bool File::Raw::open(const wchar_t *path, File::Access access, String *pErr)
+bool File::Raw::open(const wchar_t *path, File::Access access, wstring *pErr)
 {
 	this->close(); // make sure everything was properly cleaned up
 
@@ -238,17 +277,17 @@ bool File::Raw::open(const wchar_t *path, File::Access access, String *pErr)
 
 	if (_hFile == INVALID_HANDLE_VALUE) {
 		_hFile = nullptr;
-		if (pErr) *pErr = String::Fmt(L"CreateFile() failed to open file as %s, error code %d.",
+		if (pErr) *pErr = Sprintf(L"CreateFile() failed to open file as %s, error code %d.",
 			(access == Access::READONLY) ? L"read-only" : L"read-write", GetLastError());
 		return false;
 	}
 
 	_access = access; // keep for future checks
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 
-bool File::Raw::setNewSize(int newSize, String *pErr)
+bool File::Raw::setNewSize(size_t newSize, wstring *pErr)
 {
 	// This method will truncate or expand the file, according to the new size.
 	// Size zero will truncate the file.
@@ -263,18 +302,18 @@ bool File::Raw::setNewSize(int newSize, String *pErr)
 		return false;
 	}
 
-	DWORD r = SetFilePointer(_hFile, newSize, nullptr, FILE_BEGIN);
+	DWORD r = SetFilePointer(_hFile, static_cast<LONG>(newSize), nullptr, FILE_BEGIN);
 	if (r == INVALID_SET_FILE_POINTER) {
 		DWORD err = GetLastError();
 		this->close();
-		if (pErr) *pErr = String::Fmt(L"SetFilePointer() failed with offset of %d, error code %d.", newSize, err);
+		if (pErr) *pErr = Sprintf(L"SetFilePointer() failed with offset of %d, error code %d.", newSize, err);
 		return false;
 	}
 
 	if (!SetEndOfFile(_hFile)) {
 		DWORD err = GetLastError();
 		this->close();
-		if (pErr) *pErr = String::Fmt(L"SetEndOfFile() failed with offset of %d, error code %d.", newSize, err);
+		if (pErr) *pErr = Sprintf(L"SetEndOfFile() failed with offset of %d, error code %d.", newSize, err);
 		return false;
 	}
 
@@ -282,15 +321,15 @@ bool File::Raw::setNewSize(int newSize, String *pErr)
 	if (r == INVALID_SET_FILE_POINTER) {
 		DWORD err = GetLastError();
 		this->close();
-		if (pErr) *pErr = String::Fmt(L"SetFilePointer() failed to rewind the file, error code %d.", err);
+		if (pErr) *pErr = Sprintf(L"SetFilePointer() failed to rewind the file, error code %d.", err);
 		return false;
 	}
 
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 
-bool File::Raw::getContent(Array<BYTE>& buf, String *pErr) const
+bool File::Raw::getContent(vector<BYTE>& buf, wstring *pErr) const
 {
 	if (!_hFile) {
 		if (pErr) *pErr = L"File has not been opened.";
@@ -299,16 +338,16 @@ bool File::Raw::getContent(Array<BYTE>& buf, String *pErr) const
 
 	buf.resize(this->size());
 	DWORD bytesRead = 0;
-	if (!ReadFile(_hFile, &buf[0], buf.size(), &bytesRead, nullptr)) {
-		if (pErr) *pErr = String::Fmt(L"ReadFile() failed to read %d bytes.", buf.size());
+	if (!ReadFile(_hFile, &buf[0], static_cast<DWORD>(buf.size()), &bytesRead, nullptr)) {
+		if (pErr) *pErr = Sprintf(L"ReadFile() failed to read %d bytes.", buf.size());
 		return false;
 	}
 
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 
-bool File::Raw::write(const BYTE *pData, int sz, String *pErr)
+bool File::Raw::write(const BYTE *pData, size_t sz, wstring *pErr)
 {
 	if (!_hFile) {
 		if (pErr) *pErr = L"File has not been opened.";
@@ -323,16 +362,16 @@ bool File::Raw::write(const BYTE *pData, int sz, String *pErr)
 	// File boundary will be expanded if needed.
 	// Internal file pointer will move forward.
 	DWORD dwWritten = 0;
-	if (!WriteFile(_hFile, pData, sz, &dwWritten, nullptr)) {
-		if (pErr) *pErr = String::Fmt(L"WriteFile() failed to write %d bytes.", sz);
+	if (!WriteFile(_hFile, pData, static_cast<DWORD>(sz), &dwWritten, nullptr)) {
+		if (pErr) *pErr = Sprintf(L"WriteFile() failed to write %d bytes.", sz);
 		return false;
 	}
 
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 
-bool File::Raw::rewind(String *pErr)
+bool File::Raw::rewind(wstring *pErr)
 {
 	if (!_hFile) {
 		if (pErr) *pErr = L"File has not been opened.";
@@ -340,7 +379,7 @@ bool File::Raw::rewind(String *pErr)
 	}
 
 	if (SetFilePointer(_hFile, 0, nullptr, FILE_BEGIN) == INVALID_SET_FILE_POINTER) {
-		if (pErr) *pErr = String::Fmt(L"SetFilePointer() faile, error code %d.", GetLastError());
+		if (pErr) *pErr = Sprintf(L"SetFilePointer() failed, error code %d.", GetLastError());
 		return false;
 	}
 	return true;
@@ -349,13 +388,19 @@ bool File::Raw::rewind(String *pErr)
 
 void File::Mapped::close()
 {
-	if (_pMem) { UnmapViewOfFile(_pMem); _pMem = nullptr; }
-	if (_hMap) { CloseHandle(_hMap); _hMap = nullptr; }
+	if (_pMem) {
+		UnmapViewOfFile(_pMem);
+		_pMem = nullptr;
+	}
+	if (_hMap) {
+		CloseHandle(_hMap);
+		_hMap = nullptr;
+	}
 	_file.close();
 	_size = 0;
 }
 
-bool File::Mapped::open(const wchar_t *path, File::Access access, String *pErr)
+bool File::Mapped::open(const wchar_t *path, File::Access access, wstring *pErr)
 {
 	this->close(); // make sure everything was properly cleaned up
 
@@ -371,7 +416,7 @@ bool File::Mapped::open(const wchar_t *path, File::Access access, String *pErr)
 	if (!_hMap) {
 		DWORD err = GetLastError();
 		this->close();
-		if (pErr) *pErr = String::Fmt(L"CreateFileMapping() failed to create file mapping, error code %d.", err);
+		if (pErr) *pErr = Sprintf(L"CreateFileMapping() failed to create file mapping, error code %d.", err);
 		return false;
 	}
 
@@ -381,16 +426,16 @@ bool File::Mapped::open(const wchar_t *path, File::Access access, String *pErr)
 	if (!_pMem) {
 		DWORD err = GetLastError();
 		this->close();
-		if (pErr) *pErr = String::Fmt(L"MapViewOfFile() failed to map view of file, error code %d.", err);
+		if (pErr) *pErr = Sprintf(L"MapViewOfFile() failed to map view of file, error code %d.", err);
 		return false;
 	}
 
 	_size = _file.size(); // keep file size
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 
-bool File::Mapped::setNewSize(int newSize, String *pErr)
+bool File::Mapped::setNewSize(size_t newSize, wstring *pErr)
 {
 	// This method will truncate or expand the file, according to the new size.
 	// It will probably fail if file was opened as read-only.
@@ -414,7 +459,7 @@ bool File::Mapped::setNewSize(int newSize, String *pErr)
 	if (!( _hMap = CreateFileMapping(_file.hFile(), 0, PAGE_READWRITE, 0, 0, nullptr) )) {
 		DWORD err = GetLastError();
 		this->close();
-		if (pErr) *pErr = String::Fmt(L"CreateFileMapping() failed to recreate file mapping, error code %d.", err);
+		if (pErr) *pErr = Sprintf(L"CreateFileMapping() failed to recreate file mapping, error code %d.", err);
 		return false;
 	}
 
@@ -422,67 +467,70 @@ bool File::Mapped::setNewSize(int newSize, String *pErr)
 	if (!( _pMem = MapViewOfFile(_hMap, FILE_MAP_WRITE, 0, 0, 0) )) {
 		DWORD err = GetLastError();
 		this->close();
-		if (pErr) *pErr = String::Fmt(L"MapViewOfFile() failed to remap view of file, error code %d.", err);
+		if (pErr) *pErr = Sprintf(L"MapViewOfFile() failed to remap view of file, error code %d.", err);
 		return false;
 	}
 
 	_size = _file.size(); // keep new file size
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 
-bool File::Mapped::getContent(Array<BYTE>& buf, int offset, int numBytes, String *pErr) const
+bool File::Mapped::getContent(vector<BYTE>& buf, int offset, int numBytes, wstring *pErr) const
 {
 	if (!_hMap || !_pMem || !_file.hFile()) {
 		if (pErr) *pErr = L"File is not mapped into memory.";
 		return false;
-	} else if (offset >= _size) {
+	} else if (offset >= static_cast<int>(_size)) {
 		if (pErr) *pErr = L"Offset is beyond end of file.";
 		return false;
-	} else if (numBytes == -1 || offset + numBytes > _size) {
-		numBytes = _size - offset; // avoid reading beyond EOF
+	} else if (numBytes == -1 || offset + numBytes > static_cast<int>(_size)) {
+		numBytes = static_cast<int>(_size) - offset; // avoid reading beyond EOF
 	}
 
 	buf.resize(numBytes);
 	memcpy(&buf[0], this->pMem(), numBytes * sizeof(BYTE));
 
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 
-bool File::Mapped::getContent(String& buf, int offset, int numChars, String *pErr) const
+bool File::Mapped::getContent(wstring& buf, int offset, int numChars, wstring *pErr) const
 {
-	Array<BYTE> byteBuf;
-	if (!this->getContent(byteBuf, offset, numChars, pErr))
+	vector<BYTE> byteBuf;
+	if (!this->getContent(byteBuf, offset, numChars, pErr)) {
 		return false;
+	}
 
-	buf.reserve(byteBuf.size());
-	for (int i = 0; i < byteBuf.size(); ++i)
+	buf.resize(byteBuf.size());
+	for (size_t i = 0; i < byteBuf.size(); ++i) {
 		buf[i] = (wchar_t)byteBuf[i]; // raw conversion
+	}
 
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 
 
-bool File::Text::load(const wchar_t *path, String *pErr)
+bool File::Text::load(const wchar_t *path, wstring *pErr)
 {
 	File::Mapped fm;
-	if (!fm.open(path, Access::READONLY, pErr))
+	if (!fm.open(path, Access::READONLY, pErr)) {
 		return false;
-	if (pErr) *pErr = L"";
+	}
+	if (pErr) pErr->clear();
 	return this->load(fm);
 }
 
 bool File::Text::load(const File::Mapped& fm)
 {
-	BYTE *pMem = fm.pMem(); // the file reading is made upon a memory-mapped file
+	BYTE *pMem = fm.pMem(); // file reading is made upon a memory-mapped file, load all into wstring
 	BYTE *pPast = fm.pPastMem();
 
 	if ((pPast - pMem >= 3) && !memcmp(pMem, "\xEF\xBB\xBF", 3)) // UTF-8
 	{
 		pMem += 3; // skip BOM
-		_text = String::ParseUtf8(pMem, (int)(pPast - pMem)); // the whole file is loaded into a String as wchar_t
+		_text = ParseUtf8(pMem, static_cast<int>(pPast - pMem)); // the whole file is loaded as wchar_t
 	}
 	else if ((pPast - pMem >= 4) && !memcmp(pMem, "\x00\x00\xFE\xFF", 4)) // UTF-32 BE
 	{
@@ -499,53 +547,61 @@ bool File::Text::load(const File::Mapped& fm)
 	else if ((pPast - pMem >= 2) && !memcmp(pMem, "\xFE\xFF", 2)) // UTF-16 BE
 	{
 		pMem += 2;
-		_text.reserve((int)(pPast - pMem) / 2);
-		for (int i = 0; i < (int)(pPast - pMem); i += 2)
-			_text[i / 2] = (wchar_t)MAKEWORD(*(pMem + i + 1), *(pMem + i));
+		_text.resize(static_cast<int>(pPast - pMem) / 2);
+		for (int i = 0; i < static_cast<int>(pPast - pMem); i += 2) {
+			_text[i / 2] = static_cast<wchar_t>(MAKEWORD(*(pMem + i + 1), *(pMem + i)));
+		}
 	}
 	else if ((pPast - pMem >= 2) && !memcmp(pMem, "\xFF\xFE", 2)) // UTF-16 LE
 	{
 		pMem += 2;
-		_text.reserve((int)(pPast - pMem) / 2);
-		for (int i = 0; i < (int)(pPast - pMem); i += 2)
-			_text[i / 2] = (wchar_t)MAKEWORD(*(pMem + i), *(pMem + i + 1));
+		_text.resize(static_cast<int>(pPast - pMem) / 2);
+		for (int i = 0; i < static_cast<int>(pPast - pMem); i += 2) {
+			_text[i / 2] = static_cast<wchar_t>(MAKEWORD(*(pMem + i), *(pMem + i + 1)));
+		}
 	}
 	else // ASCII
 	{
-		int len = (int)(pPast - pMem);
-		_text.reserve(len);
-		for (int i = 0; i < len; ++i)
-			_text[i] = (wchar_t)*(pMem + i); // brute-force char to wchar_t
+		int len = static_cast<int>(pPast - pMem);
+		_text.resize(len);
+		for (int i = 0; i < len; ++i) {
+			_text[i] = static_cast<wchar_t>(*(pMem + i)); // brute-force char to wchar_t
+		}
 	}
-
+	
+	TrimNulls(_text);
 	this->rewind(); // our seeking pointer to be consumed by nextLine()
 	return true;
 }
 
-bool File::Text::nextLine(String& buf)
+bool File::Text::nextLine(wstring& buf)
 {
 	if (!*_p) return false; // runner pointer inside our _text String data block
 
 	if (_idxLine > -1) { // not 1st line; avoid a 1st blank like to be skipped
 		if ( (*_p == L'\r' && *(_p + 1) == L'\n') || // CRLF || LFCR
-			(*_p == L'\n' && *(_p + 1) == L'\r') ) _p += 2;
-		else if (*_p == L'\r' || *_p == L'\n') ++_p; // CR || LF
+			(*_p == L'\n' && *(_p + 1) == L'\r') )
+		{
+			_p += 2;
+		} else if (*_p == L'\r' || *_p == L'\n') {
+			++_p; // CR || LF
+		}
 	}
 	++_idxLine;
 
 	wchar_t *pRun = _p;
 	while (*pRun && *pRun != L'\r' && *pRun != '\n') ++pRun;
-	buf.reserve((int)(pRun - _p));
-	buf.copyFrom(_p, (int)(pRun - _p)); // line won't have CR nor LF at end
+	buf.clear();
+	buf.insert(0, _p, static_cast<size_t>(pRun - _p)); // line won't have CR nor LF at end
 
 	_p = pRun; // consume
 	return true;
 }
 
 
-bool File::Ini::load(String *pErr)
+bool File::Ini::load(wstring *pErr)
 {
-	if (_path.isEmpty()) {
+	if (_path.empty()) {
 		if (pErr) *pErr = L"INI path not set.";
 		return false;
 	}
@@ -556,69 +612,73 @@ bool File::Ini::load(String *pErr)
 		return false;
 	}
 
-	this->sections.removeAll().reserve( this->_countSections(&fin) );
+	this->sections.clear();
+	this->sections.reserve(this->_countSections(&fin));
 
-	String line, name, valstr; // name/val declared here to save reallocs
+	wstring line, curSection, name, valstr; // name/val declared here to save reallocs
 	while (fin.nextLine(line)) {
-		if (line[0] == L'[' && line.endsWithCS(L']')) { // begin section found
-			name.copyFrom(line.ptrAt(1), line.len() - 2);
-			this->sections[name] = Hash<String>(); // new section is an empty hash
+		if (line[0] == L'[' && line.back() == L']') { // begin of section found
+			curSection.clear();
+			curSection.insert(0, &line[1], line.length() - 2);
+			this->sections.emplace(curSection, unordered_map<wstring, wstring>()); // new section added
 			continue;
 		}
-		if (this->sections.size() && line.len()) { // keys will be read only if within a section
-			int idxEq = line.findCS(L'=');
+		if (this->sections.size() && line.length()) { // keys will be read only if within a section
+			int idxEq = StrFind(line, L'=');
 			if (idxEq > -1) {
-				name.copyFrom(line.ptrAt(0), idxEq);
-				valstr.copyFrom(line.ptrAt(idxEq + 1), line.len() - (idxEq + 1));
+				name.clear();
+				name.insert(0, &line[0], idxEq);
+				Trim(name);
+				
+				valstr.clear();
+				valstr.insert(0, &line[idxEq + 1], line.length() - (idxEq + 1));
+				Trim(valstr);
 
-				Hash<String>& lastSection = this->sections.at(this->sections.size() - 1)->val;
-				lastSection[name.trim()] = valstr.trim();
+				this->sections[curSection].emplace(name, valstr);
 			}
 		}
 	}
 
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 
-bool File::Ini::serialize(String *pErr) const
+bool File::Ini::serialize(wstring *pErr) const
 {
-	if (_path.isEmpty()) {
+	if (_path.empty()) {
 		if (pErr) *pErr = L"INI path not set.";
 		return false;
 	}
 
-	String out;
-	for (int i = 0; i < this->sections.size(); ++i) {
-		const Hash<Hash<String>>::Elem *section = this->sections.at(i);
-		out.append(L'[').append(section->key).append(L"]\r\n");
-
-		const Hash<String> *entries = &section->val;
-		for (int j = 0; j < entries->size(); ++j) {
-			const Hash<String>::Elem *entry = entries->at(j);
-			out.append(entry->key).append(L'=').append(entry->val).append(L"\r\n");
+	wstring out;
+	out.reserve(100);
+	for (auto& section : this->sections) {
+		out.append(L"[").append(section.first).append(L"]\r\n");
+		for (auto& entry : section.second) {
+			out.append(entry.first).append(L"=").append(entry.second).append(L"\r\n");
 		}
-
 		out.append(L"\r\n");
 	}
 
-	if (!File::WriteUtf8(_path.str(), out.str(), pErr)) {
+	if (!File::WriteUtf8(_path.c_str(), out.c_str(), pErr)) {
 		if (pErr) pErr->insert(0, L"INI file serialization failed.\n");
 		return false;
 	}
 
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 
 int File::Ini::_countSections(File::Text *fin) const
 {
 	int count = 0;
-	String line;
+	wstring line;
 	fin->rewind();
-	while (fin->nextLine(line))
-		if (line[0] == L'[' && line.endsWithCS(L']'))
+	while (fin->nextLine(line)) {
+		if (line[0] == L'[' && line.back() == L']') {
 			++count;
+		}
+	}
 	fin->rewind();
 	return count;
 }
@@ -628,34 +688,31 @@ File::Listing::Listing(const wchar_t *pattern)
 	: _hFind(nullptr)
 {
 	SecureZeroMemory(&_wfd, sizeof(_wfd));
-	_pattern = _wcsdup(pattern); // example of pattern: L"*.mp3"
+	_pattern = pattern; // example of pattern: L"*.mp3"
 }
 
 File::Listing::Listing(const wchar_t *path, const wchar_t *pattern)
 	: _hFind(nullptr)
 {
 	SecureZeroMemory(&_wfd, sizeof(_wfd));
-	bool hasBackslash = path[lstrlen(path) - 1] == L'\\';
-	_pattern = (wchar_t*)malloc(sizeof(wchar_t) * (
-		lstrlen(path) +
-		(hasBackslash ? 0 : 1) +
-		lstrlen(pattern) + 1 ));
-	lstrcpy(_pattern, path);
-	if (!hasBackslash) lstrcat(_pattern, L"\\");
-	lstrcat(_pattern, pattern); // assembly path + pattern
+
+	_pattern = path;
+	if (path[lstrlen(path) - 1] != L'\\') _pattern.append(L"\\");
+	_pattern.append(pattern);
 }
 
 File::Listing::~Listing()
 {
-	free(_pattern);
-	if (_hFind && _hFind != INVALID_HANDLE_VALUE)
+	if (_hFind && _hFind != INVALID_HANDLE_VALUE) {
 		FindClose(_hFind);
+		_hFind = nullptr;
+	}
 }
 
-bool File::Listing::next(wchar_t *buf)
+bool File::Listing::next(wstring& buf)
 {
 	if (!_hFind) { // first call to method
-		if ((_hFind = FindFirstFile(_pattern, &_wfd)) == INVALID_HANDLE_VALUE) { // init iteration
+		if ((_hFind = FindFirstFile(_pattern.c_str(), &_wfd)) == INVALID_HANDLE_VALUE) { // init iteration
 			_hFind = nullptr;
 			return false; // no files found at all
 		}
@@ -667,25 +724,35 @@ bool File::Listing::next(wchar_t *buf)
 		}
 	}
 
-	const wchar_t *pBackslash;
-	if (pBackslash = wcsrchr(_pattern, L'\\')) { // search last backslash on user pattern
-		int dirnameLen = (int)(pBackslash - _pattern) + 1; // length of directory plus backslash
-		lstrcpyn(buf, _pattern, dirnameLen + 1); // number of chars includes the terminating null
-		lstrcat(buf, _wfd.cFileName); // filepath + filename
+	if (StrFind(_pattern, L'\\') != -1) { // user pattern contains an absolute path
+		buf = Path::GetPath(_pattern);
+		buf.append(L"\\").append(_wfd.cFileName);
 	} else {
-		lstrcpy(buf, _wfd.cFileName); // simply copy
+		buf = _wfd.cFileName;
 	}
 
 	return true; // more to come, call again
 }
 
-bool File::Listing::next(String& buf)
+static vector<wstring> _ListingGetAll(File::Listing& listing)
 {
-	wchar_t stackbuf[MAX_PATH];
-	if (this->next(stackbuf)) {
-		buf = stackbuf;
-		return true; // more to come, call again
+	vector<wstring> ret;
+	wstring f;
+	while (listing.next(f)) {
+		ret.emplace_back(f);
 	}
-	buf = L"";
-	return false; // search finished
+	std::sort(ret.begin(), ret.end(), [](const wstring& a, const wstring& b)->bool {
+		return StrLexi(a, b) < 0;
+	});
+	return ret;
+}
+
+vector<wstring> File::Listing::GetAll(const wchar_t *pattern)
+{
+	return _ListingGetAll(Listing(pattern));
+}
+
+vector<wstring> File::Listing::GetAll(const wchar_t *path, const wchar_t *pattern)
+{
+	return _ListingGetAll(Listing(path, pattern));
 }

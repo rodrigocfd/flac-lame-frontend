@@ -5,11 +5,11 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="toolow">
-      <UniqueIdentifier>{83f4b21e-6f8c-44df-94fb-94b06fea1095}</UniqueIdentifier>
-    </Filter>
     <Filter Include="program">
       <UniqueIdentifier>{50bf2275-4a1e-43f5-80fa-3e4c89dab75d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="owl">
+      <UniqueIdentifier>{d40204dd-3c77-4033-bc52-243ea78bfcd8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -22,38 +22,29 @@
     <ClCompile Include="src\Convert.cpp">
       <Filter>program</Filter>
     </ClCompile>
-    <ClCompile Include="toolow\Internet.cpp">
-      <Filter>toolow</Filter>
+    <ClCompile Include="owl\Controls.cpp">
+      <Filter>owl</Filter>
     </ClCompile>
-    <ClCompile Include="toolow\Resources.cpp">
-      <Filter>toolow</Filter>
+    <ClCompile Include="owl\File.cpp">
+      <Filter>owl</Filter>
     </ClCompile>
-    <ClCompile Include="toolow\String.cpp">
-      <Filter>toolow</Filter>
+    <ClCompile Include="owl\Internet.cpp">
+      <Filter>owl</Filter>
     </ClCompile>
-    <ClCompile Include="toolow\System.cpp">
-      <Filter>toolow</Filter>
+    <ClCompile Include="owl\StrUtil.cpp">
+      <Filter>owl</Filter>
     </ClCompile>
-    <ClCompile Include="toolow\Window.cpp">
-      <Filter>toolow</Filter>
+    <ClCompile Include="owl\System.cpp">
+      <Filter>owl</Filter>
     </ClCompile>
-    <ClCompile Include="toolow\WindowDialog.cpp">
-      <Filter>toolow</Filter>
+    <ClCompile Include="owl\Window.cpp">
+      <Filter>owl</Filter>
     </ClCompile>
-    <ClCompile Include="toolow\WindowFrame.cpp">
-      <Filter>toolow</Filter>
+    <ClCompile Include="owl\WindowDialog.cpp">
+      <Filter>owl</Filter>
     </ClCompile>
-    <ClCompile Include="toolow\Controls.cpp">
-      <Filter>toolow</Filter>
-    </ClCompile>
-    <ClCompile Include="toolow\DataStructs.cpp">
-      <Filter>toolow</Filter>
-    </ClCompile>
-    <ClCompile Include="toolow\DeviceContext.cpp">
-      <Filter>toolow</Filter>
-    </ClCompile>
-    <ClCompile Include="toolow\File.cpp">
-      <Filter>toolow</Filter>
+    <ClCompile Include="owl\WindowFrame.cpp">
+      <Filter>owl</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -69,44 +60,32 @@
     <ClInclude Include="src\Convert.h">
       <Filter>program</Filter>
     </ClInclude>
-    <ClInclude Include="toolow\Array.h">
-      <Filter>toolow</Filter>
+    <ClInclude Include="owl\Controls.h">
+      <Filter>owl</Filter>
     </ClInclude>
-    <ClInclude Include="toolow\Controls.h">
-      <Filter>toolow</Filter>
+    <ClInclude Include="owl\File.h">
+      <Filter>owl</Filter>
     </ClInclude>
-    <ClInclude Include="toolow\DataStructs.h">
-      <Filter>toolow</Filter>
+    <ClInclude Include="owl\Internet.h">
+      <Filter>owl</Filter>
     </ClInclude>
-    <ClInclude Include="toolow\DeviceContext.h">
-      <Filter>toolow</Filter>
+    <ClInclude Include="owl\owl.h">
+      <Filter>owl</Filter>
     </ClInclude>
-    <ClInclude Include="toolow\File.h">
-      <Filter>toolow</Filter>
+    <ClInclude Include="owl\StrUtil.h">
+      <Filter>owl</Filter>
     </ClInclude>
-    <ClInclude Include="toolow\Internet.h">
-      <Filter>toolow</Filter>
+    <ClInclude Include="owl\System.h">
+      <Filter>owl</Filter>
     </ClInclude>
-    <ClInclude Include="toolow\Resources.h">
-      <Filter>toolow</Filter>
+    <ClInclude Include="owl\Window.h">
+      <Filter>owl</Filter>
     </ClInclude>
-    <ClInclude Include="toolow\String.h">
-      <Filter>toolow</Filter>
+    <ClInclude Include="owl\WindowDialog.h">
+      <Filter>owl</Filter>
     </ClInclude>
-    <ClInclude Include="toolow\System.h">
-      <Filter>toolow</Filter>
-    </ClInclude>
-    <ClInclude Include="toolow\toolow.h">
-      <Filter>toolow</Filter>
-    </ClInclude>
-    <ClInclude Include="toolow\Window.h">
-      <Filter>toolow</Filter>
-    </ClInclude>
-    <ClInclude Include="toolow\WindowDialog.h">
-      <Filter>toolow</Filter>
-    </ClInclude>
-    <ClInclude Include="toolow\WindowFrame.h">
-      <Filter>toolow</Filter>
+    <ClInclude Include="owl\WindowFrame.h">
+      <Filter>owl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

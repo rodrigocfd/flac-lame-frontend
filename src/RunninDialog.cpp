@@ -1,29 +1,22 @@
 
 #include "RunninDialog.h"
 #include "Convert.h"
+#include "../res/resource.h"
 
 RunninDialog::RunninDialog(
-	int                  numThreads,
-	Target               targetType,
-	const Array<String>& files,
-	bool                 delSrc,
-	bool                 isVbr,
-	const String&        quality,
-	const File::Ini&     ini,
-	const String&        destFolder )
-	: m_numThreads(numThreads), m_targetType(targetType), m_files(files), m_delSrc(delSrc), m_isVbr(isVbr),
+	int                    numThreads,
+	Target                 targetType,
+	const vector<wstring>& files,
+	bool                   delSrc,
+	bool                   isVbr,
+	const wstring&         quality,
+	const File::Ini&       ini,
+	const wstring&         destFolder )
+	: DialogModal(DLG_RUNNIN),
+		m_numThreads(numThreads), m_targetType(targetType), m_files(files), m_delSrc(delSrc), m_isVbr(isVbr),
 		m_quality(quality), m_ini(ini), m_destFolder(destFolder), m_curFile(0), m_filesDone(0)
 {
 	// m_curFile and m_filesDone are incremented after each processing.
-}
-
-INT_PTR RunninDialog::msgHandler(UINT msg, WPARAM wp, LPARAM lp)
-{
-	switch (msg)
-	{
-	case WM_INITDIALOG: this->onInitDialog(); break;
-	}
-	return DialogModal::msgHandler(msg, wp, lp);
 }
 
 void RunninDialog::onInitDialog()
@@ -32,24 +25,28 @@ void RunninDialog::onInitDialog()
 	m_prog = this->getChild(PRO_STATUS);
 	
 	m_prog.setRange(0, m_files.size());
-	m_lbl.setText( String::Fmt(L"0 of %d files finished...", m_files.size()) ); // initial text
+	m_lbl.setText( Sprintf(L"0 of %d files finished...", m_files.size()) ); // initial text
 	m_time0.setNow(); // start timer
 	this->setXButton(false);
 	
 	// Proceed to the file conversion straight away.
-	int batchSz = (m_numThreads < m_files.size()) ? m_numThreads : m_files.size(); // limit parallel processing
-	for (int i = 0; i < batchSz; ++i)
-		System::Thread([=]() { this->doProcessNextFile(); });
+	int nFiles = static_cast<int>(m_files.size());
+	int batchSz = (m_numThreads < nFiles) ? m_numThreads : nFiles; // limit parallel processing
+	for (int i = 0; i < batchSz; ++i) {
+		System::Thread([&]() {
+			this->doProcessNextFile();
+		});
+	}
 }
 
 void RunninDialog::doProcessNextFile()
 {
 	int index = m_curFile++;
-	if (index >= m_files.size()) return;
+	if (index >= static_cast<int>(m_files.size())) return;
 
-	const String& file = m_files[index];
+	const wstring& file = m_files[index];
 	bool good = true;
-	String err;
+	wstring err;
 
 	switch (m_targetType) {
 	case Target::MP3:
@@ -63,28 +60,29 @@ void RunninDialog::doProcessNextFile()
 	}
 
 	if (!good) {
-		m_curFile = m_files.size(); // error, so avoid further processing
-		this->sendFunction([=]() {
+		m_curFile = static_cast<int>(m_files.size()); // error, so avoid further processing
+		this->sendFunction([&]() {
 			this->messageBox(L"Conversion failed",
-				String::Fmt(L"File #%d:\n%s\n%s", index, file.str(), err.str()),
+				Sprintf(L"File #%d:\n%s\n%s", index, file.c_str(), err.c_str()),
 				MB_ICONERROR);
 			this->endDialog(IDCANCEL);
 		});
 	} else {
 		++m_filesDone;
 
-		this->sendFunction([=]() { // update GUI
+		this->sendFunction([&]() {
 			m_prog.setPos(m_filesDone);
-			m_lbl.setText( String::Fmt(L"%d of %d files finished...", m_filesDone, m_files.size()) );
+			m_lbl.setText( Sprintf(L"%d of %d files finished...", m_filesDone, m_files.size()) );
 		});
 			
-		if (m_filesDone < m_files.size()) { // more files to come
+		if (m_filesDone < static_cast<int>(m_files.size())) { // more files to come
 			this->doProcessNextFile();
 		} else { // finished all processing
-			this->sendFunction([=]() {
-				System::Date fin;
+			this->sendFunction([&]() {
+				Date fin;
 				this->messageBox(L"Conversion finished",
-					String::Fmt(L"%d files processed in %.2f seconds.", m_files.size(), (double)fin.minus(m_time0) / 1000),
+					Sprintf(L"%d files processed in %.2f seconds.",
+						m_files.size(), static_cast<double>(fin.minus(m_time0)) / 1000),
 					MB_ICONINFORMATION);
 				this->endDialog(IDOK);
 			});

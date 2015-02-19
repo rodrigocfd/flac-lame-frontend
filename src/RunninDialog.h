@@ -1,38 +1,44 @@
 
 #pragma once
-#include "../toolow/toolow.h"
-#include "../res/resource.h"
+#include "../owl/owl.h"
+using namespace owl;
+using std::wstring;
+using std::vector;
 
 class RunninDialog final : public DialogModal {
 public:
 	enum class Target { NONE=0, MP3, FLAC, WAV };
 private:
-	Window               m_lbl;
-	ProgressBar          m_prog;
-	int                  m_numThreads;
-	Target               m_targetType;
-	const Array<String>& m_files;
-	bool                 m_delSrc;
-	bool                 m_isVbr;
-	const String&        m_quality;
-	const File::Ini&     m_ini;
-	const String&        m_destFolder;
-	int                  m_curFile, m_filesDone;
-	System::Date         m_time0;
+	Window                 m_lbl;
+	ProgressBar            m_prog;
+	int                    m_numThreads;
+	Target                 m_targetType;
+	const vector<wstring>& m_files;
+	bool                   m_delSrc;
+	bool                   m_isVbr;
+	const wstring&         m_quality;
+	const File::Ini&       m_ini;
+	const wstring&         m_destFolder;
+	int                    m_curFile, m_filesDone;
+	Date                   m_time0;
 public:
 	RunninDialog(
-		int                  numThreads,
-		Target               targetType,
-		const Array<String>& files,
-		bool                 delSrc,
-		bool                 isVbr,
-		const String&        quality,
-		const File::Ini&     ini,
-		const String&        destFolder );
-	
-	int show(Window *parent) { return DialogModal::show(parent, DLG_RUNNIN); }
+		int                    numThreads,
+		Target                 targetType,
+		const vector<wstring>& files,
+		bool                   delSrc,
+		bool                   isVbr,
+		const wstring&         quality,
+		const File::Ini&       ini,
+		const wstring&         destFolder );
 private:
-	INT_PTR msgHandler(UINT msg, WPARAM wp, LPARAM lp);
 	void onInitDialog();
 	void doProcessNextFile();
+	
+	INT_PTR dlgProc(UINT msg, WPARAM wp, LPARAM lp) {
+		switch (msg) {
+		case WM_INITDIALOG: this->onInitDialog(); break;
+		}
+		return DialogModal::dlgProc(msg, wp, lp);
+	}
 };

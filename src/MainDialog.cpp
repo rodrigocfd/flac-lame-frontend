@@ -1,64 +1,17 @@
 
+#include <algorithm>
 #include "MainDialog.h"
 #include "RunninDialog.h"
 #include "Convert.h"
 
 RUN(MainDialog);
 
-INT_PTR MainDialog::msgHandler(UINT msg, WPARAM wp, LPARAM lp)
-{
-	switch (msg)
-	{
-	case WM_INITDIALOG: this->onInitDialog(); break;
-	case WM_DROPFILES:  this->onDropFiles(wp); return TRUE;
-
-	case WM_COMMAND:
-		switch (LOWORD(wp))
-		{
-		case IDCANCEL: this->onEsc(); return TRUE; // close on ESC
-		case BTN_DEST: this->onChooseDest(); return TRUE;
-		case RAD_MP3:
-		case RAD_FLAC:
-		case RAD_WAV:  this->onSelectFormat(); return TRUE;
-		case RAD_CBR:
-		case RAD_VBR:  this->onSelectRate(); return TRUE;
-		case BTN_RUN:  this->onRun(); return TRUE;
-		}
-		break;
-
-	case WM_NOTIFY:
-		switch (((NMHDR*)lp)->idFrom)
-		{
-		case LST_FILES:
-			switch (((NMHDR*)lp)->code)
-			{
-			case LVN_INSERTITEM:     this->doUpdateCounter(m_lstFiles.items.count()); return TRUE; // new item inserted
-			case LVN_DELETEITEM:     this->doUpdateCounter(m_lstFiles.items.count() - 1); return TRUE; // item about to be deleted
-			case LVN_DELETEALLITEMS: this->doUpdateCounter(0); return TRUE; // all items about to be deleted
-			case LVN_KEYDOWN:
-				if (((NMLVKEYDOWN*)lp)->wVKey == VK_DELETE) // DEL
-					m_lstFiles.items.removeSelected();
-				return TRUE;
-			}
-			break;
-		}
-		break;
-	}
-	return DialogApp::msgHandler(msg, wp, lp); // forward to parent
-}
-
-void MainDialog::onEsc()
-{
-	if (!m_lstFiles.items.count() || this->getChild(BTN_RUN).isEnabled())
-		this->sendMessage(WM_CLOSE, 0, 0); // close on ESC only if not processing
-}
-
 void MainDialog::onInitDialog()
 {
 	// Validate and load INI file.
 	m_ini.setPath( System::GetExePath().append(L"\\FlacLameFE.ini") );
 	
-	String err;
+	wstring err;
 	if (!m_ini.load(&err)) {
 		this->messageBox(L"Fail", err, MB_ICONERROR);
 		this->sendMessage(WM_CLOSE, 0, 0); // halt program
@@ -73,8 +26,7 @@ void MainDialog::onInitDialog()
 	}
 
 	// Layout control when resizing.
-	m_resizer.create(18)
-		.add({ LST_FILES }, this->hWnd(), Resizer::Do::RESIZE, Resizer::Do::RESIZE)
+	m_resizer.add({ LST_FILES }, this->hWnd(), Resizer::Do::RESIZE, Resizer::Do::RESIZE)
 		.add({ TXT_DEST }, this->hWnd(), Resizer::Do::RESIZE, Resizer::Do::REPOS)
 		.add({ LBL_DEST, FRA_CONV, RAD_MP3, RAD_FLAC, RAD_WAV, RAD_CBR, RAD_VBR, LBL_LEVEL,
 			CMB_CBR, CMB_VBR, CMB_FLAC, CHK_DELSRC, LBL_NUMTHREADS, CMB_NUMTHREADS },
@@ -130,23 +82,17 @@ void MainDialog::onInitDialog()
 
 void MainDialog::onDropFiles(WPARAM wp)
 {
-	Array<String> dropFiles = this->getDroppedFiles((HDROP)wp);
-
-	for (const String& drop : dropFiles) {
+	for (const wstring& drop : this->getDroppedFiles(reinterpret_cast<HDROP>(wp))) {
 		if (File::IsDir(drop)) { // if a directory, add all files inside of it
-			wchar_t subfilebuf[MAX_PATH];
-	
-			File::Listing findMp3(drop, L"*.mp3");
-			while (findMp3.next(subfilebuf))
-				this->doFileToList(subfilebuf);
-
-			File::Listing findFlac(drop, L"*.flac");
-			while (findFlac.next(subfilebuf))
-				this->doFileToList(subfilebuf);
-
-			File::Listing findWav(drop, L"*.wav");
-			while (findWav.next(subfilebuf))
-				this->doFileToList(subfilebuf);
+			for (const wstring f : File::Listing::GetAll(drop, L"*.mp3")) {
+				this->doFileToList(f);
+			}
+			for (const wstring f : File::Listing::GetAll(drop, L"*.flac")) {
+				this->doFileToList(f);
+			}
+			for (const wstring f : File::Listing::GetAll(drop, L"*.wav")) {
+				this->doFileToList(f);
+			}
 		} else {
 			this->doFileToList(drop); // add single file
 		}
@@ -154,11 +100,19 @@ void MainDialog::onDropFiles(WPARAM wp)
 	this->doUpdateCounter( m_lstFiles.items.count() );
 }
 
+void MainDialog::onEsc()
+{
+	if (!m_lstFiles.items.count() || this->getChild(BTN_RUN).isEnabled()) {
+		this->sendMessage(WM_CLOSE, 0, 0); // close on ESC only if not processing
+	}
+}
+
 void MainDialog::onChooseDest()
 {
-	String folder;
-	if (this->getFolderChoose(folder))
-		this->getChild(TXT_DEST).setText(folder.str()).setFocus();
+	wstring folder;
+	if (this->getFolderChoose(folder)) {
+		this->getChild(TXT_DEST).setText(folder.c_str()).setFocus();
+	}
 }
 
 void MainDialog::onSelectFormat()
@@ -182,17 +136,17 @@ void MainDialog::onSelectRate()
 void MainDialog::onRun()
 {
 	// Validate destination folder, if any.
-	String destFolder = this->getChild(TXT_DEST).getText();
-	
-	if (!destFolder.isEmpty()) {
+	wstring destFolder = this->getChild(TXT_DEST).getText();
+	if (!destFolder.empty()) {
 		if (!File::Exists(destFolder)) {
 			int q = this->messageBox(L"Create directory",
-				String::Fmt(L"The following directory:\n%s\ndoes not exist. Create it?", destFolder.str()),
+				Sprintf(L"The following directory:\n%s\ndoes not exist. Create it?", destFolder.c_str()),
 				MB_ICONQUESTION | MB_YESNO);
 			if (q == IDYES) {
 				if (!File::CreateDir(destFolder)) {
 					this->messageBox(L"Fail",
-						String::Fmt(L"The directory failed to be created:\n%s", destFolder.str()), MB_ICONERROR);
+						Sprintf(L"The directory failed to be created:\n%s", destFolder.c_str()),
+						MB_ICONERROR);
 					return; // halt
 				}
 			} else { // user didn't want to create the new dir
@@ -200,19 +154,22 @@ void MainDialog::onRun()
 			}
 		} else if (!File::IsDir(destFolder)) {
 			this->messageBox(L"Fail",
-				String::Fmt(L"The following path is not a directory:\n%s", destFolder.str()), MB_ICONERROR);
+				Sprintf(L"The following path is not a directory:\n%s", destFolder.c_str()),
+				MB_ICONERROR);
 			return; // halt
 		}
 	}
 
 	// Check the existence of each file added to list.
-	Array<String> files = m_lstFiles.items.getAll().transform<String>(
-		[](int i, const ListView::Item& elem)->String { return elem.getText(0); }
-	);
-	for (const String& f : files) { // each filepath
+	vector<ListView::Item> allItems = m_lstFiles.items.getAll();
+	vector<wstring> files(allItems.size());
+	std::transform(allItems.begin(), allItems.end(), files.begin(),
+		[](ListView::Item& item)->wstring { return item.getText(0); });
+	for (const wstring& f : files) { // each filepath
 		if (!File::Exists(f)) {
 			this->messageBox(L"Fail",
-				String::Fmt(L"Process aborted, file does not exist:\n%s", f.str()), MB_ICONERROR);
+				Sprintf(L"Process aborted, file does not exist:\n%s", f.c_str()),
+				MB_ICONERROR);
 			return; // halt
 		}
 	}
@@ -220,13 +177,13 @@ void MainDialog::onRun()
 	// Retrieve settings.
 	bool delSrc = m_chkDelSrc.isChecked();
 	bool isVbr = m_radMp3Vbr.isChecked();
-	int numThreads = m_cmbNumThreads.itemGetSelectedText().toInt();
+	int numThreads = std::stoi(m_cmbNumThreads.itemGetSelectedText());
 	
-	String quality;
+	wstring quality;
 	if (m_radMp3.isChecked()) {
 		Combo& cmbQuality = (isVbr ? m_cmbVbr : m_cmbCbr);
 		quality = cmbQuality.itemGetSelectedText();
-		quality[quality.findCS(L' ')] = L'\0'; // first characters of chosen option are the quality setting itself
+		quality.resize(StrFind(quality, L' ')); // first characters of chosen option are the quality setting itself
 	} else if (m_radFlac.isChecked()) {
 		quality = m_cmbFlac.itemGetSelectedText(); // text is quality setting itself
 	}
@@ -243,26 +200,27 @@ void MainDialog::onRun()
 	rd.show(this);
 }
 
-void MainDialog::doFileToList(const String& file)
+void MainDialog::doFileToList(const wstring& file)
 {
 	int iType = -1;
-	if (file.endsWithCI(L".mp3"))       iType = 0;
-	else if (file.endsWithCI(L".flac")) iType = 1;
-	else if (file.endsWithCI(L".wav"))  iType = 2; // what type of audio file is this?
+	if (EndsWithi(file, L".mp3"))       iType = 0;
+	else if (EndsWithi(file, L".flac")) iType = 1;
+	else if (EndsWithi(file, L".wav"))  iType = 2; // what type of audio file is this?
 
-	if (iType == -1)
+	if (iType == -1) {
 		return; // bypass file if unaccepted format
-
-	if (!m_lstFiles.items.exists(file))
+	}
+	if (!m_lstFiles.items.exists(file)) {
 		m_lstFiles.items.add(file, iType); // add only if not present yet
+	}
 }
 
 void MainDialog::doUpdateCounter(int newCount)
 {
 	// Update counter on Run button.
-	String caption;
+	wstring caption;
 	
-	if (newCount) caption = String::Fmt(L"&Run (%d)", newCount);
+	if (newCount) caption = Sprintf(L"&Run (%d)", newCount);
 	else caption = L"&Run";
 
 	this->getChild(BTN_RUN)

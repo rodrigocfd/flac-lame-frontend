@@ -1,14 +1,19 @@
-//
-// Automation for internet related operations.
-// Part of WOLF - Win32 Object Lambda Framework.
-// @author Rodrigo Cesar de Freitas Dias
-// @see https://github.com/rodrigocfd/wolf
-//
+/*!
+ * Automation for internet related operations.
+ * Part of OWL - Object Win32 Library.
+ * @author Rodrigo Cesar de Freitas Dias
+ * @see https://github.com/rodrigocfd/wolf
+ */
 
 #include "Internet.h"
+#include "StrUtil.h"
 #pragma comment(lib, "Winhttp.lib")
+using namespace owl;
+using std::initializer_list;
+using std::vector;
+using std::wstring;
 
-bool Internet::Session::init(String *pErr, const wchar_t *userAgent)
+bool Internet::Session::init(wstring *pErr, const wchar_t *userAgent)
 {
 	if (!_hSession) {
 		// http://social.msdn.microsoft.com/forums/en-US/vclanguage/thread/45ccd91c-6794-4f9b-8f4f-865c76cc146d
@@ -25,7 +30,7 @@ bool Internet::Session::init(String *pErr, const wchar_t *userAgent)
 		}
 	}
 
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 
@@ -44,36 +49,37 @@ void Internet::Download::abort()
 
 Internet::Download& Internet::Download::addRequestHeaders(initializer_list<const wchar_t*> requestHeaders)
 {
-	for (const wchar_t *rh : requestHeaders)
-		_requestHeaders.append(rh);
+	for (const wchar_t *rh : requestHeaders) {
+		_requestHeaders.emplace_back(rh);
+	}
 	return *this;
 }
 
-bool Internet::Download::start(String *pErr)
+bool Internet::Download::start(wstring *pErr)
 {
 	if (_hConnect) {
 		if (pErr) *pErr = L"A download is already in progress.";
 		return false;
 	}
 
-	if ( !this->_initHandles(pErr) ||
+	if (!this->_initHandles(pErr) ||
 		!this->_contactServer(pErr) ||
 		!this->_parseHeaders(pErr) ) return false;
 
-	_buffer.resize(0);
-	if (pErr) *pErr = L"";
+	_buffer.clear();
+	if (pErr) pErr->clear();
 	return true;
 }
 
-bool Internet::Download::hasData(String *pErr)
+bool Internet::Download::hasData(wstring *pErr)
 {
-	// Receive the data from server; user must call this until false;
+	// Receive the data from server; user must call this until false.
 	DWORD incomingBytes = 0;
 	if (!this->_getIncomingByteCount(incomingBytes, pErr)) return false;
 	if (!incomingBytes) { // no more bytes to be downloaded
-		_buffer.resize(0);
+		_buffer.clear();
 		this->abort();
-		if (pErr) *pErr = L"";
+		if (pErr) pErr->clear();
 		return false;
 	}
 
@@ -81,11 +87,11 @@ bool Internet::Download::hasData(String *pErr)
 	if (!this->_receiveBytes(incomingBytes, pErr)) return false;
 	_totalDownloaded += incomingBytes;
 
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true; // more data to come, call again
 }
 
-bool Internet::Download::_initHandles(String *pErr)
+bool Internet::Download::_initHandles(wstring *pErr)
 {
 	// Crack the URL.
 	DWORD dwErr = ERROR_SUCCESS;
@@ -102,9 +108,9 @@ bool Internet::Download::_initHandles(String *pErr)
 	}
 
 	// Build the request handle.
-	String fullPath = crackedUrl.pathAndExtra();
-	_hRequest = WinHttpOpenRequest(_hConnect, _verb.str(), fullPath.str(), nullptr,
-		_referrer.isEmpty() ? WINHTTP_NO_REFERER : _referrer.str(),
+	wstring fullPath = crackedUrl.pathAndExtra();
+	_hRequest = WinHttpOpenRequest(_hConnect, _verb.c_str(), fullPath.c_str(), nullptr,
+		_referrer.empty() ? WINHTTP_NO_REFERER : _referrer.c_str(),
 		WINHTTP_DEFAULT_ACCEPT_TYPES,
 		crackedUrl.isHttps() ? WINHTTP_FLAG_SECURE : 0);
 	if (!_hRequest) {
@@ -114,15 +120,15 @@ bool Internet::Download::_initHandles(String *pErr)
 		return false;
 	}
 
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 
-bool Internet::Download::_contactServer(String *pErr)
+bool Internet::Download::_contactServer(wstring *pErr)
 {
 	// Add the request headers to request handle.
-	for (String& rh : _requestHeaders) {
-		if (!WinHttpAddRequestHeaders(_hRequest, rh.str(), (ULONG)-1L, WINHTTP_ADDREQ_FLAG_ADD)) {
+	for (wstring& rh : _requestHeaders) {
+		if (!WinHttpAddRequestHeaders(_hRequest, rh.c_str(), static_cast<ULONG>(-1L), WINHTTP_ADDREQ_FLAG_ADD)) {
 			DWORD dwErr = GetLastError();
 			this->abort();
 			if (pErr) *pErr = _FormatErr(L"WinHttpAddRequestHeaders", dwErr);
@@ -146,22 +152,22 @@ bool Internet::Download::_contactServer(String *pErr)
 		return false;
 	}
 
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 
-bool Internet::Download::_parseHeaders(String *pErr)
+bool Internet::Download::_parseHeaders(wstring *pErr)
 {
 	// Retrieve the response header.
 	DWORD dwSize = 0;
 	WinHttpQueryHeaders(_hRequest, WINHTTP_QUERY_RAW_HEADERS_CRLF, WINHTTP_HEADER_NAME_BY_INDEX,
 		WINHTTP_NO_OUTPUT_BUFFER, &dwSize, WINHTTP_NO_HEADER_INDEX);
 
-	String rawReh; // raw response headers
-	rawReh.reserve(dwSize / sizeof(wchar_t));
+	wstring rawReh; // raw response headers
+	rawReh.resize(dwSize / sizeof(wchar_t));
 
 	if (!WinHttpQueryHeaders(_hRequest, WINHTTP_QUERY_RAW_HEADERS_CRLF, WINHTTP_HEADER_NAME_BY_INDEX,
-		rawReh.ptrAt(0), &dwSize, WINHTTP_NO_HEADER_INDEX))
+		&rawReh[0], &dwSize, WINHTTP_NO_HEADER_INDEX))
 	{
 		DWORD dwErr = GetLastError();
 		this->abort();
@@ -169,36 +175,36 @@ bool Internet::Download::_parseHeaders(String *pErr)
 		return false;
 	}
 
-	// Parse the raw response headers into a hash.
-	_responseHeaders.removeAll();
-	Array<String> lines = rawReh.explode(L"\r\n");
-	String key, val;
-	key.reserve(32); val.reserve(32); // temp buffers to save reallocs
+	// Parse the raw response headers into an associative array.
+	_responseHeaders.clear();
+	vector<wstring> lines = Explode(rawReh, L"\r\n");
 
-	for (String& line : lines) {
-		if (line.isEmpty()) continue;
-		int colonIdx = line.findCS(L':');
+	for (wstring& line : lines) {
+		if (line.empty()) continue;
+		int colonIdx = StrFind(line, L':');
 		if (colonIdx == -1) { // not a key/value pair, probably response line
-			_responseHeaders[L""] = line; // empty key
+			_responseHeaders.emplace(L"", line); // empty key
 		} else {
-			key = line.substr(0, colonIdx);
-			val = line.substr(colonIdx + 1, line.len() - (colonIdx + 1));
-			_responseHeaders[key.trim()] = val.trim();
+			_responseHeaders.emplace(
+				Trim( line.substr(0, colonIdx) ),
+				Trim( line.substr(colonIdx + 1, line.length() - (colonIdx + 1)) )
+			);
 		}
 	}
 
 	// Retrieve content length, if informed by server.
-	if (_responseHeaders.exists(L"Content-Length")) {
-		const String& strContentLength = _responseHeaders[L"Content-Length"];
-		if (strContentLength.isInt()) // yes, server informed content length
-			_contentLength = strContentLength.toInt();
+	if (_responseHeaders.find(L"Content-Length") != _responseHeaders.end()) {
+		const wstring& strContentLength = _responseHeaders[L"Content-Length"];
+		if (IsInt(strContentLength)) { // yes, server informed content length
+			_contentLength = std::stoi(strContentLength);
+		}
 	}
 
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 
-bool Internet::Download::_getIncomingByteCount(DWORD& count, String *pErr)
+bool Internet::Download::_getIncomingByteCount(DWORD& count, wstring *pErr)
 {
 	DWORD dwSize = 0;
 	if (!WinHttpQueryDataAvailable(_hRequest, &dwSize)) { // how many bytes are about to come
@@ -208,20 +214,20 @@ bool Internet::Download::_getIncomingByteCount(DWORD& count, String *pErr)
 		return false;
 	}
 	count = dwSize;
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 
-bool Internet::Download::_receiveBytes(UINT nBytesToRead, String *pErr)
+bool Internet::Download::_receiveBytes(UINT nBytesToRead, wstring *pErr)
 {
 	DWORD dwRead = 0;
-	if (!WinHttpReadData(_hRequest, (void*)&_buffer[0], nBytesToRead, &dwRead)) {
+	if (!WinHttpReadData(_hRequest, static_cast<void*>(&_buffer[0]), nBytesToRead, &dwRead)) {
 		DWORD dwErr = GetLastError();
 		this->abort();
 		if (pErr) *pErr = _FormatErr(L"WinHttpReadData", dwErr);
 		return false;
 	}
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 
@@ -250,7 +256,7 @@ bool Internet::_Url::crack(const wchar_t *address, DWORD *dwErr)
 }
 
 
-String Internet::_FormatErr(const wchar_t *funcName, DWORD code)
+wstring Internet::_FormatErr(const wchar_t *funcName, DWORD code)
 {
 	const wchar_t *s = nullptr;
 
@@ -281,6 +287,7 @@ String Internet::_FormatErr(const wchar_t *funcName, DWORD code)
 	default:                                    s = nullptr;
 	}
 
-	return String::Fmt(L"%s() failed. Error: %s.", funcName,
-		s ? s : String::Fmt(L"(unhandled, %08X)", code).str() );
+	return Sprintf(L"%s() failed. Error: %s.",
+		funcName,
+		s ? s : Sprintf(L"(unhandled, %08X)", code).c_str() );
 }

@@ -87,7 +87,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <StringPooling>true</StringPooling>
-      <ExceptionHandling>false</ExceptionHandling>
+      <ExceptionHandling>Sync</ExceptionHandling>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
@@ -105,7 +105,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
       <StringPooling>true</StringPooling>
-      <ExceptionHandling>false</ExceptionHandling>
+      <ExceptionHandling>Sync</ExceptionHandling>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
@@ -126,7 +126,7 @@
       <SDLCheck>true</SDLCheck>
       <DebugInformationFormat>None</DebugInformationFormat>
       <StringPooling>true</StringPooling>
-      <ExceptionHandling>false</ExceptionHandling>
+      <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
@@ -150,7 +150,7 @@
       <SDLCheck>true</SDLCheck>
       <DebugInformationFormat>None</DebugInformationFormat>
       <StringPooling>true</StringPooling>
-      <ExceptionHandling>false</ExceptionHandling>
+      <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
@@ -163,39 +163,32 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="owl\Controls.cpp" />
+    <ClCompile Include="owl\File.cpp" />
+    <ClCompile Include="owl\Internet.cpp" />
+    <ClCompile Include="owl\StrUtil.cpp" />
+    <ClCompile Include="owl\System.cpp" />
+    <ClCompile Include="owl\Window.cpp" />
+    <ClCompile Include="owl\WindowDialog.cpp" />
+    <ClCompile Include="owl\WindowFrame.cpp" />
     <ClCompile Include="src\Convert.cpp" />
     <ClCompile Include="src\MainDialog.cpp" />
     <ClCompile Include="src\RunninDialog.cpp" />
-    <ClCompile Include="toolow\Controls.cpp" />
-    <ClCompile Include="toolow\DataStructs.cpp" />
-    <ClCompile Include="toolow\DeviceContext.cpp" />
-    <ClCompile Include="toolow\File.cpp" />
-    <ClCompile Include="toolow\Internet.cpp" />
-    <ClCompile Include="toolow\Resources.cpp" />
-    <ClCompile Include="toolow\String.cpp" />
-    <ClCompile Include="toolow\System.cpp" />
-    <ClCompile Include="toolow\Window.cpp" />
-    <ClCompile Include="toolow\WindowDialog.cpp" />
-    <ClCompile Include="toolow\WindowFrame.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="owl\Controls.h" />
+    <ClInclude Include="owl\File.h" />
+    <ClInclude Include="owl\Internet.h" />
+    <ClInclude Include="owl\owl.h" />
+    <ClInclude Include="owl\StrUtil.h" />
+    <ClInclude Include="owl\System.h" />
+    <ClInclude Include="owl\Window.h" />
+    <ClInclude Include="owl\WindowDialog.h" />
+    <ClInclude Include="owl\WindowFrame.h" />
     <ClInclude Include="res\resource.h" />
     <ClInclude Include="src\Convert.h" />
     <ClInclude Include="src\MainDialog.h" />
     <ClInclude Include="src\RunninDialog.h" />
-    <ClInclude Include="toolow\Array.h" />
-    <ClInclude Include="toolow\Controls.h" />
-    <ClInclude Include="toolow\DataStructs.h" />
-    <ClInclude Include="toolow\DeviceContext.h" />
-    <ClInclude Include="toolow\File.h" />
-    <ClInclude Include="toolow\Internet.h" />
-    <ClInclude Include="toolow\Resources.h" />
-    <ClInclude Include="toolow\String.h" />
-    <ClInclude Include="toolow\System.h" />
-    <ClInclude Include="toolow\toolow.h" />
-    <ClInclude Include="toolow\Window.h" />
-    <ClInclude Include="toolow\WindowDialog.h" />
-    <ClInclude Include="toolow\WindowFrame.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\FlacLameFE.rc" />
