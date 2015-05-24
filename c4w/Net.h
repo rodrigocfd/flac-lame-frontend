@@ -1,8 +1,8 @@
 /*!
  * Automation for internet related operations.
- * Part of OWL - Object Win32 Library.
+ * Part of C4W - Classes for Win32.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/wolf
+ * @see https://github.com/rodrigocfd/c4w
  */
 
 #pragma once
@@ -12,9 +12,9 @@
 #include <Windows.h>
 #include <winhttp.h>
 
-namespace owl {
+namespace c4w {
 
-struct Internet final {
+namespace net {
 	class Session final {
 	private:
 		HINTERNET _hSession;
@@ -36,7 +36,6 @@ struct Internet final {
 		std::vector<BYTE> _buffer;
 		std::vector<std::wstring> _requestHeaders;
 		std::unordered_map<std::wstring, std::wstring> _responseHeaders;
-		
 	public:
 		Download(const Session& session, std::wstring url, std::wstring verb=L"GET") :
 			_session(session), _hConnect(nullptr), _hRequest(nullptr),
@@ -47,13 +46,13 @@ struct Internet final {
 		Download& addRequestHeaders(std::initializer_list<const wchar_t*> requestHeaders);
 		Download& setReferrer(const wchar_t *referrer) { _referrer = referrer; return *this; }
 		bool      start(std::wstring *pErr=nullptr);
-		bool      hasData(std::wstring *pErr=nullptr);		
+		bool      hasData(std::wstring *pErr=nullptr);
 		int       getContentLength() const   { return _contentLength; }
 		int       getTotalDownloaded() const { return _totalDownloaded; }
 		float     getPercent() const         { return _contentLength ? (static_cast<float>(_totalDownloaded) / _contentLength) * 100 : 0; }
 		const std::vector<BYTE>& getBuffer() const { return _buffer; }
 		const std::vector<std::wstring>& getRequestHeaders() const { return _requestHeaders; }
-		const std::unordered_map<std::wstring, std::wstring>&  getResponseHeaders() const { return _responseHeaders; }		
+		const std::unordered_map<std::wstring, std::wstring>&  getResponseHeaders() const { return _responseHeaders; }
 	private:
 		bool _initHandles(std::wstring *pErr=nullptr);
 		bool _contactServer(std::wstring *pErr=nullptr);
@@ -62,8 +61,7 @@ struct Internet final {
 		bool _receiveBytes(UINT nBytesToRead, std::wstring *pErr=nullptr);
 	};
 
-private:
-	class _Url final {
+	class Url final {
 	public:
 		bool           crack(const wchar_t *address, DWORD *dwErr=nullptr);
 		bool           crack(const std::wstring& address, DWORD *dwErr=nullptr) { return crack(address.c_str(), dwErr); }
@@ -80,8 +78,6 @@ private:
 		URL_COMPONENTS _uc;
 		wchar_t        _scheme[16], _host[64], _user[64], _pwd[64], _path[256], _extra[256];
 	};
+}//namespace net
 
-	static std::wstring _FormatErr(const wchar_t *funcName, DWORD code);
-};
-
-}//namespace owl
+}//namespace c4w

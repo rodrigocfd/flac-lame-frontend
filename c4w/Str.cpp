@@ -1,18 +1,18 @@
 /*!
  * String utilities.
- * Part of OWL - Object Win32 Library.
+ * Part of C4W - Classes for Win32.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/wolf
+ * @see https://github.com/rodrigocfd/c4w
  */
 
 #include <cwctype> // iswpace
-#include "StrUtil.h"
+#include "Str.h"
 #pragma warning(disable:4996) // _vsnwprintf
-using namespace owl;
+using namespace c4w;
 using std::wstring;
 using std::vector;
 
-wstring owl::Sprintf(const wchar_t *fmt, ...)
+wstring str::Sprintf(const wchar_t *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
@@ -23,7 +23,7 @@ wstring owl::Sprintf(const wchar_t *fmt, ...)
 	return ret;
 }
 
-wstring& owl::Trim(wstring& s)
+wstring& str::Trim(wstring& s)
 {
 	if (s.empty()) return s;
 	TrimNulls(s);
@@ -76,7 +76,7 @@ static wchar_t _ChangeCase(wchar_t ch, bool toUpper)
 	return ch;
 }
 
-wstring& owl::ToUpper(wstring& s)
+wstring& str::ToUpper(wstring& s)
 {
 	for (wchar_t& ch : s) {
 		ch = _ChangeCase(ch, true);
@@ -84,7 +84,7 @@ wstring& owl::ToUpper(wstring& s)
 	return s;
 }
 
-wstring& owl::ToLower(wstring& s)
+wstring& str::ToLower(wstring& s)
 {
 	for (wchar_t& ch : s) {
 		ch = _ChangeCase(ch, false);
@@ -92,7 +92,7 @@ wstring& owl::ToLower(wstring& s)
 	return s;
 }
 
-bool owl::IsInt(const wstring& s)
+bool str::IsInt(const wstring& s)
 {
 	if (s.empty()) return false;
 
@@ -104,7 +104,7 @@ bool owl::IsInt(const wstring& s)
 	return true;
 }
 
-bool owl::IsFloat(const wstring& s)
+bool str::IsFloat(const wstring& s)
 {
 	if (s.empty()) return false;
 
@@ -123,7 +123,7 @@ bool owl::IsFloat(const wstring& s)
 	return true;
 }
 
-static int _LexCmp(const wchar_t *a, const wchar_t *b, bool isCS, size_t numCharsToSee)
+int str::LexCmp(Sens se, const wchar_t *a, const wchar_t *b, size_t nChars)
 {
 	if (!a && !b) return 0;
 	if (!a) return -1; else if (!b) return 1; // different strings
@@ -132,64 +132,55 @@ static int _LexCmp(const wchar_t *a, const wchar_t *b, bool isCS, size_t numChar
 	for (;;) {
 		if (!*a && !*b) return 0; // end of both strings reached
 
-		if (isCS && *a != *b) {
+		if (se == Sens::YES && *a != *b) {
 			return static_cast<int>(*a - *b); // different strings
-		} else if (!isCS) {
+		} else if (se == Sens::NO) {
 			wchar_t aa = _ChangeCase(*a, true), // cache uppercase
 				bb = _ChangeCase(*b, true);
 			if (aa != bb) return aa - bb; // different strings
 		}
 
 		++a; ++b; ++count;
-		if (numCharsToSee && count == numCharsToSee) return 0;
+		if (nChars && count == nChars) return 0;
 	}
 	return -42; // never happens
 }
 
-int owl::StrLex(const wchar_t *a, const wchar_t *b, size_t nChars)  { return _LexCmp(a, b, true, nChars); }
-int owl::StrLexi(const wchar_t *a, const wchar_t *b, size_t nChars) { return _LexCmp(a, b, false, nChars); }
-
-static bool _BeginsWith(const wstring& s, const wchar_t *what, bool isCS)
+bool str::BeginsWith(Sens se, const wstring& s, const wchar_t *what)
 {
 	if (s.empty()) return false;
 
 	size_t whatLen = lstrlen(what);
 	if (!whatLen || whatLen > s.length()) return false;
 
-	return !_LexCmp(&s[0], what, isCS, whatLen);
+	return !LexCmp(se, &s[0], what, whatLen);
 }
 
-bool owl::BeginsWith(const wstring& s, const wchar_t *what)  { return _BeginsWith(s, what, true); }
-bool owl::BeginsWithi(const wstring& s, const wchar_t *what) { return _BeginsWith(s, what, false); }
-
-static bool _EndsWith(const wstring& s, const wchar_t *what, bool isCS)
+bool str::EndsWith(Sens se, const wstring& s, const wchar_t *what)
 {
 	if (s.empty()) return false;
 
 	size_t whatLen = lstrlen(what);
 	if (!whatLen || whatLen > s.length()) return false;
 
-	return !_LexCmp(&s[s.length() - whatLen], what, isCS, whatLen);
+	return !LexCmp(se, &s[s.length() - whatLen], what, whatLen);
 }
 
-bool owl::EndsWith(const wstring& s, const wchar_t *what)  { return _EndsWith(s, what, true); }
-bool owl::EndsWithi(const wstring& s, const wchar_t *what) { return _EndsWith(s, what, false); }
-
-static const wchar_t* _FindCh(const wchar_t *s, size_t slen, wchar_t whatCh, bool isCS, bool isReverse)
+static const wchar_t* _FindCh(str::Sens se, const wchar_t *s, size_t slen, wchar_t whatCh, bool isReverse)
 {
 	if (!slen) return nullptr;
 
-	wchar_t bb = isCS ? whatCh : _ChangeCase(whatCh, true);
+	wchar_t bb = (se == str::Sens::YES) ? whatCh : _ChangeCase(whatCh, true);
 	if (isReverse) {
 		for (size_t i = slen; i-- > 0; ) {
-			wchar_t aa = isCS ? s[i] : _ChangeCase(s[i], true);
+			wchar_t aa = (se == str::Sens::YES) ? s[i] : _ChangeCase(s[i], true);
 			if (aa == bb) {
 				return s + i;
 			}
 		}
 	} else {
 		for (size_t i = 0; i < slen; ++i) {
-			wchar_t aa = isCS ? s[i] : _ChangeCase(s[i], true);
+			wchar_t aa = (se == str::Sens::YES) ? s[i] : _ChangeCase(s[i], true);
 			if (aa == bb) {
 				return s + i;
 			}
@@ -198,15 +189,15 @@ static const wchar_t* _FindCh(const wchar_t *s, size_t slen, wchar_t whatCh, boo
 	return nullptr; // not found
 }
 
-static const wchar_t* _FindStr(const wchar_t *s, size_t slen, const wchar_t *whatStr, bool isCS, bool isReverse)
+static const wchar_t* _FindStr(str::Sens se, const wchar_t *s, size_t slen, const wchar_t *whatStr, bool isReverse)
 {
 	if (!slen) return nullptr;
 
 	int lenWhat = lstrlen(whatStr);
-	if (lenWhat == 1) return _FindCh(s, slen, *whatStr, isCS, isReverse); // ordinary char search
+	if (lenWhat == 1) return _FindCh(se, s, slen, *whatStr, isReverse); // ordinary char search
 
 	wchar_t *tmpWhat = nullptr;
-	if (!isCS) { // create temp with uppercase version of "what"
+	if (se == str::Sens::NO) { // create temp with uppercase version of "what"
 		tmpWhat = static_cast<wchar_t*>(_alloca((lenWhat + 1) * sizeof(wchar_t)));
 		for (int i = 0; i < lenWhat; ++i)
 			tmpWhat[i] = _ChangeCase(whatStr[i], true);
@@ -217,11 +208,11 @@ static const wchar_t* _FindStr(const wchar_t *s, size_t slen, const wchar_t *wha
 
 	if (isReverse) {
 		for (size_t lenS = slen; ; ) {
-			const wchar_t *found = _FindCh(s, lenS, *tmpWhat, isCS, true);
+			const wchar_t *found = _FindCh(se, s, lenS, *tmpWhat, true);
 			if (!found) break;
 			const wchar_t *pS = found + 1,
 				*pWhat = tmpWhat + 1;
-			while (*pS && (isCS ? *pS : _ChangeCase(*pS, true)) == *pWhat) {
+			while (*pS && ((se == str::Sens::YES) ? *pS : _ChangeCase(*pS, true)) == *pWhat) {
 				if (!*++pWhat) return found;
 				++pS;
 			}
@@ -229,11 +220,11 @@ static const wchar_t* _FindStr(const wchar_t *s, size_t slen, const wchar_t *wha
 		}
 	} else {
 		for (int i = 0; ; ) {
-			const wchar_t *found = _FindCh(s + i, slen - i, *tmpWhat, isCS, false);
+			const wchar_t *found = _FindCh(se, s + i, slen - i, *tmpWhat, false);
 			if (!found) break;
 			const wchar_t *pS = found + 1,
 				*pWhat = tmpWhat + 1;
-			while (*pS && (isCS ? *pS : _ChangeCase(*pS, true)) == *pWhat) {
+			while (*pS && ((se == str::Sens::YES) ? *pS : _ChangeCase(*pS, true)) == *pWhat) {
 				if (!*++pWhat) return found;
 				++pS;
 			}
@@ -243,21 +234,15 @@ static const wchar_t* _FindStr(const wchar_t *s, size_t slen, const wchar_t *wha
 	return nullptr; // not found
 }
 
-static int    _FindRetIdx(const wstring& s, const wchar_t *pFound)   { return pFound ? static_cast<int>(pFound - s.c_str()) : -1; }
-int            owl::StrFind(const wstring& s, wchar_t what)          { return _FindRetIdx(s, _FindCh(s.c_str(), s.length(), what, true, false)); }
-const wchar_t* owl::StrFind(const wchar_t *s, const wchar_t *what)   { return _FindStr(s, lstrlen(s), what, true, false); }
-int            owl::StrFind(const wstring& s, const wchar_t *what)   { return _FindRetIdx(s, _FindStr(s.c_str(), s.length(), what, true, false)); }
-int            owl::StrFindi(const wstring& s, wchar_t what)         { return _FindRetIdx(s, _FindCh(s.c_str(), s.length(), what, false, false)); }
-const wchar_t* owl::StrFindi(const wchar_t *s, const wchar_t *what)  { return _FindStr(s, lstrlen(s), what, false, false); }
-int            owl::StrFindi(const wstring& s, const wchar_t *what)  { return _FindRetIdx(s, _FindStr(s.c_str(), s.length(), what, false, false)); }
-int            owl::StrRFind(const wstring& s, wchar_t what)         { return _FindRetIdx(s, _FindCh(s.c_str(), s.length(), what, true, true)); }
-const wchar_t* owl::StrRFind(const wchar_t *s, const wchar_t *what)  { return _FindStr(s, lstrlen(s), what, true, true); }
-int            owl::StrRFind(const wstring& s, const wchar_t *what)  { return _FindRetIdx(s, _FindStr(s.c_str(), s.length(), what, true, true)); }
-int            owl::StrRFindi(const wstring& s, wchar_t what)        { return _FindRetIdx(s, _FindCh(s.c_str(), s.length(), what, false, true)); }
-const wchar_t* owl::StrRFindi(const wchar_t *s, const wchar_t *what) { return _FindStr(s, lstrlen(s), what, false, true); }
-int            owl::StrRFindi(const wstring& s, const wchar_t *what) { return _FindRetIdx(s, _FindStr(s.c_str(), s.length(), what, false, true)); }
+static int    _FindRetIdx(const wstring& s, const wchar_t *pFound) { return pFound ? static_cast<int>(pFound - s.c_str()) : -1; }
+int            str::Find(Sens se, const wstring& s, wchar_t what)        { return _FindRetIdx(s, _FindCh(se, s.c_str(), s.length(), what, false)); }
+const wchar_t* str::Find(Sens se, const wchar_t *s, const wchar_t *what) { return _FindStr(se, s, lstrlen(s), what, false); }
+int            str::Find(Sens se, const wstring& s, const wchar_t *what) { return _FindRetIdx(s, _FindStr(se, s.c_str(), s.length(), what, false)); }
+int            str::FindRev(Sens se, const wstring& s, wchar_t what)        { return _FindRetIdx(s, _FindCh(se, s.c_str(), s.length(), what, true)); }
+const wchar_t* str::FindRev(Sens se, const wchar_t *s, const wchar_t *what) { return _FindStr(se, s, lstrlen(s), what, true); }
+int            str::FindRev(Sens se, const wstring& s, const wchar_t *what) { return _FindRetIdx(s, _FindStr(se, s.c_str(), s.length(), what, true)); }
 
-static wstring& _StrRepl(wstring& s, const wchar_t *target, const wchar_t *replacement, bool isCS)
+wstring& str::Replace(Sens se, wstring& s, const wchar_t *target, const wchar_t *replacement)
 {
 	if (!target || !replacement || s.empty()) return s;
 
@@ -270,7 +255,7 @@ static wstring& _StrRepl(wstring& s, const wchar_t *target, const wchar_t *repla
 	// Count occurrences of target.
 	int occurrences = 0;
 	const wchar_t *p = s.c_str();
-	while (p = _FindStr(p, ourLen - (p - s.c_str()), target, isCS, false)) {
+	while (p = _FindStr(se, p, ourLen - (p - s.c_str()), target, false)) {
 		++occurrences;
 		p += targLen; // go beyond
 	}
@@ -283,7 +268,7 @@ static wstring& _StrRepl(wstring& s, const wchar_t *target, const wchar_t *repla
 	wchar_t *pFinBuf = &finalBuf[0];
 	const wchar_t *base = s.c_str(), *orig = s.c_str();
 	p = s.c_str();
-	while (p = _FindStr(p, ourLen - (p - s.c_str()), target, isCS, false)) {
+	while (p = _FindStr(se, p, ourLen - (p - s.c_str()), target, false)) {
 		memcpy(pFinBuf, orig, sizeof(wchar_t) * (p - base)); // copy chars until before replacement
 		pFinBuf += p - base;
 		memcpy(pFinBuf, replacement, sizeof(wchar_t) * replLen);
@@ -299,10 +284,23 @@ static wstring& _StrRepl(wstring& s, const wchar_t *target, const wchar_t *repla
 	return s;
 }
 
-wstring& owl::StrReplace(wstring& s, const wchar_t *target, const wchar_t *replacement)  { return _StrRepl(s, target, replacement, true); }
-wstring& owl::StrReplacei(wstring& s, const wchar_t *target, const wchar_t *replacement) { return _StrRepl(s, target, replacement, false); }
+wstring& str::RemoveDiacritics(wstring& s)
+{
+	const wchar_t *diacritics   = L"¡·¿‡√„¬‚ƒ‰…È»Ë ÍÀÎÕÌÃÏŒÓœÔ”Û“Ú’ı‘Ù÷ˆ⁄˙Ÿ˘€˚‹¸«Á≈Â–—Òÿ¯›˝";
+	const wchar_t *replacements = L"AaAaAaAaAaEeEeEeEeIiIiIiIiOoOoOoOoOoUuUuUuUuCcAaDdNnOoYy";
 
-wstring owl::ParseUtf8(const BYTE *data, size_t length)
+	for (wchar_t& ch : s) {
+		const wchar_t *pDiac = diacritics, *pRepl = replacements;
+		while (*pDiac) {
+			if (ch == *pDiac) ch = *pRepl; // in-place replacement
+			++pDiac;
+			++pRepl;
+		}
+	}
+	return s;
+}
+
+wstring str::ParseUtf8(const BYTE *data, size_t length)
 {
 	wstring ret;
 	if (data && length) {
@@ -316,7 +314,7 @@ wstring owl::ParseUtf8(const BYTE *data, size_t length)
 	return ret;
 }
 
-vector<wstring> owl::Explode(const wstring& s, const wchar_t *delimiters)
+vector<wstring> str::Explode(const wstring& s, const wchar_t *delimiters)
 {
 	// Count how many pieces we'll have after exploding.
 	int num = 0;
@@ -342,7 +340,7 @@ vector<wstring> owl::Explode(const wstring& s, const wchar_t *delimiters)
 	return ret;
 }
 
-vector<wstring> owl::ExplodeMultiStr(const wchar_t *multiStr)
+vector<wstring> str::ExplodeMultiStr(const wchar_t *multiStr)
 {
 	// Example multiStr:
 	// L"first one\0second one\0third one\0"

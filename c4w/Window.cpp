@@ -1,8 +1,8 @@
 /*!
  * HWND wrapper.
- * Part of OWL - Object Win32 Library.
+ * Part of C4W - Classes for Win32.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/owl
+ * @see https://github.com/rodrigocfd/c4w
  */
 
 #include <algorithm>
@@ -10,8 +10,8 @@
 #include <Shlobj.h>
 #include <VsStyle.h>
 #include <UxTheme.h>
-#include "StrUtil.h"
-#include "System.h"
+#include "Str.h"
+#include "Sys.h"
 #include "Window.h"
 #pragma comment(lib, "UxTheme.lib")
 #pragma comment(lib, "Comctl32.lib")
@@ -22,16 +22,17 @@
   "processorArchitecture='*' " \
   "publicKeyToken='6595b64144ccf1df' " \
   "language='*'\"")
-using namespace owl;
+using namespace c4w;
 using std::function;
 using std::vector;
 using std::wstring;
 
-wstring& Window::getText(wstring& buf) const
+wstring Window::getText() const
 {
-	buf.resize(GetWindowTextLength(_hWnd) + 1); // add room for terminating null
-	GetWindowText(_hWnd, &buf[0], static_cast<int>(buf.size()));
-	buf.resize(buf.size() - 1); // remove unnecessary terminating null
+	int txtLen = GetWindowTextLength(_hWnd);
+	wstring buf(txtLen + 1, L'\0');
+	GetWindowText(_hWnd, &buf[0], txtLen + 1);
+	buf.resize(txtLen);
 	return buf;
 }
 
@@ -139,10 +140,10 @@ bool WindowPopup::getFileOpen(const wchar_t *filter, vector<wstring>& arrBuf)
 	// don't know why!
 
 	if (GetOpenFileName(&ofn)) {
-		vector<wstring> strs = ExplodeMultiStr(&multiBuf[0]);
+		vector<wstring> strs = str::ExplodeMultiStr(&multiBuf[0]);
 		if (!strs.size()) {
 			this->messageBox(L"Error",
-				Sprintf(L"GetOpenFileName didn't return multiple strings.\n", multiBuf.size()),
+				str::Sprintf(L"GetOpenFileName didn't return multiple strings.\n", multiBuf.size()),
 				MB_ICONERROR);
 			return false;
 		}
@@ -159,7 +160,7 @@ bool WindowPopup::getFileOpen(const wchar_t *filter, vector<wstring>& arrBuf)
 				arrBuf[i].append(L"\\").append(strs[i + 1]); // concat folder + file
 			}
 			std::sort(arrBuf.begin(), arrBuf.end(), [](const wstring& a, const wstring& b)->bool {
-				return StrLexi(a, b) < 0;
+				return str::LexCmp(str::Sens::NO, a, b) < 0;
 			});
 		}
 		return true; // all good
@@ -168,11 +169,11 @@ bool WindowPopup::getFileOpen(const wchar_t *filter, vector<wstring>& arrBuf)
 	DWORD errNo = CommDlgExtendedError();
 	if (errNo == FNERR_BUFFERTOOSMALL) {
 		this->messageBox(L"Error",
-			Sprintf(L"GetOpenFileName: buffer too small (%d bytes).\n", multiBuf.size()),
+			str::Sprintf(L"GetOpenFileName: buffer too small (%d bytes).\n", multiBuf.size()),
 			MB_ICONERROR);
 	} else if(errNo) {
 		this->messageBox(L"Error",
-			Sprintf(L"GetOpenFileName: failed with error %d.\n", errNo),
+			str::Sprintf(L"GetOpenFileName: failed with error %d.\n", errNo),
 			MB_ICONERROR);
 	}
 	return false;
@@ -247,7 +248,7 @@ vector<wstring> WindowPopup::getDroppedFiles(HDROP hDrop)
 	}
 	DragFinish(hDrop);
 	std::sort(files.begin(), files.end(), [](const wstring& a, const wstring& b)->bool {
-		return StrLexi(a, b) < 0;
+		return str::LexCmp(str::Sens::NO, a, b) < 0;
 	});
 	return files;
 }

@@ -1,39 +1,16 @@
 /*!
  * Often-used controls.
- * Part of OWL - Object Win32 Library.
+ * Part of C4W - Classes for Win32.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/wolf
+ * @see https://github.com/rodrigocfd/c4w
  */
 
 #pragma once
-#include "System.h"
-#include "StrUtil.h"
+#include "Resources.h"
+#include "Str.h"
 #include "Window.h"
 
-namespace owl {
-
-// HMENU wrapper.
-class Menu {
-private:
-	HMENU _hMenu;
-public:
-	Menu()            : _hMenu(nullptr) { }
-	Menu(HMENU hMenu) : _hMenu(hMenu) { }
-	
-	HMENU hMenu() const             { return _hMenu; }
-	int   size() const              { return ::GetMenuItemCount(_hMenu); }
-	void  destroy()                 { if (_hMenu) { ::DestroyMenu(_hMenu); _hMenu = nullptr; } }
-	Menu  getSubmenu(int pos) const { return Menu(::GetSubMenu(_hMenu, pos)); }
-	WORD  getCmdId(int pos) const   { return ::GetMenuItemID(_hMenu, pos); }
-	Menu& createMain(HWND owner);
-	Menu& createPopup();
-	Menu& appendSeparator();
-	Menu& appendItem(const wchar_t *caption, WORD cmdId);
-	Menu& enableItem(std::initializer_list<WORD> cmdIds, bool doEnable);
-	Menu  appendSubmenu(const wchar_t *caption);
-private:
-	void _checkDummyEntry();
-};
+namespace c4w {
 
 // Fit size and position of a bunch of controls inside a window.
 class Resizer final {
@@ -65,11 +42,38 @@ private:
 };
 
 
+// HMENU wrapper.
+class Menu {
+private:
+	HMENU _hMenu;
+public:
+	Menu()            : _hMenu(nullptr) { }
+	Menu(HMENU hMenu) : _hMenu(hMenu) { }
+	
+	HMENU hMenu() const             { return _hMenu; }
+	int   size() const              { return ::GetMenuItemCount(_hMenu); }
+	void  destroy()                 { if (_hMenu) { ::DestroyMenu(_hMenu); _hMenu = nullptr; } }
+	Menu  getSubmenu(int pos) const { return Menu(::GetSubMenu(_hMenu, pos)); }
+	WORD  getCmdId(int pos) const   { return ::GetMenuItemID(_hMenu, pos); }
+	Menu& createMain(HWND owner);
+	Menu& createPopup();
+	Menu& appendSeparator();
+	Menu& appendItem(const wchar_t *caption, WORD cmdId);
+	Menu& appendItem(const std::wstring& caption, WORD cmdId) { return appendItem(caption.c_str(), cmdId); }
+	Menu& enableItem(std::initializer_list<WORD> cmdIds, bool doEnable);
+	Menu  appendSubmenu(const wchar_t *caption);
+	Menu  appendSubmenu(const std::wstring& caption)          { return appendSubmenu(caption.c_str()); }
+private:
+	void _checkDummyEntry();
+};
+
+
 // Ordinary textbox with some utilities.
 class TextBox : public Window {
 private:
 	Font _font;
 	UINT _notifyKeyUp;
+	std::function<void(WORD)> _onKeyUp;
 public:
 	TextBox()                     : _notifyKeyUp(0) { }
 	TextBox(HWND hwnd)            { operator=(hwnd); }
@@ -77,18 +81,19 @@ public:
 	TextBox(const TextBox& other) { operator=(other); }
 
 	TextBox&    operator=(HWND hwnd);
-	TextBox&    operator=(const Window& wnd)    { return operator=(wnd.hWnd()); }
-	TextBox&    operator=(const TextBox& other) { return operator=(other.hWnd()); }
+	TextBox&    operator=(const Window& wnd)                { return operator=(wnd.hWnd()); }
+	TextBox&    operator=(const TextBox& other)             { return operator=(other.hWnd()); }
 	TextBox&    create(WindowPopup *parent, int id, POINT pos, int cx, UINT extraStyles=0);
-	int         getTextLen() const              { return ::GetWindowTextLength(hWnd()); }
-	std::vector<std::wstring> getTextLines() const { return Explode(getText(), L"\r\n"); }
+	int         getTextLen() const                          { return ::GetWindowTextLength(hWnd()); }
+	std::vector<std::wstring> getTextLines() const          { return str::Explode(getText(), L"\r\n"); }
 	TextBox&    setFont(const Font& font);
-	const Font& getFont() const                 { return _font; }
-	TextBox&    selSetAll()                     { sendMessage(EM_SETSEL, 0, -1); return *this; }
-	TextBox&    selSet(int start, int length)   { sendMessage(EM_SETSEL, start, start + length); return *this; }
+	const Font& getFont() const                             { return _font; }
+	TextBox&    selSetAll()                                 { sendMessage(EM_SETSEL, 0, -1); return *this; }
+	TextBox&    selSet(int start, int length)               { sendMessage(EM_SETSEL, start, start + length); return *this; }
 	void        selGet(int *start, int *length);
-	TextBox&    selReplace(const wchar_t *text) { sendMessage(EM_REPLACESEL, TRUE, reinterpret_cast<LPARAM>(text)); return *this; }
-	TextBox&    notifyKeyUp(UINT msg)           { _notifyKeyUp = msg; return *this; }
+	TextBox&    selReplace(const wchar_t *text)             { sendMessage(EM_REPLACESEL, TRUE, reinterpret_cast<LPARAM>(text)); return *this; }
+	TextBox&    selReplace(const std::wstring text)         { return selReplace(text.c_str()); }
+	void        onKeyUp(std::function<void(WORD)> callback) { _onKeyUp = callback; }
 private:
 	static LRESULT CALLBACK _Proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, UINT_PTR idSubclass, DWORD_PTR refData);
 };
@@ -102,19 +107,18 @@ public:
 	Combo(const Window& wnd)  { operator=(wnd); }
 	Combo(const Combo& other) { operator=(other); }
 
-	Combo&   operator=(HWND hwnd)          { static_cast<Window*>(this)->operator=(hwnd); return *this; }
-	Combo&   operator=(const Window& wnd)  { return operator=(wnd.hWnd()); }
-	Combo&   operator=(const Combo& other) { return operator=(other.hWnd()); }
+	Combo&   operator=(HWND hwnd)            { static_cast<Window*>(this)->operator=(hwnd); return *this; }
+	Combo&   operator=(const Window& wnd)    { return operator=(wnd.hWnd()); }
+	Combo&   operator=(const Combo& other)   { return operator=(other.hWnd()); }
 	Combo&   create(WindowPopup *parent, int id, POINT pos, int cx);
-	int      itemCount() const             { return static_cast<int>(sendMessage(CB_GETCOUNT, 0, 0)); }
-	Combo&   itemRemoveAll()               { sendMessage(CB_RESETCONTENT, 0, 0); return *this; }
-	Combo&   itemSetSelected(int i)        { sendMessage(CB_SETCURSEL, i, 0); return *this; }
-	int      itemGetSelected() const       { return static_cast<int>(sendMessage(CB_GETCURSEL, 0, 0)); }
+	int      itemCount() const               { return static_cast<int>(sendMessage(CB_GETCOUNT, 0, 0)); }
+	Combo&   itemRemoveAll()                 { sendMessage(CB_RESETCONTENT, 0, 0); return *this; }
+	Combo&   itemSetSelected(int i)          { sendMessage(CB_SETCURSEL, i, 0); return *this; }
+	int      itemGetSelected() const         { return static_cast<int>(sendMessage(CB_GETCURSEL, 0, 0)); }
 	Combo&   itemAdd(std::initializer_list<const wchar_t*> arrStr);
-	wchar_t* itemGetText(int i, wchar_t *pBuf, int szBuf) const;
-	std::wstring& itemGetText(int i, std::wstring& buf) const;
-	std::wstring  itemGetText(int i) const     { std::wstring ret; itemGetText(i, ret); return ret; }
-	std::wstring  itemGetSelectedText() const  { return itemGetText(itemGetSelected()); }
+	wchar_t*     itemGetText(int i, wchar_t *pBuf, int szBuf) const;
+	std::wstring itemGetText(int i) const;
+	std::wstring itemGetSelectedText() const { return itemGetText(itemGetSelected()); }
 };
 
 
@@ -134,9 +138,8 @@ public:
 	int      itemCount() const               { return static_cast<int>(sendMessage(LB_GETCOUNT, 0, 0)); }
 	int      itemCountSelected() const;
 	int      itemGetSelected(std::vector<int> *indexesBuf=nullptr) const;
-	wchar_t* itemGetText(int i, wchar_t *pBuf, int szBuf) const;
-	std::wstring& itemGetText(int i, std::wstring& buf) const;
-	std::wstring  itemGetText(int i) const   { std::wstring ret; itemGetText(i, ret); return ret; }
+	wchar_t*     itemGetText(int i, wchar_t *pBuf, int szBuf) const;
+	std::wstring itemGetText(int i) const;
 	ListBox& itemRemoveAll()                 { sendMessage(LB_RESETCONTENT, 0, 0); return *this; }
 };
 
@@ -144,7 +147,7 @@ public:
 // Radio button.
 class Radio : public Window {
 public:
-	enum class EmulateClick { EMULATE, NOEMULATE };
+	enum class EmulateClick { YES, NO };
 
 	Radio()                   { }
 	Radio(HWND hwnd)          { operator=(hwnd); }
@@ -210,6 +213,8 @@ public:
 	StatusBar& addFixedPart(BYTE sizePixels);
 	StatusBar& addResizablePart(float resizeWeight);
 	StatusBar& setText(const wchar_t *text, int iPart);
+	StatusBar& setText(const std::wstring& text, int iPart) { return setText(text.c_str(), iPart); }
+	wchar_t*     getText(int iPart, wchar_t *pBuf, int szBuf) const;
 	std::wstring getText(int iPart) const;
 	void setIcon(HICON hIcon, int iPart) { _sb.sendMessage(SB_SETICON, iPart, reinterpret_cast<LPARAM>(hIcon)); }
 	void doResize(WPARAM wp, LPARAM lp)  { if (wp != SIZE_MINIMIZED && _sb.hWnd()) _putParts(LOWORD(lp)); }
@@ -226,8 +231,8 @@ public:
 		ListView *_list;
 	public:
 		int i;
-		Item(int index, ListView *pList)    : i(index), _list(pList) { }
-		Item() : Item(-1, nullptr) { }
+		Item(int index, ListView *pList) : i(index), _list(pList) { }
+		Item()                           : Item(-1, nullptr) { }
 		void     remove()                { ListView_DeleteItem(_list->hWnd(), i); }
 		void     swapWith(int index);
 		Item&    ensureVisible();
@@ -237,11 +242,10 @@ public:
 		Item&    setFocus()              { ListView_SetItemState(_list->hWnd(), i, LVIS_FOCUSED, LVIS_FOCUSED); return *this; }
 		bool     isFocused() const       { return (ListView_GetItemState(_list->hWnd(), i, LVIS_FOCUSED) & LVIS_FOCUSED) != 0; }
 		RECT     getRect() const         { RECT r = { 0 }; ListView_GetItemRect(_list->hWnd(), i, &r, LVIR_BOUNDS); return r; }
-		wchar_t* getText(wchar_t *pBuf, int szBuf, int iCol=0) const { ListView_GetItemText(_list->hWnd(), i, iCol, pBuf, szBuf); return pBuf; }
-		std::wstring& getText(std::wstring& buf, int iCol=0) const;
-		std::wstring  getText(int iCol=0) const                      { std::wstring ret; getText(ret, iCol); return ret; }
-		Item&    setText(const wchar_t *text, int iCol=0)            { ListView_SetItemText(_list->hWnd(), i, iCol, const_cast<wchar_t*>(text)); return *this; }
-		Item&    setText(const std::wstring& text, int iCol=0)       { return setText(text.c_str(), iCol); }
+		wchar_t*     getText(wchar_t *pBuf, int szBuf, int iCol=0) const { ListView_GetItemText(_list->hWnd(), i, iCol, pBuf, szBuf); return pBuf; }
+		std::wstring getText(int iCol=0) const;
+		Item&    setText(const wchar_t *text, int iCol=0)      { ListView_SetItemText(_list->hWnd(), i, iCol, const_cast<wchar_t*>(text)); return *this; }
+		Item&    setText(const std::wstring& text, int iCol=0) { return setText(text.c_str(), iCol); }
 		LPARAM   getParam() const;
 		Item&    setParam(LPARAM lp);
 		int      getIcon() const;
@@ -306,4 +310,4 @@ private:
 	static LRESULT CALLBACK _Proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, UINT_PTR idSubclass, DWORD_PTR refData);
 };
 
-}//namespace owl
+}//namespace c4w

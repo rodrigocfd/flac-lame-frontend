@@ -1,7 +1,7 @@
 
 #pragma once
-#include "../owl/owl.h"
-using namespace owl;
+#include "../c4w/c4w.h"
+using namespace c4w;
 using std::wstring;
 using std::vector;
 
@@ -17,7 +17,7 @@ private:
 	bool                   m_delSrc;
 	bool                   m_isVbr;
 	const wstring&         m_quality;
-	const File::Ini&       m_ini;
+	const file::Ini&       m_ini;
 	const wstring&         m_destFolder;
 	int                    m_curFile, m_filesDone;
 	Date                   m_time0;
@@ -29,15 +29,16 @@ public:
 		bool                   delSrc,
 		bool                   isVbr,
 		const wstring&         quality,
-		const File::Ini&       ini,
+		const file::Ini&       ini,
 		const wstring&         destFolder );
 private:
 	void onInitDialog();
+
 	void doProcessNextFile();
 	
-	INT_PTR dlgProc(UINT msg, WPARAM wp, LPARAM lp) {
+	INT_PTR dlgProc(UINT msg, WPARAM wp, LPARAM lp) override {
 		switch (msg) {
-		case WM_INITDIALOG: this->onInitDialog(); break;
+		case WM_INITDIALOG: onInitDialog(); break;
 		}
 		return DialogModal::dlgProc(msg, wp, lp);
 	}

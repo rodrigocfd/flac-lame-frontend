@@ -10,7 +10,7 @@ RunninDialog::RunninDialog(
 	bool                   delSrc,
 	bool                   isVbr,
 	const wstring&         quality,
-	const File::Ini&       ini,
+	const file::Ini&       ini,
 	const wstring&         destFolder )
 	: DialogModal(DLG_RUNNIN),
 		m_numThreads(numThreads), m_targetType(targetType), m_files(files), m_delSrc(delSrc), m_isVbr(isVbr),
@@ -25,7 +25,7 @@ void RunninDialog::onInitDialog()
 	m_prog = this->getChild(PRO_STATUS);
 	
 	m_prog.setRange(0, m_files.size());
-	m_lbl.setText( Sprintf(L"0 of %d files finished...", m_files.size()) ); // initial text
+	m_lbl.setText( str::Sprintf(L"0 of %d files finished...", m_files.size()) ); // initial text
 	m_time0.setNow(); // start timer
 	this->setXButton(false);
 	
@@ -33,7 +33,7 @@ void RunninDialog::onInitDialog()
 	int nFiles = static_cast<int>(m_files.size());
 	int batchSz = (m_numThreads < nFiles) ? m_numThreads : nFiles; // limit parallel processing
 	for (int i = 0; i < batchSz; ++i) {
-		System::Thread([&]() {
+		sys::Thread([&]() {
 			this->doProcessNextFile();
 		});
 	}
@@ -63,7 +63,7 @@ void RunninDialog::doProcessNextFile()
 		m_curFile = static_cast<int>(m_files.size()); // error, so avoid further processing
 		this->sendFunction([&]() {
 			this->messageBox(L"Conversion failed",
-				Sprintf(L"File #%d:\n%s\n%s", index, file.c_str(), err.c_str()),
+				str::Sprintf(L"File #%d:\n%s\n%s", index, file.c_str(), err.c_str()),
 				MB_ICONERROR);
 			this->endDialog(IDCANCEL);
 		});
@@ -72,7 +72,7 @@ void RunninDialog::doProcessNextFile()
 
 		this->sendFunction([&]() {
 			m_prog.setPos(m_filesDone);
-			m_lbl.setText( Sprintf(L"%d of %d files finished...", m_filesDone, m_files.size()) );
+			m_lbl.setText( str::Sprintf(L"%d of %d files finished...", m_filesDone, m_files.size()) );
 		});
 			
 		if (m_filesDone < static_cast<int>(m_files.size())) { // more files to come
@@ -81,7 +81,7 @@ void RunninDialog::doProcessNextFile()
 			this->sendFunction([&]() {
 				Date fin;
 				this->messageBox(L"Conversion finished",
-					Sprintf(L"%d files processed in %.2f seconds.",
+					str::Sprintf(L"%d files processed in %.2f seconds.",
 						m_files.size(), static_cast<double>(fin.minus(m_time0)) / 1000),
 					MB_ICONINFORMATION);
 				this->endDialog(IDOK);

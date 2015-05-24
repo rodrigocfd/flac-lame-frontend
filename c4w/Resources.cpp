@@ -1,118 +1,19 @@
 /*!
- * OS-related stuff.
- * Part of OWL - Object Win32 Library.
+ * Assorted resources.
+ * Part of C4W - Classes for Win32.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/wolf
+ * @see https://github.com/rodrigocfd/c4w
  */
 
-#pragma warning(disable:4996) // GetVersionEx is deprecated for Win8.1, won't affect current behaviour
-#include "System.h"
-#include "StrUtil.h"
-#include <process.h>
-#include <Shlobj.h>
-#pragma comment(lib, "Shell32.lib") // SHGetFolderPath
+#include "Resources.h"
+#include "Str.h"
 #include <MsXml2.h>
 #pragma comment(lib, "msxml2.lib")
-using namespace owl;
-using std::function;
+using namespace c4w;
+using std::initializer_list;
 using std::unordered_map;
 using std::vector;
 using std::wstring;
-
-void System::Thread(function<void()> callback)
-{
-	// Cheap alternative to std::thread([](){}).detach().
-
-	struct CbPack { function<void()> cb; };
-	CbPack *pack = new CbPack{ std::move(callback) };
-
-	HANDLE thandle = reinterpret_cast<HANDLE>(_beginthreadex(nullptr, 0, [](void *ptr)->unsigned int {
-		CbPack *pPack = reinterpret_cast<CbPack*>(ptr);
-		pPack->cb(); // invoke user callback
-		delete pPack;
-		_endthreadex(0); // http://www.codeproject.com/Articles/7732/A-class-to-synchronise-thread-completions/
-		return 0;
-	}, pack, 0, nullptr));
-
-	CloseHandle(thandle);
-}
-
-DWORD System::Exec(const wchar_t *cmdLine)
-{
-	SECURITY_ATTRIBUTES sa = { 0 };
-	sa.nLength = sizeof(sa);
-	sa.bInheritHandle = TRUE;
-
-	STARTUPINFO si = { 0 };
-	si.cb = sizeof(si);
-	si.dwFlags = STARTF_USESHOWWINDOW;
-	si.wShowWindow = SW_SHOW;
-
-	// Avoid eventual crash under Unicode compiling.
-	wchar_t *cmdLine2 = _wcsdup(cmdLine);
-
-	PROCESS_INFORMATION pi = { 0 };
-	DWORD dwExitCode = 1; // returned by executed program
-
-	if (CreateProcess(nullptr, cmdLine2, &sa, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi)) {
-		WaitForSingleObject(pi.hProcess, INFINITE); // the program flow is stopped here to wait
-		GetExitCodeProcess(pi.hProcess, &dwExitCode);
-		CloseHandle(pi.hThread);
-		CloseHandle(pi.hProcess);
-	}
-
-	free(cmdLine2);
-	return dwExitCode;
-}
-
-void System::PopMenu(HWND hDlg, int popupMenuId, int x, int y, HWND hWndCoordsRelativeTo)
-{
-	// Shows a popup context menu, anchored at the given coordinates.
-	// The passed coordinates can be relative to any window.
-
-	HMENU hMenu = LoadMenu(GetModuleHandle(nullptr), MAKEINTRESOURCE(popupMenuId));
-	POINT ptDlg = { x, y }; // receives coordinates relative to hDlg
-	ClientToScreen(hWndCoordsRelativeTo ? hWndCoordsRelativeTo : hDlg, &ptDlg); // to screen coordinates
-	SetForegroundWindow(hDlg);
-	TrackPopupMenu(GetSubMenu(hMenu, 0), 0, ptDlg.x, ptDlg.y, 0, hDlg, nullptr); // owned by dialog, so messages go to it
-	PostMessage(hDlg, WM_NULL, 0, 0); // http://msdn.microsoft.com/en-us/library/ms648002%28VS.85%29.aspx
-	DestroyMenu(hMenu);
-}
-
-wstring System::GetExePath()
-{
-	wchar_t buf[MAX_PATH];
-	GetModuleFileName(nullptr, buf, ARRAYSIZE(buf)); // retrieves EXE itself directory
-
-	wstring ret = buf;
-	ret.resize(StrRFind(ret, L'\\')); // truncate removing EXE filename and trailing backslash
-#ifdef _DEBUG
-	ret.resize(StrRFind(ret, L'\\')); // bypass "Debug" folder, remove trailing backslash too
-#endif
-	return ret;
-}
-
-wstring System::GetDesktopPath()
-{
-	wchar_t buf[MAX_PATH];
-	SHGetFolderPath(nullptr, CSIDL_DESKTOPDIRECTORY, nullptr, 0, buf); // won't have trailing backslash
-	return buf;
-}
-
-wstring System::GetMyDocsPath()
-{
-	wchar_t buf[MAX_PATH];
-	SHGetFolderPath(nullptr, CSIDL_MYDOCUMENTS, nullptr, 0, buf); // won't have trailing backslash
-	return buf;
-}
-
-wstring System::GetRoamingPath()
-{
-	wchar_t buf[MAX_PATH];
-	SHGetFolderPath(nullptr, CSIDL_APPDATA, nullptr, 0, buf); // won't have trailing backslash
-	return buf;
-}
-
 
 Date& Date::setNow()
 {
@@ -440,7 +341,7 @@ vector<Xml::Node*> Xml::Node::getChildrenByName(const wchar_t *elemName)
 	int howMany = 0;
 	size_t firstIndex = -1, lastIndex = -1;
 	for (size_t i = 0; i < this->children.size(); ++i) {
-		if (StrEqi(this->children[i].name, elemName)) { // case-insensitive match
+		if (str::Cmp(str::Sens::NO, this->children[i].name, elemName)) { // case-insensitive match
 			++howMany;
 			if (firstIndex == -1) firstIndex = i;
 			lastIndex = i;
@@ -452,7 +353,7 @@ vector<Xml::Node*> Xml::Node::getChildrenByName(const wchar_t *elemName)
 
 	howMany = 0;
 	for (size_t i = firstIndex; i <= lastIndex; ++i) {
-		if (StrEqi(this->children[i].name, elemName)) {
+		if (str::Cmp(str::Sens::NO, this->children[i].name, elemName)) {
 			nodeBuf.emplace_back(&this->children[i]);
 		}
 	}
@@ -462,7 +363,7 @@ vector<Xml::Node*> Xml::Node::getChildrenByName(const wchar_t *elemName)
 Xml::Node* Xml::Node::firstChildByName(const wchar_t *elemName)
 {
 	for (Node& node : this->children) {
-		if (StrEqi(node.name, elemName)) { // case-insensitive match
+		if (str::Cmp(str::Sens::NO, node.name, elemName)) { // case-insensitive match
 			return &node;
 		}
 	}
@@ -496,4 +397,74 @@ bool Xml::parse(const wchar_t *str)
 	doc->Release();
 	CoUninitialize();
 	return true;
+}
+
+
+DC::DC(HWND hwnd, HDC hDC)
+	: _hWnd(hwnd), _hdc(hDC)
+{
+	RECT rcClient = { 0 };
+	GetClientRect(_hWnd, &rcClient); // let's keep available width & height
+	this->cx = rcClient.right; // these variables are public
+	this->cy = rcClient.bottom;
+}
+
+DC& DC::setBkColor(COLORREF color)
+{
+	SetBkColor(_hdc, color == -1 ? // default?
+		this->getBkBrushColor() : color);
+	return *this;
+}
+
+COLORREF DC::getBkBrushColor()
+{
+	ULONG_PTR hbrBg = GetClassLongPtr(_hWnd, GCLP_HBRBACKGROUND);
+	if(hbrBg > 100) {
+		// The hbrBackground is a brush handle, not a system color constant.
+		// This 100 value is arbitrary, based on system color constants like COLOR_BTNFACE.
+		LOGBRUSH logBrush;
+		GetObject(reinterpret_cast<HBRUSH>(hbrBg), sizeof(LOGBRUSH), &logBrush);
+		return logBrush.lbColor;
+	}
+	return GetSysColor(static_cast<int>(hbrBg) - 1);
+}
+
+DC& DC::drawText(int x, int y, int cx, int cy, const wchar_t *text, UINT fmtFlags)
+{
+	RECT rc = { x, y, x + cx, y + cy };
+	DrawText(_hdc, text, lstrlen(text), &rc, fmtFlags); // DT_LEFT|DT_TOP is zero
+	return *this;
+}
+
+DC& DC::polygon(int left, int top, int right, int bottom)
+{
+	POINT pts[] = {
+		{ left, top },
+		{ left, bottom },
+		{ right, bottom },
+		{ right, top }
+	};
+	return this->polygon(pts, 4);
+}
+
+DCBuffered::DCBuffered(HWND hwnd)
+	: DCSimple(hwnd)
+{
+	_hdc = CreateCompatibleDC(_ps.hdc); // overwrite our painting HDC
+	_hBmp = CreateCompatibleBitmap(_ps.hdc, this->cx, this->cy);
+	_hBmpOld = static_cast<HBITMAP>(SelectObject(_hdc, _hBmp));
+	
+	RECT rcClient = { 0, 0, this->cx, this->cy };
+	FillRect(_hdc, &rcClient,
+		reinterpret_cast<HBRUSH>(GetClassLongPtr(_hWnd, GCLP_HBRBACKGROUND)));
+}
+
+DCBuffered::~DCBuffered()
+{
+	BITMAP bm = { 0 }; // http://www.ureader.com/msg/14721900.aspx
+	GetObject(_hBmp, sizeof(bm), &bm);
+	BitBlt(_ps.hdc, 0, 0, bm.bmWidth, bm.bmHeight, nullptr, 0, 0, SRCCOPY);
+	DeleteObject(SelectObject(_hdc, _hBmpOld));
+	DeleteObject(_hBmp);
+	DeleteDC(_hdc);
 }

@@ -1,42 +1,43 @@
 /*!
  * File handling.
- * Part of OWL - Object Win32 Library.
+ * Part of C4W - Classes for Win32.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/wolf
+ * @see https://github.com/rodrigocfd/c4w
  */
 
 #pragma once
 #include <unordered_map>
-#include "System.h"
+#include "Resources.h"
 
-namespace owl {
+namespace c4w {
 
-struct File final {
-	static inline bool  Exists(const wchar_t *path)                { return ::GetFileAttributes(path) != INVALID_FILE_ATTRIBUTES; }
-	static inline bool  Exists(const std::wstring& path)           { return Exists(path.c_str()); }
-	static inline bool  IsDir(const wchar_t *path)                 { return (::GetFileAttributes(path) & FILE_ATTRIBUTE_DIRECTORY) != 0; }
-	static inline bool  IsDir(const std::wstring& path)            { return IsDir(path.c_str()); }
-	static bool         Delete(const wchar_t *path, std::wstring *pErr=nullptr);
-	static inline bool  Delete(const std::wstring& path, std::wstring *pErr=nullptr) { return Delete(path.c_str(), pErr); }
-	static bool         CreateDir(const wchar_t *path);
-	static inline bool  CreateDir(const std::wstring& path)        { return CreateDir(path.c_str()); }
-	static Date         DateLastModified(const wchar_t *path);
-	static inline Date  DateLastModified(const std::wstring& path) { return DateLastModified(path.c_str()); }
-	static Date         DateCreated(const wchar_t *path);
-	static inline Date  DateCreated(const std::wstring& path)      { return DateCreated(path.c_str()); }
-	static bool         WriteUtf8(const wchar_t *path, const wchar_t *data, std::wstring *pErr=nullptr);
-	static bool         Unzip(const wchar_t *zip, const wchar_t *destFolder, std::wstring *pErr=nullptr);
-	static inline bool  Unzip(const std::wstring& zip, const std::wstring& destFolder, std::wstring *pErr=nullptr) { return Unzip(zip.c_str(), destFolder.c_str(), pErr); }
-	static int          IndexOfBin(const BYTE *pData, size_t dataLen, const wchar_t *what, bool asWideChar);
+namespace file {
+	inline bool  Exists(const wchar_t *path)                { return ::GetFileAttributes(path) != INVALID_FILE_ATTRIBUTES; }
+	inline bool  Exists(const std::wstring& path)           { return Exists(path.c_str()); }
+	inline bool  IsDir(const wchar_t *path)                 { return (::GetFileAttributes(path) & FILE_ATTRIBUTE_DIRECTORY) != 0; }
+	inline bool  IsDir(const std::wstring& path)            { return IsDir(path.c_str()); }
+	bool         Delete(const wchar_t *path, std::wstring *pErr=nullptr);
+	inline bool  Delete(const std::wstring& path, std::wstring *pErr=nullptr) { return Delete(path.c_str(), pErr); }
+	bool         CreateDir(const wchar_t *path);
+	inline bool  CreateDir(const std::wstring& path)        { return CreateDir(path.c_str()); }
+	Date         DateLastModified(const wchar_t *path);
+	inline Date  DateLastModified(const std::wstring& path) { return DateLastModified(path.c_str()); }
+	Date         DateCreated(const wchar_t *path);
+	inline Date  DateCreated(const std::wstring& path)      { return DateCreated(path.c_str()); }
+	bool         WriteUtf8(const wchar_t *path, const wchar_t *data, std::wstring *pErr=nullptr);
+	inline bool  WriteUtf8(const wchar_t *path, const std::wstring& data, std::wstring *pErr=nullptr) { return WriteUtf8(path, data.c_str(), pErr); }
+	bool         Unzip(const wchar_t *zip, const wchar_t *destFolder, std::wstring *pErr=nullptr);
+	inline bool  Unzip(const std::wstring& zip, const std::wstring& destFolder, std::wstring *pErr=nullptr) { return Unzip(zip.c_str(), destFolder.c_str(), pErr); }
+	int          IndexOfBin(const BYTE *pData, size_t dataLen, const wchar_t *what, bool asWideChar);
 
 	// Path string utilities.
-	struct Path final {
-		static void                ChangeExtension(std::wstring& path, const wchar_t *extWithoutDot);
-		static void                TrimBackslash(std::wstring& path);
-		static std::wstring        GetPath(const wchar_t *path);
-		inline static std::wstring GetPath(const std::wstring& path) { return GetPath(path.c_str()); }
-		static std::wstring        GetFilename(const std::wstring& path);
-	};
+	namespace path {
+		void                ChangeExtension(std::wstring& sPath, const wchar_t *extWithoutDot);
+		void                TrimBackslash(std::wstring& sPath);
+		std::wstring        GetPath(const wchar_t *sPath);
+		inline std::wstring GetPath(const std::wstring& sPath) { return GetPath(sPath.c_str()); }
+		std::wstring        GetFilename(const std::wstring& sPath);
+	}
 
 	enum class Access { READONLY, READWRITE };
 
@@ -115,7 +116,7 @@ struct File final {
 		bool load(std::wstring *pErr=nullptr);
 		bool serialize(std::wstring *pErr=nullptr) const;
 	private:
-		int _countSections(File::Text *fin) const;
+		int _countSections(Text *fin) const;
 	};
 
 	// Automation for directory enumeration.
@@ -135,6 +136,6 @@ struct File final {
 		static std::vector<std::wstring> GetAll(const wchar_t *path, const wchar_t *pattern);
 		static std::vector<std::wstring> GetAll(const std::wstring& path, const wchar_t *pattern) { return GetAll(path.c_str(), pattern); }
 	};
-};
+}//namespace file
 
-}//namespace owl
+}//namespace c4w

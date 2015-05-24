@@ -1,14 +1,14 @@
 /*!
  * Dialog windows, created from a dialog resource and using DLGPROC.
- * Part of OWL - Object Win32 Library.
+ * Part of C4W - Classes for Win32.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/owl
+ * @see https://github.com/rodrigocfd/c4w
  */
 
 #include "WindowDialog.h"
-#include "StrUtil.h"
-#include "System.h"
-using namespace owl;
+#include "Resources.h"
+#include "Str.h"
+using namespace c4w;
 
 Dialog::~Dialog()
 {
@@ -78,7 +78,7 @@ int DialogApp::run(HINSTANCE hInst, int cmdShow)
 	if (!CreateDialogParam(hInst, MAKEINTRESOURCE(_dialogId), nullptr,
 		Dialog::_DialogProc, reinterpret_cast<LPARAM>(this)) ) // pass pointer to object
 	{
-		OutputDebugString(Sprintf(L"ERROR: CreateDialogParam failed, error #%d.\n", GetLastError()).c_str());
+		OutputDebugString(str::Sprintf(L"ERROR: CreateDialogParam failed, error #%d.\n", GetLastError()).c_str());
 		return -1; // window creation failed
 	}
 
@@ -106,7 +106,7 @@ int DialogApp::run(HINSTANCE hInst, int cmdShow)
 	BOOL ret = 0;
 	while ((ret = GetMessage(&msg, nullptr, 0, 0)) != 0) {
 		if (ret == -1) {
-			OutputDebugString(Sprintf(L"ERROR: GetMessage failed, error #%d.\n", GetLastError()).c_str());
+			OutputDebugString(str::Sprintf(L"ERROR: GetMessage failed, error #%d.\n", GetLastError()).c_str());
 			return -1;
 		}
 		if (hAccel && TranslateAccelerator(this->hWnd(), hAccel, &msg)) continue;
@@ -179,7 +179,7 @@ void DialogCtrl::create(Window *parent, POINT pos, SIZE sz)
 	if (!CreateDialogParam(parent->getInstance(), MAKEINTRESOURCE(_dialogId), parent->hWnd(),
 		Dialog::_DialogProc, reinterpret_cast<LPARAM>(this)) ) // pass pointer to object
 	{
-		OutputDebugString(Sprintf(L"ERROR: CreateDialogParam failed, error #%d.\n", GetLastError()).c_str());
+		OutputDebugString(str::Sprintf(L"ERROR: CreateDialogParam failed, error #%d.\n", GetLastError()).c_str());
 		return; // window creation failed
 	}
 	
@@ -188,7 +188,7 @@ void DialogCtrl::create(Window *parent, POINT pos, SIZE sz)
 			GetWindowLongPtr(this->hWnd(), GWL_EXSTYLE) | WS_EX_CLIENTEDGE);
 	}
 
-	ShowWindow(this->hWnd(), SW_SHOW);
+	ShowWindow(this->hWnd(), SW_SHOWDEFAULT);
 	this->setPos(nullptr, pos, sz, SWP_NOZORDER);
 }
 

@@ -1,17 +1,18 @@
 /*!
  * Master include file.
- * Part of OWL - Object Win32 Library.
+ * Part of C4W - Classes for Win32.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/owl
+ * @see https://github.com/rodrigocfd/c4w
  */
 
 #pragma once
 
 #include "Controls.h"
 #include "File.h"
-#include "Internet.h"
-#include "StrUtil.h"
-#include "System.h"
+#include "Net.h"
+#include "Resources.h"
+#include "Str.h"
+#include "Sys.h"
 #include "Window.h"
 #include "WindowDialog.h"
 #include "WindowFrame.h"

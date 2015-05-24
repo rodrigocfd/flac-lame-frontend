@@ -1,19 +1,20 @@
 /*!
  * Regular windows, created through CreateWindowEx and using a WNDPROC.
- * Part of OWL - Object Win32 Library.
+ * Part of C4W - Classes for Win32.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/owl
+ * @see https://github.com/rodrigocfd/c4w
  */
 
 #include "WindowFrame.h"
-#include "StrUtil.h"
-using namespace owl;
+#include "Resources.h"
+#include "Str.h"
+using namespace c4w;
 
 Frame::~Frame()
 {
 }
 
-ATOM Frame::Register(const wchar_t *className, int iconId, System::Cursor cursor, System::Color bg)
+ATOM Frame::Register(const wchar_t *className, int iconId, sys::Cursor cursor, sys::Color bg)
 {
 	HINSTANCE hInst = GetModuleHandle(nullptr);
 	WNDCLASSEX wc = { 0 };
@@ -121,7 +122,7 @@ int FrameApp::run(HINSTANCE hInst, int cmdShow)
 		rc.right - rc.left, rc.bottom - rc.top,
 		nullptr, _hMenu, hInst, static_cast<LPVOID>(this)) ) // pass pointer to object, hWnd is set on WM_NCCREATE
 	{
-		OutputDebugString(Sprintf(L"ERROR: CreateWindowEx failed, error #%d.\n", GetLastError()).c_str());
+		OutputDebugString(str::Sprintf(L"ERROR: CreateWindowEx failed, error #%d.\n", GetLastError()).c_str());
 		return -1;
 	}
 
@@ -132,7 +133,7 @@ int FrameApp::run(HINSTANCE hInst, int cmdShow)
 	BOOL ret = 0;
 	while ((ret = GetMessage(&msg, nullptr, 0, 0)) != 0) {
 		if (ret == -1) {
-			OutputDebugString(Sprintf(L"ERROR: GetMessage failed, error #%d.\n", GetLastError()).c_str());
+			OutputDebugString(str::Sprintf(L"ERROR: GetMessage failed, error #%d.\n", GetLastError()).c_str());
 			return -1;
 		}
 		if (_hAccelTable && TranslateAccelerator(this->hWnd(), _hAccelTable, &msg)) continue;
@@ -159,7 +160,7 @@ FrameModal::~FrameModal()
 {
 }
 
-int FrameModal::show(Window *parent)
+void FrameModal::show(Window *parent)
 {
 	RECT rcP = parent->getWindowRect();
 	DWORD dwStyle = WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_VISIBLE | _resz | _maximize;
@@ -173,11 +174,11 @@ int FrameModal::show(Window *parent)
 		parent->hWnd(), nullptr, parent->getInstance(),
 		static_cast<LPVOID>(this)) ) // pass pointer to object, hWnd is set on WM_NCCREATE
 	{
-		OutputDebugString(Sprintf(L"ERROR: CreateWindowEx failed, error #%d.\n", GetLastError()).c_str());
-		return -1;
+		OutputDebugString(str::Sprintf(L"ERROR: CreateWindowEx failed, error #%d.\n", GetLastError()).c_str());
+		return;
 	}
 
-	// Parent is turned back active durint WM_CLOSE processing.
+	// Parent is turned back active during WM_CLOSE processing.
 	// http://blogs.msdn.com/b/oldnewthing/archive/2005/02/18/376080.aspx
 	parent->setEnable(false);
 
@@ -191,7 +192,6 @@ int FrameModal::show(Window *parent)
 			DispatchMessage(&msg);
 		}
 	}
-	return static_cast<int>(msg.wParam);
 }
 
 LRESULT FrameModal::wndProc(UINT msg, WPARAM wp, LPARAM lp)
@@ -220,7 +220,7 @@ void FrameCtrl::create(Window *parent, int ctrlId, POINT pos, SIZE sz)
 		parent->hWnd(), reinterpret_cast<HMENU>(ctrlId), parent->getInstance(),
 		static_cast<LPVOID>(this)) ) // pass pointer to object; hWnd is set on WM_NCCREATE
 	{
-		OutputDebugString(Sprintf(L"ERROR: CreateWindowEx failed, error #%d.\n", GetLastError()).c_str());
+		OutputDebugString(str::Sprintf(L"ERROR: CreateWindowEx failed, error #%d.\n", GetLastError()).c_str());
 	}
 }
 

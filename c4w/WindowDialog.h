@@ -1,24 +1,24 @@
 /*!
  * Dialog windows, created from a dialog resource and using DLGPROC.
- * Part of OWL - Object Win32 Library.
+ * Part of C4W - Classes for Win32.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/owl
+ * @see https://github.com/rodrigocfd/c4w
  */
 
 #pragma once
 #include "Window.h"
 
 /*
-          +-- WindowCtrl <---+
-          |                  +-- [DialogCtrl]
-          |          <-------+
-          +-- Dialog
-Window <--+          <-------+                  +-- [DialogApp]
+          +-- WindowPopup <--+                  +-- [DialogApp]
           |                  +-- DialogPopup <--+
-          +-- WindowPopup <--+                  +-- [DialogModal]
+          |          <-------+                  +-- [DialogModal]
+          +-- Dialog
+Window <--+          <-------+
+          |                  +-- [DialogCtrl]
+          +-- WindowCtrl <---+
 */
 
-namespace owl {
+namespace c4w {
 
 // Base class to any dialog window.
 class Dialog : virtual public Window {
@@ -106,4 +106,4 @@ private:
 	Dialog::_DialogProc;
 };
 
-}//namespace owl
+}//namespace c4w

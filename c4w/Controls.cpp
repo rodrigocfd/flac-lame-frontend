@@ -1,72 +1,17 @@
 /*!
  * Often-used controls.
- * Part of OWL - Object Win32 Library.
+ * Part of C4W - Classes for Win32.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/wolf
+ * @see https://github.com/rodrigocfd/c4w
  */
 
 #include "Controls.h"
-using namespace owl;
+#include "Sys.h"
+using namespace c4w;
 using std::function;
 using std::initializer_list;
 using std::vector;
 using std::wstring;
-
-Menu& Menu::createMain(HWND owner)
-{
-	this->destroy();
-	_hMenu = CreateMenu(); // to be used as a main window menu
-	this->appendItem(L"_DUMMY_", WM_APP-2); // avoids further call to DrawMenuBar(), which would demand HWND again
-	SetMenu(owner, _hMenu);
-	return *this;
-}
-
-Menu& Menu::createPopup()
-{
-	this->destroy();
-	_hMenu = CreatePopupMenu(); // to be used as a popup menu
-	return *this;
-}
-
-Menu& Menu::appendSeparator()
-{
-	this->_checkDummyEntry();
-	InsertMenu(_hMenu, -1, MF_BYPOSITION | MF_SEPARATOR, 0, nullptr);
-	return *this;
-}
-
-Menu& Menu::appendItem(const wchar_t *caption, WORD cmdId)
-{
-	this->_checkDummyEntry();
-	InsertMenu(_hMenu, -1, MF_BYPOSITION | MF_STRING, cmdId, caption);
-	return *this;
-}
-
-Menu& Menu::enableItem(initializer_list<WORD> cmdIds, bool doEnable)
-{
-	for (const WORD& cmd : cmdIds) {
-		EnableMenuItem(_hMenu, cmd, MF_BYCOMMAND | ((doEnable) ? MF_ENABLED : MF_GRAYED));
-	}
-	return *this;
-}
-
-Menu Menu::appendSubmenu(const wchar_t *caption)
-{
-	this->_checkDummyEntry();
-	
-	Menu sub;
-	sub.createPopup();
-	AppendMenu(_hMenu, MF_STRING | MF_POPUP, (UINT_PTR)sub.hMenu(), caption);
-	return sub; // return new submenu, so it can be edited
-}
-
-void Menu::_checkDummyEntry()
-{
-	if (size() == 1 && GetMenuItemID(_hMenu, 0) == WM_APP-2) {
-		DeleteMenu(_hMenu, 0, MF_BYPOSITION); // delete dummy, if any
-	}
-}
-
 
 Resizer& Resizer::add(initializer_list<HWND> hChildren, Do modeHorz, Do modeVert)
 {
@@ -150,6 +95,62 @@ LRESULT CALLBACK Resizer::_Proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, UINT_
 }
 
 
+Menu& Menu::createMain(HWND owner)
+{
+	this->destroy();
+	_hMenu = CreateMenu(); // to be used as a main window menu
+	this->appendItem(L"_DUMMY_", WM_APP-2); // avoids further call to DrawMenuBar(), which would demand HWND again
+	SetMenu(owner, _hMenu);
+	return *this;
+}
+
+Menu& Menu::createPopup()
+{
+	this->destroy();
+	_hMenu = CreatePopupMenu(); // to be used as a popup menu
+	return *this;
+}
+
+Menu& Menu::appendSeparator()
+{
+	this->_checkDummyEntry();
+	InsertMenu(_hMenu, -1, MF_BYPOSITION | MF_SEPARATOR, 0, nullptr);
+	return *this;
+}
+
+Menu& Menu::appendItem(const wchar_t *caption, WORD cmdId)
+{
+	this->_checkDummyEntry();
+	InsertMenu(_hMenu, -1, MF_BYPOSITION | MF_STRING, cmdId, caption);
+	return *this;
+}
+
+Menu& Menu::enableItem(initializer_list<WORD> cmdIds, bool doEnable)
+{
+	for (const WORD& cmd : cmdIds) {
+		EnableMenuItem(_hMenu, cmd, MF_BYCOMMAND | ((doEnable) ? MF_ENABLED : MF_GRAYED));
+	}
+	return *this;
+}
+
+Menu Menu::appendSubmenu(const wchar_t *caption)
+{
+	this->_checkDummyEntry();
+	
+	Menu sub;
+	sub.createPopup();
+	AppendMenu(_hMenu, MF_STRING | MF_POPUP, (UINT_PTR)sub.hMenu(), caption);
+	return sub; // return new submenu, so it can be edited
+}
+
+void Menu::_checkDummyEntry()
+{
+	if (this->size() == 1 && GetMenuItemID(_hMenu, 0) == WM_APP-2) {
+		DeleteMenu(_hMenu, 0, MF_BYPOSITION); // delete dummy, if any
+	}
+}
+
+
 TextBox& TextBox::operator=(HWND hwnd)
 {
 	const int IDSUBCLASS = 1;
@@ -206,14 +207,14 @@ LRESULT CALLBACK TextBox::_Proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, UINT_
 		}
 		break;
 	case WM_GETDLGCODE:
-		if (lp && wp == 'A' && System::HasCtrl()) { // Ctrl+A to select all text
+		if (lp && wp == 'A' && sys::HasCtrl()) { // Ctrl+A to select all text
 			reinterpret_cast<MSG*>(lp)->wParam = 0; // prevent propagation, therefore beep
 			SendMessage(hWnd, EM_SETSEL, 0, -1);
 			return DLGC_WANTCHARS;
 		}
 		break;
 	case WM_KEYUP:
-		if (pSelf->_notifyKeyUp) pSelf->getParent().sendMessage(pSelf->_notifyKeyUp, wp, lp);
+		if (pSelf->_onKeyUp) pSelf->_onKeyUp(wp);
 		break;
 	case WM_NCDESTROY:
 		RemoveWindowSubclass(hWnd, _Proc, idSubclass);
@@ -250,12 +251,12 @@ wchar_t* Combo::itemGetText(int i, wchar_t *pBuf, int szBuf) const
 	return pBuf;
 }
 
-wstring& Combo::itemGetText(int i, wstring& buf) const
+wstring Combo::itemGetText(int i) const
 {
-	buf.clear();
-	buf.resize(static_cast<int>(this->sendMessage(CB_GETLBTEXTLEN, i, 0)) + 1);
+	int txtLen = static_cast<int>(this->sendMessage(CB_GETLBTEXTLEN, i, 0));
+	wstring buf(txtLen + 1, L'\0');
 	this->sendMessage(CB_GETLBTEXT, i, reinterpret_cast<LPARAM>(&buf[0]));
-	buf.resize(buf.size() - 1); // remove unnecessary terminating null
+	buf.resize(txtLen);
 	return buf;
 }
 
@@ -307,19 +308,19 @@ wchar_t* ListBox::itemGetText(int i, wchar_t *pBuf, int szBuf) const
 {
 	int len = static_cast<int>(this->sendMessage(LB_GETTEXTLEN, i, 0)) + 1;
 	if (szBuf < len) {
-		*pBuf = 0; // buffer is too small
+		*pBuf = L'\0'; // buffer is too small
 	} else {
 		this->sendMessage(LB_GETTEXT, i, reinterpret_cast<LPARAM>(pBuf));
 	}
 	return pBuf;
 }
 
-wstring& ListBox::itemGetText(int i, wstring& buf) const
+wstring ListBox::itemGetText(int i) const
 {
-	buf.clear();
-	buf.resize(static_cast<int>(this->sendMessage(LB_GETTEXTLEN, i, 0)) + 1);
+	int txtLen = static_cast<int>(this->sendMessage(LB_GETTEXTLEN, i, 0));
+	wstring buf(txtLen + 1, L'\0');
 	this->sendMessage(LB_GETTEXT, i, reinterpret_cast<LPARAM>(&buf[0]));
-	buf.resize(buf.size() - 1); // remove unnecessary terminating null
+	buf.resize(txtLen);
 	return buf;
 }
 
@@ -336,7 +337,7 @@ Radio& Radio::create(WindowPopup *parent, int id, const wchar_t *caption, bool b
 void Radio::setCheck(bool checked, Radio::EmulateClick emulateClick)
 {
 	this->sendMessage(BM_SETCHECK, checked ? BST_CHECKED : BST_UNCHECKED, 0);
-	if (emulateClick == EmulateClick::EMULATE)
+	if (emulateClick == EmulateClick::YES)
 		this->getParent().sendMessage(WM_COMMAND,
 			MAKEWPARAM(GetDlgCtrlID(this->hWnd()), 0),
 			reinterpret_cast<LPARAM>(this->hWnd()) );
@@ -427,12 +428,24 @@ StatusBar& StatusBar::setText(const wchar_t *text, int iPart)
 	return *this;
 }
 
+wchar_t* StatusBar::getText(int iPart, wchar_t *pBuf, int szBuf) const
+{
+	int len = LOWORD(_sb.sendMessage(SB_GETTEXTLENGTH, iPart, 0)) + 1;
+	if (szBuf < len) {
+		*pBuf = L'\0'; // buffer is too small
+	} else {
+		_sb.sendMessage(SB_GETTEXT, iPart, reinterpret_cast<LPARAM>(pBuf));
+	}
+	return pBuf;
+}
+
 wstring StatusBar::getText(int iPart) const
 {
-	wstring ret(LOWORD(_sb.sendMessage(SB_GETTEXTLENGTH, iPart, 0)) + 1, L'\0');
-	_sb.sendMessage(SB_GETTEXT, iPart, reinterpret_cast<LPARAM>(&ret[0]));
-	ret.resize(ret.size() - 1); // remove unnecessary terminating null
-	return ret;
+	int txtLen = LOWORD(_sb.sendMessage(SB_GETTEXTLENGTH, iPart, 0));
+	wstring buf(txtLen + 1, L'\0');
+	_sb.sendMessage(SB_GETTEXT, iPart, reinterpret_cast<LPARAM>(&buf[0]));
+	buf.resize(txtLen);
+	return buf;
 }
 
 void StatusBar::_putParts(int cx)
@@ -515,7 +528,7 @@ ListView::Item& ListView::Item::ensureVisible()
 	return *this;
 }
 
-wstring& ListView::Item::getText(wstring& buf, int iCol) const
+wstring ListView::Item::getText(int iCol) const
 {
 	// http://forums.codeguru.com/showthread.php?351972-Getting-listView-item-text-length
 	LVITEM lvi = { 0 };
@@ -526,19 +539,19 @@ wstring& ListView::Item::getText(wstring& buf, int iCol) const
 	// was previously allocated with a value bigger than our 1st step,
 	// this will speed up the size checks.
 
-	buf.clear();
+	wstring buf(64, L'\0'); // speed-up 1st allocation
 	int baseBufLen = 0;
 	int charsWrittenWithoutNull = 0;
 	do {
 		baseBufLen += 64; // buffer increasing step, arbitrary!
 		buf.resize(baseBufLen);
-		lvi.cchTextMax = static_cast<int>(buf.size());
+		lvi.cchTextMax = baseBufLen;
 		lvi.pszText = &buf[0];
 		charsWrittenWithoutNull = static_cast<int>(_list->sendMessage(LVM_GETITEMTEXT, this->i,
 			reinterpret_cast<LPARAM>(&lvi) ));
-	} while (charsWrittenWithoutNull == buf.size() - 1); // to break, must have at least 1 char gap
+	} while (charsWrittenWithoutNull == baseBufLen - 1); // to break, must have at least 1 char gap
 
-	TrimNulls(buf);
+	str::TrimNulls(buf);
 	return buf;
 }
 
@@ -761,7 +774,7 @@ int ListView::_showCtxMenu(bool followCursor)
 		coords = lvhti.pt;
 		itemBelowCursor = lvhti.iItem; // -1 if none
 		if (itemBelowCursor != -1) { // an item was right-clicked
-			if (!System::HasCtrl() && !System::HasShift()) {
+			if (!sys::HasCtrl() && !sys::HasShift()) {
 				if ((ListView_GetItemState(this->hWnd(), itemBelowCursor, LVIS_SELECTED) & LVIS_SELECTED) == 0) {
 					// If right-clicked item isn't currently selected, unselect all and select just it.
 					ListView_SetItemState(this->hWnd(), -1, 0, LVIS_SELECTED);
@@ -770,7 +783,7 @@ int ListView::_showCtxMenu(bool followCursor)
 				ListView_SetItemState(this->hWnd(), itemBelowCursor, LVIS_FOCUSED, LVIS_FOCUSED); // focus clicked
 			}
 		} else { // no item was right-clicked
-			if (!System::HasCtrl() && !System::HasShift())
+			if (!sys::HasCtrl() && !sys::HasShift())
 				ListView_SetItemState(this->hWnd(), -1, 0, LVIS_SELECTED); // unselect all
 		}
 		this->setFocus(); // because a right-click won't set the focus by default
@@ -787,7 +800,7 @@ int ListView::_showCtxMenu(bool followCursor)
 
 	// The popup menu is created with hDlg as parent, so the menu messages go to it.
 	// The lvhti coordinates are relative to listview, and will be mapped into screen-relative.
-	System::PopMenu(this->getParent().hWnd(), _ctxMenuId, coords.x, coords.y, this->hWnd());
+	sys::PopMenu(this->getParent().hWnd(), _ctxMenuId, coords.x, coords.y, this->hWnd());
 	return itemBelowCursor; // -1 if none
 }
 
@@ -796,7 +809,7 @@ LRESULT CALLBACK ListView::_Proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, UINT
 	switch (msg)
 	{
 	case WM_GETDLGCODE:
-		if (lp && wp == 'A' && System::HasCtrl()) { // Ctrl+A to select all items
+		if (lp && wp == 'A' && sys::HasCtrl()) { // Ctrl+A to select all items
 			reinterpret_cast<MSG*>(lp)->wParam = 0; // prevent propagation, therefore beep
 			ListView_SetItemState(hWnd, -1, LVIS_SELECTED, LVIS_SELECTED);
 			return DLGC_WANTCHARS;

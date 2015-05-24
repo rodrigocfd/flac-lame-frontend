@@ -8,8 +8,8 @@
     <Filter Include="program">
       <UniqueIdentifier>{50bf2275-4a1e-43f5-80fa-3e4c89dab75d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="owl">
-      <UniqueIdentifier>{d40204dd-3c77-4033-bc52-243ea78bfcd8}</UniqueIdentifier>
+    <Filter Include="C4W">
+      <UniqueIdentifier>{63628a88-5296-4062-9264-55c5a89731b8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -22,29 +22,32 @@
     <ClCompile Include="src\Convert.cpp">
       <Filter>program</Filter>
     </ClCompile>
-    <ClCompile Include="owl\Controls.cpp">
-      <Filter>owl</Filter>
+    <ClCompile Include="c4w\Controls.cpp">
+      <Filter>C4W</Filter>
     </ClCompile>
-    <ClCompile Include="owl\File.cpp">
-      <Filter>owl</Filter>
+    <ClCompile Include="c4w\File.cpp">
+      <Filter>C4W</Filter>
     </ClCompile>
-    <ClCompile Include="owl\Internet.cpp">
-      <Filter>owl</Filter>
+    <ClCompile Include="c4w\Net.cpp">
+      <Filter>C4W</Filter>
     </ClCompile>
-    <ClCompile Include="owl\StrUtil.cpp">
-      <Filter>owl</Filter>
+    <ClCompile Include="c4w\Resources.cpp">
+      <Filter>C4W</Filter>
     </ClCompile>
-    <ClCompile Include="owl\System.cpp">
-      <Filter>owl</Filter>
+    <ClCompile Include="c4w\Str.cpp">
+      <Filter>C4W</Filter>
     </ClCompile>
-    <ClCompile Include="owl\Window.cpp">
-      <Filter>owl</Filter>
+    <ClCompile Include="c4w\Sys.cpp">
+      <Filter>C4W</Filter>
     </ClCompile>
-    <ClCompile Include="owl\WindowDialog.cpp">
-      <Filter>owl</Filter>
+    <ClCompile Include="c4w\Window.cpp">
+      <Filter>C4W</Filter>
     </ClCompile>
-    <ClCompile Include="owl\WindowFrame.cpp">
-      <Filter>owl</Filter>
+    <ClCompile Include="c4w\WindowDialog.cpp">
+      <Filter>C4W</Filter>
+    </ClCompile>
+    <ClCompile Include="c4w\WindowFrame.cpp">
+      <Filter>C4W</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -60,32 +63,35 @@
     <ClInclude Include="src\Convert.h">
       <Filter>program</Filter>
     </ClInclude>
-    <ClInclude Include="owl\Controls.h">
-      <Filter>owl</Filter>
+    <ClInclude Include="c4w\Controls.h">
+      <Filter>C4W</Filter>
     </ClInclude>
-    <ClInclude Include="owl\File.h">
-      <Filter>owl</Filter>
+    <ClInclude Include="c4w\File.h">
+      <Filter>C4W</Filter>
     </ClInclude>
-    <ClInclude Include="owl\Internet.h">
-      <Filter>owl</Filter>
+    <ClInclude Include="c4w\Net.h">
+      <Filter>C4W</Filter>
     </ClInclude>
-    <ClInclude Include="owl\owl.h">
-      <Filter>owl</Filter>
+    <ClInclude Include="c4w\Resources.h">
+      <Filter>C4W</Filter>
     </ClInclude>
-    <ClInclude Include="owl\StrUtil.h">
-      <Filter>owl</Filter>
+    <ClInclude Include="c4w\Str.h">
+      <Filter>C4W</Filter>
     </ClInclude>
-    <ClInclude Include="owl\System.h">
-      <Filter>owl</Filter>
+    <ClInclude Include="c4w\Sys.h">
+      <Filter>C4W</Filter>
     </ClInclude>
-    <ClInclude Include="owl\Window.h">
-      <Filter>owl</Filter>
+    <ClInclude Include="c4w\Window.h">
+      <Filter>C4W</Filter>
     </ClInclude>
-    <ClInclude Include="owl\WindowDialog.h">
-      <Filter>owl</Filter>
+    <ClInclude Include="c4w\WindowDialog.h">
+      <Filter>C4W</Filter>
     </ClInclude>
-    <ClInclude Include="owl\WindowFrame.h">
-      <Filter>owl</Filter>
+    <ClInclude Include="c4w\WindowFrame.h">
+      <Filter>C4W</Filter>
+    </ClInclude>
+    <ClInclude Include="c4w\c4w.h">
+      <Filter>C4W</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

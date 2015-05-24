@@ -1,19 +1,56 @@
 /*!
  * Automation for internet related operations.
- * Part of OWL - Object Win32 Library.
+ * Part of C4W - Classes for Win32.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/wolf
+ * @see https://github.com/rodrigocfd/c4w
  */
 
-#include "Internet.h"
-#include "StrUtil.h"
+#include "Net.h"
+#include "Str.h"
 #pragma comment(lib, "Winhttp.lib")
-using namespace owl;
+using namespace c4w;
 using std::initializer_list;
 using std::vector;
 using std::wstring;
 
-bool Internet::Session::init(wstring *pErr, const wchar_t *userAgent)
+static wstring _FormatErr(const wchar_t *funcName, DWORD code)
+{
+	const wchar_t *s = nullptr;
+
+	switch (code) {
+	case ERROR_NOT_ENOUGH_MEMORY:               s = L"not enough memory"; break;
+	case ERROR_WINHTTP_CANNOT_CONNECT:          s = L"cannot connect"; break;
+	case ERROR_WINHTTP_CHUNKED_ENCODING_HEADER_SIZE_OVERFLOW: s = L"chunked encoding header size overflow"; break;
+	case ERROR_WINHTTP_CLIENT_AUTH_CERT_NEEDED: s = L"client auth cert needed"; break;
+	case ERROR_WINHTTP_CONNECTION_ERROR:        s = L"connection error"; break;
+	case ERROR_WINHTTP_HEADER_COUNT_EXCEEDED:   s = L"header count exceeded"; break;
+	case ERROR_WINHTTP_HEADER_NOT_FOUND:        s = L"header not found"; break;
+	case ERROR_WINHTTP_HEADER_SIZE_OVERFLOW:    s = L"header size overflow"; break;
+	case ERROR_WINHTTP_INCORRECT_HANDLE_STATE:  s = L"incorrect handle state"; break;
+	case ERROR_WINHTTP_INCORRECT_HANDLE_TYPE:   s = L"incorrect handle type"; break;
+	case ERROR_WINHTTP_INTERNAL_ERROR:          s = L"internal error"; break;
+	case ERROR_WINHTTP_INVALID_SERVER_RESPONSE: s = L"invalid server response"; break;
+	case ERROR_WINHTTP_INVALID_URL:             s = L"invalid URL"; break;
+	case ERROR_WINHTTP_LOGIN_FAILURE:           s = L"login failure"; break;
+	case ERROR_WINHTTP_NAME_NOT_RESOLVED:       s = L"name not resolved"; break;
+	case ERROR_WINHTTP_OPERATION_CANCELLED:     s = L"operation cancelled"; break;
+	case ERROR_WINHTTP_REDIRECT_FAILED:         s = L"redirect failed"; break;
+	case ERROR_WINHTTP_RESEND_REQUEST:          s = L"resend request"; break;
+	case ERROR_WINHTTP_RESPONSE_DRAIN_OVERFLOW: s = L"response drain overflow"; break;
+	case ERROR_WINHTTP_SECURE_FAILURE:          s = L"secure failure"; break;
+	case ERROR_WINHTTP_SHUTDOWN:                s = L"shutdown"; break;
+	case ERROR_WINHTTP_TIMEOUT:                 s = L"timeout"; break;
+	case ERROR_WINHTTP_UNRECOGNIZED_SCHEME:     s = L"unrecognized scheme or bad URL"; break;
+	default:                                    s = nullptr;
+	}
+
+	return str::Sprintf(L"%s() failed. Error: %s.",
+		funcName,
+		s ? s : str::Sprintf(L"(unhandled, %08X)", code).c_str() );
+}
+
+
+bool net::Session::init(wstring *pErr, const wchar_t *userAgent)
 {
 	if (!_hSession) {
 		// http://social.msdn.microsoft.com/forums/en-US/vclanguage/thread/45ccd91c-6794-4f9b-8f4f-865c76cc146d
@@ -35,7 +72,7 @@ bool Internet::Session::init(wstring *pErr, const wchar_t *userAgent)
 }
 
 
-void Internet::Download::abort()
+void net::Download::abort()
 {
 	if (_hRequest) {
 		WinHttpCloseHandle(_hRequest);
@@ -47,7 +84,7 @@ void Internet::Download::abort()
 	}
 }
 
-Internet::Download& Internet::Download::addRequestHeaders(initializer_list<const wchar_t*> requestHeaders)
+net::Download& net::Download::addRequestHeaders(initializer_list<const wchar_t*> requestHeaders)
 {
 	for (const wchar_t *rh : requestHeaders) {
 		_requestHeaders.emplace_back(rh);
@@ -55,7 +92,7 @@ Internet::Download& Internet::Download::addRequestHeaders(initializer_list<const
 	return *this;
 }
 
-bool Internet::Download::start(wstring *pErr)
+bool net::Download::start(wstring *pErr)
 {
 	if (_hConnect) {
 		if (pErr) *pErr = L"A download is already in progress.";
@@ -71,7 +108,7 @@ bool Internet::Download::start(wstring *pErr)
 	return true;
 }
 
-bool Internet::Download::hasData(wstring *pErr)
+bool net::Download::hasData(wstring *pErr)
 {
 	// Receive the data from server; user must call this until false.
 	DWORD incomingBytes = 0;
@@ -91,11 +128,11 @@ bool Internet::Download::hasData(wstring *pErr)
 	return true; // more data to come, call again
 }
 
-bool Internet::Download::_initHandles(wstring *pErr)
+bool net::Download::_initHandles(wstring *pErr)
 {
 	// Crack the URL.
 	DWORD dwErr = ERROR_SUCCESS;
-	_Url crackedUrl;
+	Url crackedUrl;
 	if (!crackedUrl.crack(_url, &dwErr)) {
 		if (pErr) *pErr = _FormatErr(L"WinHttpCrackUrl", dwErr);
 		return false;
@@ -124,7 +161,7 @@ bool Internet::Download::_initHandles(wstring *pErr)
 	return true;
 }
 
-bool Internet::Download::_contactServer(wstring *pErr)
+bool net::Download::_contactServer(wstring *pErr)
 {
 	// Add the request headers to request handle.
 	for (wstring& rh : _requestHeaders) {
@@ -156,7 +193,7 @@ bool Internet::Download::_contactServer(wstring *pErr)
 	return true;
 }
 
-bool Internet::Download::_parseHeaders(wstring *pErr)
+bool net::Download::_parseHeaders(wstring *pErr)
 {
 	// Retrieve the response header.
 	DWORD dwSize = 0;
@@ -177,17 +214,17 @@ bool Internet::Download::_parseHeaders(wstring *pErr)
 
 	// Parse the raw response headers into an associative array.
 	_responseHeaders.clear();
-	vector<wstring> lines = Explode(rawReh, L"\r\n");
+	vector<wstring> lines = str::Explode(rawReh, L"\r\n");
 
 	for (wstring& line : lines) {
 		if (line.empty()) continue;
-		int colonIdx = StrFind(line, L':');
+		int colonIdx = str::Find(str::Sens::YES, line, L':');
 		if (colonIdx == -1) { // not a key/value pair, probably response line
 			_responseHeaders.emplace(L"", line); // empty key
 		} else {
 			_responseHeaders.emplace(
-				Trim( line.substr(0, colonIdx) ),
-				Trim( line.substr(colonIdx + 1, line.length() - (colonIdx + 1)) )
+				str::Trim( line.substr(0, colonIdx) ),
+				str::Trim( line.substr(colonIdx + 1, line.length() - (colonIdx + 1)) )
 			);
 		}
 	}
@@ -195,7 +232,7 @@ bool Internet::Download::_parseHeaders(wstring *pErr)
 	// Retrieve content length, if informed by server.
 	if (_responseHeaders.find(L"Content-Length") != _responseHeaders.end()) {
 		const wstring& strContentLength = _responseHeaders[L"Content-Length"];
-		if (IsInt(strContentLength)) { // yes, server informed content length
+		if (str::IsInt(strContentLength)) { // yes, server informed content length
 			_contentLength = std::stoi(strContentLength);
 		}
 	}
@@ -204,7 +241,7 @@ bool Internet::Download::_parseHeaders(wstring *pErr)
 	return true;
 }
 
-bool Internet::Download::_getIncomingByteCount(DWORD& count, wstring *pErr)
+bool net::Download::_getIncomingByteCount(DWORD& count, wstring *pErr)
 {
 	DWORD dwSize = 0;
 	if (!WinHttpQueryDataAvailable(_hRequest, &dwSize)) { // how many bytes are about to come
@@ -218,7 +255,7 @@ bool Internet::Download::_getIncomingByteCount(DWORD& count, wstring *pErr)
 	return true;
 }
 
-bool Internet::Download::_receiveBytes(UINT nBytesToRead, wstring *pErr)
+bool net::Download::_receiveBytes(UINT nBytesToRead, wstring *pErr)
 {
 	DWORD dwRead = 0;
 	if (!WinHttpReadData(_hRequest, static_cast<void*>(&_buffer[0]), nBytesToRead, &dwRead)) {
@@ -232,7 +269,7 @@ bool Internet::Download::_receiveBytes(UINT nBytesToRead, wstring *pErr)
 }
 
 
-bool Internet::_Url::crack(const wchar_t *address, DWORD *dwErr)
+bool net::Url::crack(const wchar_t *address, DWORD *dwErr)
 {
 	// This helper class simply breaks an URL address into several parts.
 
@@ -253,41 +290,4 @@ bool Internet::_Url::crack(const wchar_t *address, DWORD *dwErr)
 
 	if (dwErr) *dwErr = ERROR_SUCCESS;
 	return true;
-}
-
-
-wstring Internet::_FormatErr(const wchar_t *funcName, DWORD code)
-{
-	const wchar_t *s = nullptr;
-
-	switch (code) {
-	case ERROR_NOT_ENOUGH_MEMORY:               s = L"not enough memory"; break;
-	case ERROR_WINHTTP_CANNOT_CONNECT:          s = L"cannot connect"; break;
-	case ERROR_WINHTTP_CHUNKED_ENCODING_HEADER_SIZE_OVERFLOW: s = L"chunked encoding header size overflow"; break;
-	case ERROR_WINHTTP_CLIENT_AUTH_CERT_NEEDED: s = L"client auth cert needed"; break;
-	case ERROR_WINHTTP_CONNECTION_ERROR:        s = L"connection error"; break;
-	case ERROR_WINHTTP_HEADER_COUNT_EXCEEDED:   s = L"header count exceeded"; break;
-	case ERROR_WINHTTP_HEADER_NOT_FOUND:        s = L"header not found"; break;
-	case ERROR_WINHTTP_HEADER_SIZE_OVERFLOW:    s = L"header size overflow"; break;
-	case ERROR_WINHTTP_INCORRECT_HANDLE_STATE:  s = L"incorrect handle state"; break;
-	case ERROR_WINHTTP_INCORRECT_HANDLE_TYPE:   s = L"incorrect handle type"; break;
-	case ERROR_WINHTTP_INTERNAL_ERROR:          s = L"internal error"; break;
-	case ERROR_WINHTTP_INVALID_SERVER_RESPONSE: s = L"invalid server response"; break;
-	case ERROR_WINHTTP_INVALID_URL:             s = L"invalid URL"; break;
-	case ERROR_WINHTTP_LOGIN_FAILURE:           s = L"login failure"; break;
-	case ERROR_WINHTTP_NAME_NOT_RESOLVED:       s = L"name not resolved"; break;
-	case ERROR_WINHTTP_OPERATION_CANCELLED:     s = L"operation cancelled"; break;
-	case ERROR_WINHTTP_REDIRECT_FAILED:         s = L"redirect failed"; break;
-	case ERROR_WINHTTP_RESEND_REQUEST:          s = L"resend request"; break;
-	case ERROR_WINHTTP_RESPONSE_DRAIN_OVERFLOW: s = L"response drain overflow"; break;
-	case ERROR_WINHTTP_SECURE_FAILURE:          s = L"secure failure"; break;
-	case ERROR_WINHTTP_SHUTDOWN:                s = L"shutdown"; break;
-	case ERROR_WINHTTP_TIMEOUT:                 s = L"timeout"; break;
-	case ERROR_WINHTTP_UNRECOGNIZED_SCHEME:     s = L"unrecognized scheme or bad URL"; break;
-	default:                                    s = nullptr;
-	}
-
-	return Sprintf(L"%s() failed. Error: %s.",
-		funcName,
-		s ? s : Sprintf(L"(unhandled, %08X)", code).c_str() );
 }

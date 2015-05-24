@@ -1,25 +1,25 @@
 /*!
  * Regular windows, created through CreateWindowEx and using a WNDPROC.
- * Part of OWL - Object Win32 Library.
+ * Part of C4W - Classes for Win32.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/owl
+ * @see https://github.com/rodrigocfd/c4w
  */
 
 #pragma once
-#include "System.h"
+#include "Sys.h"
 #include "Window.h"
 
 /*
-          +-- WindowCtrl <---+
-          |                  +-- [FrameCtrl]
-          |         <--------+
-          +-- Frame
-Window <--+         <--------+                 +-- [FrameApp]
+          +-- WindowPopup <--+                 +-- [FrameApp]
           |                  +-- FramePopup <--+
-          +-- WindowPopup <--+                 +-- [FrameModal]
+          |         <--------+                 +-- [FrameModal]
+          +-- Frame
+Window <--+         <--------+
+          |                  +-- [FrameCtrl]
+          +-- WindowCtrl <---+
 */
 
-namespace owl {
+namespace c4w {
 
 // Base class to any regular window.
 class Frame : virtual public Window {
@@ -29,7 +29,7 @@ public:
 	Frame(ATOM atom) : _atom(atom) { }
 	virtual ~Frame() = 0;
 	void invalidateRect(bool bgErase=true) { ::InvalidateRect(hWnd(), 0, bgErase); }
-	static ATOM Register(const wchar_t *className, int iconId=0, System::Cursor cursor=System::Cursor::ARROW, System::Color bg=System::Color::BUTTON);
+	static ATOM Register(const wchar_t *className, int iconId=0, sys::Cursor cursor=sys::Cursor::ARROW, sys::Color bg=sys::Color::BUTTON);
 protected:
 	virtual LRESULT wndProc(UINT msg, WPARAM wp, LPARAM lp);
 	static LRESULT CALLBACK _WindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -90,7 +90,7 @@ public:
 	FrameModal(ATOM atom, SIZE sz, Resize r, Maximize m, DropFiles d=DropFiles::NO, HMENU hMenu=nullptr, HACCEL hAccelTable=nullptr)
 		: FramePopup(atom, sz, r, m, d, hMenu, hAccelTable) { }
 	virtual ~FrameModal() = 0;
-	int show(Window *parent);
+	void show(Window *parent);
 protected:
 	virtual LRESULT wndProc(UINT msg, WPARAM wp, LPARAM lp) override;
 private:
@@ -128,4 +128,4 @@ private:
 	Frame::_atom;
 };
 
-}//namespace owl
+}//namespace c4w
