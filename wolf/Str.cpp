@@ -1,16 +1,30 @@
 /*!
- * String utilities.
- * Part of C4W - Classes for Win32.
+ * @file
+ * @brief String and vector utilities.
+ * @details Part of WOLF - Win32 Object Lambda Framework.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/c4w
+ * @see https://github.com/rodrigocfd/wolf
  */
 
 #include <cwctype> // iswpace
 #include "Str.h"
 #pragma warning(disable:4996) // _vsnwprintf
-using namespace c4w;
+using namespace wolf;
 using std::wstring;
 using std::vector;
+
+void str::Dbg(const wchar_t *fmt, ...)
+{
+#ifdef _DEBUG
+	va_list args;
+	va_start(args, fmt);
+	int newLen = _vscwprintf(fmt, args); // calculate length, without terminating null
+	wstring buf(newLen, L'\0');
+	_vsnwprintf(&buf[0], newLen, fmt, args); // do the job
+	va_end(args);
+	OutputDebugString(buf.c_str());
+#endif
+}
 
 wstring str::Sprintf(const wchar_t *fmt, ...)
 {

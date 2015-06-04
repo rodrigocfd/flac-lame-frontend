@@ -1,23 +1,21 @@
 
 #pragma once
-#include "../c4w/c4w.h"
-using namespace c4w;
-using std::wstring;
+#include "../wolf/wolf.h"
 
-struct Convert {
+struct Convert final {
 public:
-	static bool PathsAreValid(const file::Ini& ini, wstring *pErr=nullptr);
+	static bool PathsAreValid(const wolf::file::Ini& ini, std::wstring *pErr=nullptr);
 
-	static bool ToWav(const file::Ini& ini, wstring src, wstring dest, bool delSrc,
-		wstring *pErr=nullptr);
+	static bool ToWav(const wolf::file::Ini& ini, std::wstring src, std::wstring dest, bool delSrc,
+		std::wstring *pErr=nullptr);
 	
-	static bool ToFlac(const file::Ini& ini, wstring src, wstring dest, bool delSrc,
-		const wstring& quality, wstring *pErr=nullptr);
+	static bool ToFlac(const wolf::file::Ini& ini, std::wstring src, std::wstring dest, bool delSrc,
+		const std::wstring& quality, std::wstring *pErr=nullptr);
 	
-	static bool ToMp3(const file::Ini& ini, wstring src, wstring dest, bool delSrc,
-		const wstring& quality, bool isVbr, wstring *pErr=nullptr);
+	static bool ToMp3(const wolf::file::Ini& ini, std::wstring src, std::wstring dest, bool delSrc,
+		const std::wstring& quality, bool isVbr, std::wstring *pErr=nullptr);
 private:
-	static bool _CheckDestFolder(wstring& dest, wstring *pErr=nullptr);
-	static bool _Execute(const wstring& cmdLine, const wstring& src, bool delSrc,
-		wstring *pErr=nullptr);
+	static bool _CheckDestFolder(std::wstring& dest, std::wstring *pErr=nullptr);
+	static bool _Execute(const std::wstring& cmdLine, const std::wstring& src, bool delSrc,
+		std::wstring *pErr=nullptr);
 };

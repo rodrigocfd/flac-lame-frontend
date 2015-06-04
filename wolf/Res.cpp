@@ -1,15 +1,17 @@
 /*!
- * Assorted resources.
- * Part of C4W - Classes for Win32.
+ * @file
+ * @brief Assorted resources.
+ * @details Part of WOLF - Win32 Object Lambda Framework.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/c4w
+ * @see https://github.com/rodrigocfd/wolf
  */
 
-#include "Resources.h"
+#include "Res.h"
 #include "Str.h"
 #include <MsXml2.h>
 #pragma comment(lib, "msxml2.lib")
-using namespace c4w;
+using namespace wolf;
+using namespace wolf::res;
 using std::initializer_list;
 using std::unordered_map;
 using std::vector;
@@ -99,6 +101,83 @@ void Date::_LiToSt(const LARGE_INTEGER& li, SYSTEMTIME& st)
 	ft.dwLowDateTime = li.LowPart;
 
 	FileTimeToSystemTime(&ft, &st);
+}
+
+
+Menu& Menu::addSeparator()
+{
+	// Intended to be called within WM_CREATE or WM_INITDIALOG.
+	this->_createIfNotYet();
+	InsertMenu(_hMenu, -1, MF_BYPOSITION | MF_SEPARATOR, 0, nullptr);
+	return *this;
+}
+
+Menu& Menu::addItem(const wchar_t *caption, WORD cmdId)
+{
+	// Intended to be called within WM_CREATE or WM_INITDIALOG.
+	this->_createIfNotYet();
+	InsertMenu(_hMenu, -1, MF_BYPOSITION | MF_STRING, cmdId, caption);
+	return *this;
+}
+
+Menu& Menu::enableItem(initializer_list<WORD> cmdIds, bool doEnable)
+{
+	for (const WORD& cmd : cmdIds) {
+		EnableMenuItem(_hMenu, cmd, MF_BYCOMMAND | ((doEnable) ? MF_ENABLED : MF_GRAYED));
+	}
+	return *this;
+}
+
+Menu Menu::addSubmenu(const wchar_t *caption)
+{
+	// Intended to be called within WM_CREATE or WM_INITDIALOG.
+	this->_createIfNotYet();	
+	Menu sub = CreatePopupMenu();
+	AppendMenu(_hMenu, MF_STRING | MF_POPUP, reinterpret_cast<UINT_PTR>(sub.hMenu()), caption);
+	return sub; // return new submenu, so it can be edited
+}
+
+void MenuContext::popAtPoint(HWND hParent, POINT pt, HWND hWndCoordsRelativeTo)
+{
+	// The pt argument coordinates can be relative to the hWndCoordsRelativeTo window,
+	// otherwise they are relative to the hParent window.
+
+	if (!_hMenu) return;
+	ClientToScreen(hWndCoordsRelativeTo ? hWndCoordsRelativeTo : hParent, &pt); // to screen coordinates
+	SetForegroundWindow(hParent);
+	TrackPopupMenu(_hMenu, 0, pt.x, pt.y, 0, hParent, nullptr); // owned by window, so messages go to it
+	PostMessage(hParent, WM_NULL, 0, 0); // http://msdn.microsoft.com/en-us/library/ms648002%28VS.85%29.aspx
+}
+
+
+void AccelTable::destroy()
+{
+	if (_hAccel) {
+		DestroyAcceleratorTable(_hAccel);
+		_hAccel = nullptr;
+	}
+}
+
+void AccelTable::add(initializer_list<Key> keys)
+{
+	ACCEL *entries = new ACCEL[keys.size()];
+	int i = 0;
+
+	for (Key k : keys) {
+		entries[i].key = k.key;
+		entries[i].cmd = k.cmdId;
+		entries[i].fVirt = FNOINVERT |
+			static_cast<BYTE>(k.type) |
+			static_cast<BYTE>(k.modifiers);
+		++i;
+	}
+
+	_hAccel = CreateAcceleratorTable(entries, static_cast<int>(keys.size()));
+	if (!_hAccel) {
+		str::Dbg(L"ERROR: CreateAcceleratorTable failed, error #%d.\n", GetLastError());
+	}
+
+	delete[] entries;
 }
 
 

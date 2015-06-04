@@ -1,32 +1,35 @@
 /*!
- * Often-used controls.
- * Part of C4W - Classes for Win32.
+ * @file
+ * @brief Often-used controls.
+ * @details Part of WOLF - Win32 Object Lambda Framework.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/c4w
+ * @see https://github.com/rodrigocfd/wolf
  */
 
-#include "Controls.h"
+#include "Ctrl.h"
 #include "Sys.h"
-using namespace c4w;
+using namespace wolf;
+using namespace wolf::ctrl;
+using namespace wolf::res;
 using std::function;
 using std::initializer_list;
 using std::vector;
 using std::wstring;
 
-Resizer& Resizer::add(initializer_list<HWND> hChildren, Do modeHorz, Do modeVert)
+Resizer& Resizer::add(initializer_list<int> ctrlIds, Window *parent, Do modeHorz, Do modeVert)
 {
-	_ctrls.reserve(_ctrls.size() + hChildren.size());
-	for (const HWND& hChild : hChildren) {
-		this->_addOne(hChild, modeHorz, modeVert);
+	_ctrls.reserve(_ctrls.size() + ctrlIds.size());
+	for (const int& ctrlId : ctrlIds) {
+		this->_addOne(parent->getChild(ctrlId), modeHorz, modeVert);
 	}
 	return *this;
 }
 
-Resizer& Resizer::add(initializer_list<int> ctrlIds, HWND hParent, Do modeHorz, Do modeVert)
+Resizer& Resizer::add(initializer_list<Window> children, Do modeHorz, Do modeVert)
 {
-	_ctrls.reserve(_ctrls.size() + ctrlIds.size());
-	for (const int& ctrlId : ctrlIds) {
-		this->_addOne(GetDlgItem(hParent, ctrlId), modeHorz, modeVert);
+	_ctrls.reserve(_ctrls.size() + children.size());
+	for (const Window child : children) {
+		this->_addOne(child, modeHorz, modeVert);
 	}
 	return *this;
 }
@@ -35,7 +38,7 @@ void Resizer::_addOne(Window ctrl, Do modeHorz, Do modeVert)
 {
 	Window parent = ctrl.getParent();
 
-	if (!_ctrls.size()) { // first call to _addOne()
+	if (_ctrls.empty()) { // first call to _addOne()
 		RECT rcP = parent.getClientRect();
 		_szOrig.cx = rcP.right;
 		_szOrig.cy = rcP.bottom; // save original size of parent
@@ -95,62 +98,6 @@ LRESULT CALLBACK Resizer::_Proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, UINT_
 }
 
 
-Menu& Menu::createMain(HWND owner)
-{
-	this->destroy();
-	_hMenu = CreateMenu(); // to be used as a main window menu
-	this->appendItem(L"_DUMMY_", WM_APP-2); // avoids further call to DrawMenuBar(), which would demand HWND again
-	SetMenu(owner, _hMenu);
-	return *this;
-}
-
-Menu& Menu::createPopup()
-{
-	this->destroy();
-	_hMenu = CreatePopupMenu(); // to be used as a popup menu
-	return *this;
-}
-
-Menu& Menu::appendSeparator()
-{
-	this->_checkDummyEntry();
-	InsertMenu(_hMenu, -1, MF_BYPOSITION | MF_SEPARATOR, 0, nullptr);
-	return *this;
-}
-
-Menu& Menu::appendItem(const wchar_t *caption, WORD cmdId)
-{
-	this->_checkDummyEntry();
-	InsertMenu(_hMenu, -1, MF_BYPOSITION | MF_STRING, cmdId, caption);
-	return *this;
-}
-
-Menu& Menu::enableItem(initializer_list<WORD> cmdIds, bool doEnable)
-{
-	for (const WORD& cmd : cmdIds) {
-		EnableMenuItem(_hMenu, cmd, MF_BYCOMMAND | ((doEnable) ? MF_ENABLED : MF_GRAYED));
-	}
-	return *this;
-}
-
-Menu Menu::appendSubmenu(const wchar_t *caption)
-{
-	this->_checkDummyEntry();
-	
-	Menu sub;
-	sub.createPopup();
-	AppendMenu(_hMenu, MF_STRING | MF_POPUP, (UINT_PTR)sub.hMenu(), caption);
-	return sub; // return new submenu, so it can be edited
-}
-
-void Menu::_checkDummyEntry()
-{
-	if (this->size() == 1 && GetMenuItemID(_hMenu, 0) == WM_APP-2) {
-		DeleteMenu(_hMenu, 0, MF_BYPOSITION); // delete dummy, if any
-	}
-}
-
-
 TextBox& TextBox::operator=(HWND hwnd)
 {
 	const int IDSUBCLASS = 1;
@@ -165,7 +112,7 @@ TextBox& TextBox::operator=(HWND hwnd)
 	return *this;
 }
 
-TextBox& TextBox::create(WindowPopup *parent, int id, POINT pos, int cx, UINT extraStyles)
+TextBox& TextBox::create(Window *parent, int id, POINT pos, int cx, UINT extraStyles)
 {
 	this->operator=( CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, nullptr,
 		WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL | extraStyles,
@@ -214,7 +161,7 @@ LRESULT CALLBACK TextBox::_Proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, UINT_
 		}
 		break;
 	case WM_KEYUP:
-		if (pSelf->_onKeyUp) pSelf->_onKeyUp(wp);
+		if (pSelf->_onKeyUp) pSelf->_onKeyUp(static_cast<WORD>(wp));
 		break;
 	case WM_NCDESTROY:
 		RemoveWindowSubclass(hWnd, _Proc, idSubclass);
@@ -223,7 +170,7 @@ LRESULT CALLBACK TextBox::_Proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, UINT_
 }
 
 
-Combo& Combo::create(WindowPopup *parent, int id, POINT pos, int cx)
+Combo& Combo::create(Window *parent, int id, POINT pos, int cx)
 {
 	this->operator=( CreateWindowEx(0, WC_COMBOBOX, nullptr,
 		WS_CHILD | WS_VISIBLE | WS_TABSTOP | CBS_DROPDOWNLIST | CBS_SORT,
@@ -261,7 +208,7 @@ wstring Combo::itemGetText(int i) const
 }
 
 
-ListBox& ListBox::create(WindowPopup *parent, int id, POINT pos, SIZE size)
+ListBox& ListBox::create(Window *parent, int id, POINT pos, SIZE size)
 {
 	this->operator=( CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTBOX, nullptr,
 		WS_CHILD | WS_VISIBLE | WS_TABSTOP,
@@ -325,7 +272,7 @@ wstring ListBox::itemGetText(int i) const
 }
 
 
-Radio& Radio::create(WindowPopup *parent, int id, const wchar_t *caption, bool beginGroup, POINT pos, SIZE size)
+Radio& Radio::create(Window *parent, int id, const wchar_t *caption, bool beginGroup, POINT pos, SIZE size)
 {
 	this->operator=( CreateWindowEx(0, WC_BUTTON, caption,
 		WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON | (beginGroup ? WS_GROUP : 0),
@@ -344,7 +291,7 @@ void Radio::setCheck(bool checked, Radio::EmulateClick emulateClick)
 }
 
 
-CheckBox& CheckBox::create(WindowPopup *parent, int id, const wchar_t *caption, POINT pos, SIZE size)
+CheckBox& CheckBox::create(Window *parent, int id, const wchar_t *caption, POINT pos, SIZE size)
 {
 	this->operator=( CreateWindowEx(0, WC_BUTTON, caption,
 		WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
@@ -354,7 +301,7 @@ CheckBox& CheckBox::create(WindowPopup *parent, int id, const wchar_t *caption, 
 }
 
 
-ProgressBar& ProgressBar::create(WindowPopup *parent, int id, POINT pos, SIZE size)
+ProgressBar& ProgressBar::create(Window *parent, int id, POINT pos, SIZE size)
 {
 	this->operator=( CreateWindowEx(0, PROGRESS_CLASS, nullptr,
 		WS_CHILD | WS_VISIBLE,
@@ -382,15 +329,15 @@ ProgressBar& ProgressBar::animateMarquee(bool animate)
 }
 
 
-StatusBar& StatusBar::create(HWND hOwner, int numPartsItWillHave)
+StatusBar& StatusBar::create(HWND hParent, int numPartsItWillHave)
 {
 	// The owner is considered resizable if it has the maximize button.
-	bool isStretch = (GetWindowLongPtr(hOwner, GWL_STYLE) & WS_MAXIMIZEBOX) != 0;
+	bool isStretch = (GetWindowLongPtr(hParent, GWL_STYLE) & WS_MAXIMIZEBOX) != 0;
 
 	_sb = CreateWindowEx(0, STATUSCLASSNAME, nullptr,
 		(isStretch ? SBARS_SIZEGRIP : 0) | WS_CHILD | WS_VISIBLE,
-		0, 0, 0, 0, hOwner, nullptr,
-		reinterpret_cast<HINSTANCE>(GetWindowLongPtr(hOwner, GWLP_HINSTANCE)), nullptr);
+		0, 0, 0, 0, hParent, nullptr,
+		reinterpret_cast<HINSTANCE>(GetWindowLongPtr(hParent, GWLP_HINSTANCE)), nullptr);
 
 	_parts.reserve(numPartsItWillHave);
 	_rightEdges.resize(numPartsItWillHave); // only used in _putParts(); allocated through object life for performance
@@ -675,11 +622,11 @@ ListView& ListView::operator=(HWND hwnd)
 	static_cast<Window*>(this)->operator=(hwnd);
 	SetWindowSubclass(this->hWnd(), _Proc, IDSUBCLASS, reinterpret_cast<DWORD_PTR>(this));
 	items = ItemsProxy(this); // initialize internal object
-	_ctxMenuId = 0; // ID of context popup menu
+	contextMenu.destroy();
 	return *this;
 }
 
-ListView& ListView::create(WindowPopup *parent, int id, POINT pos, SIZE size)
+ListView& ListView::create(Window *parent, int id, POINT pos, SIZE size)
 {
 	this->operator=( CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, nullptr,
 		WS_CHILD | WS_VISIBLE | WS_TABSTOP | LVS_REPORT,
@@ -741,6 +688,16 @@ ListView& ListView::columnFit(int iCol)
 	return *this;
 }
 
+vector<wstring> ListView::TextsFromItems(std::vector<Item> items, int iCol)
+{
+	vector<wstring> texts;
+	texts.reserve(items.size());
+	for (Item i : items) {
+		texts.emplace_back(i.getText(iCol));
+	}
+	return texts;
+}
+
 HIMAGELIST ListView::_proceedImageList()
 {
 	// Imagelist is destroyed automatically:
@@ -759,9 +716,9 @@ HIMAGELIST ListView::_proceedImageList()
 	return hImg; // return handle to current imagelist
 }
 
-int ListView::_showCtxMenu(bool followCursor)
+int ListView::_showContextMenu(bool followCursor)
 {
-	if (!_ctxMenuId) return -1; // no context menu assigned via setContextMenu()
+	if (!contextMenu.hMenu()) return -1; // no context menu assigned via setContextMenu()
 
 	POINT coords = { 0 };
 	int itemBelowCursor = -1;
@@ -782,9 +739,8 @@ int ListView::_showCtxMenu(bool followCursor)
 				}
 				ListView_SetItemState(this->hWnd(), itemBelowCursor, LVIS_FOCUSED, LVIS_FOCUSED); // focus clicked
 			}
-		} else { // no item was right-clicked
-			if (!sys::HasCtrl() && !sys::HasShift())
-				ListView_SetItemState(this->hWnd(), -1, 0, LVIS_SELECTED); // unselect all
+		} else if (!sys::HasCtrl() && !sys::HasShift()) {
+			ListView_SetItemState(this->hWnd(), -1, 0, LVIS_SELECTED); // unselect all
 		}
 		this->setFocus(); // because a right-click won't set the focus by default
 	} else { // usually fired with the context menu keyboard key
@@ -800,7 +756,7 @@ int ListView::_showCtxMenu(bool followCursor)
 
 	// The popup menu is created with hDlg as parent, so the menu messages go to it.
 	// The lvhti coordinates are relative to listview, and will be mapped into screen-relative.
-	sys::PopMenu(this->getParent().hWnd(), _ctxMenuId, coords.x, coords.y, this->hWnd());
+	contextMenu.popAtPoint(this->getParent().hWnd(), coords, this->hWnd());
 	return itemBelowCursor; // -1 if none
 }
 
@@ -820,11 +776,11 @@ LRESULT CALLBACK ListView::_Proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, UINT
 			reinterpret_cast<MSG*>(lp)->wParam = 0; // prevent propagation, therefore beep
 			return DLGC_WANTALLKEYS;
 		} else if (lp && wp == VK_APPS) { // context menu keyboard key
-			reinterpret_cast<ListView*>(refData)->_showCtxMenu(false);
+			reinterpret_cast<ListView*>(refData)->_showContextMenu(false);
 		}
 		break;
 	case WM_RBUTTONDOWN:
-		reinterpret_cast<ListView*>(refData)->_showCtxMenu(true);
+		reinterpret_cast<ListView*>(refData)->_showContextMenu(true);
 		return 0;
 	case WM_NCDESTROY:
 		RemoveWindowSubclass(hWnd, _Proc, idSubclass);

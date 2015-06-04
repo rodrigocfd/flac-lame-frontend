@@ -1,14 +1,16 @@
 /*!
- * Automation for internet related operations.
- * Part of C4W - Classes for Win32.
+ * @file
+ * @brief Automation for internet operations.
+ * @details Part of WOLF - Win32 Object Lambda Framework.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/c4w
+ * @see https://github.com/rodrigocfd/wolf
  */
 
 #include "Net.h"
 #include "Str.h"
 #pragma comment(lib, "Winhttp.lib")
-using namespace c4w;
+using namespace wolf;
+using namespace wolf::net;
 using std::initializer_list;
 using std::vector;
 using std::wstring;
@@ -50,7 +52,7 @@ static wstring _FormatErr(const wchar_t *funcName, DWORD code)
 }
 
 
-bool net::Session::init(wstring *pErr, const wchar_t *userAgent)
+bool Session::init(wstring *pErr, const wchar_t *userAgent)
 {
 	if (!_hSession) {
 		// http://social.msdn.microsoft.com/forums/en-US/vclanguage/thread/45ccd91c-6794-4f9b-8f4f-865c76cc146d
@@ -72,7 +74,7 @@ bool net::Session::init(wstring *pErr, const wchar_t *userAgent)
 }
 
 
-void net::Download::abort()
+void Download::abort()
 {
 	if (_hRequest) {
 		WinHttpCloseHandle(_hRequest);
@@ -84,7 +86,7 @@ void net::Download::abort()
 	}
 }
 
-net::Download& net::Download::addRequestHeaders(initializer_list<const wchar_t*> requestHeaders)
+Download& Download::addRequestHeaders(initializer_list<const wchar_t*> requestHeaders)
 {
 	for (const wchar_t *rh : requestHeaders) {
 		_requestHeaders.emplace_back(rh);
@@ -92,7 +94,7 @@ net::Download& net::Download::addRequestHeaders(initializer_list<const wchar_t*>
 	return *this;
 }
 
-bool net::Download::start(wstring *pErr)
+bool Download::start(wstring *pErr)
 {
 	if (_hConnect) {
 		if (pErr) *pErr = L"A download is already in progress.";
@@ -108,7 +110,7 @@ bool net::Download::start(wstring *pErr)
 	return true;
 }
 
-bool net::Download::hasData(wstring *pErr)
+bool Download::hasData(wstring *pErr)
 {
 	// Receive the data from server; user must call this until false.
 	DWORD incomingBytes = 0;
@@ -128,7 +130,7 @@ bool net::Download::hasData(wstring *pErr)
 	return true; // more data to come, call again
 }
 
-bool net::Download::_initHandles(wstring *pErr)
+bool Download::_initHandles(wstring *pErr)
 {
 	// Crack the URL.
 	DWORD dwErr = ERROR_SUCCESS;
@@ -161,7 +163,7 @@ bool net::Download::_initHandles(wstring *pErr)
 	return true;
 }
 
-bool net::Download::_contactServer(wstring *pErr)
+bool Download::_contactServer(wstring *pErr)
 {
 	// Add the request headers to request handle.
 	for (wstring& rh : _requestHeaders) {
@@ -193,7 +195,7 @@ bool net::Download::_contactServer(wstring *pErr)
 	return true;
 }
 
-bool net::Download::_parseHeaders(wstring *pErr)
+bool Download::_parseHeaders(wstring *pErr)
 {
 	// Retrieve the response header.
 	DWORD dwSize = 0;
@@ -241,7 +243,7 @@ bool net::Download::_parseHeaders(wstring *pErr)
 	return true;
 }
 
-bool net::Download::_getIncomingByteCount(DWORD& count, wstring *pErr)
+bool Download::_getIncomingByteCount(DWORD& count, wstring *pErr)
 {
 	DWORD dwSize = 0;
 	if (!WinHttpQueryDataAvailable(_hRequest, &dwSize)) { // how many bytes are about to come
@@ -255,7 +257,7 @@ bool net::Download::_getIncomingByteCount(DWORD& count, wstring *pErr)
 	return true;
 }
 
-bool net::Download::_receiveBytes(UINT nBytesToRead, wstring *pErr)
+bool Download::_receiveBytes(UINT nBytesToRead, wstring *pErr)
 {
 	DWORD dwRead = 0;
 	if (!WinHttpReadData(_hRequest, static_cast<void*>(&_buffer[0]), nBytesToRead, &dwRead)) {
@@ -269,7 +271,7 @@ bool net::Download::_receiveBytes(UINT nBytesToRead, wstring *pErr)
 }
 
 
-bool net::Url::crack(const wchar_t *address, DWORD *dwErr)
+bool Url::crack(const wchar_t *address, DWORD *dwErr)
 {
 	// This helper class simply breaks an URL address into several parts.
 

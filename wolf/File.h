@@ -1,36 +1,36 @@
 /*!
- * File handling.
- * Part of C4W - Classes for Win32.
+ * @file
+ * @brief Automation for file handling.
+ * @details Part of WOLF - Win32 Object Lambda Framework.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/c4w
+ * @see https://github.com/rodrigocfd/wolf
  */
 
 #pragma once
 #include <unordered_map>
-#include "Resources.h"
+#include "Res.h"
 
-namespace c4w {
+namespace wolf {
 
 namespace file {
-	inline bool  Exists(const wchar_t *path)                { return ::GetFileAttributes(path) != INVALID_FILE_ATTRIBUTES; }
-	inline bool  Exists(const std::wstring& path)           { return Exists(path.c_str()); }
-	inline bool  IsDir(const wchar_t *path)                 { return (::GetFileAttributes(path) & FILE_ATTRIBUTE_DIRECTORY) != 0; }
-	inline bool  IsDir(const std::wstring& path)            { return IsDir(path.c_str()); }
-	bool         Delete(const wchar_t *path, std::wstring *pErr=nullptr);
-	inline bool  Delete(const std::wstring& path, std::wstring *pErr=nullptr) { return Delete(path.c_str(), pErr); }
-	bool         CreateDir(const wchar_t *path);
-	inline bool  CreateDir(const std::wstring& path)        { return CreateDir(path.c_str()); }
-	Date         DateLastModified(const wchar_t *path);
-	inline Date  DateLastModified(const std::wstring& path) { return DateLastModified(path.c_str()); }
-	Date         DateCreated(const wchar_t *path);
-	inline Date  DateCreated(const std::wstring& path)      { return DateCreated(path.c_str()); }
+	inline bool Exists(const wchar_t *path)                { return ::GetFileAttributes(path) != INVALID_FILE_ATTRIBUTES; }
+	inline bool Exists(const std::wstring& path)           { return Exists(path.c_str()); }
+	inline bool IsDir(const wchar_t *path)                 { return (::GetFileAttributes(path) & FILE_ATTRIBUTE_DIRECTORY) != 0; }
+	inline bool IsDir(const std::wstring& path)            { return IsDir(path.c_str()); }
+	bool        Delete(const wchar_t *path, std::wstring *pErr=nullptr);
+	inline bool Delete(const std::wstring& path, std::wstring *pErr=nullptr) { return Delete(path.c_str(), pErr); }
+	bool        CreateDir(const wchar_t *path);
+	inline bool CreateDir(const std::wstring& path)        { return CreateDir(path.c_str()); }
+	res::Date        DateLastModified(const wchar_t *path);
+	inline res::Date DateLastModified(const std::wstring& path) { return DateLastModified(path.c_str()); }
+	res::Date        DateCreated(const wchar_t *path);
+	inline res::Date DateCreated(const std::wstring& path)      { return DateCreated(path.c_str()); }
 	bool         WriteUtf8(const wchar_t *path, const wchar_t *data, std::wstring *pErr=nullptr);
 	inline bool  WriteUtf8(const wchar_t *path, const std::wstring& data, std::wstring *pErr=nullptr) { return WriteUtf8(path, data.c_str(), pErr); }
 	bool         Unzip(const wchar_t *zip, const wchar_t *destFolder, std::wstring *pErr=nullptr);
 	inline bool  Unzip(const std::wstring& zip, const std::wstring& destFolder, std::wstring *pErr=nullptr) { return Unzip(zip.c_str(), destFolder.c_str(), pErr); }
 	int          IndexOfBin(const BYTE *pData, size_t dataLen, const wchar_t *what, bool asWideChar);
 
-	// Path string utilities.
 	namespace path {
 		void                ChangeExtension(std::wstring& sPath, const wchar_t *extWithoutDot);
 		void                TrimBackslash(std::wstring& sPath);
@@ -41,7 +41,7 @@ namespace file {
 
 	enum class Access { READONLY, READWRITE };
 
-	// Automation to a HANDLE of a file.
+	/// File HANDLE wrapper.
 	class Raw final {
 	private:
 		HANDLE _hFile;
@@ -64,7 +64,7 @@ namespace file {
 		bool   rewind(std::wstring *pErr=nullptr);
 	};
 
-	// Automation to a memory-mapped file.
+	/// Automation to a memory-mapped file.
 	class Mapped final {
 	private:
 		Raw    _file;
@@ -87,7 +87,7 @@ namespace file {
 		bool   getContent(std::wstring& buf, int offset=0, int numChars=-1, std::wstring *pErr=nullptr) const;
 	};
 
-	// Automation to read text files line-by-line.
+	/// Automation to read text files line-by-line.
 	class Text final {
 	private:
 		std::wstring _text;
@@ -105,7 +105,7 @@ namespace file {
 		const std::wstring& text() const { return _text; }
 	};
 
-	// Automation to INI files, loaded into two nested associative arrays.
+	/// Automation to INI files, loaded into two nested associative arrays.
 	class Ini final {
 	private:
 		std::wstring _path;
@@ -113,13 +113,14 @@ namespace file {
 		std::unordered_map<std::wstring, std::unordered_map<std::wstring, std::wstring>> sections;
 		Ini& setPath(const wchar_t *iniPath)      { _path = iniPath; return *this; }
 		Ini& setPath(const std::wstring& iniPath) { return setPath(iniPath.c_str()); }
+		const std::wstring& getPath() const       { return _path; }
 		bool load(std::wstring *pErr=nullptr);
 		bool serialize(std::wstring *pErr=nullptr) const;
 	private:
 		int _countSections(Text *fin) const;
 	};
 
-	// Automation for directory enumeration.
+	/// Automation for directory enumeration.
 	class Listing final {
 	private:
 		HANDLE          _hFind;
@@ -138,4 +139,4 @@ namespace file {
 	};
 }//namespace file
 
-}//namespace c4w
+}//namespace wolf

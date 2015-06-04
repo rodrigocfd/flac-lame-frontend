@@ -1,8 +1,9 @@
 /*!
- * OS-related stuff.
- * Part of C4W - Classes for Win32.
+ * @file
+ * @brief OS-related stuff.
+ * @details Part of WOLF - Win32 Object Lambda Framework.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/c4w
+ * @see https://github.com/rodrigocfd/wolf
  */
 
 #pragma once
@@ -10,7 +11,7 @@
 #include <string>
 #include <Windows.h>
 
-// WinMain automation for *App classes.
+/// WinMain automation for *App classes.
 #include <crtdbg.h>
 #define RUN(AppClass) \
 int WINAPI wWinMain(HINSTANCE hInst, HINSTANCE h0, LPWSTR cmdLine, int cmdShow) { \
@@ -21,7 +22,7 @@ int WINAPI wWinMain(HINSTANCE hInst, HINSTANCE h0, LPWSTR cmdLine, int cmdShow) 
 	return ret; }
 
 
-namespace c4w {
+namespace wolf {
 
 namespace sys {
 	enum class Color { BUTTON=COLOR_BTNFACE, DESKTOP=COLOR_DESKTOP,
@@ -35,11 +36,10 @@ namespace sys {
 	void         Thread(std::function<void()> callback);
 	DWORD        Exec(const wchar_t *cmdLine);
 	inline DWORD Exec(const std::wstring& cmdLine) { return Exec(cmdLine.c_str()); }
-	void         PopMenu(HWND hDlg, int popupMenuId, int x, int y, HWND hWndCoordsRelativeTo);
 	std::wstring GetExePath();
 	std::wstring GetDesktopPath();
 	std::wstring GetMyDocsPath();
 	std::wstring GetRoamingPath();
 }//namespace sys
 
-}//namespace c4w
+}//namespace wolf

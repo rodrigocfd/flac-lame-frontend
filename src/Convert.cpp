@@ -1,5 +1,7 @@
 
 #include "Convert.h"
+using namespace wolf;
+using std::wstring;
 
 bool Convert::PathsAreValid(const file::Ini& ini, wstring *pErr)
 {
@@ -160,7 +162,8 @@ bool Convert::ToMp3(const file::Ini& ini, wstring src, wstring dest, bool delSrc
 	if (!dest.empty()) { // different destination folder
 		wstring destMp3Path(src);
 		file::path::ChangeExtension(src, L"mp3");
-		cmdLine.append( Sprintf(L" \"%s\\%s\"", dest.c_str(), file::path::GetFilename(destMp3Path).c_str()) );
+		cmdLine.append( Sprintf(L" \"%s\\%s\"",
+			dest.c_str(), file::path::GetFilename(destMp3Path).c_str()) );
 	}
 
 	if (!_Execute(cmdLine, src, delSrc, pErr)) {
@@ -189,9 +192,9 @@ bool Convert::_Execute(const wstring& cmdLine, const wstring& src, bool delSrc, 
 {
 #ifdef _DEBUG
 	// Debug summary of operations about to be performed.
-	OutputDebugString(str::Sprintf(L"Run %s\n", cmdLine.c_str()).c_str());
+	str::Dbg(L"Run %s\n", cmdLine.c_str());
 	if (delSrc) {
-		OutputDebugString(str::Sprintf(L"Del %s\n", src.c_str()).c_str());
+		str::Dbg(L"Del %s\n", src.c_str());
 	}
 #endif
 

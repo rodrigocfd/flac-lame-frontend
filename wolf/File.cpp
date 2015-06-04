@@ -1,8 +1,9 @@
 /*!
- * File handling.
- * Part of C4W - Classes for Win32.
+ * @file
+ * @brief Automation for file handling.
+ * @details Part of WOLF - Win32 Object Lambda Framework.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/c4w
+ * @see https://github.com/rodrigocfd/wolf
  */
 
 #include "File.h"
@@ -10,7 +11,9 @@
 #include <algorithm>
 #include <direct.h> // _wmkdir()
 #include <Shlobj.h>
-using namespace c4w;
+using namespace wolf;
+using namespace wolf::file;
+using namespace wolf::res;
 using std::unordered_map;
 using std::vector;
 using std::wstring;
@@ -228,27 +231,27 @@ int file::IndexOfBin(const BYTE *pData, size_t dataLen, const wchar_t *what, boo
 }
 
 
-void file::path::ChangeExtension(wstring& sPath, const wchar_t *extWithoutDot)
+void path::ChangeExtension(wstring& sPath, const wchar_t *extWithoutDot)
 {
 	sPath.resize(str::Find(str::Sens::YES, sPath, L'.') + 1); // truncate after the dot
 	sPath.append(extWithoutDot);
 }
 
-void file::path::TrimBackslash(wstring& sPath)
+void path::TrimBackslash(wstring& sPath)
 {
 	if (!sPath.empty() && sPath.back() == L'\\') {
 		sPath.resize(sPath.length() - 1);
 	}
 }
 
-wstring file::path::GetPath(const wchar_t *sPath)
+wstring path::GetPath(const wchar_t *sPath)
 {
 	wstring ret = sPath;
 	ret.resize(str::FindRev(str::Sens::YES, ret, L'\\')); // also remove trailing backslash
 	return ret;
 }
 
-wstring file::path::GetFilename(const wstring& sPath)
+wstring path::GetFilename(const wstring& sPath)
 {
 	wstring ret = sPath;
 	ret.erase(0, str::FindRev(str::Sens::YES, ret, L'\\') + 1);
@@ -256,7 +259,7 @@ wstring file::path::GetFilename(const wstring& sPath)
 }
 
 
-void file::Raw::close()
+void Raw::close()
 {
 	if (_hFile) {
 		CloseHandle(_hFile);
@@ -265,7 +268,7 @@ void file::Raw::close()
 	}
 }
 
-bool file::Raw::open(const wchar_t *path, Access access, wstring *pErr)
+bool Raw::open(const wchar_t *path, Access access, wstring *pErr)
 {
 	this->close(); // make sure everything was properly cleaned up
 
@@ -287,7 +290,7 @@ bool file::Raw::open(const wchar_t *path, Access access, wstring *pErr)
 	return true;
 }
 
-bool file::Raw::setNewSize(size_t newSize, wstring *pErr)
+bool Raw::setNewSize(size_t newSize, wstring *pErr)
 {
 	// This method will truncate or expand the file, according to the new size.
 	// Size zero will truncate the file.
@@ -329,7 +332,7 @@ bool file::Raw::setNewSize(size_t newSize, wstring *pErr)
 	return true;
 }
 
-bool file::Raw::getContent(vector<BYTE>& buf, wstring *pErr) const
+bool Raw::getContent(vector<BYTE>& buf, wstring *pErr) const
 {
 	if (!_hFile) {
 		if (pErr) *pErr = L"File has not been opened.";
@@ -347,7 +350,7 @@ bool file::Raw::getContent(vector<BYTE>& buf, wstring *pErr) const
 	return true;
 }
 
-bool file::Raw::write(const BYTE *pData, size_t sz, wstring *pErr)
+bool Raw::write(const BYTE *pData, size_t sz, wstring *pErr)
 {
 	if (!_hFile) {
 		if (pErr) *pErr = L"File has not been opened.";
@@ -371,7 +374,7 @@ bool file::Raw::write(const BYTE *pData, size_t sz, wstring *pErr)
 	return true;
 }
 
-bool file::Raw::rewind(wstring *pErr)
+bool Raw::rewind(wstring *pErr)
 {
 	if (!_hFile) {
 		if (pErr) *pErr = L"File has not been opened.";
@@ -386,7 +389,7 @@ bool file::Raw::rewind(wstring *pErr)
 }
 
 
-void file::Mapped::close()
+void Mapped::close()
 {
 	if (_pMem) {
 		UnmapViewOfFile(_pMem);
@@ -400,7 +403,7 @@ void file::Mapped::close()
 	_size = 0;
 }
 
-bool file::Mapped::open(const wchar_t *path, file::Access access, wstring *pErr)
+bool Mapped::open(const wchar_t *path, Access access, wstring *pErr)
 {
 	this->close(); // make sure everything was properly cleaned up
 
@@ -435,7 +438,7 @@ bool file::Mapped::open(const wchar_t *path, file::Access access, wstring *pErr)
 	return true;
 }
 
-bool file::Mapped::setNewSize(size_t newSize, wstring *pErr)
+bool Mapped::setNewSize(size_t newSize, wstring *pErr)
 {
 	// This method will truncate or expand the file, according to the new size.
 	// It will probably fail if file was opened as read-only.
@@ -476,7 +479,7 @@ bool file::Mapped::setNewSize(size_t newSize, wstring *pErr)
 	return true;
 }
 
-bool file::Mapped::getContent(vector<BYTE>& buf, int offset, int numBytes, wstring *pErr) const
+bool Mapped::getContent(vector<BYTE>& buf, int offset, int numBytes, wstring *pErr) const
 {
 	if (!_hMap || !_pMem || !_file.hFile()) {
 		if (pErr) *pErr = L"File is not mapped into memory.";
@@ -495,7 +498,7 @@ bool file::Mapped::getContent(vector<BYTE>& buf, int offset, int numBytes, wstri
 	return true;
 }
 
-bool file::Mapped::getContent(wstring& buf, int offset, int numChars, wstring *pErr) const
+bool Mapped::getContent(wstring& buf, int offset, int numChars, wstring *pErr) const
 {
 	vector<BYTE> byteBuf;
 	if (!this->getContent(byteBuf, offset, numChars, pErr)) {
@@ -504,7 +507,7 @@ bool file::Mapped::getContent(wstring& buf, int offset, int numChars, wstring *p
 
 	buf.resize(byteBuf.size());
 	for (size_t i = 0; i < byteBuf.size(); ++i) {
-		buf[i] = (wchar_t)byteBuf[i]; // raw conversion
+		buf[i] = static_cast<wchar_t>(byteBuf[i]); // raw conversion
 	}
 
 	if (pErr) pErr->clear();
@@ -512,9 +515,9 @@ bool file::Mapped::getContent(wstring& buf, int offset, int numChars, wstring *p
 }
 
 
-bool file::Text::load(const wchar_t *path, wstring *pErr)
+bool Text::load(const wchar_t *path, wstring *pErr)
 {
-	file::Mapped fm;
+	Mapped fm;
 	if (!fm.open(path, Access::READONLY, pErr)) {
 		return false;
 	}
@@ -522,7 +525,7 @@ bool file::Text::load(const wchar_t *path, wstring *pErr)
 	return this->load(fm);
 }
 
-bool file::Text::load(const file::Mapped& fm)
+bool Text::load(const Mapped& fm)
 {
 	BYTE *pMem = fm.pMem(); // file reading is made upon a memory-mapped file, load all into wstring
 	BYTE *pPast = fm.pPastMem();
@@ -574,7 +577,7 @@ bool file::Text::load(const file::Mapped& fm)
 	return true;
 }
 
-bool file::Text::nextLine(wstring& buf)
+bool Text::nextLine(wstring& buf)
 {
 	if (!*_p) return false; // runner pointer inside our _text String data block
 
@@ -599,14 +602,14 @@ bool file::Text::nextLine(wstring& buf)
 }
 
 
-bool file::Ini::load(wstring *pErr)
+bool Ini::load(wstring *pErr)
 {
 	if (_path.empty()) {
 		if (pErr) *pErr = L"INI path not set.";
 		return false;
 	}
 
-	file::Text fin;
+	Text fin;
 	if (!fin.load(_path, pErr)) {
 		if (pErr) pErr->insert(0, L"INI file failed to load.\n");
 		return false;
@@ -623,7 +626,7 @@ bool file::Ini::load(wstring *pErr)
 			this->sections.emplace(curSection, unordered_map<wstring, wstring>()); // new section added
 			continue;
 		}
-		if (this->sections.size() && line.length()) { // keys will be read only if within a section
+		if (!this->sections.empty() && !line.empty()) { // keys will be read only if within a section
 			int idxEq = str::Find(str::Sens::YES, line, L'=');
 			if (idxEq > -1) {
 				name.clear();
@@ -643,7 +646,7 @@ bool file::Ini::load(wstring *pErr)
 	return true;
 }
 
-bool file::Ini::serialize(wstring *pErr) const
+bool Ini::serialize(wstring *pErr) const
 {
 	if (_path.empty()) {
 		if (pErr) *pErr = L"INI path not set.";
@@ -660,7 +663,7 @@ bool file::Ini::serialize(wstring *pErr) const
 		out.append(L"\r\n");
 	}
 
-	if (!file::WriteUtf8(_path.c_str(), out.c_str(), pErr)) {
+	if (!WriteUtf8(_path.c_str(), out.c_str(), pErr)) {
 		if (pErr) pErr->insert(0, L"INI file serialization failed.\n");
 		return false;
 	}
@@ -669,7 +672,7 @@ bool file::Ini::serialize(wstring *pErr) const
 	return true;
 }
 
-int file::Ini::_countSections(file::Text *fin) const
+int Ini::_countSections(Text *fin) const
 {
 	int count = 0;
 	wstring line;
@@ -684,24 +687,23 @@ int file::Ini::_countSections(file::Text *fin) const
 }
 
 
-file::Listing::Listing(const wchar_t *pattern)
+Listing::Listing(const wchar_t *pattern)
 	: _hFind(nullptr)
 {
 	SecureZeroMemory(&_wfd, sizeof(_wfd));
 	_pattern = pattern; // example of pattern: L"*.mp3"
 }
 
-file::Listing::Listing(const wchar_t *path, const wchar_t *pattern)
+Listing::Listing(const wchar_t *path, const wchar_t *pattern)
 	: _hFind(nullptr)
 {
 	SecureZeroMemory(&_wfd, sizeof(_wfd));
-
 	_pattern = path;
 	if (path[lstrlen(path) - 1] != L'\\') _pattern.append(L"\\");
 	_pattern.append(pattern);
 }
 
-file::Listing::~Listing()
+Listing::~Listing()
 {
 	if (_hFind && _hFind != INVALID_HANDLE_VALUE) {
 		FindClose(_hFind);
@@ -709,7 +711,7 @@ file::Listing::~Listing()
 	}
 }
 
-bool file::Listing::next(wstring& buf)
+bool Listing::next(wstring& buf)
 {
 	if (!_hFind) { // first call to method
 		if ((_hFind = FindFirstFile(_pattern.c_str(), &_wfd)) == INVALID_HANDLE_VALUE) { // init iteration
@@ -734,7 +736,7 @@ bool file::Listing::next(wstring& buf)
 	return true; // more to come, call again
 }
 
-static vector<wstring> _ListingGetAll(file::Listing& listing)
+static vector<wstring> _ListingGetAll(Listing& listing)
 {
 	vector<wstring> ret;
 	wstring f;
@@ -747,12 +749,12 @@ static vector<wstring> _ListingGetAll(file::Listing& listing)
 	return ret;
 }
 
-vector<wstring> file::Listing::GetAll(const wchar_t *pattern)
+vector<wstring> Listing::GetAll(const wchar_t *pattern)
 {
 	return _ListingGetAll(Listing(pattern));
 }
 
-vector<wstring> file::Listing::GetAll(const wchar_t *path, const wchar_t *pattern)
+vector<wstring> Listing::GetAll(const wchar_t *path, const wchar_t *pattern)
 {
 	return _ListingGetAll(Listing(path, pattern));
 }

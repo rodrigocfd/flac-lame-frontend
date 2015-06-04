@@ -163,34 +163,35 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="c4w\Controls.cpp" />
-    <ClCompile Include="c4w\File.cpp" />
-    <ClCompile Include="c4w\Net.cpp" />
-    <ClCompile Include="c4w\Resources.cpp" />
-    <ClCompile Include="c4w\Str.cpp" />
-    <ClCompile Include="c4w\Sys.cpp" />
-    <ClCompile Include="c4w\Window.cpp" />
-    <ClCompile Include="c4w\WindowDialog.cpp" />
-    <ClCompile Include="c4w\WindowFrame.cpp" />
     <ClCompile Include="src\Convert.cpp" />
     <ClCompile Include="src\MainDialog.cpp" />
     <ClCompile Include="src\RunninDialog.cpp" />
+    <ClCompile Include="wolf\Ctrl.cpp" />
+    <ClCompile Include="wolf\File.cpp" />
+    <ClCompile Include="wolf\Net.cpp" />
+    <ClCompile Include="wolf\Res.cpp" />
+    <ClCompile Include="wolf\Str.cpp" />
+    <ClCompile Include="wolf\Sys.cpp" />
+    <ClCompile Include="wolf\Window.cpp" />
+    <ClCompile Include="wolf\WindowDialog.cpp" />
+    <ClCompile Include="wolf\WindowFrame.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="c4w\c4w.h" />
-    <ClInclude Include="c4w\Controls.h" />
-    <ClInclude Include="c4w\File.h" />
-    <ClInclude Include="c4w\Net.h" />
-    <ClInclude Include="c4w\Resources.h" />
-    <ClInclude Include="c4w\Str.h" />
-    <ClInclude Include="c4w\Sys.h" />
-    <ClInclude Include="c4w\Window.h" />
-    <ClInclude Include="c4w\WindowDialog.h" />
-    <ClInclude Include="c4w\WindowFrame.h" />
     <ClInclude Include="res\resource.h" />
     <ClInclude Include="src\Convert.h" />
     <ClInclude Include="src\MainDialog.h" />
     <ClInclude Include="src\RunninDialog.h" />
+    <ClInclude Include="wolf\Ctrl.h" />
+    <ClInclude Include="wolf\File.h" />
+    <ClInclude Include="wolf\Net.h" />
+    <ClInclude Include="wolf\Res.h" />
+    <ClInclude Include="wolf\Str.h" />
+    <ClInclude Include="wolf\Sys.h" />
+    <ClInclude Include="wolf\Window.h" />
+    <ClInclude Include="wolf\WindowDialog.h" />
+    <ClInclude Include="wolf\WindowEvent.h" />
+    <ClInclude Include="wolf\WindowFrame.h" />
+    <ClInclude Include="wolf\wolf.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\FlacLameFE.rc" />

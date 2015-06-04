@@ -1,8 +1,9 @@
 /*!
- * HWND wrapper.
- * Part of C4W - Classes for Win32.
+ * @file
+ * @brief HWND wrapper.
+ * @details Part of WOLF - Win32 Object Lambda Framework.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/c4w
+ * @see https://github.com/rodrigocfd/wolf
  */
 
 #include <algorithm>
@@ -22,7 +23,7 @@
   "processorArchitecture='*' " \
   "publicKeyToken='6595b64144ccf1df' " \
   "language='*'\"")
-using namespace c4w;
+using namespace wolf;
 using std::function;
 using std::vector;
 using std::wstring;
@@ -36,13 +37,14 @@ wstring Window::getText() const
 	return buf;
 }
 
-WindowPopup::~WindowPopup()
+
+WindowTopLevel::~WindowTopLevel()
 {
 }
 
 static HHOOK _hHookMsgBox = nullptr;
 static HWND  _hWndParent = nullptr;
-static LRESULT CALLBACK _msgBoxHookProc(int code, WPARAM wp, LPARAM lp)
+static LRESULT CALLBACK _MsgBoxHookProc(int code, WPARAM wp, LPARAM lp)
 {
 	// http://www.codeguru.com/cpp/w-p/win32/messagebox/print.php/c4541
 	if (code == HCBT_ACTIVATE)
@@ -82,12 +84,12 @@ static LRESULT CALLBACK _msgBoxHookProc(int code, WPARAM wp, LPARAM lp)
 	return CallNextHookEx(nullptr, code, wp, lp);
 }
 
-int WindowPopup::messageBox(const wchar_t *caption, const wchar_t *body, UINT uType)
+int WindowTopLevel::messageBox(const wstring& caption, const wstring& body, UINT uType)
 {
 	// The hook is set to center the message box window on parent.
 	_hWndParent = this->hWnd();
-	_hHookMsgBox = SetWindowsHookEx(WH_CBT, _msgBoxHookProc, nullptr, GetCurrentThreadId());
-	return MessageBox(this->hWnd(), body, caption, uType);
+	_hHookMsgBox = SetWindowsHookEx(WH_CBT, _MsgBoxHookProc, nullptr, GetCurrentThreadId());
+	return MessageBox(this->hWnd(), body.c_str(), caption.c_str(), uType);
 }
 
 static vector<wchar_t> _formatFileFilter(const wchar_t *filterWithPipes)
@@ -102,7 +104,7 @@ static vector<wchar_t> _formatFileFilter(const wchar_t *filterWithPipes)
 	return ret;
 }
 
-bool WindowPopup::getFileOpen(const wchar_t *filter, wstring& buf)
+bool WindowTopLevel::getFileOpen(const wchar_t *filter, wstring& buf)
 {
 	OPENFILENAME    ofn = { 0 };
 	wchar_t         tmpBuf[MAX_PATH] = { 0 };
@@ -121,7 +123,7 @@ bool WindowPopup::getFileOpen(const wchar_t *filter, wstring& buf)
 	return ret;
 }
 
-bool WindowPopup::getFileOpen(const wchar_t *filter, vector<wstring>& arrBuf)
+bool WindowTopLevel::getFileOpen(const wchar_t *filter, vector<wstring>& arrBuf)
 {
 	OPENFILENAME    ofn = { 0 };
 	vector<wchar_t> multiBuf(65536, L'\0'); // http://www.askjf.com/?q=2179s http://www.askjf.com/?q=2181s
@@ -179,7 +181,7 @@ bool WindowPopup::getFileOpen(const wchar_t *filter, vector<wstring>& arrBuf)
 	return false;
 }
 
-bool WindowPopup::getFileSave(const wchar_t *filter, wstring& buf, const wchar_t *defFile)
+bool WindowTopLevel::getFileSave(const wchar_t *filter, wstring& buf, const wchar_t *defFile)
 {
 	OPENFILENAME    ofn = { 0 };
 	wchar_t         tmpBuf[MAX_PATH] = { 0 };
@@ -201,7 +203,7 @@ bool WindowPopup::getFileSave(const wchar_t *filter, wstring& buf, const wchar_t
 	return ret;
 }
 
-bool WindowPopup::getFolderChoose(wstring& buf)
+bool WindowTopLevel::getFolderChoose(wstring& buf)
 {
 	CoInitialize(nullptr);
 
@@ -228,7 +230,7 @@ bool WindowPopup::getFolderChoose(wstring& buf)
 	return true;
 }
 
-void WindowPopup::setXButton(bool enable)
+void WindowTopLevel::setXButton(bool enable)
 {
 	// Enable/disable the X button to close the window; has no effect on Alt+F4.
 	HMENU hMenu = GetSystemMenu(this->hWnd(), FALSE);
@@ -238,7 +240,7 @@ void WindowPopup::setXButton(bool enable)
 	}
 }
 
-vector<wstring> WindowPopup::getDroppedFiles(HDROP hDrop)
+vector<wstring> WindowTopLevel::getDroppedFiles(HDROP hDrop)
 {
 	vector<wstring> files(DragQueryFile(hDrop, 0xFFFFFFFF, nullptr, 0));
 	for (size_t i = 0; i < files.size(); ++i) {
@@ -253,7 +255,7 @@ vector<wstring> WindowPopup::getDroppedFiles(HDROP hDrop)
 	return files;
 }
 
-static LRESULT CALLBACK _wheelHoverProc(HWND hChild, UINT msg, WPARAM wp, LPARAM lp, UINT_PTR idSubclass, DWORD_PTR refData)
+static LRESULT CALLBACK _WheelHoverProc(HWND hChild, UINT msg, WPARAM wp, LPARAM lp, UINT_PTR idSubclass, DWORD_PTR refData)
 {
 	switch (msg)
 	{
@@ -272,47 +274,50 @@ static LRESULT CALLBACK _wheelHoverProc(HWND hChild, UINT msg, WPARAM wp, LPARAM
 			break; // finally dispatch to default processing
 		}
 	case WM_NCDESTROY:
-		RemoveWindowSubclass(hChild, _wheelHoverProc, idSubclass); // http://blogs.msdn.com/b/oldnewthing/archive/2003/11/11/55653.aspx
+		RemoveWindowSubclass(hChild, _WheelHoverProc, idSubclass); // http://blogs.msdn.com/b/oldnewthing/archive/2003/11/11/55653.aspx
 	}
 	return DefSubclassProc(hChild, msg, wp, lp);
 }
 
-void WindowPopup::_setWheelHoverBehavior()
+void WindowTopLevel::_setWheelHoverBehavior()
 {
 	// http://stackoverflow.com/questions/18367641/use-createthread-with-a-lambda
 	EnumChildWindows(this->hWnd(), [](HWND hChild, LPARAM lp)->BOOL {
 		static int uniqueSubId = 1;
-		SetWindowSubclass(hChild, _wheelHoverProc, uniqueSubId++,
+		SetWindowSubclass(hChild, _WheelHoverProc, uniqueSubId++,
 			reinterpret_cast<DWORD_PTR>(GetParent(hChild)) ); // yes, subclass every control
 		return TRUE;
 	}, 0);
 }
 
 struct _CbPack { function<void()> cb; };
-void WindowPopup::_handleSendOrPostFunction(LPARAM lp)
+void WindowTopLevel::_handleOrigThread(LPARAM lp)
 {
 	// This method is called by FramePopup and DialogPopup wndprocs on their ordinary processing.
 	_CbPack *cbPack = reinterpret_cast<_CbPack*>(lp);
 	cbPack->cb(); // invoke user callback
-	delete cbPack; // allocated by _sendOrPostFunction()
+	delete cbPack; // allocated by _OrigThread()
 }
 
-void WindowPopup::_sendOrPostFunction(function<void()> callback, bool isSend)
+static void _OrigThread(function<void()> callback, HWND hw, UINT origThreadMsg, bool async)
 {
 	// This method is analog to Send/PostMessage, but intended to be called within a separated thread,
 	// so a callback function can, tunelled by wndproc, run in the same thread of the window, thus
 	// allowing GUI updates. This avoids the user to deal with a custom WM_ message.
-	_CbPack *cbPack = new _CbPack{ std::move(callback) }; // will be deleted by _handleSendOrPostFunction()
-	isSend ? this->sendMessage(SENDORPOSTMSG, 0, reinterpret_cast<LPARAM>(cbPack)) :
-		this->postMessage(SENDORPOSTMSG, 0, reinterpret_cast<LPARAM>(cbPack));
+	_CbPack *cbPack = new _CbPack{ std::move(callback) }; // will be deleted by _handleOrigThread()
+	async ? PostMessage(hw, origThreadMsg, 0, reinterpret_cast<LPARAM>(cbPack)) :
+		SendMessage(hw, origThreadMsg, 0, reinterpret_cast<LPARAM>(cbPack));
 }
 
+void WindowTopLevel::origThreadSync(std::function<void()> callback)  { _OrigThread(std::move(callback), this->hWnd(), _WM_ORIGTHREAD, false); }
+void WindowTopLevel::origThreadAsync(std::function<void()> callback) { _OrigThread(std::move(callback), this->hWnd(), _WM_ORIGTHREAD, true); }
 
-WindowCtrl::~WindowCtrl()
+
+WindowChild::~WindowChild()
 {
 }
 
-bool WindowCtrl::_drawBorders(WPARAM wp, LPARAM lp)
+bool WindowChild::_drawThemeBorders(WPARAM wp, LPARAM lp)
 {
 	// Intended to be called within WM_NCPAINT processing.
 	if ((GetWindowLongPtr(this->hWnd(), GWL_EXSTYLE) & WS_EX_CLIENTEDGE) && IsThemeActive())

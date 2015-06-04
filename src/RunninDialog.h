@@ -1,45 +1,40 @@
 
 #pragma once
-#include "../c4w/c4w.h"
-using namespace c4w;
-using std::wstring;
-using std::vector;
+#include "../wolf/wolf.h"
+#include "../res/resource.h"
 
-class RunninDialog final : public DialogModal {
+class RunninDialog final : public wolf::DialogModal {
 public:
 	enum class Target { NONE=0, MP3, FLAC, WAV };
-private:
-	Window                 m_lbl;
-	ProgressBar            m_prog;
-	int                    m_numThreads;
-	Target                 m_targetType;
-	const vector<wstring>& m_files;
-	bool                   m_delSrc;
-	bool                   m_isVbr;
-	const wstring&         m_quality;
-	const file::Ini&       m_ini;
-	const wstring&         m_destFolder;
-	int                    m_curFile, m_filesDone;
-	Date                   m_time0;
+
 public:
 	RunninDialog(
-		int                    numThreads,
-		Target                 targetType,
-		const vector<wstring>& files,
-		bool                   delSrc,
-		bool                   isVbr,
-		const wstring&         quality,
-		const file::Ini&       ini,
-		const wstring&         destFolder );
+		int                              numThreads,
+		Target                           targetType,
+		const std::vector<std::wstring>& files,
+		bool                             delSrc,
+		bool                             isVbr,
+		const std::wstring&              quality,
+		const wolf::file::Ini&           ini,
+		const std::wstring&              destFolder )
+			: DialogModal(DLG_RUNNIN),
+			_numThreads(numThreads), _targetType(targetType), _files(files), _delSrc(delSrc),
+			_isVbr(isVbr), _quality(quality), _ini(ini), _destFolder(destFolder), _curFile(0),
+			_filesDone(0) { }
 private:
-	void onInitDialog();
+	void events() override;
+	void _doProcessNextFile();
 
-	void doProcessNextFile();
-	
-	INT_PTR dlgProc(UINT msg, WPARAM wp, LPARAM lp) override {
-		switch (msg) {
-		case WM_INITDIALOG: onInitDialog(); break;
-		}
-		return DialogModal::dlgProc(msg, wp, lp);
-	}
+	wolf::Window                     _lbl;
+	wolf::ctrl::ProgressBar          _prog;
+	int                              _numThreads;
+	Target                           _targetType;
+	const std::vector<std::wstring>& _files;
+	bool                             _delSrc;
+	bool                             _isVbr;
+	const std::wstring&              _quality;
+	const wolf::file::Ini&           _ini;
+	const std::wstring&              _destFolder;
+	int                              _curFile, _filesDone;
+	wolf::res::Date                  _time0;
 };

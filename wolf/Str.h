@@ -1,8 +1,9 @@
 /*!
- * String and vector utilities.
- * Part of C4W - Classes for Win32.
+ * @file
+ * @brief String and vector utilities.
+ * @details Part of WOLF - Win32 Object Lambda Framework.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/c4w
+ * @see https://github.com/rodrigocfd/wolf
  */
 
 #pragma once
@@ -10,11 +11,12 @@
 #include <vector>
 #include <Windows.h>
 
-namespace c4w {
+namespace wolf {
 
 namespace str {
 	enum class Sens { YES, NO };
 
+	void Dbg(const wchar_t *fmt, ...);
 	inline std::wstring& TrimNulls(std::wstring& s) { if (!s.empty()) s.resize(::lstrlen(s.c_str())); return s; }
 	std::wstring  Sprintf(const wchar_t *fmt, ...);
 	std::wstring& Trim(std::wstring& s);
@@ -51,6 +53,8 @@ namespace str {
 
 namespace vec {
 	template<typename T> inline void Append(std::vector<T>& v, const std::vector<T>& other) { v.insert(v.end(), other.begin(), other.end()); }
+	template<typename T> inline void Remove(std::vector<T>& v, int idx)                     { v.erase(std::next(v.begin(), idx)); }
+	template<typename T> inline void Remove(std::vector<T>& v, int idxFirst, int idxLast)   { v.erase(std::next(v.begin(), idxFirst), std::next(v.begin(), idxLast + 1)); }
 	template<typename T> void ReposElem(std::vector<T>& v, size_t idx, size_t toIdx) {
 		if (idx == toIdx || idx >= v.size() || toIdx >= v.size()) return;
 		std::swap(v[idx], v[toIdx]);
@@ -59,4 +63,4 @@ namespace vec {
 	}
 }//namespace vec
 
-}//namespace c4w
+}//namespace wolf

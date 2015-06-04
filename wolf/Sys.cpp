@@ -1,8 +1,9 @@
 /*!
- * OS-related stuff.
- * Part of C4W - Classes for Win32.
+ * @file
+ * @brief OS-related stuff.
+ * @details Part of WOLF - Win32 Object Lambda Framework.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/c4w
+ * @see https://github.com/rodrigocfd/wolf
  */
 
 #pragma warning(disable:4996) // GetVersionEx is deprecated for Win8.1, won't affect current behaviour
@@ -11,7 +12,7 @@
 #include <process.h>
 #include <Shlobj.h>
 #pragma comment(lib, "Shell32.lib") // SHGetFolderPath
-using namespace c4w;
+using namespace wolf;
 using std::function;
 using std::wstring;
 
@@ -59,20 +60,6 @@ DWORD sys::Exec(const wchar_t *cmdLine)
 
 	free(cmdLine2);
 	return dwExitCode;
-}
-
-void sys::PopMenu(HWND hDlg, int popupMenuId, int x, int y, HWND hWndCoordsRelativeTo)
-{
-	// Shows a popup context menu, anchored at the given coordinates.
-	// The passed coordinates can be relative to any window.
-
-	HMENU hMenu = LoadMenu(GetModuleHandle(nullptr), MAKEINTRESOURCE(popupMenuId));
-	POINT ptDlg = { x, y }; // receives coordinates relative to hDlg
-	ClientToScreen(hWndCoordsRelativeTo ? hWndCoordsRelativeTo : hDlg, &ptDlg); // to screen coordinates
-	SetForegroundWindow(hDlg);
-	TrackPopupMenu(GetSubMenu(hMenu, 0), 0, ptDlg.x, ptDlg.y, 0, hDlg, nullptr); // owned by dialog, so messages go to it
-	PostMessage(hDlg, WM_NULL, 0, 0); // http://msdn.microsoft.com/en-us/library/ms648002%28VS.85%29.aspx
-	DestroyMenu(hMenu);
 }
 
 wstring sys::GetExePath()

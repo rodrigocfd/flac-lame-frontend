@@ -8,8 +8,8 @@
     <Filter Include="program">
       <UniqueIdentifier>{50bf2275-4a1e-43f5-80fa-3e4c89dab75d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="C4W">
-      <UniqueIdentifier>{63628a88-5296-4062-9264-55c5a89731b8}</UniqueIdentifier>
+    <Filter Include="WOLF">
+      <UniqueIdentifier>{2794f960-d0de-4a33-8372-b48e78584e5d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -22,32 +22,32 @@
     <ClCompile Include="src\Convert.cpp">
       <Filter>program</Filter>
     </ClCompile>
-    <ClCompile Include="c4w\Controls.cpp">
-      <Filter>C4W</Filter>
+    <ClCompile Include="wolf\File.cpp">
+      <Filter>WOLF</Filter>
     </ClCompile>
-    <ClCompile Include="c4w\File.cpp">
-      <Filter>C4W</Filter>
+    <ClCompile Include="wolf\Net.cpp">
+      <Filter>WOLF</Filter>
     </ClCompile>
-    <ClCompile Include="c4w\Net.cpp">
-      <Filter>C4W</Filter>
+    <ClCompile Include="wolf\Str.cpp">
+      <Filter>WOLF</Filter>
     </ClCompile>
-    <ClCompile Include="c4w\Resources.cpp">
-      <Filter>C4W</Filter>
+    <ClCompile Include="wolf\Sys.cpp">
+      <Filter>WOLF</Filter>
     </ClCompile>
-    <ClCompile Include="c4w\Str.cpp">
-      <Filter>C4W</Filter>
+    <ClCompile Include="wolf\Window.cpp">
+      <Filter>WOLF</Filter>
     </ClCompile>
-    <ClCompile Include="c4w\Sys.cpp">
-      <Filter>C4W</Filter>
+    <ClCompile Include="wolf\WindowDialog.cpp">
+      <Filter>WOLF</Filter>
     </ClCompile>
-    <ClCompile Include="c4w\Window.cpp">
-      <Filter>C4W</Filter>
+    <ClCompile Include="wolf\WindowFrame.cpp">
+      <Filter>WOLF</Filter>
     </ClCompile>
-    <ClCompile Include="c4w\WindowDialog.cpp">
-      <Filter>C4W</Filter>
+    <ClCompile Include="wolf\Ctrl.cpp">
+      <Filter>WOLF</Filter>
     </ClCompile>
-    <ClCompile Include="c4w\WindowFrame.cpp">
-      <Filter>C4W</Filter>
+    <ClCompile Include="wolf\Res.cpp">
+      <Filter>WOLF</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -63,35 +63,38 @@
     <ClInclude Include="src\Convert.h">
       <Filter>program</Filter>
     </ClInclude>
-    <ClInclude Include="c4w\Controls.h">
-      <Filter>C4W</Filter>
+    <ClInclude Include="wolf\File.h">
+      <Filter>WOLF</Filter>
     </ClInclude>
-    <ClInclude Include="c4w\File.h">
-      <Filter>C4W</Filter>
+    <ClInclude Include="wolf\Net.h">
+      <Filter>WOLF</Filter>
     </ClInclude>
-    <ClInclude Include="c4w\Net.h">
-      <Filter>C4W</Filter>
+    <ClInclude Include="wolf\Str.h">
+      <Filter>WOLF</Filter>
     </ClInclude>
-    <ClInclude Include="c4w\Resources.h">
-      <Filter>C4W</Filter>
+    <ClInclude Include="wolf\Sys.h">
+      <Filter>WOLF</Filter>
     </ClInclude>
-    <ClInclude Include="c4w\Str.h">
-      <Filter>C4W</Filter>
+    <ClInclude Include="wolf\Window.h">
+      <Filter>WOLF</Filter>
     </ClInclude>
-    <ClInclude Include="c4w\Sys.h">
-      <Filter>C4W</Filter>
+    <ClInclude Include="wolf\WindowDialog.h">
+      <Filter>WOLF</Filter>
     </ClInclude>
-    <ClInclude Include="c4w\Window.h">
-      <Filter>C4W</Filter>
+    <ClInclude Include="wolf\WindowEvent.h">
+      <Filter>WOLF</Filter>
     </ClInclude>
-    <ClInclude Include="c4w\WindowDialog.h">
-      <Filter>C4W</Filter>
+    <ClInclude Include="wolf\WindowFrame.h">
+      <Filter>WOLF</Filter>
     </ClInclude>
-    <ClInclude Include="c4w\WindowFrame.h">
-      <Filter>C4W</Filter>
+    <ClInclude Include="wolf\wolf.h">
+      <Filter>WOLF</Filter>
     </ClInclude>
-    <ClInclude Include="c4w\c4w.h">
-      <Filter>C4W</Filter>
+    <ClInclude Include="wolf\Ctrl.h">
+      <Filter>WOLF</Filter>
+    </ClInclude>
+    <ClInclude Include="wolf\Res.h">
+      <Filter>WOLF</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

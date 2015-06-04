@@ -1,8 +1,9 @@
 /*!
- * Automation for internet related operations.
- * Part of C4W - Classes for Win32.
+ * @file
+ * @brief Automation for internet operations.
+ * @details Part of WOLF - Win32 Object Lambda Framework.
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/c4w
+ * @see https://github.com/rodrigocfd/wolf
  */
 
 #pragma once
@@ -12,9 +13,10 @@
 #include <Windows.h>
 #include <winhttp.h>
 
-namespace c4w {
+namespace wolf {
 
 namespace net {
+	/// An internet session to be used for download operations.
 	class Session final {
 	private:
 		HINTERNET _hSession;
@@ -27,6 +29,7 @@ namespace net {
 		bool      init(std::wstring *pErr=nullptr, const wchar_t *userAgent=L"TOOLOW/1.0");
 	};
 
+	/// A single download operation.
 	class Download final {
 	private:
 		const Session&    _session;
@@ -61,6 +64,7 @@ namespace net {
 		bool _receiveBytes(UINT nBytesToRead, std::wstring *pErr=nullptr);
 	};
 
+	/// Cracks an URL into its components.
 	class Url final {
 	public:
 		bool           crack(const wchar_t *address, DWORD *dwErr=nullptr);
@@ -80,4 +84,4 @@ namespace net {
 	};
 }//namespace net
 
-}//namespace c4w
+}//namespace wolf
