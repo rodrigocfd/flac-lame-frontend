@@ -53,7 +53,7 @@ void RunninDialog::_doProcessNextFile()
 
 	if (!good) {
 		_curFile = static_cast<int>(_files.size()); // error, so avoid further processing
-		this->origThreadSync([&]() {
+		this->inOrigThread([&]() {
 			this->messageBox(L"Conversion failed",
 				str::Sprintf(L"File #%d:\n%s\n%s", index, file.c_str(), err.c_str()),
 				MB_ICONERROR);
@@ -62,7 +62,7 @@ void RunninDialog::_doProcessNextFile()
 	} else {
 		++_filesDone;
 
-		this->origThreadSync([&]() {
+		this->inOrigThread([&]() {
 			_prog.setPos(_filesDone);
 			_lbl.setText( str::Sprintf(L"%d of %d files finished...", _filesDone, _files.size()) );
 		});
@@ -70,7 +70,7 @@ void RunninDialog::_doProcessNextFile()
 		if (_filesDone < static_cast<int>(_files.size())) { // more files to come
 			this->_doProcessNextFile();
 		} else { // finished all processing
-			this->origThreadSync([&]() {
+			this->inOrigThread([&]() {
 				Date fin;
 				this->messageBox(L"Conversion finished",
 					str::Sprintf(L"%d files processed in %.2f seconds.",

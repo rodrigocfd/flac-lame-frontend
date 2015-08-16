@@ -11,9 +11,9 @@
 #include <Shlobj.h>
 #include <VsStyle.h>
 #include <UxTheme.h>
-#include "Str.h"
-#include "Sys.h"
-#include "Window.h"
+#include "str.h"
+#include "sys.h"
+#include "wnd.h"
 #pragma comment(lib, "UxTheme.lib")
 #pragma comment(lib, "Comctl32.lib")
 #pragma comment(linker, \
@@ -24,11 +24,19 @@
   "publicKeyToken='6595b64144ccf1df' " \
   "language='*'\"")
 using namespace wolf;
+using namespace wolf::wnd;
 using std::function;
 using std::vector;
 using std::wstring;
 
-wstring Window::getText() const
+Wnd& Wnd::create(const wchar_t *className, int id, const wchar_t *caption, Wnd *parent, DWORD exStyle, DWORD style, POINT pos, SIZE size, LPVOID lp)
+{
+	_hWnd = CreateWindowEx(exStyle, className, caption, style, pos.x, pos.y, size.cx, size.cy,
+		parent->hWnd(), reinterpret_cast<HMENU>(id), this->getInstance(), lp);
+	return *this;
+}
+
+wstring Wnd::getText() const
 {
 	int txtLen = GetWindowTextLength(_hWnd);
 	wstring buf(txtLen + 1, L'\0');
@@ -38,7 +46,7 @@ wstring Window::getText() const
 }
 
 
-WindowTopLevel::~WindowTopLevel()
+TopLevel::~TopLevel()
 {
 }
 
@@ -84,7 +92,7 @@ static LRESULT CALLBACK _MsgBoxHookProc(int code, WPARAM wp, LPARAM lp)
 	return CallNextHookEx(nullptr, code, wp, lp);
 }
 
-int WindowTopLevel::messageBox(const wstring& caption, const wstring& body, UINT uType)
+int TopLevel::messageBox(const wstring& caption, const wstring& body, UINT uType)
 {
 	// The hook is set to center the message box window on parent.
 	_hWndParent = this->hWnd();
@@ -104,7 +112,7 @@ static vector<wchar_t> _formatFileFilter(const wchar_t *filterWithPipes)
 	return ret;
 }
 
-bool WindowTopLevel::getFileOpen(const wchar_t *filter, wstring& buf)
+bool TopLevel::getFileOpen(const wchar_t *filter, wstring& buf)
 {
 	OPENFILENAME    ofn = { 0 };
 	wchar_t         tmpBuf[MAX_PATH] = { 0 };
@@ -123,7 +131,7 @@ bool WindowTopLevel::getFileOpen(const wchar_t *filter, wstring& buf)
 	return ret;
 }
 
-bool WindowTopLevel::getFileOpen(const wchar_t *filter, vector<wstring>& arrBuf)
+bool TopLevel::getFileOpen(const wchar_t *filter, vector<wstring>& arrBuf)
 {
 	OPENFILENAME    ofn = { 0 };
 	vector<wchar_t> multiBuf(65536, L'\0'); // http://www.askjf.com/?q=2179s http://www.askjf.com/?q=2181s
@@ -181,7 +189,7 @@ bool WindowTopLevel::getFileOpen(const wchar_t *filter, vector<wstring>& arrBuf)
 	return false;
 }
 
-bool WindowTopLevel::getFileSave(const wchar_t *filter, wstring& buf, const wchar_t *defFile)
+bool TopLevel::getFileSave(const wchar_t *filter, wstring& buf, const wchar_t *defFile)
 {
 	OPENFILENAME    ofn = { 0 };
 	wchar_t         tmpBuf[MAX_PATH] = { 0 };
@@ -203,7 +211,7 @@ bool WindowTopLevel::getFileSave(const wchar_t *filter, wstring& buf, const wcha
 	return ret;
 }
 
-bool WindowTopLevel::getFolderChoose(wstring& buf)
+bool TopLevel::getFolderChoose(wstring& buf)
 {
 	CoInitialize(nullptr);
 
@@ -230,7 +238,7 @@ bool WindowTopLevel::getFolderChoose(wstring& buf)
 	return true;
 }
 
-void WindowTopLevel::setXButton(bool enable)
+void TopLevel::setXButton(bool enable)
 {
 	// Enable/disable the X button to close the window; has no effect on Alt+F4.
 	HMENU hMenu = GetSystemMenu(this->hWnd(), FALSE);
@@ -240,7 +248,7 @@ void WindowTopLevel::setXButton(bool enable)
 	}
 }
 
-vector<wstring> WindowTopLevel::getDroppedFiles(HDROP hDrop)
+vector<wstring> TopLevel::getDroppedFiles(HDROP hDrop)
 {
 	vector<wstring> files(DragQueryFile(hDrop, 0xFFFFFFFF, nullptr, 0));
 	for (size_t i = 0; i < files.size(); ++i) {
@@ -279,7 +287,7 @@ static LRESULT CALLBACK _WheelHoverProc(HWND hChild, UINT msg, WPARAM wp, LPARAM
 	return DefSubclassProc(hChild, msg, wp, lp);
 }
 
-void WindowTopLevel::_setWheelHoverBehavior()
+void TopLevel::_setWheelHoverBehavior()
 {
 	// http://stackoverflow.com/questions/18367641/use-createthread-with-a-lambda
 	EnumChildWindows(this->hWnd(), [](HWND hChild, LPARAM lp)->BOOL {
@@ -291,33 +299,30 @@ void WindowTopLevel::_setWheelHoverBehavior()
 }
 
 struct _CbPack { function<void()> cb; };
-void WindowTopLevel::_handleOrigThread(LPARAM lp)
+void TopLevel::_handleOrigThread(LPARAM lp)
 {
 	// This method is called by FramePopup and DialogPopup wndprocs on their ordinary processing.
 	_CbPack *cbPack = reinterpret_cast<_CbPack*>(lp);
 	cbPack->cb(); // invoke user callback
-	delete cbPack; // allocated by _OrigThread()
+	delete cbPack; // allocated by inOrigThread()
 }
 
-static void _OrigThread(function<void()> callback, HWND hw, UINT origThreadMsg, bool async)
+void TopLevel::inOrigThread(std::function<void()> callback, bool synchronous)
 {
 	// This method is analog to Send/PostMessage, but intended to be called within a separated thread,
 	// so a callback function can, tunelled by wndproc, run in the same thread of the window, thus
 	// allowing GUI updates. This avoids the user to deal with a custom WM_ message.
 	_CbPack *cbPack = new _CbPack{ std::move(callback) }; // will be deleted by _handleOrigThread()
-	async ? PostMessage(hw, origThreadMsg, 0, reinterpret_cast<LPARAM>(cbPack)) :
-		SendMessage(hw, origThreadMsg, 0, reinterpret_cast<LPARAM>(cbPack));
+	synchronous ? this->sendMessage(_WM_ORIGTHREAD, 0, reinterpret_cast<LPARAM>(cbPack)) :
+		this->postMessage(_WM_ORIGTHREAD, 0, reinterpret_cast<LPARAM>(cbPack));
 }
 
-void WindowTopLevel::origThreadSync(std::function<void()> callback)  { _OrigThread(std::move(callback), this->hWnd(), _WM_ORIGTHREAD, false); }
-void WindowTopLevel::origThreadAsync(std::function<void()> callback) { _OrigThread(std::move(callback), this->hWnd(), _WM_ORIGTHREAD, true); }
 
-
-WindowChild::~WindowChild()
+Child::~Child()
 {
 }
 
-bool WindowChild::_drawThemeBorders(WPARAM wp, LPARAM lp)
+bool Child::_drawThemeBorders(WPARAM wp, LPARAM lp)
 {
 	// Intended to be called within WM_NCPAINT processing.
 	if ((GetWindowLongPtr(this->hWnd(), GWL_EXSTYLE) & WS_EX_CLIENTEDGE) && IsThemeActive())

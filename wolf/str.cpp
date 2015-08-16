@@ -1,13 +1,13 @@
 /*!
  * @file
- * @brief String and vector utilities.
+ * @brief String utilities.
  * @details Part of WOLF - Win32 Object Lambda Framework.
  * @author Rodrigo Cesar de Freitas Dias
  * @see https://github.com/rodrigocfd/wolf
  */
 
 #include <cwctype> // iswpace
-#include "Str.h"
+#include "str.h"
 #pragma warning(disable:4996) // _vsnwprintf
 using namespace wolf;
 using std::wstring;

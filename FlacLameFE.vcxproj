@@ -166,31 +166,32 @@
     <ClCompile Include="src\Convert.cpp" />
     <ClCompile Include="src\MainDialog.cpp" />
     <ClCompile Include="src\RunninDialog.cpp" />
-    <ClCompile Include="wolf\Ctrl.cpp" />
-    <ClCompile Include="wolf\File.cpp" />
-    <ClCompile Include="wolf\Net.cpp" />
-    <ClCompile Include="wolf\Res.cpp" />
-    <ClCompile Include="wolf\Str.cpp" />
-    <ClCompile Include="wolf\Sys.cpp" />
-    <ClCompile Include="wolf\Window.cpp" />
-    <ClCompile Include="wolf\WindowDialog.cpp" />
-    <ClCompile Include="wolf\WindowFrame.cpp" />
+    <ClCompile Include="wolf\ctrl.cpp" />
+    <ClCompile Include="wolf\file.cpp" />
+    <ClCompile Include="wolf\net.cpp" />
+    <ClCompile Include="wolf\res.cpp" />
+    <ClCompile Include="wolf\str.cpp" />
+    <ClCompile Include="wolf\sys.cpp" />
+    <ClCompile Include="wolf\wnd.cpp" />
+    <ClCompile Include="wolf\wnd_dialog.cpp" />
+    <ClCompile Include="wolf\wnd_window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="res\resource.h" />
     <ClInclude Include="src\Convert.h" />
     <ClInclude Include="src\MainDialog.h" />
     <ClInclude Include="src\RunninDialog.h" />
-    <ClInclude Include="wolf\Ctrl.h" />
-    <ClInclude Include="wolf\File.h" />
-    <ClInclude Include="wolf\Net.h" />
-    <ClInclude Include="wolf\Res.h" />
-    <ClInclude Include="wolf\Str.h" />
-    <ClInclude Include="wolf\Sys.h" />
-    <ClInclude Include="wolf\Window.h" />
-    <ClInclude Include="wolf\WindowDialog.h" />
-    <ClInclude Include="wolf\WindowEvent.h" />
-    <ClInclude Include="wolf\WindowFrame.h" />
+    <ClInclude Include="wolf\ctrl.h" />
+    <ClInclude Include="wolf\file.h" />
+    <ClInclude Include="wolf\net.h" />
+    <ClInclude Include="wolf\res.h" />
+    <ClInclude Include="wolf\str.h" />
+    <ClInclude Include="wolf\sys.h" />
+    <ClInclude Include="wolf\vec.h" />
+    <ClInclude Include="wolf\wnd.h" />
+    <ClInclude Include="wolf\wnd_dialog.h" />
+    <ClInclude Include="wolf\wnd_event.h" />
+    <ClInclude Include="wolf\wnd_window.h" />
     <ClInclude Include="wolf\wolf.h" />
   </ItemGroup>
   <ItemGroup>

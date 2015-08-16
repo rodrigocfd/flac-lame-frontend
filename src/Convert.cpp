@@ -36,7 +36,7 @@ bool Convert::ToWav(const file::Ini& ini, wstring src, wstring dest, bool delSrc
 		return false;
 	}
 
-	if (Cmp(Sens::NO, file::path::GetPath(src), dest)) { // destination folder is same of origin
+	if (Equals(Sens::NO, file::path::GetPath(src), dest)) { // destination folder is same of origin
 		dest = L"";
 	}
 
@@ -77,7 +77,7 @@ bool Convert::ToFlac(const file::Ini& ini, wstring src, wstring dest, bool delSr
 		return false;
 	}
 
-	if (Cmp(Sens::NO, file::path::GetPath(src), dest)) { // destination folder is same of origin
+	if (Equals(Sens::NO, file::path::GetPath(src), dest)) { // destination folder is same of origin
 		dest = L"";
 	}
 
@@ -128,7 +128,7 @@ bool Convert::ToMp3(const file::Ini& ini, wstring src, wstring dest, bool delSrc
 		return false;
 	}
 
-	if (Cmp(Sens::NO, file::path::GetPath(src), dest)) { // destination folder is same of origin
+	if (Equals(Sens::NO, file::path::GetPath(src), dest)) { // destination folder is same of origin
 		dest = L"";
 	}
 

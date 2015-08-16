@@ -6,10 +6,11 @@
  * @see https://github.com/rodrigocfd/wolf
  */
 
-#include "WindowDialog.h"
-#include "Str.h"
+#include "wnd_dialog.h"
+#include "str.h"
 using namespace wolf;
 using namespace wolf::res;
+using namespace wolf::wnd;
 
 Dialog::~Dialog()
 {
@@ -21,7 +22,7 @@ INT_PTR CALLBACK Dialog::_DialogProc(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 	if (msg == WM_INITDIALOG) {
 		pSelf = reinterpret_cast<Dialog*>(lp); // passed on CreateDialogParam() or DialogBoxParam()
 		SetWindowLongPtr(hdlg, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pSelf)); // store pointer to object into HWND room
-		*static_cast<Window*>(pSelf) = hdlg; // assign hWnd member
+		*static_cast<Wnd*>(pSelf) = hdlg; // assign hWnd member
 		pSelf->_onInitDialog(); // before user's
 	} else {
 		pSelf = reinterpret_cast<Dialog*>(GetWindowLongPtr(hdlg, GWLP_USERDATA)); // from HWND room, zero if not set yet
@@ -31,7 +32,7 @@ INT_PTR CALLBACK Dialog::_DialogProc(HWND hdlg, UINT msg, WPARAM wp, LPARAM lp)
 
 void Dialog::_internalEvents()
 {
-	WindowEventDialog::_internalEvents();
+	EventDialog::_internalEvents();
 }
 
 
@@ -61,18 +62,18 @@ void DialogTopLevel::_internalEvents()
 {
 	Dialog::_internalEvents();
 
-	this->onMessage(WindowTopLevel::_WM_ORIGTHREAD, [&](WPARAM wp, LPARAM lp)->INT_PTR {
+	this->onMessage(TopLevel::_WM_ORIGTHREAD, [&](WPARAM wp, LPARAM lp)->INT_PTR {
 		this->_handleOrigThread(lp); // for tunelling a callback from another thread
 		return TRUE;
 	});
 }
 
 
-DialogApp::~DialogApp()
+DialogMain::~DialogMain()
 {
 }
 
-int DialogApp::run(HINSTANCE hInst, int cmdShow)
+int DialogMain::run(HINSTANCE hInst, int cmdShow)
 {
 	InitCommonControls();
 	this->_internalEvents();
@@ -114,12 +115,12 @@ int DialogApp::run(HINSTANCE hInst, int cmdShow)
 	return static_cast<int>(msg.wParam); // this can be used as program return value
 }
 
-void DialogApp::_onInitDialog()
+void DialogMain::_onInitDialog()
 {
 	DialogTopLevel::_onInitDialog();
 }
 
-void DialogApp::_internalEvents()
+void DialogMain::_internalEvents()
 {
 	DialogTopLevel::_internalEvents();
 
@@ -139,7 +140,7 @@ DialogModal::~DialogModal()
 {
 }
 
-int DialogModal::show(Window *owner)
+int DialogModal::show(Wnd *owner)
 {
 	this->_internalEvents();
 	this->events(); // attach all user event messages
@@ -176,7 +177,7 @@ DialogChild::~DialogChild()
 {
 }
 
-void DialogChild::create(Window *parent, POINT pos, SIZE sz)
+void DialogChild::create(Wnd *parent, POINT pos, SIZE sz)
 {
 	// Dialog styles to be set on VS resource editor:
 	// - Border: none

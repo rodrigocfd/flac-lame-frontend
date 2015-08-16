@@ -6,8 +6,8 @@
  * @see https://github.com/rodrigocfd/wolf
  */
 
-#include "Net.h"
-#include "Str.h"
+#include "net.h"
+#include "str.h"
 #pragma comment(lib, "Winhttp.lib")
 using namespace wolf;
 using namespace wolf::net;

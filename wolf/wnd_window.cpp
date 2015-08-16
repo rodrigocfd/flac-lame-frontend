@@ -6,32 +6,33 @@
  * @see https://github.com/rodrigocfd/wolf
  */
 
-#include "WindowFrame.h"
-#include "Str.h"
+#include "wnd_window.h"
+#include "str.h"
 using namespace wolf;
 using namespace wolf::res;
+using namespace wolf::wnd;
 
-Frame::~Frame()
+Window::~Window()
 {
 }
 
-void Frame::invalidateRect(bool bgErase)
+void Window::invalidateRect(bool bgErase)
 {
 	InvalidateRect(this->hWnd(), 0, static_cast<BOOL>(bgErase));
 }
 
-LRESULT Frame::defWindowProc(UINT msg, WPARAM wp, LPARAM lp)
+LRESULT Window::defWindowProc(UINT msg, WPARAM wp, LPARAM lp)
 {
 	return DefWindowProc(this->hWnd(), msg, wp, lp);
 }
 
-ATOM Frame::Register(const wchar_t *className, int iconId, sys::Cursor cursor, sys::Color bg)
+ATOM Window::Register(const wchar_t *className, int iconId, sys::Cursor cursor, sys::Color bg)
 {
 	HINSTANCE hInst = GetModuleHandle(nullptr);
 	WNDCLASSEX wc = { 0 };
 
 	wc.cbSize        = sizeof(wc);
-	wc.lpfnWndProc   = Frame::_WindowProc;
+	wc.lpfnWndProc   = Window::_WindowProc;
 	wc.hInstance     = hInst;
 	wc.lpszClassName = className;
 	wc.hbrBackground = reinterpret_cast<HBRUSH>(static_cast<int>(bg) + 1); // http://www.newobjects.com/pages/ndl/alp%5Caf-sysColor.htm
@@ -49,15 +50,15 @@ ATOM Frame::Register(const wchar_t *className, int iconId, sys::Cursor cursor, s
 		atom;
 }
 
-LRESULT CALLBACK Frame::_WindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+LRESULT CALLBACK Window::_WindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	Frame *pSelf = nullptr; // in run-time, will be a pointer to the derived-most class
+	Window *pSelf = nullptr; // in run-time, will be a pointer to the derived-most class
 	if (msg == WM_NCCREATE) {
-		pSelf = reinterpret_cast<Frame*>((reinterpret_cast<CREATESTRUCT*>(lp))->lpCreateParams); // passed on CreateWindowEx()
+		pSelf = reinterpret_cast<Window*>((reinterpret_cast<CREATESTRUCT*>(lp))->lpCreateParams); // passed on CreateWindowEx()
 		SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pSelf)); // store pointer to object into HWND room
-		*static_cast<Window*>(pSelf) = hwnd; // assign hWnd member
+		*static_cast<Wnd*>(pSelf) = hwnd; // assign hWnd member
 	} else {
-		pSelf = reinterpret_cast<Frame*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // from HWND room, zero if not set yet
+		pSelf = reinterpret_cast<Window*>(GetWindowLongPtr(hwnd, GWLP_USERDATA)); // from HWND room, zero if not set yet
 	}
 
 	LRESULT ret = 0;
@@ -70,23 +71,17 @@ LRESULT CALLBACK Frame::_WindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	return ret;
 }
 
-void Frame::_internalEvents()
+void Window::_internalEvents()
 {
-	WindowEventFrame::_internalEvents();
+	EventWindow::_internalEvents();
 }
 
 
-FrameTopLevel::~FrameTopLevel()
+WindowTopLevel::~WindowTopLevel()
 {
 }
 
-Window FrameTopLevel::createChild(const wchar_t *className, int id, const wchar_t *caption, DWORD exStyle, DWORD style, POINT pos, SIZE size, LPVOID lp)
-{
-	return Window(CreateWindowEx(exStyle, className, caption, style, pos.x, pos.y, size.cx, size.cy,
-		this->hWnd(), reinterpret_cast<HMENU>(id), this->getInstance(), lp));
-}
-
-void FrameTopLevel::_onCreate()
+void WindowTopLevel::_onCreate()
 {
 	static Font hSysFont; // to be shared among all regular frame windows
 
@@ -102,9 +97,9 @@ void FrameTopLevel::_onCreate()
 	this->sendMessage(WM_INITDIALOG, 0, 0); // can be used to process stuff after the WM_CREATE default processing (font & focus)
 }
 
-void FrameTopLevel::_internalEvents()
+void WindowTopLevel::_internalEvents()
 {
-	Frame::_internalEvents();
+	Window::_internalEvents();
 
 	this->onMessage(WM_ACTIVATE, [&](WPARAM wp, LPARAM lp)->LRESULT {
 		if (!HIWORD(wp)) { // it not in minimized state
@@ -125,11 +120,11 @@ void FrameTopLevel::_internalEvents()
 }
 
 
-FrameApp::~FrameApp()
+WindowMain::~WindowMain()
 {
 }
 
-int FrameApp::run(HINSTANCE hInst, int cmdShow)
+int WindowMain::run(HINSTANCE hInst, int cmdShow)
 {
 	InitCommonControls();
 	this->_internalEvents();
@@ -168,14 +163,14 @@ int FrameApp::run(HINSTANCE hInst, int cmdShow)
 	return static_cast<int>(msg.wParam); // this can be used as program return value
 }
 
-void FrameApp::_onCreate()
+void WindowMain::_onCreate()
 {
-	FrameTopLevel::_onCreate();
+	WindowTopLevel::_onCreate();
 }
 
-void FrameApp::_internalEvents()
+void WindowMain::_internalEvents()
 {
-	FrameTopLevel::_internalEvents();
+	WindowTopLevel::_internalEvents();
 
 	this->onMessage(WM_DESTROY, [&](WPARAM wp, LPARAM lp)->LRESULT {
 		PostQuitMessage(0);
@@ -184,11 +179,11 @@ void FrameApp::_internalEvents()
 }
 
 
-FrameModal::~FrameModal()
+WindowModal::~WindowModal()
 {
 }
 
-void FrameModal::show(Window *owner)
+void WindowModal::show(Wnd *owner)
 {
 	this->_internalEvents();
 	this->events(); // attach all user event messages
@@ -230,14 +225,14 @@ void FrameModal::show(Window *owner)
 	}
 }
 
-void FrameModal::_onCreate()
+void WindowModal::_onCreate()
 {
-	FrameTopLevel::_onCreate();
+	WindowTopLevel::_onCreate();
 }
 
-void FrameModal::_internalEvents()
+void WindowModal::_internalEvents()
 {
-	FrameTopLevel::_internalEvents();
+	WindowTopLevel::_internalEvents();
 
 	this->onMessage(WM_CLOSE, [&](WPARAM wp, LPARAM lp)->LRESULT {
 		this->getParent().setEnable(true); // re-enable parent window
@@ -247,11 +242,11 @@ void FrameModal::_internalEvents()
 }
 
 
-FrameChild::~FrameChild()
+WindowChild::~WindowChild()
 {
 }
 
-void FrameChild::create(Window *parent, int ctrlId, POINT pos, SIZE sz)
+void WindowChild::create(Wnd *parent, int ctrlId, POINT pos, SIZE sz)
 {
 	this->_internalEvents();
 	this->events(); // attach all user event messages
@@ -267,23 +262,23 @@ void FrameChild::create(Window *parent, int ctrlId, POINT pos, SIZE sz)
 	}
 }
 
-void FrameChild::getScrollInfo(int fnBar, SCROLLINFO& si)
+void WindowChild::getScrollInfo(int fnBar, SCROLLINFO& si)
 {
 	GetScrollInfo(this->hWnd(), fnBar, &si);
 }
 
-int FrameChild::setScrollInfo(int fnBar, const SCROLLINFO& si, bool redraw)
+int WindowChild::setScrollInfo(int fnBar, const SCROLLINFO& si, bool redraw)
 {
 	return SetScrollInfo(this->hWnd(), fnBar, &si, static_cast<BOOL>(redraw));
 }
 
-void FrameChild::_onCreate()
+void WindowChild::_onCreate()
 {
 }
 
-void FrameChild::_internalEvents()
+void WindowChild::_internalEvents()
 {
-	Frame::_internalEvents();
+	Window::_internalEvents();
 
 	this->onMessage(WM_NCPAINT, [&](WPARAM wp, LPARAM lp)->LRESULT {
 		return this->_drawThemeBorders(wp, lp) ?

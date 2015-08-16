@@ -8,19 +8,20 @@
 
 #pragma once
 #include <unordered_map>
-#include "Window.h"
+#include "wnd.h"
 
 namespace wolf {
+namespace wnd {
 
 /// Base template to handle the window procedure, exposing lambdas to attach events.
 template<typename RET>
-class WindowEvent : virtual public Window {
+class Event : virtual public Wnd {
 private:
 	std::unordered_map<UINT, std::function<RET(WPARAM, LPARAM)>> _msgs;
 	std::unordered_map<WORD, std::function<RET()>> _cmdMsgs;
 	std::unordered_map<UINT_PTR, std::unordered_map<UINT, std::function<RET(NMHDR*)>>> _notifMsgs;
 public:
-	virtual ~WindowEvent() = 0;
+	virtual ~Event() = 0;
 protected:
 	virtual void events() = 0;
 	bool onMessage(UINT msg, std::function<RET(WPARAM, LPARAM)> callback);
@@ -35,18 +36,18 @@ private:
 
 
 /// Event handler for WNDPROC of regular (non-dialog) windows.
-class WindowEventFrame : public WindowEvent<LRESULT> {
+class EventWindow : public Event<LRESULT> {
 public:
-	virtual ~WindowEventFrame() = 0;
+	virtual ~EventWindow() = 0;
 private:
 	LRESULT _defProc(UINT msg, WPARAM wp, LPARAM lp) override;
 };
 
 
 /// Event handler for DLGPROC of dialog windows.
-class WindowEventDialog : public WindowEvent<INT_PTR> {
+class EventDialog : public Event<INT_PTR> {
 public:
-	virtual ~WindowEventDialog() = 0;
+	virtual ~EventDialog() = 0;
 private:
 	INT_PTR _defProc(UINT msg, WPARAM wp, LPARAM lp) override;
 };
@@ -55,27 +56,27 @@ private:
 // ----------------------------- Template implementation -------------------------------------------
 
 template<typename RET>
-WindowEvent<RET>::~WindowEvent() {
+Event<RET>::~Event() {
 }
 
 template<typename RET>
-bool WindowEvent<RET>::onMessage(UINT msg, std::function<RET(WPARAM, LPARAM)> callback) {
+bool Event<RET>::onMessage(UINT msg, std::function<RET(WPARAM, LPARAM)> callback) {
 	// Inserts a message handler; if already exists, does nothing and returns false;
 	return _msgs.emplace(msg, std::move(callback)).second;
 }
 
 template<typename RET>
-bool WindowEvent<RET>::onCommand(WORD cmd, std::function<RET()> callback) {
+bool Event<RET>::onCommand(WORD cmd, std::function<RET()> callback) {
 	return _cmdMsgs.emplace(cmd, std::move(callback)).second;
 }
 
 template<typename RET>
-bool WindowEvent<RET>::onNotify(UINT_PTR idFrom, UINT code, std::function<RET(NMHDR*)> callback) {
+bool Event<RET>::onNotify(UINT_PTR idFrom, UINT code, std::function<RET(NMHDR*)> callback) {
 	return _notifMsgs[idFrom].emplace(code, std::move(callback)).second;
 }
 
 template<typename RET>
-RET WindowEvent<RET>::_processMessage(UINT msg, WPARAM wp, LPARAM lp) {
+RET Event<RET>::_processMessage(UINT msg, WPARAM wp, LPARAM lp) {
 	auto itmsg = _msgs.find(msg);
 	if (itmsg != _msgs.end()) {
 		return itmsg->second(wp, lp); // invoke user callback
@@ -84,7 +85,7 @@ RET WindowEvent<RET>::_processMessage(UINT msg, WPARAM wp, LPARAM lp) {
 }
 
 template<typename RET>
-void WindowEvent<RET>::_internalEvents() {
+void Event<RET>::_internalEvents() {
 	// If user adds handler to one of these messages, it his responsability to deal with them.
 	this->onMessage(WM_COMMAND, [&](WPARAM wp, LPARAM lp)->RET {
 		auto itcmd = _cmdMsgs.find(LOWORD(wp));
@@ -107,20 +108,20 @@ void WindowEvent<RET>::_internalEvents() {
 }
 
 
-inline WindowEventFrame::~WindowEventFrame() {
+inline EventWindow::~EventWindow() {
 }
 
-inline LRESULT WindowEventFrame::_defProc(UINT msg, WPARAM wp, LPARAM lp) {
+inline LRESULT EventWindow::_defProc(UINT msg, WPARAM wp, LPARAM lp) {
 	return DefWindowProc(this->hWnd(), msg, wp, lp);
 }
 
 
-inline WindowEventDialog::~WindowEventDialog() {
+inline EventDialog::~EventDialog() {
 }
 
-inline INT_PTR WindowEventDialog::_defProc(UINT msg, WPARAM wp, LPARAM lp) {
+inline INT_PTR EventDialog::_defProc(UINT msg, WPARAM wp, LPARAM lp) {
 	return FALSE;
 }
 
-
+}//namespace wnd
 }//namespace wolf

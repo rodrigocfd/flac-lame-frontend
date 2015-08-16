@@ -22,31 +22,31 @@
     <ClCompile Include="src\Convert.cpp">
       <Filter>program</Filter>
     </ClCompile>
-    <ClCompile Include="wolf\File.cpp">
+    <ClCompile Include="wolf\ctrl.cpp">
       <Filter>WOLF</Filter>
     </ClCompile>
-    <ClCompile Include="wolf\Net.cpp">
+    <ClCompile Include="wolf\file.cpp">
       <Filter>WOLF</Filter>
     </ClCompile>
-    <ClCompile Include="wolf\Str.cpp">
+    <ClCompile Include="wolf\net.cpp">
       <Filter>WOLF</Filter>
     </ClCompile>
-    <ClCompile Include="wolf\Sys.cpp">
+    <ClCompile Include="wolf\res.cpp">
       <Filter>WOLF</Filter>
     </ClCompile>
-    <ClCompile Include="wolf\Window.cpp">
+    <ClCompile Include="wolf\str.cpp">
       <Filter>WOLF</Filter>
     </ClCompile>
-    <ClCompile Include="wolf\WindowDialog.cpp">
+    <ClCompile Include="wolf\sys.cpp">
       <Filter>WOLF</Filter>
     </ClCompile>
-    <ClCompile Include="wolf\WindowFrame.cpp">
+    <ClCompile Include="wolf\wnd.cpp">
       <Filter>WOLF</Filter>
     </ClCompile>
-    <ClCompile Include="wolf\Ctrl.cpp">
+    <ClCompile Include="wolf\wnd_dialog.cpp">
       <Filter>WOLF</Filter>
     </ClCompile>
-    <ClCompile Include="wolf\Res.cpp">
+    <ClCompile Include="wolf\wnd_window.cpp">
       <Filter>WOLF</Filter>
     </ClCompile>
   </ItemGroup>
@@ -63,37 +63,40 @@
     <ClInclude Include="src\Convert.h">
       <Filter>program</Filter>
     </ClInclude>
-    <ClInclude Include="wolf\File.h">
+    <ClInclude Include="wolf\ctrl.h">
       <Filter>WOLF</Filter>
     </ClInclude>
-    <ClInclude Include="wolf\Net.h">
+    <ClInclude Include="wolf\file.h">
       <Filter>WOLF</Filter>
     </ClInclude>
-    <ClInclude Include="wolf\Str.h">
+    <ClInclude Include="wolf\net.h">
       <Filter>WOLF</Filter>
     </ClInclude>
-    <ClInclude Include="wolf\Sys.h">
+    <ClInclude Include="wolf\res.h">
       <Filter>WOLF</Filter>
     </ClInclude>
-    <ClInclude Include="wolf\Window.h">
+    <ClInclude Include="wolf\str.h">
       <Filter>WOLF</Filter>
     </ClInclude>
-    <ClInclude Include="wolf\WindowDialog.h">
+    <ClInclude Include="wolf\sys.h">
       <Filter>WOLF</Filter>
     </ClInclude>
-    <ClInclude Include="wolf\WindowEvent.h">
+    <ClInclude Include="wolf\vec.h">
       <Filter>WOLF</Filter>
     </ClInclude>
-    <ClInclude Include="wolf\WindowFrame.h">
+    <ClInclude Include="wolf\wnd.h">
+      <Filter>WOLF</Filter>
+    </ClInclude>
+    <ClInclude Include="wolf\wnd_dialog.h">
+      <Filter>WOLF</Filter>
+    </ClInclude>
+    <ClInclude Include="wolf\wnd_event.h">
+      <Filter>WOLF</Filter>
+    </ClInclude>
+    <ClInclude Include="wolf\wnd_window.h">
       <Filter>WOLF</Filter>
     </ClInclude>
     <ClInclude Include="wolf\wolf.h">
-      <Filter>WOLF</Filter>
-    </ClInclude>
-    <ClInclude Include="wolf\Ctrl.h">
-      <Filter>WOLF</Filter>
-    </ClInclude>
-    <ClInclude Include="wolf\Res.h">
       <Filter>WOLF</Filter>
     </ClInclude>
   </ItemGroup>

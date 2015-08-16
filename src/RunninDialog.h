@@ -3,7 +3,7 @@
 #include "../wolf/wolf.h"
 #include "../res/resource.h"
 
-class RunninDialog final : public wolf::DialogModal {
+class RunninDialog final : public wolf::wnd::DialogModal {
 public:
 	enum class Target { NONE=0, MP3, FLAC, WAV };
 
@@ -25,7 +25,7 @@ private:
 	void events() override;
 	void _doProcessNextFile();
 
-	wolf::Window                     _lbl;
+	wolf::wnd::Wnd                   _lbl;
 	wolf::ctrl::ProgressBar          _prog;
 	int                              _numThreads;
 	Target                           _targetType;

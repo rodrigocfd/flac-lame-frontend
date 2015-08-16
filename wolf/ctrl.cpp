@@ -6,17 +6,18 @@
  * @see https://github.com/rodrigocfd/wolf
  */
 
-#include "Ctrl.h"
-#include "Sys.h"
+#include "ctrl.h"
+#include "sys.h"
 using namespace wolf;
 using namespace wolf::ctrl;
 using namespace wolf::res;
+using namespace wolf::wnd;
 using std::function;
 using std::initializer_list;
 using std::vector;
 using std::wstring;
 
-Resizer& Resizer::add(initializer_list<int> ctrlIds, Window *parent, Do modeHorz, Do modeVert)
+Resizer& Resizer::add(initializer_list<int> ctrlIds, Wnd *parent, Do modeHorz, Do modeVert)
 {
 	_ctrls.reserve(_ctrls.size() + ctrlIds.size());
 	for (const int& ctrlId : ctrlIds) {
@@ -25,18 +26,18 @@ Resizer& Resizer::add(initializer_list<int> ctrlIds, Window *parent, Do modeHorz
 	return *this;
 }
 
-Resizer& Resizer::add(initializer_list<Window> children, Do modeHorz, Do modeVert)
+Resizer& Resizer::add(initializer_list<Wnd> children, Do modeHorz, Do modeVert)
 {
 	_ctrls.reserve(_ctrls.size() + children.size());
-	for (const Window child : children) {
+	for (const Wnd child : children) {
 		this->_addOne(child, modeHorz, modeVert);
 	}
 	return *this;
 }
 
-void Resizer::_addOne(Window ctrl, Do modeHorz, Do modeVert)
+void Resizer::_addOne(Wnd ctrl, Do modeHorz, Do modeVert)
 {
-	Window parent = ctrl.getParent();
+	Wnd parent = ctrl.getParent();
 
 	if (_ctrls.empty()) { // first call to _addOne()
 		RECT rcP = parent.getClientRect();
@@ -95,237 +96,6 @@ LRESULT CALLBACK Resizer::_Proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, UINT_
 		RemoveWindowSubclass(hWnd, _Proc, idSubclass); // http://blogs.msdn.com/b/oldnewthing/archive/2003/11/11/55653.aspx
 	}
 	return DefSubclassProc(hWnd, msg, wp, lp);
-}
-
-
-TextBox& TextBox::operator=(HWND hwnd)
-{
-	const int IDSUBCLASS = 1;
-
-	if (this->hWnd()) { // remove any previous subclassing of us, will be reassigned
-		RemoveWindowSubclass(this->hWnd(), _Proc, IDSUBCLASS);
-	}
-
-	static_cast<Window*>(this)->operator=(hwnd);
-	_notifyKeyUp = 0;
-	SetWindowSubclass(this->hWnd(), _Proc, IDSUBCLASS, reinterpret_cast<DWORD_PTR>(this));
-	return *this;
-}
-
-TextBox& TextBox::create(Window *parent, int id, POINT pos, int cx, UINT extraStyles)
-{
-	this->operator=( CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, nullptr,
-		WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL | extraStyles,
-		pos.x, pos.y, cx, 21,
-		parent->hWnd(), reinterpret_cast<HMENU>(id), parent->getInstance(), nullptr) );
-	return *this;
-}
-
-TextBox& TextBox::setFont(const Font& font)
-{
-	// Call this method within WM_SHOWWINDOW processing.
-	// If called during WM_INITDIALOG, it will be undone during default processing.
-
-	_font.cloneFrom(font); // since it's cloned, user font may be safely deleted
-	_font.apply(hWnd());
-	return *this;
-}
-
-void TextBox::selGet(int *start, int *length)
-{
-	int p1 = 0;
-	this->sendMessage(EM_GETSEL, reinterpret_cast<WPARAM>(start), reinterpret_cast<LPARAM>(&p1));
-	*length = p1 - (*start);
-}
-
-LRESULT CALLBACK TextBox::_Proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, UINT_PTR idSubclass, DWORD_PTR refData)
-{
-	TextBox *pSelf = reinterpret_cast<TextBox*>(refData);
-
-	switch (msg)
-	{
-	case WM_KEYDOWN:
-		// http://www.williamwilling.com/blog/?p=28
-		switch (LOWORD(wp))
-		{
-		case VK_ESCAPE: // ESC
-			SendMessage(GetAncestor(hWnd, GA_PARENT), WM_COMMAND, IDCANCEL, reinterpret_cast<LPARAM>(hWnd));
-			return 0;
-		}
-		break;
-	case WM_GETDLGCODE:
-		if (lp && wp == 'A' && sys::HasCtrl()) { // Ctrl+A to select all text
-			reinterpret_cast<MSG*>(lp)->wParam = 0; // prevent propagation, therefore beep
-			SendMessage(hWnd, EM_SETSEL, 0, -1);
-			return DLGC_WANTCHARS;
-		}
-		break;
-	case WM_KEYUP:
-		if (pSelf->_onKeyUp) pSelf->_onKeyUp(static_cast<WORD>(wp));
-		break;
-	case WM_NCDESTROY:
-		RemoveWindowSubclass(hWnd, _Proc, idSubclass);
-	}
-	return DefSubclassProc(hWnd, msg, wp, lp);
-}
-
-
-Combo& Combo::create(Window *parent, int id, POINT pos, int cx)
-{
-	this->operator=( CreateWindowEx(0, WC_COMBOBOX, nullptr,
-		WS_CHILD | WS_VISIBLE | WS_TABSTOP | CBS_DROPDOWNLIST | CBS_SORT,
-		pos.x, pos.y, cx, 0,
-		parent->hWnd(), reinterpret_cast<HMENU>(id), parent->getInstance(), nullptr) );
-	return *this;
-}
-
-Combo& Combo::itemAdd(initializer_list<const wchar_t*> arrStr)
-{
-	for (const wchar_t *s : arrStr) {
-		this->sendMessage(CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(s));
-	}
-	return *this;
-}
-
-wchar_t* Combo::itemGetText(int i, wchar_t *pBuf, int szBuf) const
-{
-	int len = static_cast<int>(this->sendMessage(CB_GETLBTEXTLEN, i, 0)) + 1;
-	if (szBuf < len) {
-		*pBuf = L'\0'; // buffer is too small
-	} else {
-		this->sendMessage(CB_GETLBTEXT, i, reinterpret_cast<LPARAM>(pBuf));
-	}
-	return pBuf;
-}
-
-wstring Combo::itemGetText(int i) const
-{
-	int txtLen = static_cast<int>(this->sendMessage(CB_GETLBTEXTLEN, i, 0));
-	wstring buf(txtLen + 1, L'\0');
-	this->sendMessage(CB_GETLBTEXT, i, reinterpret_cast<LPARAM>(&buf[0]));
-	buf.resize(txtLen);
-	return buf;
-}
-
-
-ListBox& ListBox::create(Window *parent, int id, POINT pos, SIZE size)
-{
-	this->operator=( CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTBOX, nullptr,
-		WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-		pos.x, pos.y, size.cx, size.cy,
-		parent->hWnd(), reinterpret_cast<HMENU>(id), parent->getInstance(), nullptr) );
-	return *this;
-}
-
-ListBox& ListBox::itemAdd(initializer_list<const wchar_t*> arrStr)
-{
-	for (const wchar_t *s : arrStr) {
-		this->sendMessage(LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(s));
-	}
-	return *this;
-}
-
-int ListBox::itemCountSelected() const
-{
-	int cou = static_cast<int>(this->sendMessage(LB_GETSELCOUNT, 0, 0));
-	if (cou == LB_ERR) { // we have a single-selection listbox, zero or one items can be selected
-		return (this->sendMessage(LB_GETCURSEL, 0, 0) == LB_ERR) ? 0 : 1;
-	}
-	return cou;
-}
-
-int ListBox::itemGetSelected(vector<int> *indexesBuf) const
-{
-	if (indexesBuf) {
-		indexesBuf->clear();
-		indexesBuf->resize(this->itemCountSelected());
-		LRESULT gsi = this->sendMessage(LB_GETSELITEMS, static_cast<WPARAM>(indexesBuf->size()),
-			reinterpret_cast<LPARAM>(&(*indexesBuf)[0]) );
-		if (gsi == LB_ERR) {
-			if (indexesBuf->size() > 0) { // a single-selection listbox
-				(*indexesBuf)[0] = static_cast<int>(this->sendMessage(LB_GETCURSEL, 0, 0));
-			}
-		}
-		return indexesBuf->size() > 0 ? (*indexesBuf)[0] : -1;
-	}
-	return static_cast<int>(this->sendMessage(LB_GETCURSEL, 0, 0)); // will work for single-selection listbox only
-}
-
-wchar_t* ListBox::itemGetText(int i, wchar_t *pBuf, int szBuf) const
-{
-	int len = static_cast<int>(this->sendMessage(LB_GETTEXTLEN, i, 0)) + 1;
-	if (szBuf < len) {
-		*pBuf = L'\0'; // buffer is too small
-	} else {
-		this->sendMessage(LB_GETTEXT, i, reinterpret_cast<LPARAM>(pBuf));
-	}
-	return pBuf;
-}
-
-wstring ListBox::itemGetText(int i) const
-{
-	int txtLen = static_cast<int>(this->sendMessage(LB_GETTEXTLEN, i, 0));
-	wstring buf(txtLen + 1, L'\0');
-	this->sendMessage(LB_GETTEXT, i, reinterpret_cast<LPARAM>(&buf[0]));
-	buf.resize(txtLen);
-	return buf;
-}
-
-
-Radio& Radio::create(Window *parent, int id, const wchar_t *caption, bool beginGroup, POINT pos, SIZE size)
-{
-	this->operator=( CreateWindowEx(0, WC_BUTTON, caption,
-		WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON | (beginGroup ? WS_GROUP : 0),
-		pos.x, pos.y, size.cx, size.cy,
-		parent->hWnd(), reinterpret_cast<HMENU>(id), parent->getInstance(), nullptr) );
-	return *this;
-}
-
-void Radio::setCheck(bool checked, Radio::EmulateClick emulateClick)
-{
-	this->sendMessage(BM_SETCHECK, checked ? BST_CHECKED : BST_UNCHECKED, 0);
-	if (emulateClick == EmulateClick::YES)
-		this->getParent().sendMessage(WM_COMMAND,
-			MAKEWPARAM(GetDlgCtrlID(this->hWnd()), 0),
-			reinterpret_cast<LPARAM>(this->hWnd()) );
-}
-
-
-CheckBox& CheckBox::create(Window *parent, int id, const wchar_t *caption, POINT pos, SIZE size)
-{
-	this->operator=( CreateWindowEx(0, WC_BUTTON, caption,
-		WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
-		pos.x, pos.y, size.cx, size.cy,
-		parent->hWnd(), reinterpret_cast<HMENU>(id), parent->getInstance(), nullptr) );
-	return *this;
-}
-
-
-ProgressBar& ProgressBar::create(Window *parent, int id, POINT pos, SIZE size)
-{
-	this->operator=( CreateWindowEx(0, PROGRESS_CLASS, nullptr,
-		WS_CHILD | WS_VISIBLE,
-		pos.x, pos.y, size.cx, size.cy,
-		parent->hWnd(), reinterpret_cast<HMENU>(id), parent->getInstance(), nullptr) );
-	return *this;
-}
-
-ProgressBar& ProgressBar::animateMarquee(bool animate)
-{
-	if (animate) {
-		SetWindowLongPtr(this->hWnd(), GWL_STYLE, // set this on resource editor won't work
-			GetWindowLongPtr(this->hWnd(), GWL_STYLE) | PBS_MARQUEE);
-	}
-	
-	this->sendMessage(PBM_SETMARQUEE, static_cast<WPARAM>(animate), 0);
-	
-	// http://stackoverflow.com/questions/23686724/how-to-reset-marquee-progress-bar
-	if (!animate) {
-		SetWindowLongPtr(this->hWnd(), GWL_STYLE,
-			GetWindowLongPtr(this->hWnd(), GWL_STYLE) & ~PBS_MARQUEE);
-	}
-	
-	return *this;
 }
 
 
@@ -421,6 +191,237 @@ void StatusBar::_putParts(int cx)
 	}
 
 	_sb.sendMessage(SB_SETPARTS, _rightEdges.size(), reinterpret_cast<LPARAM>(&_rightEdges[0]));
+}
+
+
+TextBox& TextBox::operator=(HWND hwnd)
+{
+	const int IDSUBCLASS = 1;
+
+	if (this->hWnd()) { // remove any previous subclassing of us, will be reassigned
+		RemoveWindowSubclass(this->hWnd(), _Proc, IDSUBCLASS);
+	}
+
+	static_cast<Wnd*>(this)->operator=(hwnd);
+	_notifyKeyUp = 0;
+	SetWindowSubclass(this->hWnd(), _Proc, IDSUBCLASS, reinterpret_cast<DWORD_PTR>(this));
+	return *this;
+}
+
+TextBox& TextBox::create(Wnd *parent, int id, POINT pos, int cx, UINT extraStyles)
+{
+	this->operator=( CreateWindowEx(WS_EX_CLIENTEDGE, WC_EDIT, nullptr,
+		WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_AUTOHSCROLL | extraStyles,
+		pos.x, pos.y, cx, 21,
+		parent->hWnd(), reinterpret_cast<HMENU>(id), parent->getInstance(), nullptr) );
+	return *this;
+}
+
+TextBox& TextBox::setFont(const Font& font)
+{
+	// Call this method within WM_SHOWWINDOW processing.
+	// If called during WM_INITDIALOG, it will be undone during default processing.
+
+	_font.cloneFrom(font); // since it's cloned, user font may be safely deleted
+	_font.apply(hWnd());
+	return *this;
+}
+
+void TextBox::selGet(int *start, int *length)
+{
+	int p1 = 0;
+	this->sendMessage(EM_GETSEL, reinterpret_cast<WPARAM>(start), reinterpret_cast<LPARAM>(&p1));
+	*length = p1 - (*start);
+}
+
+LRESULT CALLBACK TextBox::_Proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, UINT_PTR idSubclass, DWORD_PTR refData)
+{
+	TextBox *pSelf = reinterpret_cast<TextBox*>(refData);
+
+	switch (msg)
+	{
+	case WM_KEYDOWN:
+		// http://www.williamwilling.com/blog/?p=28
+		switch (LOWORD(wp))
+		{
+		case VK_ESCAPE: // ESC
+			SendMessage(GetAncestor(hWnd, GA_PARENT), WM_COMMAND, IDCANCEL, reinterpret_cast<LPARAM>(hWnd));
+			return 0;
+		}
+		break;
+	case WM_GETDLGCODE:
+		if (lp && wp == 'A' && sys::HasCtrl()) { // Ctrl+A to select all text
+			reinterpret_cast<MSG*>(lp)->wParam = 0; // prevent propagation, therefore beep
+			SendMessage(hWnd, EM_SETSEL, 0, -1);
+			return DLGC_WANTCHARS;
+		}
+		break;
+	case WM_KEYUP:
+		if (pSelf->_onKeyUp) pSelf->_onKeyUp(static_cast<WORD>(wp));
+		break;
+	case WM_NCDESTROY:
+		RemoveWindowSubclass(hWnd, _Proc, idSubclass);
+	}
+	return DefSubclassProc(hWnd, msg, wp, lp);
+}
+
+
+Combo& Combo::create(Wnd *parent, int id, POINT pos, int cx)
+{
+	this->operator=( CreateWindowEx(0, WC_COMBOBOX, nullptr,
+		WS_CHILD | WS_VISIBLE | WS_TABSTOP | CBS_DROPDOWNLIST | CBS_SORT,
+		pos.x, pos.y, cx, 0,
+		parent->hWnd(), reinterpret_cast<HMENU>(id), parent->getInstance(), nullptr) );
+	return *this;
+}
+
+Combo& Combo::itemAdd(initializer_list<const wchar_t*> arrStr)
+{
+	for (const wchar_t *s : arrStr) {
+		this->sendMessage(CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(s));
+	}
+	return *this;
+}
+
+wchar_t* Combo::itemGetText(int i, wchar_t *pBuf, int szBuf) const
+{
+	int len = static_cast<int>(this->sendMessage(CB_GETLBTEXTLEN, i, 0)) + 1;
+	if (szBuf < len) {
+		*pBuf = L'\0'; // buffer is too small
+	} else {
+		this->sendMessage(CB_GETLBTEXT, i, reinterpret_cast<LPARAM>(pBuf));
+	}
+	return pBuf;
+}
+
+wstring Combo::itemGetText(int i) const
+{
+	int txtLen = static_cast<int>(this->sendMessage(CB_GETLBTEXTLEN, i, 0));
+	wstring buf(txtLen + 1, L'\0');
+	this->sendMessage(CB_GETLBTEXT, i, reinterpret_cast<LPARAM>(&buf[0]));
+	buf.resize(txtLen);
+	return buf;
+}
+
+
+ListBox& ListBox::create(Wnd *parent, int id, POINT pos, SIZE size)
+{
+	this->operator=( CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTBOX, nullptr,
+		WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+		pos.x, pos.y, size.cx, size.cy,
+		parent->hWnd(), reinterpret_cast<HMENU>(id), parent->getInstance(), nullptr) );
+	return *this;
+}
+
+ListBox& ListBox::itemAdd(initializer_list<const wchar_t*> arrStr)
+{
+	for (const wchar_t *s : arrStr) {
+		this->sendMessage(LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(s));
+	}
+	return *this;
+}
+
+int ListBox::itemCountSelected() const
+{
+	int cou = static_cast<int>(this->sendMessage(LB_GETSELCOUNT, 0, 0));
+	if (cou == LB_ERR) { // we have a single-selection listbox, zero or one items can be selected
+		return (this->sendMessage(LB_GETCURSEL, 0, 0) == LB_ERR) ? 0 : 1;
+	}
+	return cou;
+}
+
+int ListBox::itemGetSelected(vector<int> *indexesBuf) const
+{
+	if (indexesBuf) {
+		indexesBuf->clear();
+		indexesBuf->resize(this->itemCountSelected());
+		LRESULT gsi = this->sendMessage(LB_GETSELITEMS, static_cast<WPARAM>(indexesBuf->size()),
+			reinterpret_cast<LPARAM>(&(*indexesBuf)[0]) );
+		if (gsi == LB_ERR) {
+			if (indexesBuf->size() > 0) { // a single-selection listbox
+				(*indexesBuf)[0] = static_cast<int>(this->sendMessage(LB_GETCURSEL, 0, 0));
+			}
+		}
+		return indexesBuf->size() > 0 ? (*indexesBuf)[0] : -1;
+	}
+	return static_cast<int>(this->sendMessage(LB_GETCURSEL, 0, 0)); // will work for single-selection listbox only
+}
+
+wchar_t* ListBox::itemGetText(int i, wchar_t *pBuf, int szBuf) const
+{
+	int len = static_cast<int>(this->sendMessage(LB_GETTEXTLEN, i, 0)) + 1;
+	if (szBuf < len) {
+		*pBuf = L'\0'; // buffer is too small
+	} else {
+		this->sendMessage(LB_GETTEXT, i, reinterpret_cast<LPARAM>(pBuf));
+	}
+	return pBuf;
+}
+
+wstring ListBox::itemGetText(int i) const
+{
+	int txtLen = static_cast<int>(this->sendMessage(LB_GETTEXTLEN, i, 0));
+	wstring buf(txtLen + 1, L'\0');
+	this->sendMessage(LB_GETTEXT, i, reinterpret_cast<LPARAM>(&buf[0]));
+	buf.resize(txtLen);
+	return buf;
+}
+
+
+Radio& Radio::create(Wnd *parent, int id, const wchar_t *caption, bool beginGroup, POINT pos, SIZE size)
+{
+	this->operator=( CreateWindowEx(0, WC_BUTTON, caption,
+		WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTORADIOBUTTON | (beginGroup ? WS_GROUP : 0),
+		pos.x, pos.y, size.cx, size.cy,
+		parent->hWnd(), reinterpret_cast<HMENU>(id), parent->getInstance(), nullptr) );
+	return *this;
+}
+
+void Radio::setCheck(bool checked, Radio::EmulateClick emulateClick)
+{
+	this->sendMessage(BM_SETCHECK, checked ? BST_CHECKED : BST_UNCHECKED, 0);
+	if (emulateClick == EmulateClick::YES)
+		this->getParent().sendMessage(WM_COMMAND,
+			MAKEWPARAM(GetDlgCtrlID(this->hWnd()), 0),
+			reinterpret_cast<LPARAM>(this->hWnd()) );
+}
+
+
+CheckBox& CheckBox::create(Wnd *parent, int id, const wchar_t *caption, POINT pos, SIZE size)
+{
+	this->operator=( CreateWindowEx(0, WC_BUTTON, caption,
+		WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
+		pos.x, pos.y, size.cx, size.cy,
+		parent->hWnd(), reinterpret_cast<HMENU>(id), parent->getInstance(), nullptr) );
+	return *this;
+}
+
+
+ProgressBar& ProgressBar::create(Wnd *parent, int id, POINT pos, SIZE size)
+{
+	this->operator=( CreateWindowEx(0, PROGRESS_CLASS, nullptr,
+		WS_CHILD | WS_VISIBLE,
+		pos.x, pos.y, size.cx, size.cy,
+		parent->hWnd(), reinterpret_cast<HMENU>(id), parent->getInstance(), nullptr) );
+	return *this;
+}
+
+ProgressBar& ProgressBar::animateMarquee(bool animate)
+{
+	if (animate) {
+		SetWindowLongPtr(this->hWnd(), GWL_STYLE, // set this on resource editor won't work
+			GetWindowLongPtr(this->hWnd(), GWL_STYLE) | PBS_MARQUEE);
+	}
+	
+	this->sendMessage(PBM_SETMARQUEE, static_cast<WPARAM>(animate), 0);
+	
+	// http://stackoverflow.com/questions/23686724/how-to-reset-marquee-progress-bar
+	if (!animate) {
+		SetWindowLongPtr(this->hWnd(), GWL_STYLE,
+			GetWindowLongPtr(this->hWnd(), GWL_STYLE) & ~PBS_MARQUEE);
+	}
+	
+	return *this;
 }
 
 
@@ -619,14 +620,14 @@ ListView& ListView::operator=(HWND hwnd)
 		RemoveWindowSubclass(this->hWnd(), _Proc, IDSUBCLASS);
 	}
 
-	static_cast<Window*>(this)->operator=(hwnd);
+	static_cast<Wnd*>(this)->operator=(hwnd);
 	SetWindowSubclass(this->hWnd(), _Proc, IDSUBCLASS, reinterpret_cast<DWORD_PTR>(this));
 	items = ItemsProxy(this); // initialize internal object
 	contextMenu.destroy();
 	return *this;
 }
 
-ListView& ListView::create(Window *parent, int id, POINT pos, SIZE size)
+ListView& ListView::create(Wnd *parent, int id, POINT pos, SIZE size)
 {
 	this->operator=( CreateWindowEx(WS_EX_CLIENTEDGE, WC_LISTVIEW, nullptr,
 		WS_CHILD | WS_VISIBLE | WS_TABSTOP | LVS_REPORT,

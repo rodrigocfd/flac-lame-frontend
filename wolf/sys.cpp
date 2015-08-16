@@ -7,8 +7,8 @@
  */
 
 #pragma warning(disable:4996) // GetVersionEx is deprecated for Win8.1, won't affect current behaviour
-#include "Sys.h"
-#include "Str.h"
+#include "sys.h"
+#include "str.h"
 #include <process.h>
 #include <Shlobj.h>
 #pragma comment(lib, "Shell32.lib") // SHGetFolderPath

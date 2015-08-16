@@ -3,9 +3,9 @@
 #include "../wolf/wolf.h"
 #include "../res/resource.h"
 
-class MainDialog final : public wolf::DialogApp {
+class MainDialog final : public wolf::wnd::DialogMain {
 public:
-	MainDialog() : DialogApp(DLG_MAIN, ICO_MAIN) { }
+	MainDialog() : DialogMain(DLG_MAIN, ICO_MAIN) { }
 private:
 	void events() override;
 	INT_PTR _doUpdateCounter(int newCount);
