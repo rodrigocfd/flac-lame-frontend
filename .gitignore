@@ -7,4 +7,5 @@ Release/
 *.sdf
 *.suo
 *.user
+*.VC.opendb
 TODO.txt

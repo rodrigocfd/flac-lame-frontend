@@ -3,207 +3,206 @@
 using namespace wolf;
 using std::wstring;
 
-bool Convert::PathsAreValid(const file::Ini& ini, wstring *pErr)
+bool Convert::pathsAreValid(const FileIni& ini, wstring *pErr)
 {
-	if ( ini.sections.find(L"Tools") == ini.sections.end() ||
-		ini.sections.at(L"Tools").find(L"lame") == ini.sections.at(L"Tools").end() ||
-		ini.sections.at(L"Tools").find(L"flac") == ini.sections.at(L"Tools").end() )
-	{
+	if (!ini.hasKey(L"Tools", L"lame") || !ini.hasKey(L"Tools", L"flac")) {
 		if (pErr) *pErr = L"INI file doesn't have the right entries.";
 		return false;
 	}
 
 	// Search for FLAC and LAME tools.
-	if (!file::Exists(ini.sections.at(L"Tools").at(L"lame"))) {
-		if (pErr) *pErr = str::Sprintf(L"Could not find LAME tool at:\n%s", ini.sections.at(L"Tools").at(L"lame").c_str());
+	if (!File::exists( ini.val(L"Tools", L"lame") )) {
+		if (pErr) *pErr = Str::format(L"Could not find LAME tool at:\n%s", ini.val(L"Tools", L"lame").c_str());
 		return false;
 	}
-	if (!file::Exists(ini.sections.at(L"Tools").at(L"flac"))) {
-		if (pErr) *pErr = str::Sprintf(L"Could not find FLAC tool at:\n%s", ini.sections.at(L"Tools").at(L"lame").c_str());
+	if (!File::exists( ini.val(L"Tools", L"flac") )) {
+		if (pErr) *pErr = Str::format(L"Could not find FLAC tool at:\n%s", ini.val(L"Tools", L"lame").c_str());
 		return false;
 	}
 
 	// All good.
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 
-bool Convert::ToWav(const file::Ini& ini, wstring src, wstring dest, bool delSrc, wstring *pErr)
+bool Convert::toWav(const FileIni& ini, wstring src, wstring dest, bool delSrc, wstring *pErr)
 {
-	using namespace str;
-
-	if (!_CheckDestFolder(dest, pErr)) {
+	if (!_checkDestFolder(dest, pErr)) {
 		return false;
 	}
 
-	if (Equals(Sens::NO, file::path::GetPath(src), dest)) { // destination folder is same of origin
-		dest = L"";
+	if (Str::eqI(Str::folderFromPath(src), dest)) { // destination folder is same of origin
+		dest.clear();
 	}
 
 	wstring cmdLine;
-	if (EndsWith(Sens::NO, src, L".mp3")) {
-		cmdLine = Sprintf(L"\"%s\" --decode \"%s\"",
-			ini.sections.at(L"Tools").at(L"lame").c_str(), src.c_str());
-	} else if (EndsWith(Sens::NO, src, L".flac")) {
-		cmdLine = Sprintf(L"\"%s\" -d \"%s\"",
-			ini.sections.at(L"Tools").at(L"flac").c_str(), src.c_str());
+	if (Str::endsWithI(src, L".mp3")) {
+		cmdLine = Str::format(L"\"%s\" --decode \"%s\"",
+			ini.val(L"Tools", L"lame").c_str(), src.c_str());
+	} else if (Str::endsWithI(src, L".flac")) {
+		cmdLine = Str::format(L"\"%s\" -d \"%s\"",
+			ini.val(L"Tools", L"flac").c_str(), src.c_str());
 		if (!dest.empty()) {
 			cmdLine.append(L" -o"); // different destination folder requires flag
 		}
 	} else {
-		if (pErr) *pErr = Sprintf(L"Not a FLAC/MP3: %s\n", src.c_str());
+		if (pErr) *pErr = Str::format(L"Not a FLAC/MP3: %s\n", src.c_str());
 		return false;
 	}
 
 	if (!dest.empty()) { // different destination folder
 		wstring destWavPath(src);
-		file::path::ChangeExtension(destWavPath, L"wav");
-		cmdLine.append( Sprintf(L" \"%s\\%s\"",
-			dest.c_str(), file::path::GetFilename(destWavPath).c_str()) );
+		_changeExtension(destWavPath, L"wav");
+		cmdLine.append( Str::format(L" \"%s\\%s\"",
+			dest.c_str(), Str::fileFromPath(destWavPath).c_str()) );
 	}
 
-	if (!_Execute(cmdLine, src, delSrc, pErr)) {
+	if (!_execute(cmdLine, src, delSrc, pErr)) {
 		return false;
 	}
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 	
-bool Convert::ToFlac(const file::Ini& ini, wstring src, wstring dest, bool delSrc, const wstring& quality, wstring *pErr)
+bool Convert::toFlac(const FileIni& ini, wstring src, wstring dest, bool delSrc, const wstring& quality, wstring *pErr)
 {
-	using namespace str;
-
-	if (!_CheckDestFolder(dest, pErr)) {
+	if (!_checkDestFolder(dest, pErr)) {
 		return false;
 	}
 
-	if (Equals(Sens::NO, file::path::GetPath(src), dest)) { // destination folder is same of origin
-		dest = L"";
+	if (Str::eqI(Str::folderFromPath(src), dest)) { // destination folder is same of origin
+		dest.clear();
 	}
 
-	if (EndsWith(Sens::NO, src, L".flac") || EndsWith(Sens::NO, src, L".mp3")) { // needs intermediary WAV conversion
-		if (EndsWith(Sens::NO, src, L".mp3")) {
-			if (!ToWav(ini, src, dest, delSrc, pErr)) { // send WAV straight to new folder, if any
+	if (Str::endsWithI(src, L".flac") || Str::endsWithI(src, L".mp3")) { // needs intermediary WAV conversion
+		if (Str::endsWithI(src, L".mp3")) {
+			if (!toWav(ini, src, dest, delSrc, pErr)) { // send WAV straight to new folder, if any
 				return false;
 			}
-		} else if (EndsWith(Sens::NO,src, L".flac")) {
-			ToWav(ini, src, dest, // send WAV straight to new folder, if any
+		} else if (Str::endsWithI(src, L".flac")) {
+			toWav(ini, src, dest, // send WAV straight to new folder, if any
 				dest.empty() ? true : delSrc, // if same destination folder, then delete source (will be replaced)
 				pErr);
 		}
 
 		if (!dest.empty()) { // different destination folder
-			src = Sprintf(L"%s\\%s", dest.c_str(), file::path::GetFilename(src).c_str());
-			dest = L"";
+			src = Str::format(L"%s\\%s", dest.c_str(), Str::fileFromPath(src).c_str());
+			dest.clear();
 		}
 
-		file::path::ChangeExtension(src, L"wav"); // our source is now a WAV
+		_changeExtension(src, L"wav"); // our source is now a WAV
 		delSrc = true; // delete the WAV at end
-	} else if (!EndsWith(Sens::NO, src, L".wav")) {
-		if (pErr) *pErr = Sprintf(L"Not a FLAC/WAV: %s\n", src.c_str());
+	} else if (!Str::endsWithI(src, L".wav")) {
+		if (pErr) *pErr = Str::format(L"Not a FLAC/WAV: %s\n", src.c_str());
 		return false;
 	}
 
-	wstring cmdLine = Sprintf(L"\"%s\" -%s -V --no-seektable \"%s\"",
-		ini.sections.at(L"Tools").at(L"flac").c_str(), quality.c_str(), src.c_str());
+	wstring cmdLine = Str::format(L"\"%s\" -%s -V --no-seektable \"%s\"",
+		ini.val(L"Tools", L"flac").c_str(), quality.c_str(), src.c_str());
 
 	if (!dest.empty()) { // different destination folder
 		wstring destFlacPath(src);
-		file::path::ChangeExtension(src, L"flac");
-		cmdLine.append( Sprintf(L" -o \"%s\\%s\"", dest.c_str(), file::path::GetFilename(destFlacPath).c_str()) );
+		_changeExtension(src, L"flac");
+		cmdLine.append( Str::format(L" -o \"%s\\%s\"",
+			dest.c_str(), Str::fileFromPath(destFlacPath).c_str()) );
 	}
 
-	if (!_Execute(cmdLine, src, delSrc, pErr)) {
+	if (!_execute(cmdLine, src, delSrc, pErr)) {
 		return false;
 	}
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 	
-bool Convert::ToMp3(const file::Ini& ini, wstring src, wstring dest, bool delSrc, const wstring& quality, bool isVbr, wstring *pErr)
+bool Convert::toMp3(const FileIni& ini, wstring src, wstring dest, bool delSrc, const wstring& quality, bool isVbr, wstring *pErr)
 {
-	using namespace str;
-
-	if (!_CheckDestFolder(dest, pErr)) {
+	if (!_checkDestFolder(dest, pErr)) {
 		return false;
 	}
 
-	if (Equals(Sens::NO, file::path::GetPath(src), dest)) { // destination folder is same of origin
-		dest = L"";
+	if (Str::eqI(Str::folderFromPath(src), dest)) { // destination folder is same of origin
+		dest.clear();
 	}
 
-	if (EndsWith(Sens::NO, src, L".flac") || EndsWith(Sens::NO, src, L".mp3")) { // needs intermediary WAV conversion
-		if (EndsWith(Sens::NO, src, L".flac")) {
-			if (!ToWav(ini, src, dest, delSrc, pErr)) { // send WAV straight to new folder, if any
+	if (Str::endsWithI(src, L".flac") || Str::endsWithI(src, L".mp3")) { // needs intermediary WAV conversion
+		if (Str::endsWithI(src, L".flac")) {
+			if (!toWav(ini, src, dest, delSrc, pErr)) { // send WAV straight to new folder, if any
 				return false;
 			}
-		} else if (EndsWith(Sens::NO, src, L".mp3")) {
-			if (!ToWav(ini, src, dest, // send WAV straight to new folder, if any
+		} else if (Str::endsWithI(src, L".mp3")) {
+			if (!toWav(ini, src, dest, // send WAV straight to new folder, if any
 				dest.empty() ? true : delSrc, // if same destination folder, then delete source (will be replaced)
 				pErr))
 				return false;
 		}
 
 		if (!dest.empty()) { // different destination folder
-			src = Sprintf(L"%s\\%s", dest.c_str(), file::path::GetFilename(src).c_str());
-			dest = L"";
+			src = Str::format(L"%s\\%s", dest.c_str(), Str::fileFromPath(src).c_str());
+			dest.clear();
 		}
 
-		file::path::ChangeExtension(src, L"wav"); // our source is now a WAV
+		_changeExtension(src, L"wav"); // our source is now a WAV
 		delSrc = true; // delete the WAV at end
-	} else if (!EndsWith(Sens::NO,src, L".wav")) {
-		if (pErr) *pErr = Sprintf(L"Not a FLAC/MP3/WAV: %s\n", src.c_str());
+	} else if (!Str::endsWithI(src, L".wav")) {
+		if (pErr) *pErr = Str::format(L"Not a FLAC/MP3/WAV: %s\n", src.c_str());
 		return false;
 	}
 
-	wstring cmdLine = Sprintf(L"\"%s\" -%s%s --noreplaygain \"%s\"",
-		ini.sections.at(L"Tools").at(L"lame").c_str(), (isVbr ? L"V" : L"b"), quality.c_str(), src.c_str());
+	wstring cmdLine = Str::format(L"\"%s\" -%s%s --noreplaygain \"%s\"",
+		ini.val(L"Tools", L"lame").c_str(), (isVbr ? L"V" : L"b"), quality.c_str(), src.c_str());
 
 	if (!dest.empty()) { // different destination folder
 		wstring destMp3Path(src);
-		file::path::ChangeExtension(src, L"mp3");
-		cmdLine.append( Sprintf(L" \"%s\\%s\"",
-			dest.c_str(), file::path::GetFilename(destMp3Path).c_str()) );
+		_changeExtension(src, L"mp3");
+		cmdLine.append( Str::format(L" \"%s\\%s\"",
+			dest.c_str(), Str::fileFromPath(destMp3Path).c_str()) );
 	}
 
-	if (!_Execute(cmdLine, src, delSrc, pErr)) {
+	if (!_execute(cmdLine, src, delSrc, pErr)) {
 		return false;
 	}
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }
 
-bool Convert::_CheckDestFolder(wstring& dest, wstring *pErr)
+void Convert::_changeExtension(wstring& filePath, const wchar_t *newExtensionWithoutDot)
+{
+	filePath.resize(filePath.find_last_of(L'.') + 1); // truncate after the dot
+	filePath.append(newExtensionWithoutDot);
+}
+
+bool Convert::_checkDestFolder(wstring& dest, wstring *pErr)
 {
 	if (dest.empty()) {
 		return true; // same destination of source file, it's OK
 	}
-	if (!file::IsDir(dest)) {
-		if (pErr) *pErr = str::Sprintf(L"Destination is not a folder:\n%s", dest.c_str());
+	if (!File::isDir(dest)) {
+		if (pErr) *pErr = Str::format(L"Destination is not a folder:\n%s", dest.c_str());
 		return false;
 	}
-
-	file::path::TrimBackslash(dest);
-	if (pErr) *pErr = L"";
+	if (dest.back() == L'\\') {
+		dest.resize(dest.size() - 1); // trim leading backslash, if any
+	}
+	if (pErr) pErr->clear();
 	return true;
 }
 
-bool Convert::_Execute(const wstring& cmdLine, const wstring& src, bool delSrc, wstring *pErr)
+bool Convert::_execute(const wstring& cmdLine, const wstring& src, bool delSrc, wstring *pErr)
 {
 #ifdef _DEBUG
 	// Debug summary of operations about to be performed.
-	str::Dbg(L"Run %s\n", cmdLine.c_str());
+	OutputDebugString( Str::format(L"Run %s\n", cmdLine.c_str()).c_str() );
 	if (delSrc) {
-		str::Dbg(L"Del %s\n", src.c_str());
+		OutputDebugString( Str::format(L"Del %s\n", src.c_str()).c_str() );
 	}
 #endif
 
-	sys::Exec(cmdLine); // run tool
+	Sys::exec(cmdLine); // run tool
 	if (delSrc) {
-		if (!file::Delete(src, pErr)) { // delete source file
+		if (!File::del(src, pErr)) { // delete source file
 			return false;
 		}
 	}
-	if (pErr) *pErr = L"";
+	if (pErr) pErr->clear();
 	return true;
 }

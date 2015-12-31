@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
-    <ProjectConfiguration Include="Debug|x64">
-      <Configuration>Debug</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
@@ -19,50 +19,53 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{2E3AC49F-23E9-4297-8212-141087565357}</ProjectGuid>
+    <ProjectGuid>{ACB16ED1-C7B2-49D8-AFC3-90E49B87DCF8}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>FlacLameFE</RootNamespace>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120_xp</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
-    <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
-  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  <ImportGroup Label="Shared">
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
@@ -85,11 +88,6 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
-      <StringPooling>true</StringPooling>
-      <ExceptionHandling>Sync</ExceptionHandling>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-      <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -102,12 +100,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
-      <StringPooling>true</StringPooling>
-      <ExceptionHandling>Sync</ExceptionHandling>
-      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
-      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -123,19 +116,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
       <DebugInformationFormat>None</DebugInformationFormat>
-      <StringPooling>true</StringPooling>
-      <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-      <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>No</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -146,59 +134,96 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>None</DebugInformationFormat>
-      <StringPooling>true</StringPooling>
-      <ExceptionHandling>Sync</ExceptionHandling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
-      <RuntimeTypeInfo>false</RuntimeTypeInfo>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>No</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Convert.cpp" />
-    <ClCompile Include="src\MainDialog.cpp" />
-    <ClCompile Include="src\RunninDialog.cpp" />
-    <ClCompile Include="wolf\ctrl.cpp" />
-    <ClCompile Include="wolf\file.cpp" />
-    <ClCompile Include="wolf\net.cpp" />
-    <ClCompile Include="wolf\res.cpp" />
-    <ClCompile Include="wolf\str.cpp" />
-    <ClCompile Include="wolf\sys.cpp" />
-    <ClCompile Include="wolf\wnd.cpp" />
-    <ClCompile Include="wolf\wnd_dialog.cpp" />
-    <ClCompile Include="wolf\wnd_window.cpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="res\resource.h" />
     <ClInclude Include="src\Convert.h" />
-    <ClInclude Include="src\MainDialog.h" />
-    <ClInclude Include="src\RunninDialog.h" />
-    <ClInclude Include="wolf\ctrl.h" />
-    <ClInclude Include="wolf\file.h" />
-    <ClInclude Include="wolf\net.h" />
-    <ClInclude Include="wolf\res.h" />
-    <ClInclude Include="wolf\str.h" />
-    <ClInclude Include="wolf\sys.h" />
-    <ClInclude Include="wolf\vec.h" />
-    <ClInclude Include="wolf\wnd.h" />
-    <ClInclude Include="wolf\wnd_dialog.h" />
-    <ClInclude Include="wolf\wnd_event.h" />
-    <ClInclude Include="wolf\wnd_window.h" />
+    <ClInclude Include="src\WndMain.h" />
+    <ClInclude Include="src\WndRunnin.h" />
+    <ClInclude Include="wolf\CheckBox.h" />
+    <ClInclude Include="wolf\ComboBox.h" />
+    <ClInclude Include="wolf\DateTime.h" />
+    <ClInclude Include="wolf\File.h" />
+    <ClInclude Include="wolf\FileIni.h" />
+    <ClInclude Include="wolf\FileMap.h" />
+    <ClInclude Include="wolf\Font.h" />
+    <ClInclude Include="wolf\Icon.h" />
+    <ClInclude Include="wolf\InternetDownload.h" />
+    <ClInclude Include="wolf\InternetSession.h" />
+    <ClInclude Include="wolf\InternetUrl.h" />
+    <ClInclude Include="wolf\ListView.h" />
+    <ClInclude Include="wolf\Menu.h" />
+    <ClInclude Include="wolf\ProgressBar.h" />
+    <ClInclude Include="wolf\RadioButton.h" />
+    <ClInclude Include="wolf\Resizer.h" />
+    <ClInclude Include="wolf\StatusBar.h" />
+    <ClInclude Include="wolf\Str.h" />
+    <ClInclude Include="wolf\Sys.h" />
+    <ClInclude Include="wolf\TaskBarProgress.h" />
+    <ClInclude Include="wolf\Window.h" />
+    <ClInclude Include="wolf\WindowControl.h" />
+    <ClInclude Include="wolf\WindowDialogTemplate.h" />
+    <ClInclude Include="wolf\WindowGuiThread.h" />
+    <ClInclude Include="wolf\WindowMain.h" />
+    <ClInclude Include="wolf\WindowModal.h" />
+    <ClInclude Include="wolf\WindowMsgHandler.h" />
+    <ClInclude Include="wolf\WindowParent.h" />
+    <ClInclude Include="wolf\WindowProc.h" />
+    <ClInclude Include="wolf\WindowSubclass.h" />
+    <ClInclude Include="wolf\WindowTopLevel.h" />
     <ClInclude Include="wolf\wolf.h" />
+    <ClInclude Include="wolf\Xml.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\Ron Burgundy.ico" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\FlacLameFE.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="res\Ron Burgundy.ico" />
+    <ClCompile Include="src\Convert.cpp" />
+    <ClCompile Include="src\WndMain.cpp" />
+    <ClCompile Include="src\WndRunnin.cpp" />
+    <ClCompile Include="wolf\CheckBox.cpp" />
+    <ClCompile Include="wolf\ComboBox.cpp" />
+    <ClCompile Include="wolf\DateTime.cpp" />
+    <ClCompile Include="wolf\File.cpp" />
+    <ClCompile Include="wolf\FileIni.cpp" />
+    <ClCompile Include="wolf\FileMap.cpp" />
+    <ClCompile Include="wolf\Font.cpp" />
+    <ClCompile Include="wolf\Icon.cpp" />
+    <ClCompile Include="wolf\InternetDownload.cpp" />
+    <ClCompile Include="wolf\InternetSession.cpp" />
+    <ClCompile Include="wolf\InternetUrl.cpp" />
+    <ClCompile Include="wolf\ListView.cpp" />
+    <ClCompile Include="wolf\Menu.cpp" />
+    <ClCompile Include="wolf\ProgressBar.cpp" />
+    <ClCompile Include="wolf\RadioButton.cpp" />
+    <ClCompile Include="wolf\Resizer.cpp" />
+    <ClCompile Include="wolf\StatusBar.cpp" />
+    <ClCompile Include="wolf\Str.cpp" />
+    <ClCompile Include="wolf\Sys.cpp" />
+    <ClCompile Include="wolf\TaskBarProgress.cpp" />
+    <ClCompile Include="wolf\Window.cpp" />
+    <ClCompile Include="wolf\WindowControl.cpp" />
+    <ClCompile Include="wolf\WindowDialogTemplate.cpp" />
+    <ClCompile Include="wolf\WindowMain.cpp" />
+    <ClCompile Include="wolf\WindowModal.cpp" />
+    <ClCompile Include="wolf\WindowParent.cpp" />
+    <ClCompile Include="wolf\WindowProc.cpp" />
+    <ClCompile Include="wolf\WindowSubclass.cpp" />
+    <ClCompile Include="wolf\WindowTopLevel.cpp" />
+    <ClCompile Include="wolf\Xml.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

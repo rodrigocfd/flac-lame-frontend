@@ -1,35 +1,233 @@
-/*!
- * @file
- * @brief Automation for file handling.
- * @details Part of WOLF - Win32 Object Lambda Framework.
+/**
+ * Part of WOLF - WinAPI Object Lambda Framework
  * @author Rodrigo Cesar de Freitas Dias
  * @see https://github.com/rodrigocfd/wolf
  */
 
-#include "file.h"
-#include "str.h"
 #include <algorithm>
-#include <direct.h> // _wmkdir()
+#include "File.h"
+#include "Str.h"
 #include <Shlobj.h>
-#include <MsXml2.h>
-#pragma comment(lib, "msxml2.lib")
 using namespace wolf;
-using namespace wolf::file;
-using namespace wolf::res;
-using std::unordered_map;
 using std::vector;
 using std::wstring;
 
-bool file::Delete(const wchar_t *path, wstring *pErr)
+File::~File()
 {
-	if (IsDir(path)) {
+	this->close();
+}
+
+File::File()
+	: _hFile(nullptr), _access(Access::READONLY)
+{
+}
+
+File::File(File&& f)
+	: _hFile(f._hFile), _access(f._access)
+{
+	f._hFile = nullptr;
+	f._access = Access::READONLY;
+}
+
+File& File::operator=(File&& f)
+{
+	std::swap(this->_hFile, f._hFile);
+	std::swap(this->_access, f._access);
+	return *this;
+}
+
+HANDLE File::hFile() const
+{
+	return this->_hFile;
+}
+
+File::Access File::getAccess() const
+{
+	return this->_access;
+}
+
+void File::close()
+{
+	if (this->_hFile) {
+		CloseHandle(this->_hFile);
+		this->_hFile = nullptr;
+		this->_access = Access::READONLY;
+	}
+}
+
+size_t File::size() const
+{
+	return GetFileSize(this->_hFile, nullptr);
+}
+
+bool File::open(const wchar_t *path, Access access, wstring *pErr)
+{
+	this->close();
+	this->_hFile = CreateFile(path,
+		GENERIC_READ | (access == Access::READWRITE ? GENERIC_WRITE : 0),
+		(access == Access::READWRITE) ? 0 : FILE_SHARE_READ, nullptr,
+		(access == Access::READWRITE) ? OPEN_ALWAYS : OPEN_EXISTING,
+		0, nullptr); // if file doesn't exist, will be created
+
+	if (this->_hFile == INVALID_HANDLE_VALUE) {
+		this->_hFile = nullptr;
+		if (pErr) *pErr = Str::format(L"CreateFile() failed to open file as %s, error code %d.",
+			(access == Access::READONLY) ? L"read-only" : L"read-write", GetLastError());
+		return false;
+	}
+
+	this->_access = access; // keep for future checks
+	if (pErr) pErr->clear();
+	return true;
+}
+
+bool File::open(const wstring& path, Access access, wstring *pErr)
+{
+	return this->open(path.c_str(), access, pErr);
+}
+
+bool File::setNewSize(size_t newSize, wstring *pErr)
+{
+	// This method will truncate or expand the file, according to the new size.
+	// Size zero will empty the file.
+
+	if (!this->_hFile) {
+		if (pErr) *pErr = L"File has not been opened.";
+		return false;
+	}
+
+	if (this->_access == Access::READONLY) {
+		if (pErr) *pErr = L"File is opened for read-only access.";
+		return false;
+	}
+
+	if (this->size() == newSize) {
+		return true; // nothing to do
+	}
+
+	DWORD r = SetFilePointer(this->_hFile, static_cast<LONG>(newSize), nullptr, FILE_BEGIN);
+	if (r == INVALID_SET_FILE_POINTER) {
+		DWORD err = GetLastError();
+		this->close();
+		if (pErr) *pErr = Str::format(L"SetFilePointer() failed with offset of %d, error code %d.", newSize, err);
+		return false;
+	}
+
+	if (!SetEndOfFile(this->_hFile)) {
+		DWORD err = GetLastError();
+		this->close();
+		if (pErr) *pErr = Str::format(L"SetEndOfFile() failed with offset of %d, error code %d.", newSize, err);
+		return false;
+	}
+
+	r = SetFilePointer(this->_hFile, 0, nullptr, FILE_BEGIN); // rewind
+	if (r == INVALID_SET_FILE_POINTER) {
+		DWORD err = GetLastError();
+		this->close();
+		if (pErr) *pErr = Str::format(L"SetFilePointer() failed to rewind the file, error code %d.", err);
+		return false;
+	}
+
+	if (pErr) pErr->clear();
+	return true;
+}
+
+bool File::truncate(wstring *pErr)
+{
+	return this->setNewSize(0, pErr);
+}
+
+bool File::getContent(vector<BYTE>& buf, wstring *pErr) const
+{
+	if (!this->_hFile) {
+		if (pErr) *pErr = L"File has not been opened.";
+		return false;
+	}
+
+	buf.resize(this->size());
+	DWORD bytesRead = 0;
+	if (!ReadFile(this->_hFile, &buf[0], static_cast<DWORD>(buf.size()), &bytesRead, nullptr)) {
+		if (pErr) *pErr = Str::format(L"ReadFile() failed to read %d bytes.", buf.size());
+		return false;
+	}
+
+	if (pErr) pErr->clear();
+	return true;
+}
+
+bool File::write(const BYTE *pData, size_t sz, wstring *pErr)
+{
+	if (!this->_hFile) {
+		if (pErr) *pErr = L"File has not been opened.";
+		return false;
+	}
+
+	if (this->_access == Access::READONLY) {
+		if (pErr) *pErr = L"File is opened for read-only access.";
+		return false;
+	}
+
+	// File boundary will be expanded if needed.
+	// Internal file pointer will move forward.
+	DWORD dwWritten = 0;
+	if (!WriteFile(this->_hFile, pData, static_cast<DWORD>(sz), &dwWritten, nullptr)) {
+		if (pErr) *pErr = Str::format(L"WriteFile() failed to write %d bytes.", sz);
+		return false;
+	}
+
+	if (pErr) pErr->clear();
+	return true;
+}
+
+bool File::write(const vector<BYTE>& data, wstring *pErr)
+{
+	return this->write(&data[0], data.size(), pErr);
+}
+
+bool File::rewind(wstring *pErr)
+{
+	if (!this->_hFile) {
+		if (pErr) *pErr = L"File has not been opened.";
+		return false;
+	}
+
+	if (SetFilePointer(this->_hFile, 0, nullptr, FILE_BEGIN) == INVALID_SET_FILE_POINTER) {
+		if (pErr) *pErr = Str::format(L"SetFilePointer() failed, error code %d.", GetLastError());
+		return false;
+	}
+	return true;
+}
+
+bool File::exists(const wchar_t *path)
+{
+	return GetFileAttributes(path) != INVALID_FILE_ATTRIBUTES;
+}
+
+bool File::exists(const wstring& path)
+{
+	return exists(path.c_str());
+}
+
+bool File::isDir(const wchar_t *path)
+{
+	return (GetFileAttributes(path) & FILE_ATTRIBUTE_DIRECTORY) != 0;
+}
+
+bool File::isDir(const wstring& path)
+{
+	return isDir(path.c_str());
+}
+
+bool File::del(const wchar_t *path, wstring *pErr)
+{
+	if (isDir(path)) {
 		// http://stackoverflow.com/questions/1468774/why-am-i-having-problems-recursively-deleting-directories
-		wchar_t szDir[MAX_PATH + 1] = { 0 }; // +1 for the double null terminate
+		wchar_t szDir[MAX_PATH + 1] = { L'\0' }; // +1 for the double null terminate
 		lstrcpy(szDir, path);
 
 		SHFILEOPSTRUCTW fos = { 0 };
-		fos.wFunc = FO_DELETE;
-		fos.pFrom = szDir;
+		fos.wFunc  = FO_DELETE;
+		fos.pFrom  = szDir;
 		fos.fFlags = FOF_NO_UI;
 
 		if (!SHFileOperation(&fos)) {
@@ -38,7 +236,7 @@ bool file::Delete(const wchar_t *path, wstring *pErr)
 		}
 	} else {
 		if (!DeleteFile(path)) {
-			if (pErr) *pErr = str::Sprintf(L"DeleteFile() failed, error code %d.", GetLastError());
+			if (pErr) *pErr = Str::format(L"DeleteFile() failed, error code %d.", GetLastError());
 			return false;
 		}
 	}
@@ -46,66 +244,208 @@ bool file::Delete(const wchar_t *path, wstring *pErr)
 	return true;
 }
 
-bool file::CreateDir(const wchar_t *path)
+bool File::del(const wstring& path, wstring *pErr)
 {
-	return _wmkdir(path) == 0;
+	return del(path.c_str(), pErr);
 }
 
-Date file::DateLastModified(const wchar_t *path)
+bool File::createDir(const wchar_t *path, wstring *pErr)
 {
-	WIN32_FILE_ATTRIBUTE_DATA fad = { 0 };
-	GetFileAttributesEx(path, GetFileExInfoStandard, &fad);
-	return Date(fad.ftLastWriteTime); // already converted to current timezone
-}
-
-Date file::DateCreated(const wchar_t *path)
-{
-	WIN32_FILE_ATTRIBUTE_DATA fad = { 0 };
-	GetFileAttributesEx(path, GetFileExInfoStandard, &fad);
-	return Date(fad.ftCreationTime); // already converted to current timezone
-}
-
-bool file::WriteUtf8(const wchar_t *path, const wchar_t *data, wstring *pErr)
-{
-	bool isUtf8 = false;
-	int dataLen = lstrlen(data);
-	for (int i = 0; i < dataLen; ++i) {
-		if (data[i] > 127) {
-			isUtf8 = true;
-			break;
-		}
-	}
-
-	Raw fout;
-	if (!fout.open(path, Access::READWRITE, pErr)) {
-		return false;
-	}
-	if (fout.size() && !fout.setNewSize(0, pErr)) { // if already exists, truncate to empty
-		return false;
-	}
-
-	// If the text doesn't have any char to make it UTF-8, it'll
-	// be simply converted to plain ASCII.
-	int newLen = WideCharToMultiByte(CP_UTF8, 0, data, dataLen, nullptr, 0, nullptr, nullptr);
-	vector<BYTE> outBuf(newLen + (isUtf8 ? 3 : 0));
-	if (isUtf8) memcpy(&outBuf[0], "\xEF\xBB\xBF", 3); // write UTF-8 BOM
-	WideCharToMultiByte(CP_UTF8, 0, data, dataLen,
-		reinterpret_cast<char*>(&outBuf[isUtf8 ? 3 : 0]), newLen, nullptr, nullptr);
-	if (!fout.write(outBuf, pErr)) { // one single write() to all data, better performance
+	if (!CreateDirectory(path, nullptr)) {
+		if (pErr) *pErr = Str::format(L"CreateDirectory() failed, error code %d.", GetLastError());
 		return false;
 	}
 	if (pErr) pErr->clear();
 	return true;
 }
 
-bool file::Unzip(const wchar_t *zip, const wchar_t *destFolder, wstring *pErr)
+bool File::createDir(const wstring& path, wstring *pErr)
 {
-	if (!Exists(zip)) {
-		if (pErr) *pErr = str::Sprintf(L"File doesn't exist: \"%s\".", zip);
+	return createDir(path.c_str(), pErr);
+}
+
+static vector<wchar_t> _formatFileFilter(const wchar_t *filterWithPipes)
+{
+	// Input filter follows same C# syntax:
+	// L"Text Files (*.txt)|*.txt|All Files (*.*)|*.*"
+
+	vector<wchar_t> ret(lstrlen(filterWithPipes) + 2, L'\0'); // two terminating nulls
+	for (size_t i = 0; i < ret.size() - 1; ++i) {
+		ret[i] = (filterWithPipes[i] != L'|') ? filterWithPipes[i] : L'\0';
+	}
+	return ret;
+}
+
+bool File::showOpen(HWND hWnd, const wchar_t *filter, wstring& buf)
+{
+	OPENFILENAME    ofn = { 0 };
+	wchar_t         tmpBuf[MAX_PATH] = { L'\0' };
+	vector<wchar_t> zfilter = _formatFileFilter(filter);
+
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner   = hWnd;
+	ofn.lpstrFilter = &zfilter[0];
+	ofn.lpstrFile   = tmpBuf;
+	ofn.nMaxFile    = ARRAYSIZE(tmpBuf);
+	ofn.Flags       = OFN_EXPLORER | OFN_ENABLESIZING | OFN_FILEMUSTEXIST;// | OFN_HIDEREADONLY;
+
+	bool ret = GetOpenFileName(&ofn) != 0;
+	if (ret) buf = tmpBuf;
+	return ret;
+}
+
+bool File::showOpen(const Window *wnd, const wchar_t *filter, wstring& buf)
+{
+	return showOpen(wnd->hWnd(), filter, buf);
+}
+
+bool File::showOpen(HWND hWnd, const wchar_t *filter, vector<wstring>& arrBuf)
+{
+	OPENFILENAME    ofn = { 0 };
+	vector<wchar_t> multiBuf(65536, L'\0'); // http://www.askjf.com/?q=2179s http://www.askjf.com/?q=2181s
+	vector<wchar_t> zfilter = _formatFileFilter(filter);
+	arrBuf.clear();
+
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner   = hWnd;
+	ofn.lpstrFilter = &zfilter[0];
+	ofn.lpstrFile   = &multiBuf[0];
+	ofn.nMaxFile    = static_cast<DWORD>(multiBuf.size()); // including terminating null
+	ofn.Flags       = OFN_FILEMUSTEXIST | OFN_ALLOWMULTISELECT | OFN_EXPLORER | OFN_ENABLESIZING;
+	//ofn.FlagsEx = OFN_EX_NOPLACESBAR;
+	// Call to GetOpenFileName() causes "First-chance exception (KernelBase.dll): The RPC server is unavailable."
+	// in debug mode, but nothing else happens. The only way to get rid of it was using OFN_EX_NOPLACESBAR flag,
+	// don't know why!
+
+	if (GetOpenFileName(&ofn)) {
+		auto explodeMultiStr = [](const wchar_t *multiStr)->vector<wstring> {
+			// Example multiStr:
+			// L"first one\0second one\0third one\0"
+			// Assumes a well-formed multiStr, which ends with two nulls.
+
+			// Count number of null-delimited strings; string end with double null.
+			int numStrings = 0;
+			const wchar_t *pRun = multiStr;
+			while (*pRun) {
+				++numStrings;
+				pRun += lstrlen(pRun) + 1;
+			}
+
+			// Alloc return array of strings.
+			vector<wstring> ret;
+			ret.reserve(numStrings);
+
+			// Copy each string.
+			pRun = multiStr;
+			for (int i = 0; i < numStrings; ++i) {
+				ret.emplace_back(pRun);
+				pRun += lstrlen(pRun) + 1;
+			}
+
+			return ret;
+		};
+
+		vector<wstring> strs = explodeMultiStr(&multiBuf[0]);
+		if (!strs.size()) {
+			MessageBox(hWnd, L"GetOpenFileName didn't return multiple strings.", L"Error", MB_ICONERROR);
+			return false;
+		}
+
+		if (strs.size() == 1) { // if user selected only 1 file, the string is the full path, and that's all
+			arrBuf.emplace_back(strs[0]);
+		} else { // user selected 2 or more files
+			wstring& basePath = strs[0]; // 1st string is the base path; others are the filenames
+			arrBuf.resize(strs.size() - 1); // alloc return buffer
+
+			for (size_t i = 0; i < strs.size() - 1; ++i) {
+				arrBuf[i].reserve(basePath.size() + strs[i + 1].size() + 1); // room for backslash
+				arrBuf[i] = basePath;
+				arrBuf[i].append(L"\\").append(strs[i + 1]); // concat folder + file
+			}
+			std::sort(arrBuf.begin(), arrBuf.end());
+		}
+		return true; // all good
+	}
+
+	DWORD errNo = CommDlgExtendedError();
+	if (errNo == FNERR_BUFFERTOOSMALL) {
+		MessageBox(hWnd, L"GetOpenFileName: buffer too small.", L"Error", MB_ICONERROR);
+	} else if (errNo) {
+		wchar_t txtBuf[64] = { L'\0' };
+		wsprintf(txtBuf, L"GetOpenFileName: failed with error %d.", errNo);
+		MessageBox(hWnd, txtBuf, L"Error", MB_ICONERROR);
+	}
+	return false;
+}
+
+bool File::showOpen(const Window *wnd, const wchar_t *filter, vector<wstring>& arrBuf)
+{
+	return showOpen(wnd->hWnd(), filter, arrBuf);
+}
+
+bool File::showSave(HWND hWnd, const wchar_t *filter, wstring& buf, const wchar_t *defFile)
+{
+	OPENFILENAME    ofn = { 0 };
+	wchar_t         tmpBuf[MAX_PATH] = { L'\0' };
+	vector<wchar_t> zfilter = _formatFileFilter(filter);
+
+	if (defFile) lstrcpy(tmpBuf, defFile);
+
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner   = hWnd;
+	ofn.lpstrFilter = &zfilter[0];
+	ofn.lpstrFile   = tmpBuf;
+	ofn.nMaxFile    = ARRAYSIZE(tmpBuf);
+	ofn.Flags       = OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT;
+	ofn.lpstrDefExt = L"txt"; // apparently could be anything, will just force append of combo selected extension
+
+	bool ret = GetSaveFileName(&ofn) != 0;
+	if (ret) buf = tmpBuf;
+	return ret;
+}
+
+bool File::showSave(const Window *wnd, const wchar_t *filter, wstring& buf, const wchar_t *defFile)
+{
+	return showSave(wnd->hWnd(), filter, buf, defFile);
+}
+
+bool File::showChooseFolder(HWND hWnd, wstring& buf)
+{
+	CoInitialize(nullptr);
+
+	//LPITEMIDLIST pidlRoot = 0;
+	//if (defFolder) SHParseDisplayName(defFolder, nullptr, &pidlRoot, 0, nullptr);
+
+	BROWSEINFO bi = { 0 };
+	bi.hwndOwner = hWnd;
+	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
+
+	PIDLIST_ABSOLUTE pidl = SHBrowseForFolder(&bi);
+	if (!pidl) return false; // user cancelled
+
+	wchar_t tmpbuf[MAX_PATH] = { L'\0' };
+	if (!SHGetPathFromIDList(pidl, tmpbuf)) {
+		return false; // some weird error
+	}
+
+	CoUninitialize();
+	buf = tmpbuf;
+	return true;
+}
+
+bool File::showChooseFolder(const Window *wnd, wstring& buf)
+{
+	return showChooseFolder(wnd->hWnd(), buf);
+}
+
+bool File::unzip(wstring zipFile, wstring destFolder, wstring *pErr)
+{
+	if (!exists(zipFile)) {
+		if (pErr) *pErr = Str::format(L"File doesn't exist: \"%s\".", zipFile.c_str());
 		return false;
 	}
-	if (!Exists(destFolder)) {
-		if (pErr) *pErr = str::Sprintf(L"Output directory doesn't exist: \"%s\".", destFolder);
+	if (!exists(destFolder)) {
+		if (pErr) *pErr = Str::format(L"Output directory doesn't exist: \"%s\".", destFolder.c_str());
 		return false;
 	}
 
@@ -113,14 +453,14 @@ bool file::Unzip(const wchar_t *zip, const wchar_t *destFolder, wstring *pErr)
 	CoInitialize(nullptr);
 
 	IShellDispatch *pISD = nullptr;
-	if (FAILED( CoCreateInstance(CLSID_Shell, nullptr, CLSCTX_INPROC_SERVER,
-		IID_IShellDispatch, reinterpret_cast<void**>(&pISD)) ))
+	if (FAILED(CoCreateInstance(CLSID_Shell, nullptr, CLSCTX_INPROC_SERVER,
+		IID_IShellDispatch, reinterpret_cast<void**>(&pISD))))
 	{
 		if (pErr) *pErr = L"CoCreateInstance failed on IID_IShellDispatch.";
 		return false;
 	}
 
-	BSTR bstrZipFile = SysAllocString(zip);
+	BSTR bstrZipFile = SysAllocString(zipFile.c_str());
 	VARIANT inZipFile = { 0 };
 	inZipFile.vt = VT_BSTR;
 	inZipFile.bstrVal = bstrZipFile;
@@ -135,7 +475,7 @@ bool file::Unzip(const wchar_t *zip, const wchar_t *destFolder, wstring *pErr)
 		return false;
 	}
 
-	BSTR bstrFolder = SysAllocString(destFolder);
+	BSTR bstrFolder = SysAllocString(destFolder.c_str());
 	VARIANT outFolder = { 0 };
 	outFolder.vt = VT_BSTR;
 	outFolder.bstrVal = bstrFolder;
@@ -209,720 +549,33 @@ bool file::Unzip(const wchar_t *zip, const wchar_t *destFolder, wstring *pErr)
 	return true;
 }
 
-int file::IndexOfBin(const BYTE *pData, size_t dataLen, const wchar_t *what, bool asWideChar)
+vector<wstring> File::listDir(wstring pathAndPattern)
 {
-	// Returns the position of a string within a binary data block, if present.
-
-	size_t whatlen = lstrlen(what);
-	size_t pWhatSz = whatlen * (asWideChar ? 2 : 1);
-	BYTE *pWhat = static_cast<BYTE*>(_alloca(pWhatSz * sizeof(BYTE)));
-	if (asWideChar) {
-		memcpy(pWhat, what, whatlen * sizeof(wchar_t)); // simply copy the wide string, each char+zero
-	} else {
-		for (size_t i = 0; i < whatlen; ++i) {
-			pWhat[i] = LOBYTE(what[i]); // raw conversion from wchar_t to char
-		}
-	}
-
-	for (size_t i = 0; i < dataLen; ++i) {
-		if (!memcmp(pData + i, pWhat, pWhatSz * sizeof(BYTE))) {
-			return static_cast<int>(i);
-		}
-	}
-	return -1; // not found
-}
-
-
-void path::ChangeExtension(wstring& sPath, const wchar_t *extWithoutDot)
-{
-	sPath.resize(str::Find(str::Sens::YES, sPath, L'.') + 1); // truncate after the dot
-	sPath.append(extWithoutDot);
-}
-
-void path::TrimBackslash(wstring& sPath)
-{
-	if (!sPath.empty() && sPath.back() == L'\\') {
-		sPath.resize(sPath.length() - 1);
-	}
-}
-
-wstring path::GetPath(const wchar_t *sPath)
-{
-	wstring ret = sPath;
-	ret.resize(str::FindRev(str::Sens::YES, ret, L'\\')); // also remove trailing backslash
-	return ret;
-}
-
-wstring path::GetFilename(const wstring& sPath)
-{
-	wstring ret = sPath;
-	ret.erase(0, str::FindRev(str::Sens::YES, ret, L'\\') + 1);
-	return ret;
-}
-
-
-void Raw::close()
-{
-	if (_hFile) {
-		CloseHandle(_hFile);
-		_hFile = nullptr;
-		_access = Access::READONLY;
-	}
-}
-
-bool Raw::open(const wchar_t *path, Access access, wstring *pErr)
-{
-	this->close(); // make sure everything was properly cleaned up
-
-	_hFile = CreateFile(path,
-		GENERIC_READ | (access == Access::READWRITE ? GENERIC_WRITE : 0),
-		(access == Access::READWRITE) ? 0 : FILE_SHARE_READ, nullptr,
-		(access == Access::READWRITE) ? OPEN_ALWAYS : OPEN_EXISTING,
-		0, nullptr); // if file doesn't exist, will be created
-
-	if (_hFile == INVALID_HANDLE_VALUE) {
-		_hFile = nullptr;
-		if (pErr) *pErr = str::Sprintf(L"CreateFile() failed to open file as %s, error code %d.",
-			(access == Access::READONLY) ? L"read-only" : L"read-write", GetLastError());
-		return false;
-	}
-
-	_access = access; // keep for future checks
-	if (pErr) pErr->clear();
-	return true;
-}
-
-bool Raw::setNewSize(size_t newSize, wstring *pErr)
-{
-	// This method will truncate or expand the file, according to the new size.
-	// Size zero will truncate the file.
-
-	if (!_hFile) {
-		if (pErr) *pErr = L"File has not been opened.";
-		return false;
-	}
-
-	if (_access == Access::READONLY) {
-		if (pErr) *pErr = L"File is opened for read-only access.";
-		return false;
-	}
-
-	DWORD r = SetFilePointer(_hFile, static_cast<LONG>(newSize), nullptr, FILE_BEGIN);
-	if (r == INVALID_SET_FILE_POINTER) {
-		DWORD err = GetLastError();
-		this->close();
-		if (pErr) *pErr = str::Sprintf(L"SetFilePointer() failed with offset of %d, error code %d.", newSize, err);
-		return false;
-	}
-
-	if (!SetEndOfFile(_hFile)) {
-		DWORD err = GetLastError();
-		this->close();
-		if (pErr) *pErr = str::Sprintf(L"SetEndOfFile() failed with offset of %d, error code %d.", newSize, err);
-		return false;
-	}
-
-	r = SetFilePointer(_hFile, 0, nullptr, FILE_BEGIN); // rewind
-	if (r == INVALID_SET_FILE_POINTER) {
-		DWORD err = GetLastError();
-		this->close();
-		if (pErr) *pErr = str::Sprintf(L"SetFilePointer() failed to rewind the file, error code %d.", err);
-		return false;
-	}
-
-	if (pErr) pErr->clear();
-	return true;
-}
-
-bool Raw::getContent(vector<BYTE>& buf, wstring *pErr) const
-{
-	if (!_hFile) {
-		if (pErr) *pErr = L"File has not been opened.";
-		return false;
-	}
-
-	buf.resize(this->size());
-	DWORD bytesRead = 0;
-	if (!ReadFile(_hFile, &buf[0], static_cast<DWORD>(buf.size()), &bytesRead, nullptr)) {
-		if (pErr) *pErr = str::Sprintf(L"ReadFile() failed to read %d bytes.", buf.size());
-		return false;
-	}
-
-	if (pErr) pErr->clear();
-	return true;
-}
-
-bool Raw::write(const BYTE *pData, size_t sz, wstring *pErr)
-{
-	if (!_hFile) {
-		if (pErr) *pErr = L"File has not been opened.";
-		return false;
-	}
-
-	if (_access == Access::READONLY) {
-		if (pErr) *pErr = L"File is opened for read-only access.";
-		return false;
-	}
-
-	// File boundary will be expanded if needed.
-	// Internal file pointer will move forward.
-	DWORD dwWritten = 0;
-	if (!WriteFile(_hFile, pData, static_cast<DWORD>(sz), &dwWritten, nullptr)) {
-		if (pErr) *pErr = str::Sprintf(L"WriteFile() failed to write %d bytes.", sz);
-		return false;
-	}
-
-	if (pErr) pErr->clear();
-	return true;
-}
-
-bool Raw::rewind(wstring *pErr)
-{
-	if (!_hFile) {
-		if (pErr) *pErr = L"File has not been opened.";
-		return false;
-	}
-
-	if (SetFilePointer(_hFile, 0, nullptr, FILE_BEGIN) == INVALID_SET_FILE_POINTER) {
-		if (pErr) *pErr = str::Sprintf(L"SetFilePointer() failed, error code %d.", GetLastError());
-		return false;
-	}
-	return true;
-}
-
-
-void Mapped::close()
-{
-	if (_pMem) {
-		UnmapViewOfFile(_pMem);
-		_pMem = nullptr;
-	}
-	if (_hMap) {
-		CloseHandle(_hMap);
-		_hMap = nullptr;
-	}
-	_file.close();
-	_size = 0;
-}
-
-bool Mapped::open(const wchar_t *path, Access access, wstring *pErr)
-{
-	this->close(); // make sure everything was properly cleaned up
-
-	// Open file.
-	if (!_file.open(path, access, pErr)) {
-		this->close();
-		return false;
-	}
-
-	// Mapping into memory.
-	_hMap = CreateFileMapping(_file.hFile(), nullptr,
-		(access == Access::READWRITE) ? PAGE_READWRITE : PAGE_READONLY, 0, 0, nullptr);
-	if (!_hMap) {
-		DWORD err = GetLastError();
-		this->close();
-		if (pErr) *pErr = str::Sprintf(L"CreateFileMapping() failed to create file mapping, error code %d.", err);
-		return false;
-	}
-
-	// Get pointer to data block.
-	_pMem = MapViewOfFile(_hMap,
-		(access == Access::READWRITE) ? FILE_MAP_WRITE : FILE_MAP_READ, 0, 0, 0);
-	if (!_pMem) {
-		DWORD err = GetLastError();
-		this->close();
-		if (pErr) *pErr = str::Sprintf(L"MapViewOfFile() failed to map view of file, error code %d.", err);
-		return false;
-	}
-
-	_size = _file.size(); // keep file size
-	if (pErr) pErr->clear();
-	return true;
-}
-
-bool Mapped::setNewSize(size_t newSize, wstring *pErr)
-{
-	// This method will truncate or expand the file, according to the new size.
-	// It will probably fail if file was opened as read-only.
-
-	if (!_hMap || !_pMem || !_file.hFile()) {
-		if (pErr) *pErr = L"File is not mapped into memory.";
-		return false;
-	}
-
-	// Unmap file, but keep it open.
-	UnmapViewOfFile(_pMem);
-	CloseHandle(_hMap);
-
-	// Truncate/expand file.
-	if (!_file.setNewSize(newSize, pErr)) {
-		this->close();
-		return false;
-	}
-
-	// Remap into memory.
-	if (!( _hMap = CreateFileMapping(_file.hFile(), 0, PAGE_READWRITE, 0, 0, nullptr) )) {
-		DWORD err = GetLastError();
-		this->close();
-		if (pErr) *pErr = str::Sprintf(L"CreateFileMapping() failed to recreate file mapping, error code %d.", err);
-		return false;
-	}
-
-	// Get new pointer to data block, old one just became invalid!
-	if (!( _pMem = MapViewOfFile(_hMap, FILE_MAP_WRITE, 0, 0, 0) )) {
-		DWORD err = GetLastError();
-		this->close();
-		if (pErr) *pErr = str::Sprintf(L"MapViewOfFile() failed to remap view of file, error code %d.", err);
-		return false;
-	}
-
-	_size = _file.size(); // keep new file size
-	if (pErr) pErr->clear();
-	return true;
-}
-
-bool Mapped::getContent(vector<BYTE>& buf, int offset, int numBytes, wstring *pErr) const
-{
-	if (!_hMap || !_pMem || !_file.hFile()) {
-		if (pErr) *pErr = L"File is not mapped into memory.";
-		return false;
-	} else if (offset >= static_cast<int>(_size)) {
-		if (pErr) *pErr = L"Offset is beyond end of file.";
-		return false;
-	} else if (numBytes == -1 || offset + numBytes > static_cast<int>(_size)) {
-		numBytes = static_cast<int>(_size) - offset; // avoid reading beyond EOF
-	}
-
-	buf.resize(numBytes);
-	memcpy(&buf[0], this->pMem(), numBytes * sizeof(BYTE));
-
-	if (pErr) pErr->clear();
-	return true;
-}
-
-bool Mapped::getContent(wstring& buf, int offset, int numChars, wstring *pErr) const
-{
-	vector<BYTE> byteBuf;
-	if (!this->getContent(byteBuf, offset, numChars, pErr)) {
-		return false;
-	}
-
-	buf.resize(byteBuf.size());
-	for (size_t i = 0; i < byteBuf.size(); ++i) {
-		buf[i] = static_cast<wchar_t>(byteBuf[i]); // raw conversion
-	}
-
-	if (pErr) pErr->clear();
-	return true;
-}
-
-
-bool Text::load(const wchar_t *path, wstring *pErr)
-{
-	Mapped fm;
-	if (!fm.open(path, Access::READONLY, pErr)) {
-		return false;
-	}
-	if (pErr) pErr->clear();
-	return this->load(fm);
-}
-
-bool Text::load(const Mapped& fm)
-{
-	BYTE *pMem = fm.pMem(); // file reading is made upon a memory-mapped file, load all into wstring
-	BYTE *pPast = fm.pPastMem();
-
-	if ((pPast - pMem >= 3) && !memcmp(pMem, "\xEF\xBB\xBF", 3)) // UTF-8
-	{
-		pMem += 3; // skip BOM
-		_text = str::ParseUtf8(pMem, static_cast<int>(pPast - pMem)); // the whole file is loaded as wchar_t
-	}
-	else if ((pPast - pMem >= 4) && !memcmp(pMem, "\x00\x00\xFE\xFF", 4)) // UTF-32 BE
-	{
-		pMem += 4;
-		return false;
-		//...
-	}
-	else if ((pPast - pMem >= 4) && !memcmp(pMem, "\xFF\xFE\x00\x00", 4)) // UTF-32 LE
-	{
-		pMem += 4;
-		return false;
-		//...
-	}
-	else if ((pPast - pMem >= 2) && !memcmp(pMem, "\xFE\xFF", 2)) // UTF-16 BE
-	{
-		pMem += 2;
-		_text.resize(static_cast<int>(pPast - pMem) / 2);
-		for (int i = 0; i < static_cast<int>(pPast - pMem); i += 2) {
-			_text[i / 2] = static_cast<wchar_t>(MAKEWORD(*(pMem + i + 1), *(pMem + i)));
-		}
-	}
-	else if ((pPast - pMem >= 2) && !memcmp(pMem, "\xFF\xFE", 2)) // UTF-16 LE
-	{
-		pMem += 2;
-		_text.resize(static_cast<int>(pPast - pMem) / 2);
-		for (int i = 0; i < static_cast<int>(pPast - pMem); i += 2) {
-			_text[i / 2] = static_cast<wchar_t>(MAKEWORD(*(pMem + i), *(pMem + i + 1)));
-		}
-	}
-	else // ASCII
-	{
-		int len = static_cast<int>(pPast - pMem);
-		_text.resize(len);
-		for (int i = 0; i < len; ++i) {
-			_text[i] = static_cast<wchar_t>(*(pMem + i)); // brute-force char to wchar_t
-		}
-	}
+	// Entry example: "C:\\myfolder\\*.mp3"
 	
-	str::TrimNulls(_text);
-	this->rewind(); // our seeking pointer to be consumed by nextLine()
-	return true;
-}
+	vector<wstring> files;
 
-bool Text::nextLine(wstring& buf)
-{
-	if (!*_p) return false; // runner pointer inside our _text String data block
+	WIN32_FIND_DATA wfd = { 0 };
+	HANDLE hFind = FindFirstFile(pathAndPattern.c_str(), &wfd);
+	if (!hFind) return files; // nothing found
 
-	if (_idxLine > -1) { // not 1st line; avoid a 1st blank like to be skipped
-		if ( (*_p == L'\r' && *(_p + 1) == L'\n') || // CRLF || LFCR
-			(*_p == L'\n' && *(_p + 1) == L'\r') )
-		{
-			_p += 2;
-		} else if (*_p == L'\r' || *_p == L'\n') {
-			++_p; // CR || LF
+	wstring path = pathAndPattern;
+	path = Str::folderFromPath(path);
+
+	do {
+		if (*wfd.cFileName) {
+			files.emplace_back(path);
+			files.back().append(L"\\").append(wfd.cFileName);
 		}
-	}
-	++_idxLine;
+	} while (FindNextFile(hFind, &wfd));
 
-	wchar_t *pRun = _p;
-	while (*pRun && *pRun != L'\r' && *pRun != '\n') ++pRun;
-	buf.clear();
-	buf.insert(0, _p, static_cast<size_t>(pRun - _p)); // line won't have CR nor LF at end
-
-	_p = pRun; // consume
-	return true;
+	FindClose(hFind);
+	return files;
 }
 
-
-bool Ini::load(wstring *pErr)
+vector<wstring> File::listDir(wstring path, wstring pattern)
 {
-	if (_path.empty()) {
-		if (pErr) *pErr = L"INI path not set.";
-		return false;
-	}
-
-	Text fin;
-	if (!fin.load(_path, pErr)) {
-		if (pErr) pErr->insert(0, L"INI file failed to load.\n");
-		return false;
-	}
-
-	this->sections.clear();
-	this->sections.reserve(this->_countSections(&fin));
-
-	wstring line, curSection, name, valstr; // name/val declared here to save reallocs
-	while (fin.nextLine(line)) {
-		if (line[0] == L'[' && line.back() == L']') { // begin of section found
-			curSection.clear();
-			curSection.insert(0, &line[1], line.length() - 2);
-			this->sections.emplace(curSection, unordered_map<wstring, wstring>()); // new section added
-			continue;
-		}
-		if (!this->sections.empty() && !line.empty()) { // keys will be read only if within a section
-			int idxEq = str::Find(str::Sens::YES, line, L'=');
-			if (idxEq > -1) {
-				name.clear();
-				name.insert(0, &line[0], idxEq);
-				str::Trim(name);
-				
-				valstr.clear();
-				valstr.insert(0, &line[idxEq + 1], line.length() - (idxEq + 1));
-				str::Trim(valstr);
-
-				this->sections[curSection].emplace(name, valstr);
-			}
-		}
-	}
-
-	if (pErr) pErr->clear();
-	return true;
-}
-
-bool Ini::serialize(wstring *pErr) const
-{
-	if (_path.empty()) {
-		if (pErr) *pErr = L"INI path not set.";
-		return false;
-	}
-
-	wstring out;
-	out.reserve(100);
-	for (auto& section : this->sections) {
-		out.append(L"[").append(section.first).append(L"]\r\n");
-		for (auto& entry : section.second) {
-			out.append(entry.first).append(L"=").append(entry.second).append(L"\r\n");
-		}
-		out.append(L"\r\n");
-	}
-
-	if (!WriteUtf8(_path.c_str(), out.c_str(), pErr)) {
-		if (pErr) pErr->insert(0, L"INI file serialization failed.\n");
-		return false;
-	}
-
-	if (pErr) pErr->clear();
-	return true;
-}
-
-int Ini::_countSections(Text *fin) const
-{
-	int count = 0;
-	wstring line;
-	fin->rewind();
-	while (fin->nextLine(line)) {
-		if (line[0] == L'[' && line.back() == L']') {
-			++count;
-		}
-	}
-	fin->rewind();
-	return count;
-}
-
-
-static void _ReadAttrs(IXMLDOMNode *xmlnode, unordered_map<wstring, wstring>& attrbuf)
-{
-	// Read attribute collection.
-	IXMLDOMNamedNodeMap *attrs = nullptr;
-	xmlnode->get_attributes(&attrs);
-	
-	long attrCount = 0;
-	attrs->get_length(&attrCount);
-	attrbuf.clear();
-	attrbuf.reserve(attrCount);
-
-	for (long i = 0; i < attrCount; ++i) {
-		IXMLDOMNode *attr = nullptr;
-		attrs->get_item(i, &attr);
-
-		DOMNodeType type = NODE_INVALID;
-		attr->get_nodeType(&type);
-		if (type == NODE_ATTRIBUTE) {
-			BSTR bstr = nullptr;
-			attr->get_nodeName(&bstr); // get attribute name
-
-			VARIANT var = { 0 };
-			attr->get_nodeValue(&var); // get attribute value
-			
-			attrbuf.emplace(static_cast<wchar_t*>(bstr), static_cast<wchar_t*>(var.bstrVal)); // add hash entry
-			SysFreeString(bstr);
-			VariantClear(&var);
-		}
-		attr->Release();
-	}
-	attrs->Release();
-}
-
-static int _CountChildNodes(IXMLDOMNodeList *nodeList)
-{
-	int childCount = 0;
-	long totalCount = 0;
-	nodeList->get_length(&totalCount); // includes text and actual element nodes
-	
-	for (long i = 0; i < totalCount; ++i) {
-		IXMLDOMNode *child = nullptr;
-		nodeList->get_item(i, &child);
-
-		DOMNodeType type = NODE_INVALID;
-		child->get_nodeType(&type);
-		if (type == NODE_ELEMENT) ++childCount;
-
-		child->Release();
-	}
-	return childCount;
-}
-
-static void _BuildNode(IXMLDOMNode *xmlnode, Xml::Node& nodebuf)
-{
-	// Get node name.
-	BSTR bstr = nullptr;
-	xmlnode->get_nodeName(&bstr);
-	nodebuf.name = static_cast<wchar_t*>(bstr);
-	SysFreeString(bstr);
-
-	// Parse attributes of node, if any.
-	_ReadAttrs(xmlnode, nodebuf.attrs);
-
-	// Process children, if any.
-	VARIANT_BOOL vb = FALSE;
-	xmlnode->hasChildNodes(&vb);
-	if (vb) {
-		IXMLDOMNodeList *nodeList = nullptr;
-		xmlnode->get_childNodes(&nodeList);
-		nodebuf.children.resize(_CountChildNodes(nodeList));
-
-		int childCount = 0;
-		long totalCount = 0;
-		nodeList->get_length(&totalCount);
-
-		for (long i = 0; i < totalCount; ++i) {
-			IXMLDOMNode *child = nullptr;
-			nodeList->get_item(i, &child);
-
-			// Node can be text or an actual child node.
-			DOMNodeType type = NODE_INVALID;
-			child->get_nodeType(&type);
-			if (type == NODE_TEXT) {
-				xmlnode->get_text(&bstr);
-				nodebuf.value.append(static_cast<wchar_t*>(bstr));
-				SysFreeString(bstr);
-			} else if (type == NODE_ELEMENT) {
-				_BuildNode(child, nodebuf.children[childCount++]); // recursively
-			} else {
-				// (L"Unhandled node type: %d.\n", type);
-			}
-			child->Release();
-		}
-		nodeList->Release();
-	} else {
-		// Assumes that only a leaf node can have text.
-		xmlnode->get_text(&bstr);
-		nodebuf.value = static_cast<wchar_t*>(bstr);
-		SysFreeString(bstr);
-	}
-}
-
-vector<Xml::Node*> Xml::Node::getChildrenByName(const wchar_t *elemName)
-{
-	int howMany = 0;
-	size_t firstIndex = -1, lastIndex = -1;
-	for (size_t i = 0; i < this->children.size(); ++i) {
-		if (str::Equals(str::Sens::NO, this->children[i].name, elemName)) { // case-insensitive match
-			++howMany;
-			if (firstIndex == -1) firstIndex = i;
-			lastIndex = i;
-		}
-	}
-
-	vector<Node*> nodeBuf;
-	nodeBuf.reserve(howMany); // alloc return array
-
-	howMany = 0;
-	for (size_t i = firstIndex; i <= lastIndex; ++i) {
-		if (str::Equals(str::Sens::NO, this->children[i].name, elemName)) {
-			nodeBuf.emplace_back(&this->children[i]);
-		}
-	}
-	return nodeBuf;
-}
-
-Xml::Node* Xml::Node::firstChildByName(const wchar_t *elemName)
-{
-	for (Node& node : this->children) {
-		if (str::Equals(str::Sens::NO, node.name, elemName)) { // case-insensitive match
-			return &node;
-		}
-	}
-	return nullptr; // not found
-}
-
-bool Xml::parse(const wchar_t *str)
-{
-	CoInitialize(nullptr); // http://stackoverflow.com/questions/7824383/double-calls-to-coinitialize
-	
-	// Create COM object for XML document.
-	IXMLDOMDocument2 *doc = nullptr;
-	CoCreateInstance(CLSID_DOMDocument30, nullptr, CLSCTX_INPROC_SERVER,
-		IID_IXMLDOMDocument, reinterpret_cast<void**>(&doc));
-	doc->put_async(FALSE);
-
-	// Parse the XML string.
-	VARIANT_BOOL vb = FALSE;
-	doc->loadXML(static_cast<BSTR>(const_cast<wchar_t*>(str)), &vb);
-
-	// Get document element and root node from XML.
-	IXMLDOMElement *docElem = nullptr;
-	doc->get_documentElement(&docElem);
-
-	IXMLDOMNode *rootNode = nullptr;
-	docElem->QueryInterface(IID_IXMLDOMNode, reinterpret_cast<void**>(&rootNode));
-	_BuildNode(rootNode, this->root); // recursive
-
-	rootNode->Release(); // must be released before CoUninitialize
-	docElem->Release();
-	doc->Release();
-	CoUninitialize();
-	return true;
-}
-
-
-Listing::Listing(const wchar_t *pattern)
-	: _hFind(nullptr)
-{
-	SecureZeroMemory(&_wfd, sizeof(_wfd));
-	_pattern = pattern; // example of pattern: L"*.mp3"
-}
-
-Listing::Listing(const wchar_t *path, const wchar_t *pattern)
-	: _hFind(nullptr)
-{
-	SecureZeroMemory(&_wfd, sizeof(_wfd));
-	_pattern = path;
-	if (path[lstrlen(path) - 1] != L'\\') _pattern.append(L"\\");
-	_pattern.append(pattern);
-}
-
-Listing::~Listing()
-{
-	if (_hFind && _hFind != INVALID_HANDLE_VALUE) {
-		FindClose(_hFind);
-		_hFind = nullptr;
-	}
-}
-
-bool Listing::next(wstring& buf)
-{
-	if (!_hFind) { // first call to method
-		if ((_hFind = FindFirstFile(_pattern.c_str(), &_wfd)) == INVALID_HANDLE_VALUE) { // init iteration
-			_hFind = nullptr;
-			return false; // no files found at all
-		}
-	} else { // subsequent calls
-		if (!FindNextFile(_hFind, &_wfd)) {
-			FindClose(_hFind);
-			_hFind = nullptr;
-			return false; // search finished
-		}
-	}
-
-	if (str::Find(str::Sens::YES, _pattern, L'\\') != -1) { // user pattern contains an absolute path
-		buf = path::GetPath(_pattern);
-		buf.append(L"\\").append(_wfd.cFileName);
-	} else {
-		buf = _wfd.cFileName;
-	}
-
-	return true; // more to come, call again
-}
-
-static vector<wstring> _ListingGetAll(Listing& listing)
-{
-	vector<wstring> ret;
-	wstring f;
-	while (listing.next(f)) {
-		ret.emplace_back(f);
-	}
-	std::sort(ret.begin(), ret.end(), [](const wstring& a, const wstring& b)->bool {
-		return str::LexCmp(str::Sens::NO, a, b) < 0;
-	});
-	return ret;
-}
-
-vector<wstring> Listing::GetAll(const wchar_t *pattern)
-{
-	return _ListingGetAll(Listing(pattern));
-}
-
-vector<wstring> Listing::GetAll(const wchar_t *path, const wchar_t *pattern)
-{
-	return _ListingGetAll(Listing(path, pattern));
+	if (path.back() != L'\\') path.append(L"\\");
+	path.append(pattern);
+	return listDir(path);
 }

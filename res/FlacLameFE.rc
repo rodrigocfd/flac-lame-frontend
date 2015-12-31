@@ -57,9 +57,9 @@ CAPTION "FLAC/LAME front end"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "&Run",BTN_RUN,241,260,62,15,WS_DISABLED
-    CONTROL         "",LST_FILES,"SysListView32",LVS_REPORT | LVS_SORTASCENDING | LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | WS_BORDER | WS_TABSTOP,3,2,308,175
+    CONTROL         "",LST_FILES,"SysListView32",LVS_REPORT | LVS_SORTASCENDING | LVS_ALIGNLEFT | LVS_NOCOLUMNHEADER | WS_TABSTOP,3,2,308,175,WS_EX_CLIENTEDGE
     LTEXT           "Destination",LBL_DEST,7,183,40,8
-    EDITTEXT        TXT_DEST,51,181,236,13,ES_AUTOHSCROLL
+    EDITTEXT        TXT_DEST,51,181,236,13,ES_AUTOHSCROLL | NOT WS_BORDER,WS_EX_CLIENTEDGE
     PUSHBUTTON      "...",BTN_DEST,289,180,20,14
     GROUPBOX        "Conversion",FRA_CONV,6,199,173,79
     CONTROL         "MP3",RAD_MP3,"Button",BS_AUTORADIOBUTTON | WS_GROUP,12,216,29,10
@@ -94,6 +94,7 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 ICO_MAIN                ICON                    "Ron Burgundy.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -149,6 +150,17 @@ BEGIN
     END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+DLG_MAIN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
 
 #endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
