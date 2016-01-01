@@ -45,9 +45,9 @@ WindowGuiThread<DefProcT>::WindowGuiThread()
 template<WNDPROC DefProcT>
 void WindowGuiThread<DefProcT>::guiThread(std::function<void()> callback)
 {
-	// This method is analog to SendMessage, but intended to be called from another thread, so a
-	// callback function can, tunelled by wndproc, run in the original thread of the window, thus
-	// allowing GUI updates. This avoids the user to deal with a custom WM_ message.
+	// This method is analog to SendMessage (synchronous), but intended to be called from another
+	// thread, so a callback function can, tunelled by wndproc, run in the original thread of the
+	// window, thus allowing GUI updates. This avoids the user to deal with a custom WM_ message.
 	CallbackPack *pack = new CallbackPack{ std::move(callback) };
 	this->sendMessage(WM_GUITHREAD, 0, reinterpret_cast<LPARAM>(pack)); // onto window message queue
 }

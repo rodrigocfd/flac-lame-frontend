@@ -69,7 +69,7 @@ wstring& Str::trim(wstring& s)
 	return s;
 }
 
-wstring& Str::toUpper(wstring& s)
+wstring& Str::upper(wstring& s)
 {
 	for (wchar_t& ch : s) {
 		ch = towupper(ch);
@@ -77,7 +77,7 @@ wstring& Str::toUpper(wstring& s)
 	return s;
 }
 
-wstring& Str::toLower(wstring& s)
+wstring& Str::lower(wstring& s)
 {
 	for (wchar_t& ch : s) {
 		ch = towlower(ch);
@@ -134,6 +134,122 @@ wstring Str::fileFromPath(const wstring& path)
 	return ret;
 }
 
+size_t Str::find(const wstring& s, const wchar_t *what, size_t offset)
+{
+	if (!s.size() || offset >= s.size()) {
+		return wstring::npos; // same behavior of find_first_of
+	}
+
+	size_t whatLen = lstrlen(what);
+	if (!whatLen || whatLen > s.size() - offset) {
+		return wstring::npos;
+	}
+
+	size_t found = s.find_first_of(what[0], offset);
+	while (found != wstring::npos && found + whatLen <= s.size()) {
+		if (!memcmp(&s[found], what, whatLen * sizeof(wchar_t))) {
+			return found;
+		}
+		found = s.find_first_of(what[0], found + 1);
+	}
+
+	return wstring::npos; // not found
+}
+
+size_t Str::findI(const wstring& s, const wchar_t *what, size_t offset)
+{
+	wstring haystack(s), needle(what);
+	upper(haystack);
+	upper(needle);
+	return find(haystack, needle.c_str(), offset);
+}
+
+size_t Str::findLast(const wstring& s, const wchar_t *what, size_t offset)
+{
+	if (!s.size()) return wstring::npos;
+
+	size_t whatLen = lstrlen(what);
+	if (!whatLen || whatLen > s.size() - offset)
+	if (!whatLen || whatLen - 1 > min(s.size() - 1, offset)) return wstring::npos; // same behavior of find_last_of
+
+	size_t found = s.find_last_of(what[0], min(s.size() - whatLen, offset));
+	while (found != wstring::npos) {
+		if (!memcmp(&s[found], what, whatLen * sizeof(wchar_t))) {
+			return found;
+		}
+		if (!found) break;
+		found = s.find_last_of(what[0], found - 1);
+	}
+
+	return wstring::npos; // not found
+}
+
+size_t Str::findLastI(const wstring& s, const wchar_t *what, size_t offset)
+{
+	wstring haystack(s), needle(what);
+	upper(haystack);
+	upper(needle);
+	return findLast(haystack, needle.c_str(), offset);
+}
+
+wstring& Str::replace(wstring& s, const wchar_t *what, const wchar_t *replacement)
+{
+	if (!s.size()) return s;
+
+	size_t whatLen = lstrlen(what);
+	if (!whatLen) return s;
+
+	size_t replacementLen = lstrlen(replacement);
+	wstring output;
+	size_t base = 0;
+	size_t found = 0;
+	
+	for (;;) {
+		found = find(s, what, found);
+		output.insert(output.size(), s, base, found - base);
+		if (found != wstring::npos) {
+			output.append(replacement);
+			base = found = found + whatLen;
+		} else {
+			break;
+		}
+	}
+
+	s.swap(output);
+	return s;
+}
+
+wstring& Str::replaceI(wstring& s, const wchar_t *what, const wchar_t *replacement)
+{
+	if (!s.size()) return s;
+
+	size_t whatLen = lstrlen(what);
+	if (!whatLen) return s;
+
+	wstring haystack(s), needle(what); // clone and uppercase
+	upper(haystack);
+	upper(needle);
+	
+	size_t replacementLen = lstrlen(replacement);
+	wstring output;
+	size_t base = 0;
+	size_t found = 0;
+
+	for (;;) {
+		found = find(haystack, needle.c_str(), found);
+		output.insert(output.size(), s, base, found - base);
+		if (found != wstring::npos) {
+			output.append(replacement);
+			base = found = found + whatLen;
+		} else {
+			break;
+		}
+	}
+
+	s.swap(output);
+	return s;
+}
+
 bool Str::eq(const wstring& s, const wchar_t *what)
 {
 	return !lstrcmp(s.c_str(), what);
@@ -161,7 +277,7 @@ static bool _firstEndsBeginsCheck(const wstring& s, const wchar_t *what, size_t&
 	}
 
 	whatLen = lstrlen(what);
-	if (!whatLen || whatLen > s.length()) {
+	if (!whatLen || whatLen > s.size()) {
 		return false;
 	}
 
@@ -175,7 +291,7 @@ bool Str::endsWith(const wstring& s, const wchar_t *what)
 		return false;
 	}
 
-	return !lstrcmp(&s[s.length() - whatLen], what);
+	return !lstrcmp(&s[s.size() - whatLen], what);
 }
 
 bool Str::endsWith(const wstring& s, const wstring& what)
@@ -190,7 +306,7 @@ bool Str::endsWithI(const wstring& s, const wchar_t *what)
 		return false;
 	}
 
-	return !lstrcmpi(&s[s.length() - whatLen], what);
+	return !lstrcmpi(&s[s.size() - whatLen], what);
 }
 
 bool Str::endsWithI(const wstring& s, const wstring& what)
