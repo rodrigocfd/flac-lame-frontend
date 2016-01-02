@@ -20,7 +20,6 @@ public:
 	explicit TaskBarProgress(const Window& mainWindow);
 	explicit TaskBarProgress(HWND hWndMainWindow);
 	TaskBarProgress& setPos(size_t percent, size_t total);
-	TaskBarProgress& setPos(size_t percent);
 	TaskBarProgress& setPos(double percent);
 	TaskBarProgress& setWaiting(bool isWaiting);
 	TaskBarProgress& setPause(bool isPaused);

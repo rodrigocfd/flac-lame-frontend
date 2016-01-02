@@ -38,14 +38,9 @@ TaskBarProgress& TaskBarProgress::setPos(size_t percent, size_t total)
 	return *this;
 }
 
-TaskBarProgress& TaskBarProgress::setPos(size_t percent)
-{
-	return this->setPos(percent, 100);
-}
-
 TaskBarProgress& TaskBarProgress::setPos(double percent)
 {
-	return this->setPos(static_cast<size_t>(percent + 0.5)); // round
+	return this->setPos(static_cast<size_t>(percent + 0.5), 100); // round
 }
 
 TaskBarProgress& TaskBarProgress::setWaiting(bool isWaiting)

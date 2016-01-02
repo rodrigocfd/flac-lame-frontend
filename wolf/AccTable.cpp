@@ -78,7 +78,8 @@ bool AccTable::create(DWORD *lastError)
 {
 	if (this->_entries.empty()) return true; // nothing to do
 
-	this->_hAccel = CreateAcceleratorTable(this->_entries.data(), this->_entries.size());
+	this->_hAccel = CreateAcceleratorTable(this->_entries.data(),
+		static_cast<int>(this->_entries.size()));
 	if (lastError) *lastError = this->_hAccel ? 0 : GetLastError();
 	if (this->_hAccel) this->_entries.clear();
 	return this->_hAccel != nullptr;

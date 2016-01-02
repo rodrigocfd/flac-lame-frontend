@@ -29,7 +29,7 @@ WndRunnin::WndRunnin(
 		_prog = this->getChild(PRO_STATUS);
 	
 		_prog.setRange(0, _files.size());
-		_taskBar.setPos(0U);
+		_taskBar.setPos(0);
 		_lbl.setText( Str::format(L"0 of %d files finished...", _files.size()) ); // initial text
 		_time0.setNow(); // start timer
 		EnableMenuItem(GetSystemMenu(this->hWnd(), FALSE),

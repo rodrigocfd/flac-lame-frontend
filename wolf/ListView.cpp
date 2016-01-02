@@ -28,7 +28,7 @@ void ListView::Item::remove()
 	ListView_DeleteItem(this->_list->hWnd(), this->index);
 }
 
-void ListView::Item::swapWith(int itemIndex)
+void ListView::Item::swapWith(size_t itemIndex)
 {
 	Item newItem = this->_list->items[itemIndex];
 
@@ -119,12 +119,12 @@ RECT ListView::Item::getRect() const
 	return rc;
 }
 
-wstring ListView::Item::getText(int columnIndex) const
+wstring ListView::Item::getText(size_t columnIndex) const
 {
 	// http://forums.codeguru.com/showthread.php?351972-Getting-listView-item-text-length
 	LVITEM lvi = { 0 };
 	lvi.iItem = this->index;
-	lvi.iSubItem = columnIndex;
+	lvi.iSubItem = static_cast<int>(columnIndex);
 
 	// Notice that, since strings' size always increase, if the buffer
 	// was previously allocated with a value bigger than our 1st step,
@@ -147,14 +147,14 @@ wstring ListView::Item::getText(int columnIndex) const
 	return buf;
 }
 
-ListView::Item& ListView::Item::setText(const wchar_t *text, int columnIndex)
+ListView::Item& ListView::Item::setText(const wchar_t *text, size_t columnIndex)
 {
 	ListView_SetItemText(this->_list->hWnd(), this->index,
-		columnIndex, const_cast<wchar_t*>(text));
+		static_cast<int>(columnIndex), const_cast<wchar_t*>(text));
 	return *this;
 }
 
-ListView::Item& ListView::Item::setText(const wstring& text, int columnIndex)
+ListView::Item& ListView::Item::setText(const wstring& text, size_t columnIndex)
 {
 	return this->setText(text.c_str(), columnIndex);
 }
@@ -207,9 +207,9 @@ ListView::Collection::Collection(ListView *pList)
 {
 }
 
-ListView::Item ListView::Collection::operator[](int itemIndex)
+ListView::Item ListView::Collection::operator[](size_t itemIndex)
 {
-	return Item(itemIndex, this->_list);
+	return Item(static_cast<int>(itemIndex), this->_list);
 }
 
 int ListView::Collection::count() const
@@ -280,11 +280,12 @@ int ListView::Collection::countSelected() const
 	return ListView_GetSelectedCount(this->_list->hWnd());
 }
 
-void ListView::Collection::select(const vector<int>& indexes)
+void ListView::Collection::select(const vector<size_t>& indexes)
 {
 	// Select the items whose indexes have been passed in the array.
-	for (const int& index : indexes) {
-		ListView_SetItemState(this->_list->hWnd(), index, LVIS_SELECTED, LVIS_SELECTED);
+	for (const size_t& index : indexes) {
+		ListView_SetItemState(this->_list->hWnd(),
+			static_cast<int>(index), LVIS_SELECTED, LVIS_SELECTED);
 	}
 }
 
@@ -433,13 +434,13 @@ ListView& ListView::columnAdd(const wchar_t *caption, int cx)
 	return *this;
 }
 
-ListView& ListView::columnFit(int iCol)
+ListView& ListView::columnFit(size_t columnIndex)
 {
 	int numCols = this->columnCount();
 	int cxUsed = 0;
 
 	for (int i = 0; i < numCols; ++i) {
-		if (i != iCol) {
+		if (i != columnIndex) {
 			LVCOLUMN lvc = { 0 };
 			lvc.mask = LVCF_WIDTH;
 			ListView_GetColumn(this->hWnd(), i, &lvc); // retrieve cx of each column, except stretchee
@@ -449,12 +450,12 @@ ListView& ListView::columnFit(int iCol)
 
 	RECT rc = { 0 };
 	GetClientRect(this->hWnd(), &rc); // listview client area
-	ListView_SetColumnWidth(this->hWnd(), iCol,
+	ListView_SetColumnWidth(this->hWnd(), static_cast<int>(columnIndex),
 		rc.right /*- GetSystemMetrics(SM_CXVSCROLL)*/ - cxUsed); // fit the rest of available space
 	return *this;
 }
 
-vector<wstring> ListView::getAllText(vector<Item> items, int columnIndex)
+vector<wstring> ListView::getAllText(vector<Item> items, size_t columnIndex)
 {
 	vector<wstring> texts;
 	texts.reserve(items.size());

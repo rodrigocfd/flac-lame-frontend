@@ -21,7 +21,7 @@ public:
 		Item(int itemIndex, ListView *pList);
 		Item();
 		void         remove();
-		void         swapWith(int itemIndex);
+		void         swapWith(size_t itemIndex);
 		Item&        ensureVisible();
 		bool         isVisible() const;
 		Item&        setSelect(bool select);
@@ -29,9 +29,9 @@ public:
 		Item&        setFocus();
 		bool         isFocused() const;
 		RECT         getRect() const;
-		std::wstring getText(int columnIndex = 0) const;
-		Item&        setText(const wchar_t *text, int columnIndex = 0);
-		Item&        setText(const std::wstring& text, int columnIndex = 0);
+		std::wstring getText(size_t columnIndex = 0) const;
+		Item&        setText(const wchar_t *text, size_t columnIndex = 0);
+		Item&        setText(const std::wstring& text, size_t columnIndex = 0);
 		LPARAM       getParam() const;
 		Item&        setParam(LPARAM lp);
 		int          getIcon() const;
@@ -43,7 +43,7 @@ public:
 		ListView *_list;
 	public:
 		explicit Collection(ListView *pList);
-		Item operator[](int itemIndex);
+		Item operator[](size_t itemIndex);
 		int               count() const;
 		Item              add(const wchar_t *caption, int imagelistIconIndex = -1, int positionIndex = -1);
 		Item              add(const std::wstring& caption, int imagelistIconIndex = -1, int positionIndex = -1);
@@ -54,7 +54,7 @@ public:
 		bool              exists(const wchar_t *caption);
 		bool              exists(const std::wstring& caption);
 		int               countSelected() const;
-		void              select(const std::vector<int>& indexes);
+		void              select(const std::vector<size_t>& indexes);
 		void              selectAll();
 		void              selectNone();
 		void              removeSelected();
@@ -87,9 +87,9 @@ public:
 	ListView& iconPush(const wchar_t *fileExtension);
 	int       columnCount() const;
 	ListView& columnAdd(const wchar_t *caption, int cx);
-	ListView& columnFit(int iCol);
+	ListView& columnFit(size_t columnIndex);
 
-	static std::vector<std::wstring> getAllText(std::vector<Item> items, int columnIndex = 0);
+	static std::vector<std::wstring> getAllText(std::vector<Item> items, size_t columnIndex = 0);
 private:
 	void       _addMsgs();
 	HIMAGELIST _proceedImagelist();

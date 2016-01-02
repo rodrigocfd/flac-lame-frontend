@@ -15,7 +15,7 @@ public:
 	WndMain();
 private:
 	bool    _destFolderIsOk();
-	bool    _filesExist();
+	bool    _filesExist(std::vector<std::wstring>& files);
 	LRESULT _doUpdateCounter(int newCount);
 	void    _doFileToList(const std::wstring& file);
 };

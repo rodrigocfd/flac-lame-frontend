@@ -14,6 +14,9 @@ WndMain::WndMain()
 {
 	this->setup.dialogId = DLG_MAIN;
 	this->setup.iconId = ICO_MAIN;
+	this->setup.accTable
+		.addChar(MNU_ADDFILES, 'A', AccTable::Mod::SHIFT)
+		.addKey(MNU_ABOUT, VK_F1);
 
 	this->onMessage(WM_CREATE, [this](WPARAM wp, LPARAM lp)->LRESULT
 	{
@@ -21,7 +24,7 @@ WndMain::WndMain()
 		wstring iniPath = Sys::pathOfExe().append(L"\\FlacLameFE.ini");
 		if (!File::exists(iniPath)) {
 			Sys::msgBox(this, L"Fail",
-				Str::format(L"Fail", L"File not found:\n%s", iniPath.c_str()),
+				Str::format(L"File not found:\n%s", iniPath.c_str()),
 				MB_ICONERROR);
 			this->sendMessage(WM_CLOSE, 0, 0); // halt program
 			return 0;
@@ -30,7 +33,7 @@ WndMain::WndMain()
 		wstring err;
 		if (!_ini.load(iniPath, &err)) {
 			Sys::msgBox(this, L"Fail",
-				Str::format(L"Fail", L"Failed to open:\n%s\n%s", iniPath.c_str(), err.c_str()),
+				Str::format(L"Failed to open:\n%s\n%s", iniPath.c_str(), err.c_str()),
 				MB_ICONERROR);
 			this->sendMessage(WM_CLOSE, 0, 0); // halt program
 			return 0;
@@ -50,6 +53,14 @@ WndMain::WndMain()
 			.iconPush(L"mp3")
 			.iconPush(L"flac")
 			.iconPush(L"wav"); // icons of the 3 filetypes we use
+		_lstFiles.menu
+			.addItem(MNU_ADDFILES, L"&Add files...\tShift+A")
+			.addItem(MNU_REMSELECTED, L"&Remove selected\tDel")
+			.addSeparator()
+			.addItem(MNU_ABOUT, L"A&bout...\tF1");
+		_lstFiles.menu.onInitMenuPopup(this, [this]()->void {
+			_lstFiles.menu.enableItem(MNU_REMSELECTED, _lstFiles.items.countSelected() > 0);
+		});
 
 		// Initializing comboboxes.
 		_cmbCbr = this->getChild(CMB_CBR);
@@ -123,6 +134,35 @@ WndMain::WndMain()
 		return 0;
 	});
 
+	this->onCommand(MNU_ABOUT, [this]()->LRESULT {
+		Sys::msgBox(this, L"About",
+			L"FLAC/LAME graphical front-end.", MB_ICONINFORMATION);
+		return 0;
+	});
+
+	this->onCommand(MNU_ADDFILES, [this]()->LRESULT {
+		vector<wstring> files;
+		if (File::showOpen(this,
+			L"Supported audio files (*.mp3, *.flac, *.wav)|*.mp3;*.flac;*.wav|"
+			L"MP3 audio files (*.mp3)|*.mp3|"
+			L"FLAC audio files (*.flac)|*.flac|"
+			L"WAV audio files (*.wav)|*.wav",
+			files))
+		{
+			for (const wstring& file : files) {
+				this->_doFileToList(file);
+			}
+			this->_doUpdateCounter( _lstFiles.items.count() );
+		}
+		return 0;
+	});
+
+	this->onCommand(MNU_REMSELECTED, [this]()->LRESULT {
+		_lstFiles.items.removeSelected();
+		this->_doUpdateCounter( _lstFiles.items.count() );
+		return 0;
+	});
+
 	this->onCommand(IDCANCEL, [this]()->LRESULT
 	{
 		if (!_lstFiles.items.count() || IsWindowEnabled(this->getChild(BTN_RUN).hWnd())) {
@@ -166,7 +206,8 @@ WndMain::WndMain()
 
 	this->onCommand(BTN_RUN, [this]()->LRESULT
 	{
-		if (!this->_destFolderIsOk() || !this->_filesExist()) {
+		vector<wstring> files;
+		if (!this->_destFolderIsOk() || !this->_filesExist(files)) {
 			return 0;
 		}
 
@@ -193,8 +234,7 @@ WndMain::WndMain()
 
 		// Finally invoke dialog.
 		WndRunnin rd(_taskBar, numThreads, targetType,
-			ListView::getAllText(_lstFiles.items.getAll(), 0),
-			delSrc, isVbr, quality, _ini,
+			files, delSrc, isVbr, quality, _ini,
 			this->getChild(TXT_DEST).getText());
 		rd.show(this);
 		return 0;
@@ -208,7 +248,7 @@ WndMain::WndMain()
 	{
 		NMLVKEYDOWN& nkd = reinterpret_cast<NMLVKEYDOWN&>(nm);
 		if (nkd.wVKey == VK_DELETE) { // Del key
-			_lstFiles.items.removeSelected();
+			this->sendMessage(WM_COMMAND, MAKEWPARAM(MNU_REMSELECTED, 0), 0);
 		}
 		return 0;
 	});
@@ -243,10 +283,10 @@ bool WndMain::_destFolderIsOk()
 	return true;
 }
 
-bool WndMain::_filesExist()
+bool WndMain::_filesExist(vector<wstring>& files)
 {
 	vector<ListView::Item> allItems = _lstFiles.items.getAll();
-	vector<wstring> files = ListView::getAllText(allItems, 0);
+	files = ListView::getAllText(allItems, 0);
 
 	for (const wstring& f : files) { // each filepath
 		if (!File::exists(f)) {
