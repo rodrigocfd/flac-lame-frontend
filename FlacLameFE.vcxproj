@@ -150,6 +150,7 @@
     <ClInclude Include="src\Convert.h" />
     <ClInclude Include="src\WndMain.h" />
     <ClInclude Include="src\WndRunnin.h" />
+    <ClInclude Include="wolf\AccTable.h" />
     <ClInclude Include="wolf\CheckBox.h" />
     <ClInclude Include="wolf\ComboBox.h" />
     <ClInclude Include="wolf\DateTime.h" />
@@ -194,6 +195,7 @@
     <ClCompile Include="src\Convert.cpp" />
     <ClCompile Include="src\WndMain.cpp" />
     <ClCompile Include="src\WndRunnin.cpp" />
+    <ClCompile Include="wolf\AccTable.cpp" />
     <ClCompile Include="wolf\CheckBox.cpp" />
     <ClCompile Include="wolf\ComboBox.cpp" />
     <ClCompile Include="wolf\DateTime.cpp" />

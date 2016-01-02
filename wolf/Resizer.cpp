@@ -14,29 +14,47 @@ Resizer::Resizer(WindowParent *parent)
 {
 }
 
-Resizer& Resizer::addById(initializer_list<int> ctrlIds, Do modeHorz, Do modeVert)
+Resizer& Resizer::add(int ctrlId, Do modeHorz, Do modeVert)
+{
+	this->_addOne(GetDlgItem(this->_parent.hWnd(), ctrlId), modeHorz, modeVert);
+	return *this;
+}
+
+Resizer& Resizer::add(HWND child, Do modeHorz, Do modeVert)
+{
+	this->_addOne(child, modeHorz, modeVert);
+	return *this;
+}
+
+Resizer& Resizer::add(const Window *child, Do modeHorz, Do modeVert)
+{
+	this->_addOne(child->hWnd(), modeHorz, modeVert);
+	return *this;
+}
+
+Resizer& Resizer::add(initializer_list<int> ctrlIds, Do modeHorz, Do modeVert)
 {
 	this->_ctrls.reserve(this->_ctrls.size() + ctrlIds.size());
 	for (int ctrlId : ctrlIds) {
-		this->_addOne(GetDlgItem(this->_parent.hWnd(), ctrlId), modeHorz, modeVert);
+		this->add(ctrlId, modeHorz, modeVert);
 	}
 	return *this;
 }
 
-Resizer& Resizer::addByHwnd(initializer_list<HWND> children, Do modeHorz, Do modeVert)
+Resizer& Resizer::add(initializer_list<HWND> children, Do modeHorz, Do modeVert)
 {
 	this->_ctrls.reserve(this->_ctrls.size() + children.size());
 	for (HWND hChild : children) {
-		this->_addOne(hChild, modeHorz, modeVert);
+		this->add(hChild, modeHorz, modeVert);
 	}
 	return *this;
 }
 
-Resizer& Resizer::addByObj(initializer_list<const Window*> children, Do modeHorz, Do modeVert)
+Resizer& Resizer::add(initializer_list<const Window*> children, Do modeHorz, Do modeVert)
 {
 	this->_ctrls.reserve(this->_ctrls.size() + children.size());
 	for (const Window *pChild : children) {
-		this->_addOne(pChild->hWnd(), modeHorz, modeVert);
+		this->add(pChild, modeHorz, modeVert);
 	}
 	return *this;
 }

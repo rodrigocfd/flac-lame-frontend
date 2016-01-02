@@ -125,6 +125,9 @@
     <ClInclude Include="wolf\TaskBarProgress.h">
       <Filter>wolf</Filter>
     </ClInclude>
+    <ClInclude Include="wolf\AccTable.h">
+      <Filter>wolf</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\Ron Burgundy.ico">
@@ -234,6 +237,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="wolf\TaskBarProgress.cpp">
+      <Filter>wolf</Filter>
+    </ClCompile>
+    <ClCompile Include="wolf\AccTable.cpp">
       <Filter>wolf</Filter>
     </ClCompile>
   </ItemGroup>

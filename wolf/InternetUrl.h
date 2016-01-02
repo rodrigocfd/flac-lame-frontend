@@ -12,8 +12,8 @@ namespace wolf {
 class InternetUrl final {
 public:
 	InternetUrl();
-	bool           crack(const wchar_t *address, std::wstring *pErr=nullptr);
-	bool           crack(const std::wstring& address, std::wstring *pErr=nullptr);
+	bool           crack(const wchar_t *address, std::wstring *pErr = nullptr);
+	bool           crack(const std::wstring& address, std::wstring *pErr = nullptr);
 	const wchar_t* scheme() const;
 	const wchar_t* host() const;
 	const wchar_t* user() const;

@@ -7,17 +7,17 @@ using std::wstring;
 using std::vector;
 
 WndRunnin::WndRunnin(
-	WindowMain                      *wmain,
-	int                              numThreads,
-	Target                           targetType,
-	const std::vector<std::wstring>& files,
-	bool                             delSrc,
-	bool                             isVbr,
-	const std::wstring&              quality,
-	const wolf::FileIni&             ini,
-	const std::wstring&              destFolder
+	TaskBarProgress&       taskBar,
+	int                    numThreads,
+	Target                 targetType,
+	const vector<wstring>& files,
+	bool                   delSrc,
+	bool                   isVbr,
+	const wstring&         quality,
+	const FileIni&         ini,
+	const wstring&         destFolder
 )
-	: _taskBar(wmain), _numThreads(numThreads), _targetType(targetType), _files(files),
+	: _taskBar(taskBar), _numThreads(numThreads), _targetType(targetType), _files(files),
 		_delSrc(delSrc), _isVbr(isVbr), _quality(quality), _ini(ini), _destFolder(destFolder),
 		_curFile(0), _filesDone(0)
 {

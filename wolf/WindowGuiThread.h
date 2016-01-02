@@ -9,7 +9,7 @@
 
 namespace wolf {
 
-template<WNDPROC DefProcT=DefWindowProc>
+template<WNDPROC DefProcT>
 class WindowGuiThread : public WindowMsgHandler<DefProcT> {
 public:
 	virtual ~WindowGuiThread() = 0;

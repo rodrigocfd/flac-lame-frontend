@@ -7,7 +7,7 @@ public:
 	enum class Target { NONE=0, MP3, FLAC, WAV };
 
 private:
-	wolf::TaskBarProgress            _taskBar;
+	wolf::TaskBarProgress&           _taskBar;
 	wolf::Window                     _lbl;
 	wolf::ProgressBar                _prog;
 	int                              _numThreads;
@@ -22,7 +22,7 @@ private:
 	wolf::DateTime                   _time0;
 public:
 	WndRunnin(
-		wolf::WindowMain                *wmain,
+		wolf::TaskBarProgress&           taskBar,
 		int                              numThreads,
 		Target                           targetType,
 		const std::vector<std::wstring>& files,

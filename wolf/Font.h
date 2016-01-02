@@ -32,7 +32,7 @@ public:
 	Font& operator=(Font&& f);
 	HFONT hFont() const;
 	void  release();
-	Font& create(const wchar_t *name, int size, bool bold=false, bool italic=false);
+	Font& create(const wchar_t *name, int size, bool bold = false, bool italic = false);
 	Font& create(const Info& info);
 	Font& cloneFrom(const Font& font);
 	Info  getInfo() const;

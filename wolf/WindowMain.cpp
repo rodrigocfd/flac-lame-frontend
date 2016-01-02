@@ -8,7 +8,7 @@
 using namespace wolf;
 
 WindowMain::SetupMain::SetupMain()
-	: hMenu(nullptr), iconId(0)
+	: iconId(0)
 {
 }
 
@@ -38,14 +38,14 @@ int WindowMain::run(HINSTANCE hInst, int cmdShow)
 
 	if (this->setup.dialogId) {
 		if (!this->WindowTopLevel::_loadIfTemplate(hInst, this->setup)) return -1;
-		if (this->setup.hMenu) this->setup.size.cy += GetSystemMetrics(SM_CYMENU); // add menu height
+		if (this->setup.menu.hMenu()) this->setup.size.cy += GetSystemMetrics(SM_CYMENU); // add menu height
 		style = this->_dialogTemplate.style;
 		exStyle = this->_dialogTemplate.exStyle;
 	} else {
 		style = WindowTopLevel::_calcStyle(this->setup);
 		exStyle = WindowTopLevel::_calcStyleEx(this->setup);
 		if (!WindowTopLevel::_compensateBorders(WindowTopLevel::_calcStyle(this->setup),
-			this->setup.hMenu != nullptr, this->setup)) return -1;
+			this->setup.menu.hMenu() != nullptr, this->setup)) return -1;
 	}
 
 	if (!CreateWindowEx(exStyle, MAKEINTATOM(this->_registerClass(hInst)),
@@ -53,7 +53,7 @@ int WindowMain::run(HINSTANCE hInst, int cmdShow)
 		GetSystemMetrics(SM_CXSCREEN) / 2 - this->setup.size.cx / 2, // center on screen
 		GetSystemMetrics(SM_CYSCREEN) / 2 - this->setup.size.cy / 2,
 		this->setup.size.cx, this->setup.size.cy,
-		nullptr, this->setup.hMenu, hInst,
+		nullptr, this->setup.menu.hMenu(), hInst,
 		static_cast<LPVOID>(this)) ) // pass pointer to object, _hWnd is set on WM_NCCREATE
 	{
 		WindowMsgHandler::_errorShout(GetLastError(), L"WindowMain::run", L"CreateWindowEx");

@@ -15,7 +15,7 @@ WindowModal::WindowModal()
 {
 	this->WindowMsgHandler::onMessage(WM_DESTROY, [this](WPARAM wp, LPARAM lp)->LRESULT {
 		// https://msdn.microsoft.com/en-us/library/windows/desktop/ff381396%28v=vs.85%29.aspx
-		EnableWindow(this->getParent().hWnd(), TRUE); // re-enable parent window
+		this->getParent().enable(true); // re-enable parent window
 		SetForegroundWindow(this->getParent().hWnd());
 		//BringWindowToTop(this->getParent().hWnd());
 		return 0;

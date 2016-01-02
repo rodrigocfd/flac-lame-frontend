@@ -9,8 +9,7 @@
 using namespace wolf;
 
 WindowTopLevel::SetupTopLevel::SetupTopLevel()
-	: resize(false), maximize(false), minimize(true), dropFiles(false),
-		size({300, 200}), hAccel(nullptr)
+	: resize(false), maximize(false), minimize(true), dropFiles(false), size({300, 200})
 {
 }
 
@@ -35,8 +34,14 @@ bool WindowTopLevel::_loadIfTemplate(HINSTANCE hInst, SetupTopLevel& setup)
 	return true;
 }
 
-int WindowTopLevel::_loop(const SetupTopLevel& setup)
+int WindowTopLevel::_loop(SetupTopLevel& setup)
 {
+	DWORD err = 0;
+	if (!setup.accTable.create(&err)) {
+		WindowMsgHandler::_errorShout(err, L"WindowTopLevel::_loop", L"CreateAcceleratorTable");
+		return -1;
+	}
+
 	MSG  msg = { 0 };
 	BOOL ret = 0;
 	while (IsWindow(this->Window::hWnd()) && (ret = GetMessage(&msg, nullptr, 0, 0)) != 0) {
@@ -44,7 +49,8 @@ int WindowTopLevel::_loop(const SetupTopLevel& setup)
 			WindowMsgHandler::_errorShout(GetLastError(), L"WindowTopLevel::_loop", L"GetMessage");
 			return -1;
 		}
-		if ( (setup.hAccel && TranslateAccelerator(this->Window::hWnd(), setup.hAccel, &msg)) ||
+		if ( (setup.accTable.hAccel() &&
+				setup.accTable.translate(this->Window::hWnd(), msg)) ||
 			IsDialogMessage(this->Window::hWnd(), &msg) )
 		{
 			continue;

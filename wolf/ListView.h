@@ -7,6 +7,7 @@
 #pragma once
 #include "WindowSubclass.h"
 #include "WindowParent.h"
+#include "Menu.h"
 
 namespace wolf {
 
@@ -28,9 +29,9 @@ public:
 		Item&        setFocus();
 		bool         isFocused() const;
 		RECT         getRect() const;
-		std::wstring getText(int columnIndex=0) const;
-		Item&        setText(const wchar_t *text, int columnIndex=0);
-		Item&        setText(const std::wstring& text, int columnIndex=0);
+		std::wstring getText(int columnIndex = 0) const;
+		Item&        setText(const wchar_t *text, int columnIndex = 0);
+		Item&        setText(const std::wstring& text, int columnIndex = 0);
 		LPARAM       getParam() const;
 		Item&        setParam(LPARAM lp);
 		int          getIcon() const;
@@ -44,8 +45,8 @@ public:
 		explicit Collection(ListView *pList);
 		Item operator[](int itemIndex);
 		int               count() const;
-		Item              add(const wchar_t *caption, int imagelistIconIndex=-1, int positionIndex=-1);
-		Item              add(const std::wstring& caption, int imagelistIconIndex=-1, int positionIndex=-1);
+		Item              add(const wchar_t *caption, int imagelistIconIndex = -1, int positionIndex = -1);
+		Item              add(const std::wstring& caption, int imagelistIconIndex = -1, int positionIndex = -1);
 		std::vector<Item> getAll() const;
 		void              removeAll();
 		Item              find(const wchar_t *caption);
@@ -62,17 +63,22 @@ public:
 	};
 public:
 	Collection items;
-	HMENU hMenuContext;
-	enum class View { DETAILS=LV_VIEW_DETAILS, ICON=LV_VIEW_ICON,
-		LIST=LV_VIEW_LIST, SMALLICON=LV_VIEW_SMALLICON, TILE=LV_VIEW_TILE };
+	MenuContext menu;
+	enum class View : WORD {
+		DETAILS   = LV_VIEW_DETAILS,
+		ICON      = LV_VIEW_ICON,
+		LIST      = LV_VIEW_LIST,
+		SMALLICON = LV_VIEW_SMALLICON,
+		TILE      = LV_VIEW_TILE
+	};
 
 	ListView();
 	ListView(HWND hwnd);
 	ListView(Window&& w);
 	ListView& operator=(HWND hwnd);
 	ListView& operator=(Window&& w);
-	ListView& create(const WindowParent *parent, int id, POINT pos, SIZE size, View view=View::DETAILS);
-	ListView& create(HWND hParent, int id, POINT pos, SIZE size, View view=View::DETAILS);
+	ListView& create(const WindowParent *parent, int id, POINT pos, SIZE size, View view = View::DETAILS);
+	ListView& create(HWND hParent, int id, POINT pos, SIZE size, View view = View::DETAILS);
 	ListView& setFullRowSelect();
 	ListView& setRedraw(bool doRedraw);
 	ListView& setView(View view);
@@ -83,7 +89,7 @@ public:
 	ListView& columnAdd(const wchar_t *caption, int cx);
 	ListView& columnFit(int iCol);
 
-	static std::vector<std::wstring> getAllText(std::vector<Item> items, int columnIndex=0);
+	static std::vector<std::wstring> getAllText(std::vector<Item> items, int columnIndex = 0);
 private:
 	void       _addMsgs();
 	HIMAGELIST _proceedImagelist();

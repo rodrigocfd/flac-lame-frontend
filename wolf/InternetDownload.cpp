@@ -35,10 +35,16 @@ void InternetDownload::abort()
 	}
 }
 
-InternetDownload& InternetDownload::addRequestHeaders(initializer_list<const wchar_t*> requestHeaders)
+InternetDownload& InternetDownload::addRequestHeader(const wchar_t *requestHeader)
+{
+	this->_requestHeaders.emplace_back(requestHeader);
+	return *this;
+}
+
+InternetDownload& InternetDownload::addRequestHeader(initializer_list<const wchar_t*> requestHeaders)
 {
 	for (const wchar_t *rh : requestHeaders) {
-		this->_requestHeaders.emplace_back(rh);
+		this->addRequestHeader(rh);
 	}
 	return *this;
 }

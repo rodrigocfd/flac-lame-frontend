@@ -334,13 +334,13 @@ ListView::ListView()
 }
 
 ListView::ListView(HWND hwnd)
-	: WindowSubclass(hwnd), items(this), hMenuContext(nullptr)
+	: WindowSubclass(hwnd), items(this)
 {
 	this->_addMsgs();
 }
 
 ListView::ListView(Window&& w)
-	: WindowSubclass(std::move(w)), items(this), hMenuContext(nullptr)
+	: WindowSubclass(std::move(w)), items(this)
 {
 	this->_addMsgs();
 }
@@ -511,7 +511,7 @@ HIMAGELIST ListView::_proceedImagelist()
 
 int ListView::_showContextMenu(bool followCursor)
 {
-	if (!this->hMenuContext) return -1; // no context menu assigned
+	if (!this->menu.hMenu()) return -1; // no context menu assigned
 
 	POINT coords = { 0 };
 	int itemBelowCursor = -1;
@@ -552,7 +552,6 @@ int ListView::_showContextMenu(bool followCursor)
 
 	// The popup menu is created with hDlg as parent, so the menu messages go to it.
 	// The lvhti coordinates are relative to listview, and will be mapped into screen-relative.
-	Menu cm = this->hMenuContext;
-	cm.showAtPoint(this->getParent().hWnd(), coords, this->hWnd());
+	this->menu.showAtPoint(this->getParent().hWnd(), coords, this->hWnd());
 	return itemBelowCursor; // -1 if none
 }

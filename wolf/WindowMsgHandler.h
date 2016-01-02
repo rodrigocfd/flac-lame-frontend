@@ -11,7 +11,7 @@
 
 namespace wolf {
 
-template<WNDPROC DefProcT=DefWindowProc>
+template<WNDPROC DefProcT = DefWindowProc>
 class WindowMsgHandler : public Window {
 private:
 	struct Msg      { UINT msg; std::vector<std::function<LRESULT(WPARAM, LPARAM)>> callbacks; };

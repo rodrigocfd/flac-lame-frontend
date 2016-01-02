@@ -10,7 +10,7 @@ using std::wstring;
 RUN(WndMain);
 
 WndMain::WndMain()
-	: _resizer(this)
+	: _taskBar(this), _resizer(this)
 {
 	this->setup.dialogId = DLG_MAIN;
 	this->setup.iconId = ICO_MAIN;
@@ -89,12 +89,12 @@ WndMain::WndMain()
 		_chkDelSrc = this->getChild(CHK_DELSRC);
 
 		// Layout control when resizing.
-		_resizer.addByObj({ &_lstFiles }, Resizer::Do::RESIZE, Resizer::Do::RESIZE)
-			.addById({ TXT_DEST }, Resizer::Do::RESIZE, Resizer::Do::REPOS)
-			.addById({ LBL_DEST, FRA_CONV, RAD_MP3, RAD_FLAC, RAD_WAV, RAD_CBR, RAD_VBR, LBL_LEVEL,
+		_resizer.add(&_lstFiles, Resizer::Do::RESIZE, Resizer::Do::RESIZE)
+			.add(TXT_DEST, Resizer::Do::RESIZE, Resizer::Do::REPOS)
+			.add({ LBL_DEST, FRA_CONV, RAD_MP3, RAD_FLAC, RAD_WAV, RAD_CBR, RAD_VBR, LBL_LEVEL,
 				CMB_CBR, CMB_VBR, CMB_FLAC, CHK_DELSRC, LBL_NUMTHREADS, CMB_NUMTHREADS },
 				Resizer::Do::NOTHING, Resizer::Do::REPOS)
-			.addById({ BTN_DEST, BTN_RUN }, Resizer::Do::REPOS, Resizer::Do::REPOS)
+			.add({ BTN_DEST, BTN_RUN }, Resizer::Do::REPOS, Resizer::Do::REPOS)
 			.afterResize([this]()->void {
 				_lstFiles.columnFit(0);
 			});
@@ -143,14 +143,14 @@ WndMain::WndMain()
 
 	this->onCommand(RAD_MP3, [this]()->LRESULT
 	{
-		EnableWindow(_radMp3Cbr.hWnd(), _radMp3.isChecked());
-		EnableWindow(_cmbCbr.hWnd(), _radMp3.isChecked() && _radMp3Cbr.isChecked());
+		_radMp3Cbr.enable(_radMp3.isChecked());
+		_cmbCbr.enable(_radMp3.isChecked() && _radMp3Cbr.isChecked());
 
-		EnableWindow(_radMp3Vbr.hWnd(), _radMp3.isChecked());
-		EnableWindow(_cmbVbr.hWnd(), _radMp3.isChecked() && _radMp3Vbr.isChecked());
+		_radMp3Vbr.enable(_radMp3.isChecked());
+		_cmbVbr.enable(_radMp3.isChecked() && _radMp3Vbr.isChecked());
 
-		EnableWindow(this->getChild(LBL_LEVEL).hWnd(), _radFlac.isChecked());
-		EnableWindow(_cmbFlac.hWnd(), _radFlac.isChecked());
+		this->getChild(LBL_LEVEL).enable(_radFlac.isChecked());
+		_cmbFlac.enable(_radFlac.isChecked());
 		return 0;
 	});
 	this->onCommand(RAD_FLAC, [this]()->LRESULT { return this->sendMessage(WM_COMMAND, MAKEWPARAM(RAD_MP3, 0), 0); });
@@ -158,8 +158,8 @@ WndMain::WndMain()
 
 	this->onCommand(RAD_CBR, [this]()->LRESULT
 	{
-		EnableWindow(_cmbCbr.hWnd(), _radMp3Cbr.isChecked());
-		EnableWindow(_cmbVbr.hWnd(), _radMp3Vbr.isChecked());
+		_cmbCbr.enable(_radMp3Cbr.isChecked());
+		_cmbVbr.enable(_radMp3Vbr.isChecked());
 		return 0;
 	});
 	this->onCommand(RAD_VBR, [this]()->LRESULT { return this->sendMessage(WM_COMMAND, MAKEWPARAM(RAD_CBR, 0), 0); });
@@ -192,7 +192,7 @@ WndMain::WndMain()
 		else if (_radWav.isChecked())  targetType = WndRunnin::Target::WAV;
 
 		// Finally invoke dialog.
-		WndRunnin rd(this, numThreads, targetType,
+		WndRunnin rd(_taskBar, numThreads, targetType,
 			ListView::getAllText(_lstFiles.items.getAll(), 0),
 			delSrc, isVbr, quality, _ini,
 			this->getChild(TXT_DEST).getText());
@@ -266,7 +266,7 @@ LRESULT WndMain::_doUpdateCounter(int newCount)
 		Str::format(L"&Run (%d)", newCount) : L"&Run";
 
 	this->getChild(BTN_RUN).setText(caption);
-	EnableWindow(this->getChild(BTN_RUN).hWnd(), newCount > 0); // Run button enabled if at least 1 file
+	this->getChild(BTN_RUN).enable(newCount > 0); // Run button enabled if at least 1 file
 	return 0;
 };
 

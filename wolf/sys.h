@@ -19,8 +19,8 @@ public:
 	static std::wstring pathOfDesktop();
 	static bool         hasCtrl();
 	static bool         hasShift();
-	static int          msgBox(const Window *parent, std::wstring title, std::wstring text, UINT uType=0);
-	static int          msgBox(HWND hParent, std::wstring title, std::wstring text, UINT uType=0);
+	static int          msgBox(const Window *parent, std::wstring title, std::wstring text, UINT uType = 0);
+	static int          msgBox(HWND hParent, std::wstring title, std::wstring text, UINT uType = 0);
 	static std::vector<std::wstring> getDroppedFiles(HDROP hDrop);
 };
 

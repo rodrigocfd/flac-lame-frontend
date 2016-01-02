@@ -23,7 +23,7 @@ public:
 	ComboBox&    itemSetSelected(int i);
 	int          itemGetSelected() const;
 	ComboBox&    itemAdd(std::initializer_list<const wchar_t*> entries);
-	ComboBox&    itemAdd(const wchar_t* entries, wchar_t delimiter=L'|');
+	ComboBox&    itemAdd(const wchar_t* entries, wchar_t delimiter = L'|');
 	std::wstring itemGetText(int i) const;
 	std::wstring itemGetSelectedText() const;
 private:

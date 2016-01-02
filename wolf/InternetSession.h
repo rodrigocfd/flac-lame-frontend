@@ -21,7 +21,7 @@ public:
 	InternetSession& operator=(InternetSession&& is);
 	HINTERNET        hSession() const;
 	void             close();
-	bool             init(std::wstring *pErr=nullptr, const wchar_t *userAgent=L"WOLF/1.0");
+	bool             init(std::wstring *pErr = nullptr, const wchar_t *userAgent = L"WOLF/1.0");
 
 	static std::wstring formatError(DWORD lastError, const wchar_t *funcName);
 };

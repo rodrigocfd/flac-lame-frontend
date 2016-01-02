@@ -38,7 +38,7 @@ public:
 	BYTE              fontCharset;
 	std::vector<Item> children;
 
-	bool load(HINSTANCE hInst, int dialogId, std::wstring *pErr=nullptr);
+	bool load(HINSTANCE hInst, int dialogId, std::wstring *pErr = nullptr);
 };
 
 }//namespace wolf

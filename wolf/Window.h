@@ -31,6 +31,7 @@ public:
 	std::wstring getText() const;
 	void         setText(const std::wstring& text);
 	void         setText(const wchar_t *text);
+	void         enable(bool doEnable);
 };
 
 }//namespace wolf

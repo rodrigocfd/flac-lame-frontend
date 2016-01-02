@@ -50,27 +50,6 @@ void Menu::destroy()
 	}
 }
 
-Menu& Menu::createMain()
-{
-	this->destroy();
-	this->_hMenu = CreateMenu();
-	return *this;
-}
-
-Menu& Menu::createPopup()
-{
-	this->destroy();
-	this->_hMenu = CreatePopupMenu();
-	return *this;
-}
-
-Menu& Menu::loadResource(int menuId)
-{
-	this->destroy();
-	this->_hMenu = LoadMenu(GetModuleHandle(nullptr), MAKEINTRESOURCE(menuId));
-	return *this;
-}
-
 int Menu::size() const
 {
 	return GetMenuItemCount(this->_hMenu);
@@ -81,41 +60,50 @@ Menu Menu::getSubmenu(int pos) const
 	return Menu(GetSubMenu(this->_hMenu, pos));
 }
 
-WORD Menu::getCmdId(int index) const
+WORD Menu::getCommandId(int index) const
 {
 	return GetMenuItemID(this->_hMenu, index);
 }
 
 Menu& Menu::addSeparator()
 {
+	this->_createOnce();
 	InsertMenu(this->_hMenu, -1, MF_BYPOSITION | MF_SEPARATOR, 0, nullptr);
 	return *this;
 }
 
-Menu& Menu::addItem(const wchar_t *caption, WORD cmdId)
+Menu& Menu::addItem(WORD commandId, const wchar_t *caption)
 {
-	InsertMenu(this->_hMenu, -1, MF_BYPOSITION | MF_STRING, cmdId, caption);
+	this->_createOnce();
+	InsertMenu(this->_hMenu, -1, MF_BYPOSITION | MF_STRING, commandId, caption);
 	return *this;
 }
 
-Menu& Menu::addItem(const wstring& caption, WORD cmdId)
+Menu& Menu::addItem(WORD commandId, const wstring& caption)
 {
-	return this->addItem(caption.c_str(), cmdId);
+	return this->addItem(commandId, caption.c_str());
 }
 
-Menu& Menu::enableItem(initializer_list<WORD> cmdIds, bool doEnable)
+Menu& Menu::enableItem(WORD commandId, bool doEnable)
 {
-	for (const WORD& cmd : cmdIds) {
-		EnableMenuItem(this->_hMenu, cmd,
-			MF_BYCOMMAND | ((doEnable) ? MF_ENABLED : MF_GRAYED));
+	EnableMenuItem(this->_hMenu, commandId,
+		MF_BYCOMMAND | ((doEnable) ? MF_ENABLED : MF_GRAYED));
+	return *this;
+}
+
+Menu& Menu::enableItem(initializer_list<WORD> commandIds, bool doEnable)
+{
+	for (const WORD& cmd : commandIds) {
+		this->enableItem(cmd, doEnable);
 	}
 	return *this;
 }
 
 Menu Menu::addSubmenu(const wchar_t *caption)
 {
+	this->_createOnce();
 	Menu sub;
-	sub.createPopup();
+	sub._hMenu = CreatePopupMenu();
 	AppendMenu(this->_hMenu, MF_STRING | MF_POPUP,
 		reinterpret_cast<UINT_PTR>(sub._hMenu), caption);
 	return sub; // return new submenu, so it can be edited
@@ -126,12 +114,33 @@ Menu Menu::addSubmenu(const wstring& caption)
 	return this->addSubmenu(caption.c_str());
 }
 
-void Menu::showAtPoint(HWND hParent, POINT pt, HWND hWndCoordsRelativeTo)
+void Menu::_createOnce()
+{
+	// Does nothing here.
+}
+
+
+void MenuMain::_createOnce()
+{
+	if (!this->_hMenu) {
+		this->_hMenu = CreateMenu();
+	}
+}
+
+
+void MenuContext::_createOnce()
+{
+	if (!this->_hMenu) {
+		this->_hMenu = CreatePopupMenu();
+	}
+}
+
+void MenuContext::showAtPoint(HWND hParent, POINT pt, HWND hWndCoordsRelativeTo)
 {
 	// Shows a popup context menu, anchored at the given coordinates.
 	// The passed coordinates can be relative to any window.
 
-	POINT ptParent = pt; // receives coordinates relative to hDlg
+	POINT ptParent = pt; // receives coordinates relative to hParent
 	ClientToScreen(hWndCoordsRelativeTo ? hWndCoordsRelativeTo : hParent, &ptParent); // to screen coordinates
 	SetForegroundWindow(hParent);
 	TrackPopupMenu(this->_hMenu, 0, ptParent.x, ptParent.y, 0, hParent, nullptr); // owned by dialog, so messages go to it

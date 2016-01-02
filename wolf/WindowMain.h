@@ -6,14 +6,15 @@
 
 #pragma once
 #include "WindowTopLevel.h"
+#include "Menu.h"
 
 namespace wolf {
 
 class WindowMain : public WindowTopLevel  {
 private:
 	struct SetupMain final : public WindowTopLevel::SetupTopLevel {
-		HMENU hMenu;
-		int   iconId;
+		MenuMain menu;
+		int      iconId;
 		SetupMain();
 	};
 

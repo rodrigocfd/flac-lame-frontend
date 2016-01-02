@@ -20,6 +20,7 @@
 #include "WindowModal.h"
 #include "WindowSubclass.h"
 
+#include "AccTable.h"
 #include "CheckBox.h"
 #include "ComboBox.h"
 #include "DateTime.h"

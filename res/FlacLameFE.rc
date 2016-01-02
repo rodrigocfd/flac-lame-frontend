@@ -82,7 +82,7 @@ CAPTION "Running..."
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "Status",LBL_STATUS,6,5,185,8
-    CONTROL         "",PRO_STATUS,"msctls_progress32",WS_BORDER,4,19,190,14
+    CONTROL         "",PRO_STATUS,"msctls_progress32",0x0,4,19,190,14
 END
 
 
@@ -148,6 +148,10 @@ BEGIN
     DLG_MAIN, DIALOG
     BEGIN
     END
+
+    DLG_RUNNIN, DIALOG
+    BEGIN
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -158,6 +162,11 @@ END
 //
 
 DLG_MAIN AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+DLG_RUNNIN AFX_DIALOG_LAYOUT
 BEGIN
     0
 END

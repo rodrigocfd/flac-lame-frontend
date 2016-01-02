@@ -35,9 +35,12 @@ public:
 	explicit Resizer(WindowParent *parent);
 	Resizer& operator=(const Resizer& r) = delete;
 	Resizer& operator=(Resizer&& r) = delete;
-	Resizer& addById(std::initializer_list<int> ctrlIds, Do modeHorz, Do modeVert);
-	Resizer& addByHwnd(std::initializer_list<HWND> children, Do modeHorz, Do modeVert);
-	Resizer& addByObj(std::initializer_list<const Window*> pChildren, Do modeHorz, Do modeVert);
+	Resizer& add(int ctrlId, Do modeHorz, Do modeVert);
+	Resizer& add(HWND child, Do modeHorz, Do modeVert);
+	Resizer& add(const Window *child, Do modeHorz, Do modeVert);
+	Resizer& add(std::initializer_list<int> ctrlIds, Do modeHorz, Do modeVert);
+	Resizer& add(std::initializer_list<HWND> children, Do modeHorz, Do modeVert);
+	Resizer& add(std::initializer_list<const Window*> pChildren, Do modeHorz, Do modeVert);
 	Resizer& afterResize(std::function<void()> callback);
 private:
 	void _addOne(HWND hCtrl, Do modeHorz, Do modeVert);
