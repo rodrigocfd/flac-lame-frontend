@@ -22,10 +22,10 @@ public:
 	StatusBar&   operator=(StatusBar&& sb) = delete;
 	StatusBar&   addFixedPart(UINT sizePixels);
 	StatusBar&   addResizablePart(UINT resizeWeight);
-	StatusBar&   setText(const wchar_t *text, int iPart);
-	StatusBar&   setText(const std::wstring& text, int iPart);
-	std::wstring getText(int iPart) const;
-	StatusBar&   setIcon(HICON hIcon, int iPart);
+	StatusBar&   setText(const wchar_t *text, size_t iPart);
+	StatusBar&   setText(const std::wstring& text, size_t iPart);
+	std::wstring getText(size_t iPart) const;
+	StatusBar&   setIcon(HICON hIcon, size_t iPart);
 private:
 	void _putParts();
 	void _createOnce();

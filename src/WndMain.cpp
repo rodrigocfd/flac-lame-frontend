@@ -10,7 +10,7 @@ using std::wstring;
 RUN(WndMain);
 
 WndMain::WndMain()
-	: _taskBar(this), _resizer(this)
+	: _taskBar(this), _resizer(this), _lstFiles(this)
 {
 	this->setup.dialogId = DLG_MAIN;
 	this->setup.iconId = ICO_MAIN;
@@ -58,7 +58,7 @@ WndMain::WndMain()
 			.addItem(MNU_REMSELECTED, L"&Remove selected\tDel")
 			.addSeparator()
 			.addItem(MNU_ABOUT, L"A&bout...\tF1");
-		_lstFiles.menu.onInitMenuPopup(this, [this]()->void {
+		_lstFiles.menu.onInitMenuPopup([this]()->void {
 			_lstFiles.menu.enableItem(MNU_REMSELECTED, _lstFiles.items.countSelected() > 0);
 		});
 

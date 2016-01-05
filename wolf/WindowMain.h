@@ -15,7 +15,7 @@ private:
 	struct SetupMain final : public WindowTopLevel::SetupTopLevel {
 		MenuMain menu;
 		int      iconId;
-		SetupMain();
+		SetupMain(WindowMain *wndMain);
 	};
 
 public:
@@ -25,7 +25,6 @@ public:
 	int run(HINSTANCE hInst, int cmdShow);
 private:
 	ATOM _registerClass(HINSTANCE hInst);
-	WindowMsgHandler::_errorShout;
 	WindowProc::_registerClass;
 	WindowParent::_dialogTemplate;
 	WindowTopLevel::SetupTopLevel;

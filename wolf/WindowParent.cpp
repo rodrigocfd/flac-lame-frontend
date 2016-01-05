@@ -6,6 +6,7 @@
 
 #include "WindowParent.h"
 #include "Font.h"
+#include "Str.h"
 using namespace wolf;
 using std::wstring;
 
@@ -66,7 +67,11 @@ bool WindowParent::_loadIfTemplate(HINSTANCE hInst, SetupParent& setup)
 
 	wstring err;
 	if (!this->_dialogTemplate.load(hInst, setup.dialogId, &err)) {
-		WindowMsgHandler::_errorShout(err.c_str());
+		MessageBox(nullptr,
+			Str::format(L"WindowParent::_loadIfTemplate\n"
+				L"WindowDialogTemplate::load failed:\n%s", err.c_str()).c_str(),
+			L"WOLF internal error",
+			MB_ICONERROR);
 		return false;
 	}
 

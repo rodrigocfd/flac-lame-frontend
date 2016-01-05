@@ -13,6 +13,7 @@ class Menu {
 protected:
 	HMENU _hMenu;
 public:
+	virtual ~Menu() = default;
 	Menu();
 	Menu(HMENU hMenu);
 	Menu(Menu&& m);
@@ -32,57 +33,62 @@ public:
 	Menu  addSubmenu(const std::wstring& caption);
 protected:
 	virtual void _createOnce();
-	template<WNDPROC DefProcT> bool _addInitMenuPopup(WindowMsgHandler<DefProcT> *parent, std::function<void()> callback);
 };
 
 
-class MenuMain : public Menu {
+class MenuInitHandler : public Menu {
+private:
+	std::function<void()> _callback;
 public:
-	MenuMain() = default;
+	virtual ~MenuInitHandler() = default;
+	template<WNDPROC DefProcT> explicit MenuInitHandler(WindowMsgHandler<DefProcT> *parent);
+	void onInitMenuPopup(std::function<void()> callback);
+};
+
+
+class MenuMain final : public MenuInitHandler {
+public:
+	template<WNDPROC DefProcT> explicit MenuMain(WindowMsgHandler<DefProcT> *parent);
 	MenuMain& operator=(const MenuMain& m) = delete;
 	MenuMain& operator=(MenuMain&& m) = delete;
-	template<WNDPROC DefProcT> bool onInitMenuPopup(WindowMsgHandler<DefProcT> *parent, std::function<void()> callback);
 private:
 	void _createOnce() override;
-	Menu::_addInitMenuPopup;
 };
 
 
-class MenuContext : public Menu {
+class MenuContext final : public MenuInitHandler {
 public:
-	MenuContext() = default;
+	template<WNDPROC DefProcT> explicit MenuContext(WindowMsgHandler<DefProcT> *parent);
 	MenuContext& operator=(const MenuContext& m) = delete;
 	MenuContext& operator=(MenuContext&& m) = delete;
-	template<WNDPROC DefProcT> bool onInitMenuPopup(WindowMsgHandler<DefProcT> *parent, std::function<void()> callback);
-	void showAtPoint(HWND hParent, POINT pt, HWND hWndCoordsRelativeTo=nullptr);
+	void showAtPoint(HWND hParent, POINT pt, HWND hWndCoordsRelativeTo = nullptr);
 private:
 	void _createOnce() override;
-	Menu::_addInitMenuPopup;
 };
 
 
 
 template<WNDPROC DefProcT>
-bool Menu::_addInitMenuPopup(WindowMsgHandler<DefProcT> *parent, std::function<void()> callback)
+MenuInitHandler::MenuInitHandler(WindowMsgHandler<DefProcT> *parent)
 {
-	return parent->onMessage(WM_INITMENUPOPUP, [callback, this](WPARAM wp, LPARAM lp)->LRESULT {
-		if (this->_hMenu == reinterpret_cast<HMENU>(wp)) {
-			callback();
+	parent->onMessage(WM_INITMENUPOPUP, [this](WPARAM wp, LPARAM lp)->LRESULT {
+		if (this->_hMenu == reinterpret_cast<HMENU>(wp) && this->_callback) {
+			this->_callback();
 		}
 		return 0;
 	});
 }
 
 template<WNDPROC DefProcT>
-bool MenuMain::onInitMenuPopup(WindowMsgHandler<DefProcT> *parent, std::function<void()> callback)
+MenuMain::MenuMain(WindowMsgHandler<DefProcT> *parent)
+	: MenuInitHandler(parent)
 {
-	return this->Menu::_addInitMenuPopup(parent, std::move(callback));
 }
 
 template<WNDPROC DefProcT>
-bool MenuContext::onInitMenuPopup(WindowMsgHandler<DefProcT> *parent, std::function<void()> callback)
+MenuContext::MenuContext(WindowMsgHandler<DefProcT> *parent)
+	: MenuInitHandler(parent)
 {
-	return this->Menu::_addInitMenuPopup(parent, std::move(callback));
 }
 
 }//namespace wolf

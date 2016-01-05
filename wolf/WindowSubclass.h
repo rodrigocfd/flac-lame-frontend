@@ -30,7 +30,6 @@ private:
 	static LRESULT CALLBACK _subclassProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp,
 		UINT_PTR idSubclass, DWORD_PTR refData);
 	WindowMsgHandler::_processMsg;
-	WindowMsgHandler::_errorShout;
 };
 
 }//namespace wolf

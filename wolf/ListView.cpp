@@ -329,44 +329,65 @@ ListView::Item ListView::Collection::getFocused() const
 }
 
 
-ListView::ListView()
-	: ListView(nullptr)
+ListView::ListView(WindowParent *parent)
+	: _parent(*parent), items(this), menu(parent)
 {
-}
+	this->onMessage(WM_GETDLGCODE, [this](WPARAM wp, LPARAM lp)->LRESULT {
+		if (lp && wp == 'A' && Sys::hasCtrl()) { // Ctrl+A to select all items
+			reinterpret_cast<MSG*>(lp)->wParam = 0; // prevent propagation, therefore beep
+			ListView_SetItemState(this->hWnd(), -1, LVIS_SELECTED, LVIS_SELECTED);
+			return DLGC_WANTCHARS;
+		}
+		else if (lp && wp == VK_RETURN) { // send Enter key to parent
+			NMLVKEYDOWN nmlvkd = { { this->hWnd(), static_cast<UINT_PTR>(GetDlgCtrlID(this->hWnd())), LVN_KEYDOWN }, VK_RETURN, 0 };
+			SendMessage(GetAncestor(this->hWnd(), GA_PARENT), WM_NOTIFY, reinterpret_cast<WPARAM>(this->hWnd()),
+				reinterpret_cast<LPARAM>(&nmlvkd));
+			reinterpret_cast<MSG*>(lp)->wParam = 0; // prevent propagation, therefore beep
+			return DLGC_WANTALLKEYS;
+		}
+		else if (lp && wp == VK_APPS) { // context menu keyboard key
+			this->_showContextMenu(false);
+		}
+		return DefSubclassProc(this->hWnd(), WM_GETDLGCODE, wp, lp);
+	});
 
-ListView::ListView(HWND hwnd)
-	: WindowSubclass(hwnd), items(this)
-{
-	this->_addMsgs();
-}
-
-ListView::ListView(Window&& w)
-	: WindowSubclass(std::move(w)), items(this)
-{
-	this->_addMsgs();
+	this->onMessage(WM_RBUTTONDOWN, [this](WPARAM wp, LPARAM lp)->LRESULT {
+		this->_showContextMenu(true);
+		return 0;
+	});
 }
 
 ListView& ListView::operator=(HWND hwnd)
 {
-	this->WindowSubclass::operator=(hwnd);
+	if (GetParent(hwnd) != this->_parent.hWnd()) {
+		MessageBox(this->_parent.hWnd(),
+			L"ListView::operator=\nNew control belongs to foreign window.",
+			L"WOLF internal error",
+			MB_ICONERROR);
+	} else {
+		this->WindowSubclass::operator=(hwnd);
+	}
 	return *this;
 }
 
 ListView& ListView::operator=(Window&& w)
 {
-	this->WindowSubclass::operator=(std::move(w));
+	if (w.getParent().hWnd() != this->_parent.hWnd()) {
+		MessageBox(this->_parent.hWnd(),
+			L"ListView::operator=\nNew control belongs to foreign window.",
+			L"WOLF internal error",
+			MB_ICONERROR);
+	} else {
+		this->WindowSubclass::operator=(std::move(w));
+	}
 	return *this;
 }
 
-ListView& ListView::create(const WindowParent *parent, int id, POINT pos, SIZE size, View view)
-{
-	return this->create(parent->hWnd(), id, pos, size);
-}
-
-ListView& ListView::create(HWND hParent, int id, POINT pos, SIZE size, View view)
+ListView& ListView::create(int id, POINT pos, SIZE size, View view)
 {
 	// For children, WS_BORDER gives old, flat drawing; always use WS_EX_CLIENTEDGE.
-	this->WindowSubclass::create(hParent, WC_LISTVIEW, nullptr, id, pos, size,
+	this->WindowSubclass::create(this->_parent.hWnd(),
+		WC_LISTVIEW, nullptr, id, pos, size,
 		WS_CHILD | WS_VISIBLE | WS_TABSTOP | static_cast<DWORD>(view),
 		WS_EX_CLIENTEDGE);
 	return *this;
@@ -465,33 +486,6 @@ vector<wstring> ListView::getAllText(vector<Item> items, size_t columnIndex)
 	return texts;
 }
 
-void ListView::_addMsgs()
-{
-	this->onMessage(WM_GETDLGCODE, [this](WPARAM wp, LPARAM lp)->LRESULT {
-		if (lp && wp == 'A' && Sys::hasCtrl()) { // Ctrl+A to select all items
-			reinterpret_cast<MSG*>(lp)->wParam = 0; // prevent propagation, therefore beep
-			ListView_SetItemState(this->hWnd(), -1, LVIS_SELECTED, LVIS_SELECTED);
-			return DLGC_WANTCHARS;
-		}
-		else if (lp && wp == VK_RETURN) { // send Enter key to parent
-			NMLVKEYDOWN nmlvkd = { { this->hWnd(), static_cast<UINT_PTR>(GetDlgCtrlID(this->hWnd())), LVN_KEYDOWN }, VK_RETURN, 0 };
-			SendMessage(GetAncestor(this->hWnd(), GA_PARENT), WM_NOTIFY, reinterpret_cast<WPARAM>(this->hWnd()),
-				reinterpret_cast<LPARAM>(&nmlvkd));
-			reinterpret_cast<MSG*>(lp)->wParam = 0; // prevent propagation, therefore beep
-			return DLGC_WANTALLKEYS;
-		}
-		else if (lp && wp == VK_APPS) { // context menu keyboard key
-			this->_showContextMenu(false);
-		}
-		return DefSubclassProc(this->hWnd(), WM_GETDLGCODE, wp, lp);
-	});
-
-	this->onMessage(WM_RBUTTONDOWN, [this](WPARAM wp, LPARAM lp)->LRESULT {
-		this->_showContextMenu(true);
-		return 0;
-	});
-}
-
 HIMAGELIST ListView::_proceedImagelist()
 {
 	// Imagelist is destroyed automatically:
@@ -502,7 +496,10 @@ HIMAGELIST ListView::_proceedImagelist()
 	if (!hImg) {
 		hImg = ImageList_Create(16, 16, ILC_COLOR32, 1, 1); // create a 16x16 imagelist
 		if (!hImg) {
-			WindowMsgHandler::_errorShout(L"ListView::_proceedImagelist, ImageList_Create failed.");
+			Sys::msgBox(this->getParent().hWnd(),
+				L"WOLF internal error",
+				L"ListView::_proceedImagelist\nImageList_Create failed.",
+				MB_ICONERROR);
 			return nullptr;
 		}
 		ListView_SetImageList(this->hWnd(), hImg, LVSIL_SMALL); // associate imagelist to listview control

@@ -5,6 +5,7 @@
  */
 
 #include "WindowProc.h"
+#include "Str.h"
 using namespace wolf;
 using std::wstring;
 
@@ -51,7 +52,11 @@ ATOM WindowProc::_registerClass(HINSTANCE hInst, WNDCLASSEX& wc, SetupProc& setu
 		if (lastError == ERROR_CLASS_ALREADY_EXISTS) {
 			return static_cast<ATOM>(GetClassInfoEx(hInst, wc.lpszClassName, &wc)); // http://blogs.msdn.com/b/oldnewthing/archive/2004/10/11/240744.aspx
 		}
-		WindowMsgHandler::_errorShout(lastError, L"WindowProc::_registerClass", L"RegisterClassEx");
+		MessageBox(nullptr,
+			Str::format(L"WindowProc::_registerClass\n"
+				L"RegisterClassEx failed with error %u.", lastError).c_str(),
+			L"WOLF internal error",
+			MB_ICONERROR);
 	}
 	return atom;
 }

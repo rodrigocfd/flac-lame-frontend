@@ -22,7 +22,6 @@ public:
 	void show(const WindowParent *owner);
 private:
 	ATOM _registerClass(HINSTANCE hInst);
-	WindowMsgHandler::_errorShout;
 	WindowProc::_registerClass;
 	WindowParent::_dialogTemplate;
 	WindowTopLevel::SetupTopLevel;

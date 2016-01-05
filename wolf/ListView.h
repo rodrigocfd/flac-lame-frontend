@@ -61,9 +61,7 @@ public:
 		std::vector<Item> getSelected() const;
 		Item              getFocused() const;
 	};
-public:
-	Collection items;
-	MenuContext menu;
+
 	enum class View : WORD {
 		DETAILS   = LV_VIEW_DETAILS,
 		ICON      = LV_VIEW_ICON,
@@ -71,14 +69,16 @@ public:
 		SMALLICON = LV_VIEW_SMALLICON,
 		TILE      = LV_VIEW_TILE
 	};
+private:
+	WindowParent& _parent;
+public:
+	Collection  items;
+	MenuContext menu;
 
-	ListView();
-	ListView(HWND hwnd);
-	ListView(Window&& w);
+	explicit ListView(WindowParent *parent);
 	ListView& operator=(HWND hwnd);
 	ListView& operator=(Window&& w);
-	ListView& create(const WindowParent *parent, int id, POINT pos, SIZE size, View view = View::DETAILS);
-	ListView& create(HWND hParent, int id, POINT pos, SIZE size, View view = View::DETAILS);
+	ListView& create(int id, POINT pos, SIZE size, View view = View::DETAILS);
 	ListView& setFullRowSelect();
 	ListView& setRedraw(bool doRedraw);
 	ListView& setView(View view);
@@ -91,7 +91,6 @@ public:
 
 	static std::vector<std::wstring> getAllText(std::vector<Item> items, size_t columnIndex = 0);
 private:
-	void       _addMsgs();
 	HIMAGELIST _proceedImagelist();
 	int        _showContextMenu(bool followCursor);
 	Window::getText;

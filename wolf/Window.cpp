@@ -98,6 +98,11 @@ void Window::setText(const wchar_t *text)
 	SetWindowText(this->_hWnd, text);
 }
 
+void Window::setFocus()
+{
+	SetFocus(this->_hWnd);
+}
+
 void Window::enable(bool doEnable)
 {
 	EnableWindow(this->_hWnd, doEnable);

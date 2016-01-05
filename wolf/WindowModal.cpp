@@ -5,6 +5,7 @@
  */
 
 #include "WindowModal.h"
+#include "Str.h"
 using namespace wolf;
 
 WindowModal::~WindowModal()
@@ -25,7 +26,10 @@ WindowModal::WindowModal()
 void WindowModal::show(HWND hOwner)
 {
 	if (this->Window::hWnd()) {
-		WindowMsgHandler::_errorShout(L"WindowModal::show called twice.");
+		MessageBox(hOwner,
+			L"WindowModal::show\nMethod called twice.",
+			L"WOLF internal error",
+			MB_ICONERROR);
 		return;
 	}
 
@@ -58,7 +62,11 @@ void WindowModal::show(HWND hOwner)
 		hOwner, nullptr, hInst,
 		static_cast<LPVOID>(this)) ) // pass pointer to object, _hWnd is set on WM_NCCREATE
 	{
-		WindowMsgHandler::_errorShout(GetLastError(), L"WindowModal::show", L"CreateWindowEx");
+		MessageBox(nullptr,
+			Str::format(L"WindowModal::show\n"
+				L"CreateWindowEx failed with error %u.", GetLastError()).c_str(),
+			L"WOLF internal error",
+			MB_ICONERROR);
 		EnableWindow(hOwner, TRUE);
 		return;
 	}

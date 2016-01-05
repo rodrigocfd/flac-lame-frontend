@@ -5,7 +5,7 @@
  */
 
 #include "WindowTopLevel.h"
-#include "Font.h"
+#include "Str.h"
 using namespace wolf;
 
 WindowTopLevel::SetupTopLevel::SetupTopLevel()
@@ -38,7 +38,11 @@ int WindowTopLevel::_loop(SetupTopLevel& setup)
 {
 	DWORD err = 0;
 	if (!setup.accTable.create(&err)) {
-		WindowMsgHandler::_errorShout(err, L"WindowTopLevel::_loop", L"CreateAcceleratorTable");
+		MessageBox(nullptr,
+			Str::format(L"WindowTopLevel::_loop\n"
+				L"CreateAcceleratorTable failed with error %u.", err).c_str(),
+			L"WOLF internal error",
+			MB_ICONERROR);
 		return -1;
 	}
 
@@ -46,7 +50,11 @@ int WindowTopLevel::_loop(SetupTopLevel& setup)
 	BOOL ret = 0;
 	while (IsWindow(this->Window::hWnd()) && (ret = GetMessage(&msg, nullptr, 0, 0)) != 0) {
 		if (ret == -1) {
-			WindowMsgHandler::_errorShout(GetLastError(), L"WindowTopLevel::_loop", L"GetMessage");
+			MessageBox(nullptr,
+				Str::format(L"WindowTopLevel::_loop\n"
+					L"GetMessage failed with error %u.", GetLastError()).c_str(),
+				L"WOLF internal error",
+				MB_ICONERROR);
 			return -1;
 		}
 		if ( (setup.accTable.hAccel() &&
@@ -78,7 +86,11 @@ bool WindowTopLevel::_compensateBorders(DWORD style, bool hasMenu, SetupTopLevel
 {
 	RECT rc = { 0, 0, setup.size.cx, setup.size.cy };
 	if (!AdjustWindowRect(&rc, style, hasMenu)) { // compensate different theme window borders
-		WindowMsgHandler::_errorShout(GetLastError(), L"WindowTopLevel::_compensateBorders", L"AdjustWindowRect");
+		MessageBox(nullptr,
+			Str::format(L"WindowTopLevel::_compensateBorders\n"
+				L"AdjustWindowRect failed with error %u.", GetLastError()).c_str(),
+			L"WOLF internal error",
+			MB_ICONERROR);
 		return false;
 	}
 	setup.size.cx = rc.right - rc.left;

@@ -5,6 +5,7 @@
  */
 
 #include "WindowSubclass.h"
+#include "Str.h"
 using namespace wolf;
 
 const UINT WindowSubclass::SUBCLASSID = 1;
@@ -61,7 +62,10 @@ WindowSubclass& WindowSubclass::create(HWND hParent, const wchar_t *className, c
 	int id, POINT pos, SIZE size, DWORD style, DWORD exStyle)
 {
 	if (this->Window::hWnd()) {
-		WindowMsgHandler::_errorShout(L"WindowSubclass::create, control already created.");
+		MessageBox(hParent,
+			L"WindowSubclass::create\nControl already created.",
+			L"WOLF internal error",
+			MB_ICONERROR);
 	} else {
 		HWND hwnd = CreateWindowEx(exStyle, className, title,
 			style | WS_CHILD | WS_VISIBLE,
@@ -71,7 +75,11 @@ WindowSubclass& WindowSubclass::create(HWND hParent, const wchar_t *className, c
 			nullptr);
 
 		if (!hwnd) {
-			WindowMsgHandler::_errorShout(GetLastError(), L"WindowSubclass::create", L"CreateWindowEx");
+			MessageBox(hParent,
+				Str::format(L"WindowSubclass::create\n"
+					L"CreateWindowEx failed with error %u.", GetLastError()).c_str(),
+				L"WOLF internal error",
+				MB_ICONERROR);
 		} else {
 			this->operator=(hwnd);
 		}
@@ -96,7 +104,11 @@ void WindowSubclass::_setNew()
 {
 	if (this->Window::hWnd()) {
 		if (!SetWindowSubclass(this->Window::hWnd(), _subclassProc, SUBCLASSID, reinterpret_cast<DWORD_PTR>(this))) {
-			WindowMsgHandler::_errorShout(GetLastError(), L"WindowSubclass::_setNew", L"SetWindowSubclass");
+			MessageBox(nullptr,
+				Str::format(L"WindowSubclass::_setNew\n"
+					L"SetWindowSubclass failed with error %u.", GetLastError()).c_str(),
+				L"WOLF internal error",
+				MB_ICONERROR);
 		}
 	}
 }

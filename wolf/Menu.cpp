@@ -6,6 +6,7 @@
 
 #include "Menu.h"
 using namespace wolf;
+using std::function;
 using std::initializer_list;
 using std::wstring;
 
@@ -116,7 +117,13 @@ Menu Menu::addSubmenu(const wstring& caption)
 
 void Menu::_createOnce()
 {
-	// Does nothing here.
+	// Do nothing here.
+}
+
+
+void MenuInitHandler::onInitMenuPopup(function<void()> callback)
+{
+	this->_callback = std::move(callback);
 }
 
 

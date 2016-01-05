@@ -11,80 +11,6 @@ using std::wstring;
 StatusBar::StatusBar(WindowTopLevel *parent)
 	: _parent(*parent)
 {
-}
-
-StatusBar& StatusBar::addFixedPart(UINT sizePixels)
-{
-	this->_parts.push_back({ sizePixels, 0 });
-	this->_rightEdges.emplace_back(0);
-	this->_createOnce();
-	this->_putParts();
-	return *this;
-}
-
-StatusBar& StatusBar::addResizablePart(UINT resizeWeight)
-{
-	// How resizeWeight works:
-	// Suppose you have 3 parts, respectively with weights of 1, 1 and 2.
-	// If available client area is 400px, respective part widths will be 100, 100 and 200px.
-	// Zero weight means a fixed-width part, which therefore should have sizePixels set (otherwise zero).
-	this->_parts.push_back({ 0, resizeWeight });
-	this->_rightEdges.emplace_back(0);
-	this->_createOnce();
-	this->_putParts();
-	return *this;
-}
-
-StatusBar& StatusBar::setText(const wchar_t *text, int iPart)
-{
-	this->sendMessage(SB_SETTEXT, MAKEWPARAM(MAKEWORD(iPart, 0), 0),
-		reinterpret_cast<LPARAM>(text));
-	return *this;
-}
-
-StatusBar& StatusBar::setText(const wstring& text, int iPart)
-{
-	return this->setText(text.c_str(), iPart);
-}
-
-wstring StatusBar::getText(int iPart) const
-{
-	int len = LOWORD(this->sendMessage(SB_GETTEXTLENGTH, iPart, 0)) + 1;
-	wstring buf(len, L'\0');
-	this->sendMessage(SB_GETTEXT, iPart, reinterpret_cast<LPARAM>(&buf[0]));
-	buf.resize(len);
-	return buf;
-}
-
-StatusBar& StatusBar::setIcon(HICON hIcon, int iPart)
-{
-	this->sendMessage(SB_SETICON, iPart, reinterpret_cast<LPARAM>(hIcon));
-	return *this;
-}
-
-void StatusBar::_putParts()
-{
-	for (auto i = 0U; i < this->_parts.size(); ++i) {
-		this->_rightEdges[i] = i * 10; // arbitrary, just to force parts creation, will be fixed on WM_SIZE
-	}
-	this->sendMessage(SB_SETPARTS, this->_rightEdges.size(),
-		reinterpret_cast<LPARAM>(&this->_rightEdges[0]));
-}
-
-void StatusBar::_createOnce()
-{
-	if (this->hWnd()) {
-		return;
-	}
-
-	DWORD parentStyle = static_cast<DWORD>(GetWindowLongPtr(this->_parent.hWnd(), GWL_STYLE));
-	bool isStretch = (parentStyle & WS_MAXIMIZEBOX) != 0 ||
-		(parentStyle & WS_SIZEBOX) != 0;
-
-	this->Window::operator=( CreateWindowEx(0, STATUSCLASSNAME, nullptr,
-		(WS_CHILD | WS_VISIBLE) | (isStretch ? SBARS_SIZEGRIP : 0),
-		0, 0, 0, 0, this->_parent.hWnd(), nullptr, this->_parent.hInst(), nullptr) );
-
 	this->_parent.onMessage(WM_SIZE, [this](WPARAM wp, LPARAM lp)->LRESULT { // equivalent of subclass parent
 		if (wp != SIZE_MINIMIZED && this->hWnd()) {
 			int cx = LOWORD(lp); // available width
@@ -115,4 +41,77 @@ void StatusBar::_createOnce()
 		}
 		return 0;
 	});
+}
+
+StatusBar& StatusBar::addFixedPart(UINT sizePixels)
+{
+	this->_parts.push_back({ sizePixels, 0 });
+	this->_rightEdges.emplace_back(0);
+	this->_createOnce();
+	this->_putParts();
+	return *this;
+}
+
+StatusBar& StatusBar::addResizablePart(UINT resizeWeight)
+{
+	// How resizeWeight works:
+	// Suppose you have 3 parts, respectively with weights of 1, 1 and 2.
+	// If available client area is 400px, respective part widths will be 100, 100 and 200px.
+	// Zero weight means a fixed-width part, which therefore should have sizePixels set (otherwise zero).
+	this->_parts.push_back({ 0, resizeWeight });
+	this->_rightEdges.emplace_back(0);
+	this->_createOnce();
+	this->_putParts();
+	return *this;
+}
+
+StatusBar& StatusBar::setText(const wchar_t *text, size_t iPart)
+{
+	this->sendMessage(SB_SETTEXT, MAKEWPARAM(MAKEWORD(iPart, 0), 0),
+		reinterpret_cast<LPARAM>(text));
+	return *this;
+}
+
+StatusBar& StatusBar::setText(const wstring& text, size_t iPart)
+{
+	return this->setText(text.c_str(), iPart);
+}
+
+wstring StatusBar::getText(size_t iPart) const
+{
+	int len = LOWORD(this->sendMessage(SB_GETTEXTLENGTH, iPart, 0)) + 1;
+	wstring buf(len, L'\0');
+	this->sendMessage(SB_GETTEXT, iPart, reinterpret_cast<LPARAM>(&buf[0]));
+	buf.resize(len);
+	return buf;
+}
+
+StatusBar& StatusBar::setIcon(HICON hIcon, size_t iPart)
+{
+	this->sendMessage(SB_SETICON, iPart, reinterpret_cast<LPARAM>(hIcon));
+	return *this;
+}
+
+void StatusBar::_putParts()
+{
+	for (auto i = 0U; i < this->_parts.size(); ++i) {
+		this->_rightEdges[i] = i * 10; // arbitrary, just to force parts creation, will be fixed on WM_SIZE
+	}
+	this->sendMessage(SB_SETPARTS, this->_rightEdges.size(),
+		reinterpret_cast<LPARAM>(&this->_rightEdges[0]));
+}
+
+void StatusBar::_createOnce()
+{
+	if (this->hWnd()) { // if already created, go away
+		return;
+	}
+
+	DWORD parentStyle = static_cast<DWORD>(GetWindowLongPtr(this->_parent.hWnd(), GWL_STYLE));
+	bool isStretch = (parentStyle & WS_MAXIMIZEBOX) != 0 ||
+		(parentStyle & WS_SIZEBOX) != 0;
+
+	this->Window::operator=( CreateWindowEx(0, STATUSCLASSNAME, nullptr,
+		(WS_CHILD | WS_VISIBLE) | (isStretch ? SBARS_SIZEGRIP : 0),
+		0, 0, 0, 0, this->_parent.hWnd(), nullptr, this->_parent.hInst(), nullptr) );
 }

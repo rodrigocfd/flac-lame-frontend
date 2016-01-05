@@ -7,6 +7,7 @@
 #include "WindowControl.h"
 #include <VsStyle.h>
 #include <Uxtheme.h>
+#include "Str.h"
 #pragma comment(lib, "UxTheme.lib")
 using namespace wolf;
 
@@ -55,7 +56,11 @@ WindowControl::WindowControl()
 void WindowControl::create(HWND hParent, int ctrlId, POINT pos, SIZE sz)
 {
 	if (this->Window::hWnd()) {
-		WindowMsgHandler::_errorShout(L"WindowControl::create called twice.");
+		MessageBox(hParent,
+			L"WindowControl::create\nMethod called twice.",
+			L"WOLF internal error",
+			MB_ICONERROR);
+		return;
 	}
 
 	// For children, WS_BORDER gives old, flat drawing; always use WS_EX_CLIENTEDGE.
@@ -72,7 +77,11 @@ void WindowControl::create(HWND hParent, int ctrlId, POINT pos, SIZE sz)
 		hParent, reinterpret_cast<HMENU>(static_cast<UINT_PTR>(ctrlId)),
 		hInst, static_cast<LPVOID>(this)) ) // pass pointer to object; hWnd is set on WM_NCCREATE
 	{
-		WindowMsgHandler::_errorShout(GetLastError(), L"WindowControl::create", L"CreateWindowEx");
+		MessageBox(hParent,
+			Str::format(L"WindowControl::create\n"
+				L"CreateWindowEx failed with error %u.", GetLastError()).c_str(),
+			L"WOLF internal error",
+			MB_ICONERROR);
 	}
 }
 

@@ -27,7 +27,6 @@ public:
 	void create(const WindowParent *parent, int ctrlId, POINT pos, SIZE sz);
 private:
 	ATOM _registerClass(HINSTANCE hInst);
-	WindowMsgHandler::_errorShout;
 	WindowProc::SetupProc;
 	WindowProc::_registerClass;
 };

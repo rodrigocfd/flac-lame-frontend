@@ -20,7 +20,7 @@ private:
 	std::vector<Msg>      _msgs;
 	std::vector<MsgCmd>   _msgsCmd;
 	std::vector<MsgNotif> _msgsNotif;
-	bool _canAddMsg;
+	bool _loopHasStarted;
 public:
 	virtual ~WindowMsgHandler() = 0;
 	WindowMsgHandler();
@@ -29,8 +29,6 @@ public:
 	bool onNotify(UINT_PTR idFrom, UINT code, std::function<LRESULT(NMHDR&)> callback);
 protected:
 	LRESULT _processMsg(UINT msg, WPARAM wp, LPARAM lp);
-	static void _errorShout(const wchar_t *text);
-	static void _errorShout(DWORD lastError, const wchar_t *src, const wchar_t *func);
 };
 
 
@@ -42,22 +40,12 @@ WindowMsgHandler<DefProcT>::~WindowMsgHandler()
 
 template<WNDPROC DefProcT>
 WindowMsgHandler<DefProcT>::WindowMsgHandler()
-	: _canAddMsg(true)
+	: _loopHasStarted(false)
 {
-	// It's possible to add a handler during WM_NCCREATE/WM_CREATE handling. If so, vector
-	// memory reallocation may occur, crashing the program. Pre-allocation prevents such a
-	// crash. That's a cheaper/faster solution than using a vector of pointers.
-	this->_msgs.reserve(40); // arbitrary value
-
-	this->onMessage(WM_CREATE, [this](WPARAM wp, LPARAM lp)->LRESULT {
-		this->_canAddMsg = false; // no messages can be added after WM_CREATE handling
-		return 0;
-	});
-
 	this->onMessage(WM_COMMAND, [this](WPARAM wp, LPARAM lp)->LRESULT {
-		for (auto i = 0U; i < this->_msgsCmd.size(); ++i) {
-			if (this->_msgsCmd[i].cmd == LOWORD(wp)) {
-				return this->_msgsCmd[i].callback();
+		for (const auto& handler : this->_msgsCmd) {
+			if (handler.cmd == LOWORD(wp)) {
+				return handler.callback();
 			}
 		}
 		return DefProcT(this->Window::hWnd(), WM_COMMAND, wp, lp);
@@ -65,11 +53,9 @@ WindowMsgHandler<DefProcT>::WindowMsgHandler()
 
 	this->onMessage(WM_NOTIFY, [this](WPARAM wp, LPARAM lp)->LRESULT {
 		NMHDR& nmhdr = *reinterpret_cast<NMHDR*>(lp);
-		for (auto i = 0U; i < this->_msgsNotif.size(); ++i) {
-			if (this->_msgsNotif[i].idFrom == nmhdr.idFrom
-				&& this->_msgsNotif[i].code == nmhdr.code)
-			{
-				return this->_msgsNotif[i].callback(nmhdr);
+		for (const auto& handler : this->_msgsNotif) {
+			if (handler.idFrom == nmhdr.idFrom && handler.code == nmhdr.code) {
+				return handler.callback(nmhdr);
 			}
 		}
 		return DefProcT(this->Window::hWnd(), WM_NOTIFY, wp, lp);
@@ -80,7 +66,15 @@ template<WNDPROC DefProcT>
 bool WindowMsgHandler<DefProcT>::onMessage(UINT msg, std::function<LRESULT(WPARAM, LPARAM)> callback)
 {
 	// Appends a new callback to any message.
-	if (!this->_canAddMsg) return false;
+	
+	if (this->_loopHasStarted) {
+		MessageBox(nullptr,
+			L"WindowMsgHandler::onMessage\nMethod called after loop started.",
+			L"WOLF internal error",
+			MB_ICONERROR);
+		return false;
+	}
+
 	for (auto& m : this->_msgs) {
 		if (m.msg == msg) {
 			m.callbacks.emplace_back(std::move(callback));
@@ -95,7 +89,15 @@ template<WNDPROC DefProcT>
 bool WindowMsgHandler<DefProcT>::onCommand(WORD cmd, std::function<LRESULT()> callback)
 {
 	// Appends a new callback to a WM_COMMAND message.
-	if (!this->_canAddMsg) return false;
+	
+	if (this->_loopHasStarted) {
+		MessageBox(nullptr,
+			L"WindowMsgHandler::onCommand\nMethod called after loop started.",
+			L"WOLF internal error",
+			MB_ICONERROR);
+		return false;
+	}
+
 	for (auto& c : this->_msgsCmd) {
 		if (c.cmd == cmd) {
 			c.callback = std::move(callback); // replace existing
@@ -110,7 +112,15 @@ template<WNDPROC DefProcT>
 bool WindowMsgHandler<DefProcT>::onNotify(UINT_PTR idFrom, UINT code, std::function<LRESULT(NMHDR&)> callback)
 {
 	// Appends a new callback to a WM_NOTIFY message.
-	if (!this->_canAddMsg) return false;
+	
+	if (this->_loopHasStarted) {
+		MessageBox(nullptr,
+			L"WindowMsgHandler::onNotify\nMethod called after loop started.",
+			L"WOLF internal error",
+			MB_ICONERROR);
+		return false;
+	}
+
 	for (auto& n : this->_msgsNotif) {
 		if (n.idFrom == idFrom && n.code == code) {
 			n.callback = std::move(callback); // replace existing
@@ -125,14 +135,14 @@ template<WNDPROC DefProcT>
 LRESULT WindowMsgHandler<DefProcT>::_processMsg(UINT msg, WPARAM wp, LPARAM lp)
 {
 	// Main message processing, intended to be called within the window procedure.
-	// Ordinary loop is used instead of iterator because new handlers can be added
-	// during WM_NCCREATE/WM_CREATE processing, this invalidating the iterators in
-	// the middle of the loop.
-	for (auto i = this->_msgs.size(); i-- > 0; ) {
-		if (this->_msgs[i].msg == msg) {
+	
+	this->_loopHasStarted = true; // once the loop starts, no further messages can be added
+
+	for (const auto& handler : this->_msgs) {
+		if (handler.msg == msg) {
 			LRESULT retVal = 0;
-			for (auto j = this->_msgs[i].callbacks.size(); j-- > 0; ) { // last added handlers (user's) run first
-				LRESULT handlerRet = this->_msgs[i].callbacks[j](wp, lp);
+			for (auto cb = handler.callbacks.rbegin(); cb != handler.callbacks.rend(); ++cb) {
+				LRESULT handlerRet = (*cb)(wp, lp); // last added handlers (user's) run first
 				if (handlerRet) {
 					retVal = handlerRet; // return the last non-default returned value
 				}
@@ -141,20 +151,6 @@ LRESULT WindowMsgHandler<DefProcT>::_processMsg(UINT msg, WPARAM wp, LPARAM lp)
 		}
 	}
 	return DefProcT(this->Window::hWnd(), msg, wp, lp);
-}
-
-template<WNDPROC DefProcT>
-void WindowMsgHandler<DefProcT>::_errorShout(const wchar_t *text)
-{
-	MessageBox(nullptr, text, L"WOLF internal error", MB_ICONERROR); // shout on ya face!
-}
-
-template<WNDPROC DefProcT>
-void WindowMsgHandler<DefProcT>::_errorShout(DWORD lastError, const wchar_t *src, const wchar_t *func)
-{
-	wchar_t buf[160] = { L'\0' };
-	wsprintf(buf, L"%s %s failed.\nError %u (0x%X).\n", src, func, lastError, lastError);
-	_errorShout(buf);
 }
 
 }//namespace wolf

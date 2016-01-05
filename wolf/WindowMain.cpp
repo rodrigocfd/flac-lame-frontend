@@ -5,10 +5,11 @@
  */
 
 #include "WindowMain.h"
+#include "Str.h"
 using namespace wolf;
 
-WindowMain::SetupMain::SetupMain()
-	: iconId(0)
+WindowMain::SetupMain::SetupMain(WindowMain *wndMain)
+	: menu(wndMain), iconId(0)
 {
 }
 
@@ -18,6 +19,7 @@ WindowMain::~WindowMain()
 }
 
 WindowMain::WindowMain()
+	: setup(this)
 {
 	this->WindowMsgHandler::onMessage(WM_DESTROY, [this](WPARAM wp, LPARAM lp)->LRESULT {
 		// https://msdn.microsoft.com/en-us/library/windows/desktop/ff381396%28v=vs.85%29.aspx
@@ -29,7 +31,10 @@ WindowMain::WindowMain()
 int WindowMain::run(HINSTANCE hInst, int cmdShow)
 {
 	if (this->Window::hWnd()) {
-		WindowMsgHandler::_errorShout(L"WindowMain::run called twice.");
+		MessageBox(nullptr,
+			L"WindowMain::run\nMethod called twice.",
+			L"WOLF internal error",
+			MB_ICONERROR);
 		return -1;
 	}
 
@@ -56,7 +61,11 @@ int WindowMain::run(HINSTANCE hInst, int cmdShow)
 		nullptr, this->setup.menu.hMenu(), hInst,
 		static_cast<LPVOID>(this)) ) // pass pointer to object, _hWnd is set on WM_NCCREATE
 	{
-		WindowMsgHandler::_errorShout(GetLastError(), L"WindowMain::run", L"CreateWindowEx");
+		MessageBox(nullptr,
+			Str::format(L"WindowMain::run\n"
+				L"CreateWindowEx failed with error %u.", GetLastError()).c_str(),
+			L"WOLF internal error",
+			MB_ICONERROR);
 		return -1;
 	}
 
@@ -72,11 +81,19 @@ ATOM WindowMain::_registerClass(HINSTANCE hInst)
 
 	if (this->setup.iconId) {
 		if (!( wc.hIcon = static_cast<HICON>(LoadImage(hInst, MAKEINTRESOURCE(this->setup.iconId), IMAGE_ICON, 32, 32, LR_DEFAULTCOLOR)) )) {
-			WindowMsgHandler::_errorShout(GetLastError(), L"WindowMain::_registerClass", L"LoadImage 32");
+			MessageBox(nullptr,
+				Str::format(L"WindowMain::_registerClass\n"
+					L"LoadImage 32 failed with error %u.", GetLastError()).c_str(),
+				L"WOLF internal error",
+				MB_ICONERROR);
 			return 0;
 		}
 		if (!( wc.hIconSm = static_cast<HICON>(LoadImage(hInst, MAKEINTRESOURCE(this->setup.iconId), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR)) )) {
-			WindowMsgHandler::_errorShout(GetLastError(), L"WindowMain::_registerClass", L"LoadImage 16");
+			MessageBox(nullptr,
+				Str::format(L"WindowMain::_registerClass\n"
+					L"LoadImage 16 failed with error %u.", GetLastError()).c_str(),
+				L"WOLF internal error",
+				MB_ICONERROR);
 			return 0;
 		}
 	}
