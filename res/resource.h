@@ -4,7 +4,9 @@
 //
 #define DLG_MAIN                        101
 #define ICO_MAIN                        102
-#define DLG_RUNNIN                      104
+#define MEN_MAIN                        104
+#define DLG_RUNNIN                      105
+#define ACC_MAIN                        106
 #define LST_FILES                       1001
 #define RAD_MP3                         1002
 #define RAD_FLAC                        1003
@@ -33,9 +35,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        105
+#define _APS_NEXT_RESOURCE_VALUE        107
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1023
+#define _APS_NEXT_CONTROL_VALUE         1024
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

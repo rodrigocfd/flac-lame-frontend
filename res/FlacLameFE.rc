@@ -77,7 +77,7 @@ BEGIN
 END
 
 DLG_RUNNIN DIALOGEX 0, 0, 198, 36
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Running..."
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
@@ -139,6 +139,23 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// Menu
+//
+
+MEN_MAIN MENU
+BEGIN
+    POPUP ""
+    BEGIN
+        MENUITEM "&Add files...\tShift+A",      MNU_ADDFILES
+        MENUITEM "&Remove selected\tDel",       MNU_REMSELECTED
+        MENUITEM SEPARATOR
+        MENUITEM "A&bout...\tF1",               MNU_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // DESIGNINFO
 //
 
@@ -169,6 +186,18 @@ END
 DLG_RUNNIN AFX_DIALOG_LAYOUT
 BEGIN
     0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+ACC_MAIN ACCELERATORS
+BEGIN
+    "A",            MNU_ADDFILES,           VIRTKEY, SHIFT, NOINVERT
+    VK_F1,          MNU_ABOUT,              VIRTKEY 
 END
 
 #endif    // English (United States) resources

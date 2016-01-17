@@ -1,6 +1,8 @@
 
 #include "Convert.h"
-using namespace wolf;
+#include "../winutil/File.h"
+#include "../winutil/Str.h"
+#include "../winutil/Sys.h"
 using std::wstring;
 
 bool Convert::pathsAreValid(const FileIni& ini, wstring *pErr)
