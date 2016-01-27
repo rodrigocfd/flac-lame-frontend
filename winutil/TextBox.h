@@ -26,11 +26,12 @@ public:
 	TextBox&                  setText(const std::wstring& t);
 	std::wstring              getText() const;
 	std::vector<std::wstring> getTextLines() const;
-	TextBox&                  setSelection(int start, int length);
+	TextBox&                  setSelection(int start = 0, int length = -1);
 	std::pair<int, int>       getSelection() const;
 	TextBox&                  replaceSelection(const wchar_t *t);
 	TextBox&                  replaceSelection(const std::wstring& t);
 	TextBox&                  enable(bool doEnable);
+	TextBox&                  focus();
 	TextBox&                  onKeyUp(KeyUpFunc callback);
 private:
 	TextBox& _create(HWND hParent, int id, POINT pos, SIZE size, DWORD extraStyles);

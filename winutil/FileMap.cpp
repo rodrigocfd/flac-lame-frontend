@@ -159,23 +159,7 @@ bool FileMap::getContent(vector<BYTE>& buf, int offset, int numBytes, wstring *p
 	}
 
 	buf.resize(numBytes);
-	memcpy(&buf[0], pMem(), numBytes * sizeof(BYTE));
-
-	if (pErr) pErr->clear();
-	return true;
-}
-
-bool FileMap::getAnsiContent(wstring& buf, int offset, int numChars, wstring *pErr) const
-{
-	vector<BYTE> byteBuf;
-	if (!getContent(byteBuf, offset, numChars, pErr)) {
-		return false;
-	}
-
-	buf.reserve(byteBuf.size());
-	for (const auto& ch : byteBuf) {
-		buf.append(1, static_cast<wchar_t>(ch)); // raw conversion
-	}
+	memcpy(&buf[0], pMem() + offset, numBytes * sizeof(BYTE));
 
 	if (pErr) pErr->clear();
 	return true;

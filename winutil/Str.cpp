@@ -95,25 +95,6 @@ wstring& Str::removeDiacritics(wstring& s)
 	return s;
 }
 
-wstring Str::parseUtf8(const BYTE *data, size_t length)
-{
-	wstring ret;
-	if (data && length) {
-		int neededLen = MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<const char*>(data),
-			static_cast<int>(length), nullptr, 0);
-		ret.resize(neededLen);
-		MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<const char*>(data),
-			static_cast<int>(length), &ret[0], neededLen);
-		trimNulls(ret);
-	}
-	return ret;
-}
-
-wstring Str::parseUtf8(const vector<BYTE>& data)
-{
-	return parseUtf8(&data[0], data.size());
-}
-
 wstring Str::folderFromPath(const wstring& path)
 {
 	wstring ret(path);
@@ -150,12 +131,22 @@ size_t Str::find(const wstring& s, const wchar_t *what, size_t offset)
 	return wstring::npos; // not found
 }
 
+size_t Str::find(const wstring& s, const wstring& what, size_t offset)
+{
+	return find(s, what.c_str(), offset);
+}
+
 size_t Str::findI(const wstring& s, const wchar_t *what, size_t offset)
 {
 	wstring haystack(s), needle(what);
 	upper(haystack);
 	upper(needle);
 	return find(haystack, needle.c_str(), offset);
+}
+
+size_t Str::findI(const wstring& s, const wstring& what, size_t offset)
+{
+	return findI(s, what.c_str(), offset);
 }
 
 size_t Str::findLast(const wstring& s, const wchar_t *what, size_t offset)
@@ -178,12 +169,22 @@ size_t Str::findLast(const wstring& s, const wchar_t *what, size_t offset)
 	return wstring::npos; // not found
 }
 
+size_t Str::findLast(const wstring& s, const wstring& what, size_t offset)
+{
+	return findLast(s, what.c_str(), offset);
+}
+
 size_t Str::findLastI(const wstring& s, const wchar_t *what, size_t offset)
 {
 	wstring haystack(s), needle(what);
 	upper(haystack);
 	upper(needle);
 	return findLast(haystack, needle.c_str(), offset);
+}
+
+size_t Str::findLastI(const wstring& s, const wstring& what, size_t offset)
+{
+	return findLastI(s, what.c_str(), offset);
 }
 
 wstring& Str::replace(wstring& s, const wchar_t *what, const wchar_t *replacement)
@@ -338,143 +339,227 @@ bool Str::beginsWithI(const wstring& s, const wstring& what)
 	return beginsWithI(s, what.c_str());
 }
 
-bool Str::isFloat(const wstring& s, float *pNum)
+bool Str::isInt(const wstring& s)
 {
 	if (s.empty()) return false;
-	wchar_t *p = nullptr;
-	float converted = wcstof(s.c_str(), &p);
-	if (pNum && p != s.c_str()) *pNum = converted;
-	return p != s.c_str();
+	if (s[0] != L'-' && !iswdigit(s[0]) && !iswblank(s[0])) return false;
+	for (wchar_t ch : s) {
+		if (!iswdigit(ch) && !iswblank(ch)) return false;
+	}
+	return true;
 }
 
-bool Str::isFloatU(const wstring& s, float *pNum)
-{
-	if (s.empty() || s[0] == L'-') return false;
-	wchar_t *p = nullptr;
-	float converted = wcstof(s.c_str(), &p);
-	if (pNum && p != s.c_str()) *pNum = converted;
-	return p != s.c_str();
-}
-
-bool Str::isDouble(const wstring& s, double *pNum)
+bool Str::isUint(const wstring& s)
 {
 	if (s.empty()) return false;
-	wchar_t *p = nullptr;
-	double converted = wcstod(s.c_str(), &p);
-	if (pNum && p != s.c_str()) *pNum = converted;
-	return p != s.c_str();
+	for (wchar_t ch : s) {
+		if (!iswdigit(ch) && !iswblank(ch)) return false;
+	}
+	return true;
 }
 
-bool Str::isDoubleU(const wstring& s, double *pNum)
-{
-	if (s.empty() || s[0] == L'-') return false;
-	wchar_t *p = nullptr;
-	double converted = wcstod(s.c_str(), &p);
-	if (pNum && p != s.c_str()) *pNum = converted;
-	return p != s.c_str();
-}
-
-bool Str::isInt(const wstring& s, int *pNum)
+bool Str::isHex(const wstring& s)
 {
 	if (s.empty()) return false;
-	wchar_t *p = nullptr;
-	int converted = wcstol(s.c_str(), &p, 10);
-	if (pNum && p != s.c_str()) *pNum = converted;
-	return p != s.c_str();
+	for (wchar_t ch : s) {
+		if (!iswxdigit(ch) && !iswblank(ch)) return false;
+	}
+	return true;
 }
 
-bool Str::isIntU(const wstring& s, unsigned int *pNum)
-{
-	if (s.empty() || s[0] == L'-') return false;
-	wchar_t *p = nullptr;
-	unsigned int converted = wcstoul(s.c_str(), &p, 10);
-	if (pNum && p != s.c_str()) *pNum = converted;
-	return p != s.c_str();
-}
-
-bool Str::isHex(const wstring& s, int *pNum)
+bool Str::isFloat(const wstring& s)
 {
 	if (s.empty()) return false;
-	wchar_t *p = nullptr;
-	int converted = wcstol(s.c_str(), &p, 16);
-	if (pNum && p != s.c_str()) *pNum = converted;
-	return p != s.c_str();
+	if (s[0] != L'-' && s[0] != L'.' && !iswdigit(s[0]) && !iswblank(s[0])) return false;
+
+	bool hasDot = false;
+	for (wchar_t ch : s) {
+		if (ch == L'.') {
+			if (hasDot) {
+				return false;
+			} else {
+				hasDot = true;
+			}
+		} else {
+			if (!iswdigit(ch) && !iswblank(ch)) return false;
+		}
+	}
+	return true;
 }
 
-bool Str::isHexU(const wstring& s, unsigned int *pNum)
+vector<wstring> Str::explode(const wstring& s, const wchar_t *delimiter)
 {
-	if (s.empty() || s[0] == L'-') return false;
-	wchar_t *p = nullptr;
-	unsigned int converted = wcstoul(s.c_str(), &p, 16);
-	if (pNum && p != s.c_str()) *pNum = converted;
-	return p != s.c_str();
-}
+	vector<wstring> ret;
+	size_t delimiterLen = lstrlen(delimiter);
+	size_t base = 0, head = 0;
 
-vector<wstring> Str::explode(const wchar_t *s, const wchar_t *delimiters)
-{
-	// Count how many pieces we'll have after exploding.
-	int num = 0;
-	const wchar_t *pBase = s;
 	for (;;) {
-		size_t lenSub = wcscspn(pBase, delimiters);
-		if (lenSub) ++num;
-		if (pBase[lenSub] == L'\0') break;
-		pBase += lenSub + 1;
+		head = find(s, delimiter, head);
+		if (head == wstring::npos) break;
+		ret.emplace_back();
+		ret.back().insert(0, s, base, head - base);
+		head += delimiterLen;
+		base = head;
 	}
 
-	vector<wstring> ret(num); // alloc return buffer
+	ret.emplace_back();
+	ret.back().insert(0, s, base, s.size() - base);
+	
+	return ret;
+}
 
-	// Grab each substring after explosion.
-	num = 0;
-	pBase = s;
-	for (;;) {
-		size_t lenSub = wcscspn(pBase, delimiters);
-		if (lenSub) ret[num++].insert(0, pBase, lenSub);
-		if (pBase[lenSub] == L'\0') break;
-		pBase += lenSub + 1;
+vector<wstring> Str::explode(const wstring& s, const wstring& delimiter)
+{
+	return explode(s, delimiter.c_str());
+}
+
+vector<wstring> Str::explodeMultiZero(const wchar_t *s)
+{
+	// Example multiStr:
+	// L"first one\0second one\0third one\0"
+	// Assumes a well-formed multiStr, which ends with two nulls.
+
+	// Count number of null-delimited strings; string end with double null.
+	size_t numStrings = 0;
+	const wchar_t *pRun = s;
+	while (*pRun) {
+		++numStrings;
+		pRun += lstrlen(pRun) + 1;
+	}
+
+	// Alloc return array of strings.
+	vector<wstring> ret;
+	ret.reserve(numStrings);
+
+	// Copy each string.
+	pRun = s;
+	for (size_t i = 0; i < numStrings; ++i) {
+		ret.emplace_back(pRun);
+		pRun += lstrlen(pRun) + 1;
+	}
+
+	return ret;
+}
+
+vector<wstring> Str::explodeQuoted(const wchar_t *s)
+{
+	// Example quotedStr:
+	// "First one" NoQuoteSecond "Third one"
+
+	// Count number of strings.
+	size_t numStrings = 0;
+	const wchar_t *pRun = s;
+	while (*pRun) {
+		if (*pRun == L'\"') { // begin of quoted string
+			++pRun; // point to 1st char of string
+			for (;;) {
+				if (!*pRun) {
+					break; // won't compute open-quoted
+				} else if (*pRun == L'\"') {
+					++pRun; // point to 1st char after closing quote
+					++numStrings;
+					break;
+				}
+				++pRun;
+			}
+		} else if (!iswspace(*pRun)) { // 1st char of non-quoted string
+			++pRun; // point to 2nd char of string
+			while (*pRun && !iswspace(*pRun) && *pRun != L'\"') ++pRun; // passed string
+			++numStrings;
+		} else {
+			++pRun; // some white space
+		}
+	}
+
+	// Alloc return array of strings.
+	vector<wstring> ret;
+	ret.reserve(numStrings);
+
+	// Alloc and copy each string.
+	pRun = s;
+	const wchar_t *pBase;
+	int i = 0;
+	while (*pRun) {
+		if (*pRun == L'\"') { // begin of quoted string
+			++pRun; // point to 1st char of string
+			pBase = pRun;
+			for (;;) {
+				if (!*pRun) {
+					break; // won't compute open-quoted
+				} else if (*pRun == L'\"') {
+					ret.emplace_back();
+					ret.back().insert(0, pBase, pRun - pBase); // copy to buffer
+					++i; // next string
+
+					++pRun; // point to 1st char after closing quote
+					break;
+				}
+				++pRun;
+			}
+		} else if (!iswspace(*pRun)) { // 1st char of non-quoted string
+			pBase = pRun;
+			++pRun; // point to 2nd char of string
+			while (*pRun && !iswspace(*pRun) && *pRun != L'\"') ++pRun; // passed string
+
+			ret.emplace_back();
+			ret.back().insert(0, pBase, pRun - pBase); // copy to buffer
+			++i; // next string
+		} else {
+			++pRun; // some white space
+		}
+	}
+
+	return ret;
+}
+
+wstring Str::parseAscii(const BYTE *data, size_t length)
+{
+	wstring ret;
+	if (data && length) {
+		ret.resize(length);
+		for (size_t i = 0; i < length; ++i) {
+			ret[i] = static_cast<wchar_t>(data[i]); // raw conversion
+		}
 	}
 	return ret;
 }
 
-vector<wstring> Str::explode(const wstring& s, const wchar_t *delimiters)
+wstring Str::parseAscii(const std::vector<BYTE>& data)
 {
-	return explode(s.c_str(), delimiters);
+	return parseAscii(&data[0], data.size());
 }
 
-Str::Encoding Str::getEncoding(const BYTE *pData, size_t sz)
+wstring Str::parseUtf8(const BYTE *data, size_t length)
 {
-	auto match = [pData, sz](const BYTE *pBom, size_t szBom)->bool {
-		return (sz >= szBom) &&
-			!memcmp(pData, pBom, sizeof(BYTE) * szBom);
-	};
-
-	// https://en.wikipedia.org/wiki/Byte_order_mark
-
-	BYTE utf8[] = { 0xEF, 0xBB, 0xBF };
-	if (match(utf8, 3)) return Encoding::UTF8;
-
-	BYTE utf16be[] = { 0xFE, 0xFF };
-	if (match(utf16be, 2)) return Encoding::UTF16BE;
-
-	BYTE utf16le[] = { 0xFF, 0xFE };
-	if (match(utf16le, 2)) return Encoding::UTF16LE;
-	
-	BYTE utf32be[] = { 0x00, 0x00, 0xFE, 0xFF };
-	if (match(utf32be, 4)) return Encoding::UTF32BE;
-
-	BYTE utf32le[] = { 0xFF, 0xFE, 0x00, 0x00 };
-	if (match(utf32le, 4)) return Encoding::UTF32LE;
-
-	BYTE scsu[] = { 0x0E, 0xFE, 0xFF };
-	if (match(scsu, 4)) return Encoding::SCSU;
-
-	BYTE bocu1[] = { 0xFB, 0xEE, 0x28 };
-	if (match(bocu1, 4)) return Encoding::BOCU1;
-
-	return Encoding::ASCII;
+	wstring ret;
+	if (data && length) {
+		int neededLen = MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<const char*>(data),
+			static_cast<int>(length), nullptr, 0);
+		ret.resize(neededLen);
+		MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<const char*>(data),
+			static_cast<int>(length), &ret[0], neededLen);
+		trimNulls(ret);
+	}
+	return ret;
 }
 
-Str::Encoding Str::getEncoding(const std::vector<BYTE>& data)
+wstring Str::parseUtf8(const vector<BYTE>& data)
 {
-	return getEncoding(&data[0], data.size());
+	return parseUtf8(&data[0], data.size());
+}
+
+vector<BYTE> Str::serializeUtf8(const wstring& s)
+{
+	vector<BYTE> ret;
+	if (!s.empty()) {
+		int neededLen = WideCharToMultiByte(CP_UTF8, 0,
+			s.c_str(), static_cast<int>(s.size()),
+			nullptr, 0, nullptr, 0);
+		ret.resize(neededLen);
+		WideCharToMultiByte(CP_UTF8, 0,
+			s.c_str(), static_cast<int>(s.size()), 
+			reinterpret_cast<char*>(&ret[0]),
+			neededLen, nullptr, nullptr);
+	}
+	return ret;
 }

@@ -307,34 +307,7 @@ bool File::showOpen(HWND hWnd, const wchar_t *filter, vector<wstring>& arrBuf)
 	// don't know why!
 
 	if (GetOpenFileName(&ofn)) {
-		auto explodeMultiStr = [](const wchar_t *multiStr)->vector<wstring> {
-			// Example multiStr:
-			// L"first one\0second one\0third one\0"
-			// Assumes a well-formed multiStr, which ends with two nulls.
-
-			// Count number of null-delimited strings; string end with double null.
-			int numStrings = 0;
-			const wchar_t *pRun = multiStr;
-			while (*pRun) {
-				++numStrings;
-				pRun += lstrlen(pRun) + 1;
-			}
-
-			// Alloc return array of strings.
-			vector<wstring> ret;
-			ret.reserve(numStrings);
-
-			// Copy each string.
-			pRun = multiStr;
-			for (int i = 0; i < numStrings; ++i) {
-				ret.emplace_back(pRun);
-				pRun += lstrlen(pRun) + 1;
-			}
-
-			return ret;
-		};
-
-		vector<wstring> strs = explodeMultiStr(&multiBuf[0]);
+		vector<wstring> strs = Str::explodeMultiZero(&multiBuf[0]);
 		if (!strs.size()) {
 			MessageBox(hWnd, L"GetOpenFileName didn't return multiple strings.", L"Error", MB_ICONERROR);
 			return false;

@@ -136,6 +136,21 @@ void Sys::enableXButton(HWND hWnd, bool enable)
 	}
 }
 
+bool Sys::fontExists(const wchar_t *name)
+{
+	// http://cboard.cprogramming.com/windows-programming/90066-how-determine-if-font-support-unicode.html
+	bool isInstalled = false;
+	HDC hdc = GetDC(nullptr);
+	EnumFontFamilies(hdc, name,
+		(FONTENUMPROC)[](const LOGFONT *lpelf, const TEXTMETRIC *lpntm, DWORD fontType, LPARAM lp)->int {
+		bool *pIsInstalled = reinterpret_cast<bool*>(lp);
+		*pIsInstalled = true; // if we're here, font does exist
+		return 0;
+	}, reinterpret_cast<LPARAM>(&isInstalled));
+	ReleaseDC(nullptr, hdc);
+	return isInstalled;
+}
+
 vector<wstring> Sys::getDroppedFiles(HDROP hDrop)
 {
 	vector<wstring> files(DragQueryFile(hDrop, 0xFFFFFFFF, nullptr, 0)); // alloc return vector

@@ -13,5 +13,6 @@ struct Sys final {
 	static bool         hasShift();
 	static int          msgBox(HWND hParent, std::wstring title, std::wstring text, UINT uType = 0);
 	static void         enableXButton(HWND hWnd, bool enable);
+	static bool         fontExists(const wchar_t *name);
 	static std::vector<std::wstring> getDroppedFiles(HDROP hDrop);
 };

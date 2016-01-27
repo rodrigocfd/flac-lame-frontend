@@ -78,6 +78,7 @@ public:
 	ListView& setContextMenu(int contextMenuId);
 	ListView& setFullRowSelect();
 	ListView& setRedraw(bool doRedraw);
+	ListView& focus();
 	ListView& setView(View view);
 	View      getView() const;
 	ListView& iconPush(int iconId);

@@ -166,6 +166,7 @@
     <ClInclude Include="winutil\File.h" />
     <ClInclude Include="winutil\FileIni.h" />
     <ClInclude Include="winutil\FileMap.h" />
+    <ClInclude Include="winutil\FileText.h" />
     <ClInclude Include="winutil\Icon.h" />
     <ClInclude Include="winutil\Internet.h" />
     <ClInclude Include="winutil\Label.h" />
@@ -173,6 +174,7 @@
     <ClInclude Include="winutil\Menu.h" />
     <ClInclude Include="winutil\ProgressBar.h" />
     <ClInclude Include="winutil\Resizer.h" />
+    <ClInclude Include="winutil\StatusBar.h" />
     <ClInclude Include="winutil\Str.h" />
     <ClInclude Include="winutil\Sys.h" />
     <ClInclude Include="winutil\TaskBarProgress.h" />
@@ -195,6 +197,7 @@
     <ClCompile Include="winutil\File.cpp" />
     <ClCompile Include="winutil\FileIni.cpp" />
     <ClCompile Include="winutil\FileMap.cpp" />
+    <ClCompile Include="winutil\FileText.cpp" />
     <ClCompile Include="winutil\Icon.cpp" />
     <ClCompile Include="winutil\Internet.cpp" />
     <ClCompile Include="winutil\Label.cpp" />
@@ -202,6 +205,7 @@
     <ClCompile Include="winutil\Menu.cpp" />
     <ClCompile Include="winutil\ProgressBar.cpp" />
     <ClCompile Include="winutil\Resizer.cpp" />
+    <ClCompile Include="winutil\StatusBar.cpp" />
     <ClCompile Include="winutil\Str.cpp" />
     <ClCompile Include="winutil\Sys.cpp" />
     <ClCompile Include="winutil\TaskBarProgress.cpp" />

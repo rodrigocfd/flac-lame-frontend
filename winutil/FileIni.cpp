@@ -1,7 +1,7 @@
 
 #include <vector>
 #include "FileIni.h"
-#include "FileMap.h"
+#include "FileText.h"
 #include "Str.h"
 using std::unordered_map;
 using std::vector;
@@ -14,13 +14,10 @@ bool FileIni::load(const wstring& file, wstring *pErr)
 
 bool FileIni::load(const wchar_t *file, wstring *pErr)
 {
-	FileMap fm;
-	if (!fm.open(file, File::Access::READONLY, pErr)) return false;
-
 	wstring content;
-	if (!fm.getAnsiContent(content, 0, -1, pErr)) return false;
-
-	fm.close();
+	if (!FileText::read(content, file, pErr)) {
+		return false;
+	}
 
 	vector<wstring> lines = Str::explode(content, L"\r\n");
 	wstring curSection, keyBuf, valBuf;
@@ -46,6 +43,8 @@ bool FileIni::load(const wchar_t *file, wstring *pErr)
 			}
 		}
 	}
+
+	if (pErr) pErr->clear();
 	return true;
 }
 
@@ -57,18 +56,7 @@ bool FileIni::save(const wstring& file, wstring *pErr) const
 bool FileIni::save(const wchar_t *file, wstring *pErr) const
 {
 	wstring out = serialize();
-
-	File fout;
-	if (!fout.open(file, File::Access::READWRITE, pErr)) return false;
-	if (!fout.setNewSize(0, pErr)) return false;
-
-	vector<BYTE> raw(out.size(), 0x00);
-	for (size_t i = 0; i < out.size(); ++i) {
-		raw[i] = static_cast<BYTE>(out[i]); // brute-force
-	}
-
-	if (!fout.write(raw, pErr)) return false;
-	return true;
+	return FileText::writeUtf8(out, file, pErr);
 }
 
 wstring FileIni::serialize() const

@@ -389,6 +389,12 @@ ListView& ListView::setRedraw(bool doRedraw)
 	return *this;
 }
 
+ListView& ListView::focus()
+{
+	SetFocus(_hWnd);
+	return *this;
+}
+
 ListView& ListView::setView(View view)
 {
 	ListView_SetView(_hWnd, static_cast<DWORD>(view));

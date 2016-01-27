@@ -321,7 +321,7 @@ bool InternetDownload::_parseHeaders(wstring *pErr)
 	// Retrieve content length, if informed by server.
 	if (this->_responseHeaders.find(L"Content-Length") != this->_responseHeaders.end()) {
 		const wstring& strContentLength = this->_responseHeaders[L"Content-Length"];
-		if (Str::isIntU(strContentLength)) { // yes, server informed content length
+		if (Str::isUint(strContentLength)) { // yes, server informed content length
 			this->_contentLength = std::stoi(strContentLength);
 		}
 	}

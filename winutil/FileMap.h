@@ -23,5 +23,4 @@ public:
 	BYTE*        pPastMem() const;
 	bool         setNewSize(size_t newSize, std::wstring *pErr = nullptr);
 	bool         getContent(std::vector<BYTE>& buf, int offset = 0, int numBytes = -1, std::wstring *pErr = nullptr) const;
-	bool         getAnsiContent(std::wstring& buf, int offset = 0, int numChars = -1, std::wstring *pErr = nullptr) const;
 };

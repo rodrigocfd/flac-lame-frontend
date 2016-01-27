@@ -105,6 +105,12 @@ TextBox& TextBox::enable(bool doEnable)
 	return *this;
 }
 
+TextBox& TextBox::focus()
+{
+	SetFocus(_hWnd);
+	return *this;
+}
+
 TextBox& TextBox::onKeyUp(KeyUpFunc callback)
 {
 	_onKeyUp = std::move(callback);
