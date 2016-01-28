@@ -42,6 +42,12 @@ ComboBox& ComboBox::enable(bool doEnable)
 	return *this;
 }
 
+ComboBox& ComboBox::focus()
+{
+	SetFocus(_hWnd);
+	return *this;
+}
+
 int ComboBox::itemCount() const
 {
 	return static_cast<int>(SendMessage(_hWnd, CB_GETCOUNT, 0, 0));

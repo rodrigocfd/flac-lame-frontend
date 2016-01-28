@@ -22,20 +22,12 @@ class window_dialog : public window_thread<window_dialog_traits> {
 private:
 	msg_func_type _userInitDialog;
 public:
-	struct setup_type {
-		int dialogId;
-		int iconId;
-		int accelTableId;
-		setup_type() : dialogId(0), iconId(0), accelTableId(0) { }
-	};
-
-	setup_type setup;
 	virtual ~window_dialog() = default;
 
 	window_dialog()
 	{
 		window_proc::on_message(WM_INITDIALOG, [this](WPARAM wp, LPARAM lp)->INT_PTR {
-			window_font::set_ui_on_children(hwnd()); // if user creates controls, font must be set manually
+			window_font::set_ui_on_children(hwnd()); // if user creates more controls, font must be set manually on them
 			return _userInitDialog ? _userInitDialog(wp, lp) : TRUE;
 		});
 	}

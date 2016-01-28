@@ -21,19 +21,19 @@ DlgMain::DlgMain()
 	on_message(WM_INITDIALOG, [this](WPARAM wp, LPARAM lp)->INT_PTR
 	{
 		// Validate and load INI file.
-		wstring iniPath = Sys::pathOfExe().append(L"\\FlacLameFE.ini");
-		if (!File::exists(iniPath)) {
+		_ini.path = Sys::pathOfExe().append(L"\\FlacLameFE.ini");
+		if (!File::exists(_ini.path)) {
 			Sys::msgBox(hwnd(), L"Fail",
-				Str::format(L"File not found:\n%s", iniPath.c_str()),
+				Str::format(L"File not found:\n%s", _ini.path.c_str()),
 				MB_ICONERROR);
 			SendMessage(hwnd(), WM_CLOSE, 0, 0); // halt program
 			return TRUE;
 		}
 
 		wstring err;
-		if (!_ini.load(iniPath, &err)) {
+		if (!_ini.load(&err)) {
 			Sys::msgBox(hwnd(), L"Fail",
-				Str::format(L"Failed to open:\n%s\n%s", iniPath.c_str(), err.c_str()),
+				Str::format(L"Failed to load:\n%s\n%s", _ini.path.c_str(), err.c_str()),
 				MB_ICONERROR);
 			SendMessage(hwnd(), WM_CLOSE, 0, 0); // halt program
 			return TRUE;

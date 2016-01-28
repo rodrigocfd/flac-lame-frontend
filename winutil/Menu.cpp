@@ -13,6 +13,11 @@ Menu::Menu(HMENU hMenu)
 {
 }
 
+Menu::Menu(const Menu& m)
+	: _hMenu(m._hMenu)
+{
+}
+
 Menu::Menu(Menu&& m)
 	: _hMenu(m._hMenu)
 {
@@ -22,6 +27,12 @@ Menu::Menu(Menu&& m)
 Menu& Menu::operator=(HMENU hMenu)
 {
 	_hMenu = hMenu;
+	return *this;
+}
+
+Menu& Menu::operator=(const Menu& m)
+{
+	_hMenu = m._hMenu;
 	return *this;
 }
 
@@ -44,10 +55,10 @@ Menu& Menu::loadResource(int resourceId, HINSTANCE hInst)
 	return *this;
 }
 
-Menu& Menu::loadResource(int resourceId, int subMenuIndex, HINSTANCE hInst)
+Menu& Menu::loadResource(int resourceId, size_t subMenuIndex, HINSTANCE hInst)
 {
 	loadResource(resourceId, hInst);
-	_hMenu = GetSubMenu(_hMenu, subMenuIndex);
+	_hMenu = GetSubMenu(_hMenu, static_cast<int>(subMenuIndex));
 	return *this;
 }
 
@@ -64,14 +75,33 @@ int Menu::size() const
 	return GetMenuItemCount(_hMenu);
 }
 
-Menu Menu::getSubmenu(int pos) const
+Menu Menu::getSubmenu(size_t pos) const
 {
-	return Menu(GetSubMenu(_hMenu, pos));
+	return Menu(GetSubMenu(_hMenu, static_cast<int>(pos)));
 }
 
-WORD Menu::getCommandId(int index) const
+WORD Menu::getCommandId(size_t pos) const
 {
-	return GetMenuItemID(_hMenu, index);
+	return GetMenuItemID(_hMenu, static_cast<int>(pos));
+}
+
+wstring Menu::getCaption(WORD commandId) const
+{
+	wchar_t captionBuf[64]; // arbitrary buffer length
+	MENUITEMINFO mii = { 0 };
+
+	mii.cbSize     = sizeof(mii);
+	mii.cch        = ARRAYSIZE(captionBuf);
+	mii.dwTypeData = captionBuf;
+	mii.fMask      = MIIM_STRING;
+
+	GetMenuItemInfo(_hMenu, commandId, FALSE, &mii);
+	return captionBuf;
+}
+
+size_t Menu::getItemCount() const
+{
+	return static_cast<size_t>(GetMenuItemCount(_hMenu));
 }
 
 Menu& Menu::addSeparator()
@@ -95,6 +125,26 @@ Menu& Menu::enableItem(WORD commandId, bool doEnable)
 {
 	EnableMenuItem(_hMenu, commandId,
 		MF_BYCOMMAND | ((doEnable) ? MF_ENABLED : MF_GRAYED));
+	return *this;
+}
+
+Menu& Menu::deleteItemByPos(size_t pos)
+{
+	DeleteMenu(_hMenu, static_cast<UINT>(pos), MF_BYPOSITION);
+	return *this;
+}
+
+Menu& Menu::deleteItemById(WORD commandId)
+{
+	DeleteMenu(_hMenu, commandId, MF_BYCOMMAND);
+	return *this;
+}
+
+Menu& Menu::deleteAllItems()
+{
+	for (size_t i = getItemCount(); i-- > 0; ) {
+		deleteItemByPos(i);
+	}
 	return *this;
 }
 

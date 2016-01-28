@@ -59,9 +59,6 @@
     <ClInclude Include="src\DlgRunnin.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="winutil\FileIni.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
     <ClInclude Include="winutil\FileMap.h">
       <Filter>winutil</Filter>
     </ClInclude>
@@ -81,6 +78,9 @@
       <Filter>winutil</Filter>
     </ClInclude>
     <ClInclude Include="winutil\Menu.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\MenuRecent.h">
       <Filter>winutil</Filter>
     </ClInclude>
     <ClInclude Include="winutil\ProgressBar.h">
@@ -117,6 +117,9 @@
       <Filter>winutil</Filter>
     </ClInclude>
     <ClInclude Include="winutil\File.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\FileIni.h">
       <Filter>winutil</Filter>
     </ClInclude>
   </ItemGroup>
@@ -159,6 +162,9 @@
       <Filter>winutil</Filter>
     </ClCompile>
     <ClCompile Include="winutil\Menu.cpp">
+      <Filter>winutil</Filter>
+    </ClCompile>
+    <ClCompile Include="winutil\MenuRecent.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
     <ClCompile Include="winutil\ProgressBar.cpp">

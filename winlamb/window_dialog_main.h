@@ -19,6 +19,14 @@ namespace winlamb {
 
 class window_dialog_main : public window_dialog {
 public:
+	struct setup_type {
+		int dialogId;
+		int iconId;
+		int accelTableId;
+		setup_type() : dialogId(0), iconId(0), accelTableId(0) { }
+	};
+
+	setup_type setup;
 	virtual ~window_dialog_main() = default;
 	window_dialog_main& operator=(const window_dialog_main&) = delete;
 

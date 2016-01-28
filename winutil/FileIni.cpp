@@ -3,19 +3,19 @@
 #include "FileIni.h"
 #include "FileText.h"
 #include "Str.h"
-using std::unordered_map;
+using std::map;
 using std::vector;
 using std::wstring;
 
-bool FileIni::load(const wstring& file, wstring *pErr)
+bool FileIni::loadFromFile(wstring *pErr)
 {
-	return load(file.c_str(), pErr);
-}
+	if (path.empty()) {
+		if (pErr) *pErr = L"Current path is empty.";
+		return false;
+	}
 
-bool FileIni::load(const wchar_t *file, wstring *pErr)
-{
 	wstring content;
-	if (!FileText::read(content, file, pErr)) {
+	if (!FileText::read(content, path, pErr)) {
 		return false;
 	}
 
@@ -27,7 +27,7 @@ bool FileIni::load(const wchar_t *file, wstring *pErr)
 		if (line[0] == L'[' && line.back() == L']') { // begin of section found
 			curSection.clear();
 			curSection.insert(0, &line[1], line.length() - 2);
-			data.emplace(curSection, unordered_map<wstring, wstring>()); // new section added
+			data.emplace(curSection, map<wstring, wstring>()); // new section added
 		} else if (!data.empty() && !line.empty() && line[0] != L';') { // keys will be read only if within a section
 			size_t idxEq = line.find_first_of(L'=');
 			if (idxEq != wstring::npos) {
@@ -48,15 +48,15 @@ bool FileIni::load(const wchar_t *file, wstring *pErr)
 	return true;
 }
 
-bool FileIni::save(const wstring& file, wstring *pErr) const
+bool FileIni::saveToFile(wstring *pErr) const
 {
-	return save(file.c_str(), pErr);
-}
+	if (path.empty()) {
+		if (pErr) *pErr = L"Current path is empty.";
+		return false;
+	}
 
-bool FileIni::save(const wchar_t *file, wstring *pErr) const
-{
 	wstring out = serialize();
-	return FileText::writeUtf8(out, file, pErr);
+	return FileText::writeUtf8(out, path, pErr);
 }
 
 wstring FileIni::serialize() const
@@ -84,11 +84,16 @@ const wstring& FileIni::val(const wchar_t *section, const wchar_t *key) const
 
 bool FileIni::hasSection(const wchar_t *section) const
 {
-	return data.find(section) != data.end();
+	return data.count(section) > 0;
+}
+
+bool FileIni::hasSection(const wstring& section) const
+{
+	return hasSection(section.c_str());
 }
 
 bool FileIni::hasKey(const wchar_t *section, const wchar_t *key) const
 {
-	if (!hasSection(section)) return false;
-	return data.at(section).find(key) != data.at(section).end();
+	return !hasSection(section) ? false :
+		data.at(section).count(key) > 0;
 }

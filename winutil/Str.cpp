@@ -57,8 +57,8 @@ wstring& Str::trim(wstring& s)
 		}
 	}
 
-	std::copy(std::next(s.begin(), iFirst), // move the non-space chars back
-		std::next(s.begin(), iLast + 1), s.begin());
+	std::copy(s.begin() + iFirst, // move the non-space chars back
+		s.begin() + iLast + 1, s.begin());
 	s.resize(iLast - iFirst + 1); // trim container size
 	return s;
 }

@@ -172,6 +172,7 @@
     <ClInclude Include="winutil\Label.h" />
     <ClInclude Include="winutil\ListView.h" />
     <ClInclude Include="winutil\Menu.h" />
+    <ClInclude Include="winutil\MenuRecent.h" />
     <ClInclude Include="winutil\ProgressBar.h" />
     <ClInclude Include="winutil\Resizer.h" />
     <ClInclude Include="winutil\StatusBar.h" />
@@ -203,6 +204,7 @@
     <ClCompile Include="winutil\Label.cpp" />
     <ClCompile Include="winutil\ListView.cpp" />
     <ClCompile Include="winutil\Menu.cpp" />
+    <ClCompile Include="winutil\MenuRecent.cpp" />
     <ClCompile Include="winutil\ProgressBar.cpp" />
     <ClCompile Include="winutil\Resizer.cpp" />
     <ClCompile Include="winutil\StatusBar.cpp" />

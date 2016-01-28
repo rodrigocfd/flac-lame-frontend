@@ -14,6 +14,7 @@ public:
 	HWND         hWnd() const;
 	ComboBox&    create(HWND hParent, int id, POINT pos, int width, bool sorted);
 	ComboBox&    enable(bool doEnable);
+	ComboBox&    focus();
 	int          itemCount() const;
 	ComboBox&    itemRemoveAll();
 	ComboBox&    itemSetSelected(int i);

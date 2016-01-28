@@ -38,6 +38,12 @@ CheckBox& CheckBox::create(HWND hParent, int id, const wchar_t *caption, POINT p
 		nullptr) );
 }
 
+CheckBox& CheckBox::focus()
+{
+	SetFocus(_hWnd);
+	return *this;
+}
+
 bool CheckBox::isChecked()
 {
 	return SendMessage(_hWnd, BM_GETCHECK, 0, 0) == BST_CHECKED;
