@@ -163,6 +163,7 @@
     <ClInclude Include="winutil\CheckBox.h" />
     <ClInclude Include="winutil\ComboBox.h" />
     <ClInclude Include="winutil\DateTime.h" />
+    <ClInclude Include="winutil\DC.h" />
     <ClInclude Include="winutil\File.h" />
     <ClInclude Include="winutil\FileIni.h" />
     <ClInclude Include="winutil\FileMap.h" />
@@ -195,6 +196,7 @@
     <ClCompile Include="winutil\CheckBox.cpp" />
     <ClCompile Include="winutil\ComboBox.cpp" />
     <ClCompile Include="winutil\DateTime.cpp" />
+    <ClCompile Include="winutil\DC.cpp" />
     <ClCompile Include="winutil\File.cpp" />
     <ClCompile Include="winutil\FileIni.cpp" />
     <ClCompile Include="winutil\FileMap.cpp" />
