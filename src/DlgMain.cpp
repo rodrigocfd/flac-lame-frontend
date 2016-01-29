@@ -31,7 +31,7 @@ DlgMain::DlgMain()
 		}
 
 		wstring err;
-		if (!_ini.load(&err)) {
+		if (!_ini.loadFromFile(&err)) {
 			Sys::msgBox(hwnd(), L"Fail",
 				Str::format(L"Failed to load:\n%s\n%s", _ini.path.c_str(), err.c_str()),
 				MB_ICONERROR);
@@ -193,7 +193,7 @@ DlgMain::DlgMain()
 		return TRUE;
 	});
 
-	on_command(RAD_MP3, [this]()->INT_PTR
+	on_command({RAD_MP3, RAD_FLAC, RAD_WAV}, [this]()->INT_PTR
 	{
 		_radMp3Cbr.enable(_radMp3.isChecked());
 		_cmbCbr.enable(_radMp3.isChecked() && _radMp3Cbr.isChecked());
@@ -205,16 +205,13 @@ DlgMain::DlgMain()
 		_cmbFlac.enable(_radFlac.isChecked());
 		return TRUE;
 	});
-	on_command(RAD_FLAC, [this]()->INT_PTR { return SendMessage(hwnd(), WM_COMMAND, MAKEWPARAM(RAD_MP3, 0), 0); });
-	on_command(RAD_WAV, [this]()->INT_PTR { return SendMessage(hwnd(), WM_COMMAND, MAKEWPARAM(RAD_MP3, 0), 0); });
 
-	on_command(RAD_CBR, [this]()->INT_PTR
+	on_command({RAD_CBR, RAD_VBR}, [this]()->INT_PTR
 	{
 		_cmbCbr.enable(_radMp3Cbr.isChecked());
 		_cmbVbr.enable(_radMp3Vbr.isChecked());
 		return TRUE;
 	});
-	on_command(RAD_VBR, [this]()->INT_PTR { return SendMessage(hwnd(), WM_COMMAND, MAKEWPARAM(RAD_CBR, 0), 0); });
 
 	on_command(BTN_RUN, [this]()->INT_PTR
 	{

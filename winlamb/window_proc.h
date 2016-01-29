@@ -94,7 +94,7 @@ public:
 		}
 	}
 
-	virtual void on_notify(UINT idFrom, UINT code, notif_func_type callback)
+	virtual void on_notify(UINT_PTR idFrom, UINT code, notif_func_type callback)
 	{
 		if (!_loopStarted) {
 			for (auto& n : _notifs) {
@@ -105,6 +105,34 @@ public:
 			}
 			this->_notifs.push_back({ idFrom, code, std::move(callback) }); // add new WM_NOTIFY handler
 		}
+	}
+
+	void on_message(std::initializer_list<UINT> msgs, msg_func_type callback)
+	{
+		for (size_t i = 0; i < msgs.size() - 1; ++i) {
+			on_message(*(msgs.begin() + i), callback);
+		}
+		on_message(*(msgs.begin() + msgs.size() - 1), std::move(callback));
+	}
+
+	void on_command(std::initializer_list<WORD> cmds, cmd_func_type callback)
+	{
+		for (size_t i = 0; i < cmds.size() - 1; ++i) {
+			on_command(*(cmds.begin() + i), callback);
+		}
+		on_command(*(cmds.begin() + cmds.size() - 1), std::move(callback));
+	}
+
+	void on_notify(std::initializer_list<std::pair<UINT_PTR, UINT>> idFromAndCodes, notif_func_type callback)
+	{
+		for (size_t i = 0; i < idFromAndCodes.size() - 1; ++i) {
+			on_notify((idFromAndCodes.begin() + i)->first,
+				(idFromAndCodes.begin() + i)->second,
+				callback);
+		}
+		on_notify((idFromAndCodes.begin() + idFromAndCodes.size() - 1)->first,
+			(idFromAndCodes.begin() + idFromAndCodes.size() - 1)->second,
+			std::move(callback));
 	}
 
 protected:
