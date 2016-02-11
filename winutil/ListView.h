@@ -71,7 +71,8 @@ public:
 	~ListView();
 	ListView();
 	ListView(HWND hWnd);
-	ListView& operator=(HWND hwnd);
+	ListView& operator=(HWND hWnd);
+	ListView& operator=(std::pair<HWND, int> hWndAndCtrlId);
 
 	HWND      hWnd() const;
 	ListView& create(HWND hParent, int id, POINT pos, SIZE size, View view = View::DETAILS);

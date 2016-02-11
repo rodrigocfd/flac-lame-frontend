@@ -3,6 +3,7 @@
 #include "Icon.h"
 #include "Str.h"
 #include "Sys.h"
+using std::pair;
 using std::vector;
 using std::wstring;
 
@@ -351,6 +352,11 @@ ListView& ListView::operator=(HWND hwnd)
 	items = Collection(this); // initialize internal object
 	_contextMenu.destroy();
 	return *this;
+}
+
+ListView& ListView::operator=(pair<HWND, int> hWndAndCtrlId)
+{
+	return operator=(GetDlgItem(hWndAndCtrlId.first, hWndAndCtrlId.second));
 }
 
 HWND ListView::hWnd() const

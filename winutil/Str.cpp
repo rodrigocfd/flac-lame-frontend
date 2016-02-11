@@ -63,20 +63,18 @@ wstring& Str::trim(wstring& s)
 	return s;
 }
 
-wstring& Str::upper(wstring& s)
+wstring Str::upper(const wstring& s)
 {
-	for (wchar_t& ch : s) {
-		ch = towupper(ch);
-	}
-	return s;
+	wstring ret(s);
+	CharUpperBuff(&ret[0], static_cast<DWORD>(ret.size()));
+	return ret;
 }
 
-wstring& Str::lower(wstring& s)
+wstring Str::lower(const wstring& s)
 {
-	for (wchar_t& ch : s) {
-		ch = towlower(ch);
-	}
-	return s;
+	wstring ret(s);
+	CharLowerBuff(&ret[0], static_cast<DWORD>(ret.size()));
+	return ret;
 }
 
 wstring& Str::removeDiacritics(wstring& s)
@@ -95,166 +93,6 @@ wstring& Str::removeDiacritics(wstring& s)
 	return s;
 }
 
-wstring Str::folderFromPath(const wstring& path)
-{
-	wstring ret(path);
-	ret.resize(ret.find_last_of(L'\\')); // also remove trailing backslash
-	return ret;
-}
-
-wstring Str::fileFromPath(const wstring& path)
-{
-	wstring ret(path);
-	ret.erase(0, ret.find_last_of(L'\\') + 1);
-	return ret;
-}
-
-size_t Str::find(const wstring& s, const wchar_t *what, size_t offset)
-{
-	if (!s.size() || offset >= s.size()) {
-		return wstring::npos; // same behavior of find_first_of
-	}
-
-	size_t whatLen = lstrlen(what);
-	if (!whatLen || whatLen > s.size() - offset) {
-		return wstring::npos;
-	}
-
-	size_t found = s.find_first_of(what[0], offset);
-	while (found != wstring::npos && found + whatLen <= s.size()) {
-		if (!memcmp(&s[found], what, whatLen * sizeof(wchar_t))) {
-			return found;
-		}
-		found = s.find_first_of(what[0], found + 1);
-	}
-
-	return wstring::npos; // not found
-}
-
-size_t Str::find(const wstring& s, const wstring& what, size_t offset)
-{
-	return find(s, what.c_str(), offset);
-}
-
-size_t Str::findI(const wstring& s, const wchar_t *what, size_t offset)
-{
-	wstring haystack(s), needle(what);
-	upper(haystack);
-	upper(needle);
-	return find(haystack, needle.c_str(), offset);
-}
-
-size_t Str::findI(const wstring& s, const wstring& what, size_t offset)
-{
-	return findI(s, what.c_str(), offset);
-}
-
-size_t Str::findLast(const wstring& s, const wchar_t *what, size_t offset)
-{
-	if (!s.size()) return wstring::npos;
-
-	size_t whatLen = lstrlen(what);
-	if (!whatLen || whatLen > s.size() - offset)
-	if (!whatLen || whatLen - 1 > min(s.size() - 1, offset)) return wstring::npos; // same behavior of find_last_of
-
-	size_t found = s.find_last_of(what[0], min(s.size() - whatLen, offset));
-	while (found != wstring::npos) {
-		if (!memcmp(&s[found], what, whatLen * sizeof(wchar_t))) {
-			return found;
-		}
-		if (!found) break;
-		found = s.find_last_of(what[0], found - 1);
-	}
-
-	return wstring::npos; // not found
-}
-
-size_t Str::findLast(const wstring& s, const wstring& what, size_t offset)
-{
-	return findLast(s, what.c_str(), offset);
-}
-
-size_t Str::findLastI(const wstring& s, const wchar_t *what, size_t offset)
-{
-	wstring haystack(s), needle(what);
-	upper(haystack);
-	upper(needle);
-	return findLast(haystack, needle.c_str(), offset);
-}
-
-size_t Str::findLastI(const wstring& s, const wstring& what, size_t offset)
-{
-	return findLastI(s, what.c_str(), offset);
-}
-
-wstring& Str::replace(wstring& s, const wchar_t *what, const wchar_t *replacement)
-{
-	if (!s.size()) return s;
-
-	size_t whatLen = lstrlen(what);
-	if (!whatLen) return s;
-
-	size_t replacementLen = lstrlen(replacement);
-	wstring output;
-	size_t base = 0;
-	size_t found = 0;
-	
-	for (;;) {
-		found = find(s, what, found);
-		output.insert(output.size(), s, base, found - base);
-		if (found != wstring::npos) {
-			output.append(replacement);
-			base = found = found + whatLen;
-		} else {
-			break;
-		}
-	}
-
-	s.swap(output);
-	return s;
-}
-
-wstring& Str::replaceI(wstring& s, const wchar_t *what, const wchar_t *replacement)
-{
-	if (!s.size()) return s;
-
-	size_t whatLen = lstrlen(what);
-	if (!whatLen) return s;
-
-	wstring haystack(s), needle(what); // clone and uppercase
-	upper(haystack);
-	upper(needle);
-	
-	size_t replacementLen = lstrlen(replacement);
-	wstring output;
-	size_t base = 0;
-	size_t found = 0;
-
-	for (;;) {
-		found = find(haystack, needle.c_str(), found);
-		output.insert(output.size(), s, base, found - base);
-		if (found != wstring::npos) {
-			output.append(replacement);
-			base = found = found + whatLen;
-		} else {
-			break;
-		}
-	}
-
-	s.swap(output);
-	return s;
-}
-
-bool Str::eq(const wstring& s, const wchar_t *what)
-{
-	return !lstrcmp(s.c_str(), what);
-}
-
-bool Str::eq(const wstring& s, const wstring& what)
-{
-	return eq(s, what.c_str());
-}
-
 bool Str::eqI(const wstring& s, const wchar_t *what)
 {
 	return !lstrcmpi(s.c_str(), what);
@@ -262,7 +100,7 @@ bool Str::eqI(const wstring& s, const wchar_t *what)
 
 bool Str::eqI(const wstring& s, const wstring& what)
 {
-	return eqI(s, what.c_str());
+	return eqI(s.c_str(), what.c_str());
 }
 
 static bool _firstEndsBeginsCheck(const wstring& s, const wchar_t *what, size_t& whatLen)
@@ -286,7 +124,7 @@ bool Str::endsWith(const wstring& s, const wchar_t *what)
 		return false;
 	}
 
-	return !lstrcmp(&s[s.size() - whatLen], what);
+	return !lstrcmp(s.c_str() + s.size() - whatLen, what);
 }
 
 bool Str::endsWith(const wstring& s, const wstring& what)
@@ -301,7 +139,7 @@ bool Str::endsWithI(const wstring& s, const wchar_t *what)
 		return false;
 	}
 
-	return !lstrcmpi(&s[s.size() - whatLen], what);
+	return !lstrcmpi(s.c_str() + s.size() - whatLen, what);
 }
 
 bool Str::endsWithI(const wstring& s, const wstring& what)
@@ -337,6 +175,90 @@ bool Str::beginsWithI(const wstring& s, const wchar_t *what)
 bool Str::beginsWithI(const wstring& s, const wstring& what)
 {
 	return beginsWithI(s, what.c_str());
+}
+
+size_t Str::findI(const wstring& s, const wchar_t *what, size_t offset)
+{
+	wstring s2 = upper(s);
+	wstring what2(what);
+	CharUpperBuff(&what2[0], static_cast<DWORD>(what2.size()));
+	return s2.find(what2, offset);
+}
+
+size_t Str::findI(const wstring& s, const wstring& what, size_t offset)
+{
+	return findI(s, what.c_str(), offset);
+}
+
+size_t Str::rfindI(const wstring& s, const wchar_t *what, size_t offset)
+{
+	wstring s2 = upper(s);
+	wstring what2(what);
+	CharUpperBuff(&what2[0], static_cast<DWORD>(what2.size()));
+	return s2.rfind(what2, offset);
+}
+
+size_t Str::rfindI(const wstring& s, const wstring& what, size_t offset)
+{
+	return rfindI(s, what.c_str(), offset);
+}
+
+wstring& Str::replace(wstring& haystack, const wchar_t *needle, const wchar_t *replacement)
+{
+	if (haystack.empty()) return haystack;
+
+	size_t needleLen = lstrlen(needle);
+	if (!needleLen) return haystack;
+
+	size_t replacementLen = lstrlen(replacement);
+	wstring output;
+	size_t base = 0;
+	size_t found = 0;
+
+	for (;;) {
+		found = haystack.find(needle, found);
+		//found = find(s, what, found);
+		output.insert(output.size(), haystack, base, found - base);
+		if (found != wstring::npos) {
+			output.append(replacement);
+			base = found = found + needleLen;
+		} else {
+			break;
+		}
+	}
+
+	haystack.swap(output); // behaves like an in-place operation
+	return haystack;
+}
+
+wstring& Str::replaceI(wstring& haystack, const wchar_t *needle, const wchar_t *replacement)
+{
+	if (!haystack.size()) return haystack;
+
+	size_t needleLen = lstrlen(needle);
+	if (!needleLen) return haystack;
+
+	wstring haystackU = upper(haystack);
+	wstring needleU = upper(needle);
+
+	size_t replacementLen = lstrlen(replacement);
+	wstring output;
+	size_t base = 0;
+	size_t found = 0;
+
+	for (;;) {
+		found = haystackU.find(needleU, found);
+		output.insert(output.size(), haystack, base, found - base);
+		if (found != wstring::npos) {
+			output.append(replacement);
+			base = found = found + needleLen;
+		} else {
+			break;
+		}
+	}
+
+	haystack.swap(output); // behaves like an in-place operation
+	return haystack;
 }
 
 bool Str::isInt(const wstring& s)
@@ -394,7 +316,7 @@ vector<wstring> Str::explode(const wstring& s, const wchar_t *delimiter)
 	size_t base = 0, head = 0;
 
 	for (;;) {
-		head = find(s, delimiter, head);
+		head = s.find(delimiter, head);
 		if (head == wstring::npos) break;
 		ret.emplace_back();
 		ret.back().insert(0, s, base, head - base);

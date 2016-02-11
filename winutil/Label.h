@@ -10,6 +10,7 @@ public:
 	Label();
 	Label(HWND hwnd);
 	Label& operator=(HWND hwnd);
+	Label& operator=(std::pair<HWND, int> hWndAndCtrlId);
 
 	HWND         hWnd() const;
 	Label&       create(HWND hParent, int id, POINT pos, SIZE size);

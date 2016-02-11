@@ -11,8 +11,8 @@ vector<Xml::Node*> Xml::Node::getChildrenByName(const wchar_t *elemName)
 {
 	int howMany = 0;
 	size_t firstIndex = -1, lastIndex = -1;
-	for (size_t i = 0; i < this->children.size(); ++i) {
-		if (!lstrcmpi(this->children[i].name.c_str(), elemName)) { // case-insensitive match
+	for (size_t i = 0; i < children.size(); ++i) {
+		if (!lstrcmpi(children[i].name.c_str(), elemName)) { // case-insensitive match
 			++howMany;
 			if (firstIndex == -1) firstIndex = i;
 			lastIndex = i;
@@ -24,8 +24,8 @@ vector<Xml::Node*> Xml::Node::getChildrenByName(const wchar_t *elemName)
 
 	howMany = 0;
 	for (size_t i = firstIndex; i <= lastIndex; ++i) {
-		if (!lstrcmpi(this->children[i].name.c_str(), elemName)) {
-			nodeBuf.emplace_back(&this->children[i]);
+		if (!lstrcmpi(children[i].name.c_str(), elemName)) {
+			nodeBuf.emplace_back(&children[i]);
 		}
 	}
 	return nodeBuf;
@@ -33,7 +33,7 @@ vector<Xml::Node*> Xml::Node::getChildrenByName(const wchar_t *elemName)
 
 Xml::Node* Xml::Node::firstChildByName(const wchar_t *elemName)
 {
-	for (Node& node : this->children) {
+	for (Node& node : children) {
 		if (!lstrcmpi(node.name.c_str(), elemName)) { // case-insensitive match
 			return &node;
 		}
@@ -58,23 +58,23 @@ Xml::Xml(Xml&& other)
 
 Xml::Xml(const wchar_t *str)
 {
-	this->parse(str);
+	parse(str);
 }
 
 Xml::Xml(const wstring& str)
 {
-	this->parse(str);
+	parse(str);
 }
 
 Xml& Xml::operator=(const Xml& other)
 {
-	this->root = other.root;
+	root = other.root;
 	return *this;
 }
 
 Xml& Xml::operator=(Xml&& other)
 {
-	this->root = std::move(other.root);
+	root = std::move(other.root);
 	return *this;
 }
 
@@ -200,7 +200,7 @@ bool Xml::parse(const wchar_t *str)
 
 	IXMLDOMNode *rootNode = nullptr;
 	docElem->QueryInterface(IID_IXMLDOMNode, reinterpret_cast<void**>(&rootNode));
-	_buildNode(rootNode, this->root); // recursive
+	_buildNode(rootNode, root); // recursive
 
 	rootNode->Release(); // must be released before CoUninitialize
 	docElem->Release();
@@ -211,5 +211,5 @@ bool Xml::parse(const wchar_t *str)
 
 bool Xml::parse(const wstring& str)
 {
-	return this->parse(str.c_str());
+	return parse(str.c_str());
 }

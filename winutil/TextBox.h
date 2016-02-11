@@ -17,6 +17,7 @@ public:
 	TextBox();
 	TextBox(HWND hwnd);
 	TextBox& operator=(HWND hwnd);
+	TextBox& operator=(std::pair<HWND, int> hWndAndCtrlId);
 
 	HWND                      hWnd() const;
 	TextBox&                  create(HWND hParent, int id, POINT pos, LONG width);

@@ -10,6 +10,7 @@ public:
 	ComboBox();
 	ComboBox(HWND hWnd);
 	ComboBox& operator=(HWND hWnd);
+	ComboBox& operator=(std::pair<HWND, int> hWndAndCtrlId);
 
 	HWND         hWnd() const;
 	ComboBox&    create(HWND hParent, int id, POINT pos, int width, bool sorted);

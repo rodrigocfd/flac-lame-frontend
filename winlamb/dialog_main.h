@@ -5,32 +5,31 @@
  */
 
 #pragma once
-#include "window_dialog.h"
+#include "dialog.h"
 
  /**
-  * window_dialog_main
-  *  window_dialog
-  *   window_thread<window_dialog_traits>
-  *    window_proc<window_dialog_traits>
-  *     window
+  * dialog_main
+  *  dialog
+  *   threaded<traits_dialog>
+  *    proc<traits_dialog>
+  *     handle
   */
 
 namespace winlamb {
 
-class window_dialog_main : public window_dialog {
+struct setup_dialog_main final : public setup_dialog {
+	int iconId;
+	int accelTableId;
+	setup_dialog_main() : iconId(0), accelTableId(0) { }
+};
+
+
+class dialog_main : public dialog<setup_dialog_main> {
 public:
-	struct setup_type {
-		int dialogId;
-		int iconId;
-		int accelTableId;
-		setup_type() : dialogId(0), iconId(0), accelTableId(0) { }
-	};
+	virtual ~dialog_main() = default;
+	dialog_main& operator=(const dialog_main&) = delete;
 
-	setup_type setup;
-	virtual ~window_dialog_main() = default;
-	window_dialog_main& operator=(const window_dialog_main&) = delete;
-
-	window_dialog_main()
+	dialog_main()
 	{
 		on_message(WM_CLOSE, [this](WPARAM wp, LPARAM lp)->INT_PTR {
 			DestroyWindow(hwnd());
@@ -47,7 +46,7 @@ public:
 		InitCommonControls();
 		
 		if (!CreateDialogParam(hInst, MAKEINTRESOURCE(setup.dialogId), nullptr,
-			window_proc::_proc, reinterpret_cast<LPARAM>(this))) return -1; // _hwnd member is set on first message processing
+			proc::_process, reinterpret_cast<LPARAM>(this))) return -1; // _hwnd member is set on first message processing
 
 		if (setup.iconId) {
 			SendMessage(hwnd(), WM_SETICON, ICON_SMALL,
@@ -78,7 +77,7 @@ public:
 	}
 
 private:
-	window_proc::_proc;
+	proc<traits_dialog>::_process;
 };
 
 }//namespace winlamb

@@ -1,6 +1,7 @@
 
 #include <algorithm>
 #include "File.h"
+#include "Path.h"
 #include "Str.h"
 #include <Shlobj.h>
 using std::vector;
@@ -507,7 +508,7 @@ vector<wstring> File::listDir(wstring pathAndPattern)
 	if (!hFind) return files; // nothing found
 
 	wstring path = pathAndPattern;
-	path = Str::folderFromPath(path);
+	path = Path::folderFrom(path);
 
 	do {
 		if (*wfd.cFileName) {

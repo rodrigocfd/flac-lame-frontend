@@ -46,11 +46,11 @@ DlgMain::DlgMain()
 			return TRUE;
 		}
 
-		_taskBar << hwnd();
-		_txtDest = GetDlgItem(hwnd(), TXT_DEST);
+		_taskBar.create(hwnd());
+		_txtDest = { hwnd(), TXT_DEST };
 
 		// Main listview initialization.
-		(_lstFiles = GetDlgItem(hwnd(), LST_FILES))
+		(_lstFiles = { hwnd(), LST_FILES })
 			.setContextMenu(MEN_MAIN)
 			.columnAdd(L"File", 300)
 			.columnFit(0)
@@ -59,23 +59,24 @@ DlgMain::DlgMain()
 			.iconPush(L"wav"); // icons of the 3 filetypes we use
 
 		// Initializing comboboxes.
-		_cmbCbr = GetDlgItem(hwnd(), CMB_CBR);
-		_cmbCbr.itemAdd(L"32 kbps|40 kbps|48 kbps|56 kbps|64 kbps|80 kbps|96 kbps|"
-			L"112 kbps|128 kbps; default|160 kbps|192 kbps|224 kbps|256 kbps|320 kbps");
-		_cmbCbr.itemSetSelected(8);
+		(_cmbCbr = { hwnd(), CMB_CBR })
+			.itemAdd(L"32 kbps|40 kbps|48 kbps|56 kbps|64 kbps|80 kbps|96 kbps|"
+				L"112 kbps|128 kbps; default|160 kbps|192 kbps|224 kbps|256 kbps|320 kbps")
+			.itemSetSelected(8);
 
-		_cmbVbr = GetDlgItem(hwnd(), CMB_VBR);
-		_cmbVbr.itemAdd(L"0 (~245 kbps)|1 (~225 kbps)|2 (~190 kbps)|3 (~175 kbps)|"
-			L"4 (~165 kbps); default|5 (~130 kbps)|6 (~115 kbps)|7 (~100 kbps)"
-			L"8 (~85 kbps)|9 (~65 kbps)");
-		_cmbVbr.itemSetSelected(4);
+		(_cmbVbr = { hwnd(), CMB_VBR })
+			.itemAdd(L"0 (~245 kbps)|1 (~225 kbps)|2 (~190 kbps)|3 (~175 kbps)|"
+				L"4 (~165 kbps); default|5 (~130 kbps)|6 (~115 kbps)|7 (~100 kbps)"
+				L"8 (~85 kbps)|9 (~65 kbps)")
+			.itemSetSelected(4);
 
-		_cmbFlac = GetDlgItem(hwnd(), CMB_FLAC);
-		_cmbFlac.itemAdd(L"1|2|3|4|5|6|7|8");
-		_cmbFlac.itemSetSelected(7);
+		(_cmbFlac = { hwnd(), CMB_FLAC })
+			.itemAdd(L"1|2|3|4|5|6|7|8")
+			.itemSetSelected(7);
 
-		_cmbNumThreads = GetDlgItem(hwnd(), CMB_NUMTHREADS);
-		_cmbNumThreads.itemAdd(L"1|2|4|8");
+		(_cmbNumThreads = { hwnd(), CMB_NUMTHREADS })
+			.itemAdd(L"1|2|4|8");
+
 		SYSTEM_INFO si = { 0 };
 		GetSystemInfo(&si);
 		switch (si.dwNumberOfProcessors) {
@@ -87,13 +88,13 @@ DlgMain::DlgMain()
 		}
 
 		// Initializing radio buttons.
-		_radMp3    = GetDlgItem(hwnd(), RAD_MP3); _radMp3.setCheckAndTrigger(true);
-		_radMp3Cbr = GetDlgItem(hwnd(), RAD_CBR);
-		_radMp3Vbr = GetDlgItem(hwnd(), RAD_VBR); _radMp3Vbr.setCheckAndTrigger(true);
-		_radFlac   = GetDlgItem(hwnd(), RAD_FLAC);
-		_radWav    = GetDlgItem(hwnd(), RAD_WAV);
+		(_radMp3    = { hwnd(), RAD_MP3  }).setCheckAndTrigger(true);
+		_radMp3Cbr  = { hwnd(), RAD_CBR  };
+		(_radMp3Vbr = { hwnd(), RAD_VBR  }).setCheckAndTrigger(true);
+		_radFlac    = { hwnd(), RAD_FLAC };
+		_radWav     = { hwnd(), RAD_WAV  };
 
-		_chkDelSrc = GetDlgItem(hwnd(), CHK_DELSRC);
+		_chkDelSrc = { hwnd(), CHK_DELSRC };
 
 		// Layout control when resizing.
 		_resizer.add(hwnd(), LST_FILES, Resizer::Do::RESIZE, Resizer::Do::RESIZE)

@@ -49,8 +49,10 @@ MenuRecent& MenuRecent::onClick(OnClickType callback)
 
 MenuRecent& MenuRecent::addEntry(const wstring& entry)
 {
+	wstring entryU = Str::upper(entry);
+
 	for (size_t i = 0; i < _entries.size(); ++i) {
-		if (Str::eqI(entry, _entries[i])) {
+		if (entryU == Str::upper(_entries[i])) {
 			_entries.erase(_entries.begin() + i); // remove if existing
 			break;
 		}

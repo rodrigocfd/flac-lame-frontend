@@ -5,18 +5,18 @@
  */
 
 #pragma once
-#include "window_proc.h"
+#include "proc.h"
 
 /**
- * window_thread
- *  window_proc
- *   window
+ * threaded
+ *  proc
+ *   handle
  */
 
 namespace winlamb {
 
 template<typename traitsT, UINT wm_threadT = WM_APP-1>
-class window_thread : public window_proc<traitsT> {
+class threaded : public proc<traitsT> {
 public:
 	typedef std::function<void()> thread_func_type;
 private:
@@ -25,7 +25,7 @@ private:
 	};
 
 protected:
-	window_thread()
+	threaded()
 	{
 		on_message(wm_threadT, [this](WPARAM wp, LPARAM lp)->typename traitsT::ret_type {
 			_callback_pack *pack = reinterpret_cast<_callback_pack*>(lp);
@@ -36,9 +36,9 @@ protected:
 	}
 
 public:
-	virtual ~window_thread() = default;
+	virtual ~threaded() = default;
 
-	void gui_thread(thread_func_type callback)
+	void ui_thread(thread_func_type callback)
 	{
 		// This method is analog to SendMessage (synchronous), but intended to be called from another
 		// thread, so a callback function can, tunelled by wndproc, run in the original thread of the

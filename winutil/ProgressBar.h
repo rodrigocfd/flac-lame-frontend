@@ -1,5 +1,6 @@
 
 #pragma once
+#include <utility>
 #include <Windows.h>
 
 class ProgressBar final {
@@ -9,6 +10,7 @@ public:
 	ProgressBar();
 	ProgressBar(HWND hwnd);
 	ProgressBar& operator=(HWND hwnd);
+	ProgressBar& operator=(std::pair<HWND, int> hWndAndCtrlId);
 
 	HWND         hWnd() const;
 	ProgressBar& create(HWND hParent, int id, POINT pos, SIZE size);

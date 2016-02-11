@@ -5,24 +5,30 @@
  */
 
 #pragma once
-#include "window_basic.h"
+#include "window.h"
 
  /**
-  * window_basic_main
-  *  window_basic
-  *   window_thread<window_basic_traits>
-  *    window_proc<window_basic_traits>
-  *     window
+  * window_main
+  *  window
+  *   threaded<traits_window>
+  *    proc<traits_window>
+  *     handle
   */
 
 namespace winlamb {
 
-class window_basic_main : public window_basic {
-public:
-	virtual ~window_basic_main() = default;
-	window_basic_main& operator=(const window_basic_main&) = delete;
+struct setup_window_main final : public setup_window {
+	HACCEL accelTable;
+	setup_window_main() : accelTable(nullptr) { }
+};
 
-	window_basic_main()
+
+class window_main : public window<setup_window_main> {
+public:
+	virtual ~window_main() = default;
+	window_main& operator=(const window_main&) = delete;
+
+	window_main()
 	{
 		setup.wcx.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
 		setup.wcx.style = CS_DBLCLKS;
@@ -55,7 +61,7 @@ public:
 	}
 
 private:
-	window_basic::create;
+	window::create;
 };
 
 }//namespace winlamb

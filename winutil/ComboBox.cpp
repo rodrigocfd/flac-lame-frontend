@@ -2,6 +2,7 @@
 #include "ComboBox.h"
 #include "Str.h"
 using std::initializer_list;
+using std::pair;
 using std::vector;
 using std::wstring;
 
@@ -19,6 +20,11 @@ ComboBox& ComboBox::operator=(HWND hWnd)
 {
 	_hWnd = hWnd;
 	return *this;
+}
+
+ComboBox& ComboBox::operator=(pair<HWND, int> hWndAndCtrlId)
+{
+	return operator=(GetDlgItem(hWndAndCtrlId.first, hWndAndCtrlId.second));
 }
 
 HWND ComboBox::hWnd() const

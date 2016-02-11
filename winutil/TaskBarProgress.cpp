@@ -14,7 +14,7 @@ TaskBarProgress::TaskBarProgress()
 {
 }
 
-TaskBarProgress& TaskBarProgress::operator<<(HWND hWnd)
+TaskBarProgress& TaskBarProgress::create(HWND hWnd)
 {
 	_hWnd = hWnd;
 	CoInitialize(nullptr);
@@ -50,7 +50,7 @@ TaskBarProgress& TaskBarProgress::setError(bool hasError)
 	return _setState(hasError ? TBPF_ERROR : TBPF_NORMAL);
 }
 
-TaskBarProgress& TaskBarProgress::dismiss()
+TaskBarProgress& TaskBarProgress::clear()
 {
 	return _setState(TBPF_NOPROGRESS);
 }

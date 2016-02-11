@@ -1,6 +1,6 @@
 
 #pragma once
-#include "../winlamb/window_dialog_main.h"
+#include "../winlamb/dialog_main.h"
 #include "../winutil/CheckBox.h"
 #include "../winutil/ComboBox.h"
 #include "../winutil/FileIni.h"
@@ -9,7 +9,7 @@
 #include "../winutil/TaskBarProgress.h"
 #include "../winutil/TextBox.h"
 
-class DlgMain final : public winlamb::window_dialog_main {
+class DlgMain final : public winlamb::dialog_main {
 private:
 	FileIni         _ini;
 	TaskBarProgress _taskBar;

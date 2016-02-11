@@ -10,14 +10,13 @@ private:
 public:
 	~TaskBarProgress();
 	TaskBarProgress();
-	TaskBarProgress& operator<<(HWND hWnd);
-
+	TaskBarProgress& create(HWND hWnd);
 	TaskBarProgress& setPos(size_t percent, size_t total);
 	TaskBarProgress& setPos(double percent);
 	TaskBarProgress& setWaiting(bool isWaiting);
 	TaskBarProgress& setPause(bool isPaused);
 	TaskBarProgress& setError(bool hasError);
-	TaskBarProgress& dismiss();
+	TaskBarProgress& clear();
 private:
 	TaskBarProgress& _setState(TBPFLAG state);
 };

@@ -87,7 +87,8 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -100,7 +101,8 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -115,9 +117,10 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>None</DebugInformationFormat>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <ExceptionHandling>false</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -134,9 +137,10 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>None</DebugInformationFormat>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <ExceptionHandling>SyncCThrow</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -150,16 +154,18 @@
     <ClInclude Include="src\Convert.h" />
     <ClInclude Include="src\DlgMain.h" />
     <ClInclude Include="src\DlgRunnin.h" />
+    <ClInclude Include="winlamb\dialog.h" />
+    <ClInclude Include="winlamb\dialog_main.h" />
+    <ClInclude Include="winlamb\dialog_modal.h" />
+    <ClInclude Include="winlamb\font.h" />
+    <ClInclude Include="winlamb\handle.h" />
+    <ClInclude Include="winlamb\proc.h" />
+    <ClInclude Include="winlamb\threaded.h" />
+    <ClInclude Include="winlamb\traits_dialog.h" />
+    <ClInclude Include="winlamb\traits_window.h" />
     <ClInclude Include="winlamb\window.h" />
-    <ClInclude Include="winlamb\window_basic.h" />
-    <ClInclude Include="winlamb\window_basic_main.h" />
-    <ClInclude Include="winlamb\window_dialog.h" />
-    <ClInclude Include="winlamb\window_dialog_main.h" />
-    <ClInclude Include="winlamb\window_dialog_modal.h" />
-    <ClInclude Include="winlamb\window_font.h" />
-    <ClInclude Include="winlamb\window_proc.h" />
-    <ClInclude Include="winlamb\window_thread.h" />
-    <ClInclude Include="winlamb\window_traits.h" />
+    <ClInclude Include="winlamb\window_control.h" />
+    <ClInclude Include="winlamb\window_main.h" />
     <ClInclude Include="winutil\CheckBox.h" />
     <ClInclude Include="winutil\ComboBox.h" />
     <ClInclude Include="winutil\DateTime.h" />
@@ -174,6 +180,7 @@
     <ClInclude Include="winutil\ListView.h" />
     <ClInclude Include="winutil\Menu.h" />
     <ClInclude Include="winutil\MenuRecent.h" />
+    <ClInclude Include="winutil\Path.h" />
     <ClInclude Include="winutil\ProgressBar.h" />
     <ClInclude Include="winutil\Resizer.h" />
     <ClInclude Include="winutil\StatusBar.h" />
@@ -207,6 +214,7 @@
     <ClCompile Include="winutil\ListView.cpp" />
     <ClCompile Include="winutil\Menu.cpp" />
     <ClCompile Include="winutil\MenuRecent.cpp" />
+    <ClCompile Include="winutil\Path.cpp" />
     <ClCompile Include="winutil\ProgressBar.cpp" />
     <ClCompile Include="winutil\Resizer.cpp" />
     <ClCompile Include="winutil\StatusBar.cpp" />

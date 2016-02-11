@@ -1,5 +1,6 @@
 
 #include "Label.h"
+using std::pair;
 using std::wstring;
 
 Label::Label()
@@ -16,6 +17,11 @@ Label& Label::operator=(HWND hwnd)
 {
 	_hWnd = hwnd;
 	return *this;
+}
+
+Label& Label::operator=(pair<HWND, int> hWndAndCtrlId)
+{
+	return operator=(GetDlgItem(hWndAndCtrlId.first, hWndAndCtrlId.second));
 }
 
 HWND Label::hWnd() const

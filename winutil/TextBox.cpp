@@ -29,6 +29,11 @@ TextBox& TextBox::operator=(HWND hwnd)
 	return *this;
 }
 
+TextBox& TextBox::operator=(pair<HWND, int> hWndAndCtrlId)
+{
+	return operator=(GetDlgItem(hWndAndCtrlId.first, hWndAndCtrlId.second));
+}
+
 HWND TextBox::hWnd() const
 {
 	return _hWnd;

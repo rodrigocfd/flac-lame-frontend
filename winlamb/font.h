@@ -10,31 +10,31 @@
 
 namespace winlamb {
 
-class window_font final {
+class font final {
 private:
 	HFONT _hFont;
 public:
-	~window_font()
+	~font()
 	{
 		release();
 	}
 
-	window_font() : _hFont(nullptr)
+	font() : _hFont(nullptr)
 	{
 	}
 
-	window_font(window_font&& f) : _hFont(f._hFont)
+	font(font&& f) : _hFont(f._hFont)
 	{
 		f._hFont = nullptr;
 	}
 
-	window_font& operator=(window_font&& f)
+	font& operator=(font&& f)
 	{
 		std::swap(_hFont, f._hFont);
 		return *this;
 	}
 
-	window_font& release()
+	font& release()
 	{
 		if (_hFont) {
 			DeleteObject(_hFont);
@@ -48,14 +48,14 @@ public:
 		return _hFont;
 	}
 
-	window_font& create(const LOGFONT& lf)
+	font& create(const LOGFONT& lf)
 	{
 		release();
 		_hFont = CreateFontIndirect(&lf);
 		return *this;
 	}
 
-	window_font& create_ui()
+	font& create_ui()
 	{
 		OSVERSIONINFO ovi = { 0 };
 		ovi.dwOSVersionInfoSize = sizeof(ovi);
@@ -78,7 +78,7 @@ public:
 	{
 		// Helper function to set UI font on all chidren of a window.
 
-		static window_font font; // keep one single font instance for all windows
+		static font font; // keep one single font instance for all windows
 		if (!font._hFont) font.create_ui();
 
 		SendMessage(hParent, WM_SETFONT,

@@ -23,36 +23,6 @@
     <ClInclude Include="src\Convert.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\window_dialog.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\window_dialog_main.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\window_dialog_modal.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\window_font.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\window_proc.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\window_thread.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\window_traits.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\window.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\window_basic.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\window_basic_main.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
     <ClInclude Include="src\DlgMain.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -124,6 +94,45 @@
     </ClInclude>
     <ClInclude Include="winutil\CheckBox.h">
       <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\Path.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\traits_dialog.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\traits_window.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\window.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\window_main.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\dialog.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\dialog_main.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\dialog_modal.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\font.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\handle.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\proc.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\threaded.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\window_control.h">
+      <Filter>winlamb</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -210,6 +219,9 @@
       <Filter>winutil</Filter>
     </ClCompile>
     <ClCompile Include="winutil\CheckBox.cpp">
+      <Filter>winutil</Filter>
+    </ClCompile>
+    <ClCompile Include="winutil\Path.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
   </ItemGroup>

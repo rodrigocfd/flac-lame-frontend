@@ -7,17 +7,17 @@
 #pragma once
 #include <functional>
 #include <vector>
-#include "window.h"
+#include "handle.h"
 
 /**
- * window_proc
- *  window
+ * proc
+ *  handle
  */
 
 namespace winlamb {
 
 template<typename traitsT>
-class window_proc : public window {
+class proc : public handle {
 public:
 	typedef std::function<typename traitsT::ret_type(WPARAM, LPARAM)> msg_func_type;
 	typedef std::function<typename traitsT::ret_type()> cmd_func_type;
@@ -44,7 +44,7 @@ private:
 	bool _loopStarted;
 
 protected:
-	window_proc() : _loopStarted(false)
+	proc() : _loopStarted(false)
 	{
 		on_message(WM_COMMAND, [this](WPARAM wp, LPARAM lp)->typename traitsT::ret_type {
 			for (const auto& c : _cmds) {
@@ -52,7 +52,7 @@ protected:
 					return c.callback();
 				}
 			}
-			return traitsT::default_proc(_hwnd, WM_COMMAND, wp, lp);
+			return traitsT::default_proc(_hWnd, WM_COMMAND, wp, lp);
 		});
 		on_message(WM_NOTIFY, [this](WPARAM wp, LPARAM lp)->typename traitsT::ret_type {
 			NMHDR& nmhdr = *reinterpret_cast<NMHDR*>(lp);
@@ -61,12 +61,12 @@ protected:
 					return n.callback(nmhdr);
 				}
 			}
-			return traitsT::default_proc(_hwnd, WM_NOTIFY, wp, lp);
+			return traitsT::default_proc(_hWnd, WM_NOTIFY, wp, lp);
 		});
 	}
 
 public:
-	virtual ~window_proc() = default;
+	virtual ~proc() = default;
 
 	virtual void on_message(UINT msg, msg_func_type callback)
 	{
@@ -77,7 +77,7 @@ public:
 					return;
 				}
 			}
-			this->_msgs.push_back({ msg, std::move(callback) }); // add new message handler
+			_msgs.push_back({ msg, std::move(callback) }); // add new message handler
 		}
 	}
 
@@ -90,7 +90,7 @@ public:
 					return;
 				}
 			}
-			this->_cmds.push_back({ cmd, std::move(callback) }); // add new WM_COMMAND handler
+			_cmds.push_back({ cmd, std::move(callback) }); // add new WM_COMMAND handler
 		}
 	}
 
@@ -103,47 +103,65 @@ public:
 					return;
 				}
 			}
-			this->_notifs.push_back({ idFrom, code, std::move(callback) }); // add new WM_NOTIFY handler
+			_notifs.push_back({ idFrom, code, std::move(callback) }); // add new WM_NOTIFY handler
 		}
 	}
 
 	void on_message(std::initializer_list<UINT> msgs, msg_func_type callback)
 	{
-		for (size_t i = 0; i < msgs.size() - 1; ++i) {
-			on_message(*(msgs.begin() + i), callback);
+		on_message(*msgs.begin(), std::move(callback)); // store first once
+		size_t m0 = _msgs.size() - 1;
+
+		for (size_t i = 1; i < msgs.size(); ++i) {
+			if (*(msgs.begin() + i) != *msgs.begin()) {
+				on_message(*(msgs.begin() + i), [this, m0](WPARAM wp, LPARAM lp)->typename traitsT::ret_type {
+					return _msgs[m0].callback(wp, lp); // store light wrapper to first
+				});
+			}
 		}
-		on_message(*(msgs.begin() + msgs.size() - 1), std::move(callback));
 	}
 
 	void on_command(std::initializer_list<WORD> cmds, cmd_func_type callback)
 	{
-		for (size_t i = 0; i < cmds.size() - 1; ++i) {
-			on_command(*(cmds.begin() + i), callback);
+		on_command(*cmds.begin(), std::move(callback)); // store first once
+		size_t c0 = _cmds.size() - 1;
+
+		for (size_t i = 1; i < cmds.size(); ++i) {
+			if (*(cmds.begin() + i) != *cmds.begin()) {
+				on_command(*(cmds.begin() + i), [this, c0]()->typename traitsT::ret_type {
+					return _cmds[c0].callback(); // store light wrapper to first
+				});
+			}
 		}
-		on_command(*(cmds.begin() + cmds.size() - 1), std::move(callback));
 	}
 
 	void on_notify(std::initializer_list<std::pair<UINT_PTR, UINT>> idFromAndCodes, notif_func_type callback)
 	{
-		for (size_t i = 0; i < idFromAndCodes.size() - 1; ++i) {
-			on_notify((idFromAndCodes.begin() + i)->first,
-				(idFromAndCodes.begin() + i)->second,
-				callback);
+		UINT_PTR idFrom0 = idFromAndCodes.begin()->first;
+		UINT code0 = idFromAndCodes.begin()->second;
+		on_notify(idFrom0, code0, std::move(callback)); // store first once
+		size_t n0 = _notifs.size() - 1;
+
+		for (size_t i = 1; i < idFromAndCodes.size(); ++i) {
+			UINT_PTR idFrom = (idFromAndCodes.begin() + i)->first;
+			UINT code = (idFromAndCodes.begin() + i)->second;
+			if (idFrom != idFrom0 && code != code0) {
+				on_notify(idFrom, code, [this, n0](NMHDR& nmhdr)->typename traitsT::ret_type {
+					return _notifs[n0].callback(nmhdr); // store light wrapper to first
+				});
+			}
 		}
-		on_notify((idFromAndCodes.begin() + idFromAndCodes.size() - 1)->first,
-			(idFromAndCodes.begin() + idFromAndCodes.size() - 1)->second,
-			std::move(callback));
 	}
 
 protected:
-	static typename traitsT::ret_type CALLBACK _proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
+	static typename traitsT::ret_type CALLBACK _process(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
-		window_proc *pSelf = reinterpret_cast<window_proc*>(
+		proc *pSelf = reinterpret_cast<proc*>(
 			traitsT::get_instance_pointer(hWnd, msg, lp) );
 		if (pSelf) {
 			if (!pSelf->_loopStarted) {
 				pSelf->_loopStarted = true; // no more messages can be added
-				pSelf->_hwnd = hWnd; // store HWND
+				pSelf->_hWnd = hWnd; // store HWND
 			}
 			for (const auto& m : pSelf->_msgs) {
 				if (m.msg == msg) {
@@ -155,7 +173,7 @@ protected:
 	}
 
 private:
-	window::_hwnd;
+	handle::_hWnd;
 };
 
 }//namespace winlamb

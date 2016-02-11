@@ -3,27 +3,27 @@
 
 DateTime::DateTime()
 {
-	this->setNow();
+	setNow();
 }
 
 DateTime::DateTime(LONGLONG ms)
 {
-	this->setFromMs(ms);
+	setFromMs(ms);
 }
 
 DateTime::DateTime(const SYSTEMTIME& st)
 {
-	this->setFromSt(st);
+	setFromSt(st);
 }
 
 DateTime::DateTime(const FILETIME& ft)
 {
-	this->setFromFt(ft);
+	setFromFt(ft);
 }
 
 const SYSTEMTIME& DateTime::get() const
 {
-	return this->_st;
+	return _st;
 }
 
 DateTime& DateTime::setNow()
@@ -33,14 +33,14 @@ DateTime& DateTime::setNow()
 
 	TIME_ZONE_INFORMATION tzi = { 0 };
 	GetTimeZoneInformation(&tzi);
-	SystemTimeToTzSpecificLocalTime(&tzi, &st1, &this->_st);
+	SystemTimeToTzSpecificLocalTime(&tzi, &st1, &_st);
 
 	return *this;
 }
 
 DateTime& DateTime::setFromSt(const SYSTEMTIME& st)
 {
-	memcpy(&this->_st, &st, sizeof(SYSTEMTIME));
+	memcpy(&_st, &st, sizeof(SYSTEMTIME));
 	return *this;
 }
 
@@ -51,23 +51,23 @@ DateTime& DateTime::setFromFt(const FILETIME& ft)
 
 	TIME_ZONE_INFORMATION tzi = { 0 };
 	GetTimeZoneInformation(&tzi);
-	SystemTimeToTzSpecificLocalTime(&tzi, &st1, &this->_st);
+	SystemTimeToTzSpecificLocalTime(&tzi, &st1, &_st);
 
 	return *this;
 }
 
 DateTime& DateTime::setFromMs(LONGLONG ms)
 {
-	SecureZeroMemory(&this->_st, sizeof(SYSTEMTIME));
+	SecureZeroMemory(&_st, sizeof(SYSTEMTIME));
 
-	this->_st.wMilliseconds = ms % 1000;
-	ms = (ms - this->_st.wMilliseconds) / 1000; // now in seconds
-	this->_st.wSecond = ms % 60;
-	ms = (ms - this->_st.wSecond) / 60; // now in minutes
-	this->_st.wMinute = ms % 60;
-	ms = (ms - this->_st.wMinute) / 60; // now in hours
-	this->_st.wHour = ms % 24;
-	ms = (ms - this->_st.wHour) / 24; // now in days
+	_st.wMilliseconds = ms % 1000;
+	ms = (ms - _st.wMilliseconds) / 1000; // now in seconds
+	_st.wSecond = ms % 60;
+	ms = (ms - _st.wSecond) / 60; // now in minutes
+	_st.wMinute = ms % 60;
+	ms = (ms - _st.wMinute) / 60; // now in hours
+	_st.wHour = ms % 24;
+	ms = (ms - _st.wHour) / 24; // now in days
 
 	return *this;
 }
@@ -76,7 +76,7 @@ LONGLONG DateTime::getTimestamp() const
 {
 	// http://www.frenk.com/2009/12/convert-filetime-to-unix-timestamp/
 	LARGE_INTEGER date, adjust;
-	_stToLi(this->_st, date);
+	_stToLi(_st, date);
 	adjust.QuadPart = 11644473600000 * 10000; // 100-nanoseconds = milliseconds * 10000
 	date.QuadPart -= adjust.QuadPart; // removes the diff between 1970 and 1601
 	//return date.QuadPart / 10000000; // converts back from 100-nanoseconds to seconds
@@ -86,7 +86,7 @@ LONGLONG DateTime::getTimestamp() const
 LONGLONG DateTime::minus(const DateTime& other) const
 {
 	LARGE_INTEGER liUs, liThem;
-	_stToLi(this->_st, liUs);
+	_stToLi(_st, liUs);
 	_stToLi(other._st, liThem);
 	return (liUs.QuadPart - liThem.QuadPart) / 10000; // 100-nanoseconds to milliseconds; to printf use %I64u
 }
@@ -94,30 +94,30 @@ LONGLONG DateTime::minus(const DateTime& other) const
 DateTime& DateTime::addMs(LONGLONG ms)
 {
 	LARGE_INTEGER li;
-	_stToLi(this->_st, li);
+	_stToLi(_st, li);
 	li.QuadPart += ms * 10000; // milliseconds to 100-nanoseconds
-	_liToSt(li, this->_st);
+	_liToSt(li, _st);
 	return *this;
 }
 
 DateTime& DateTime::addSec(LONGLONG sec)
 {
-	return this->addMs(sec * 1000);
+	return addMs(sec * 1000);
 }
 
 DateTime& DateTime::addMin(LONGLONG min)
 {
-	return this->addSec(min * 60);
+	return addSec(min * 60);
 }
 
 DateTime& DateTime::addHour(LONGLONG h)
 {
-	return this->addMin(h * 60);
+	return addMin(h * 60);
 }
 
 DateTime& DateTime::addDay(LONGLONG d)
 {
-	return this->addHour(d * 24);
+	return addHour(d * 24);
 }
 
 void DateTime::_stToLi(const SYSTEMTIME& st, LARGE_INTEGER& li)

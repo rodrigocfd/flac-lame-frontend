@@ -5,30 +5,24 @@
  */
 
 #pragma once
-#include "window_dialog.h"
+#include "dialog.h"
 
  /**
-  * window_dialog_modal
-  *  window_dialog
-  *   window_thread<window_dialog_traits>
-  *    window_proc<window_dialog_traits>
-  *     window
+  * dialog_modal
+  *  dialog
+  *   threaded<traits_dialog>
+  *    proc<traits_dialog>
+  *     handle
   */
 
 namespace winlamb {
 
-class window_dialog_modal : public window_dialog {
+class dialog_modal : public dialog<> {
 public:
-	struct setup_type {
-		int dialogId;
-		setup_type() : dialogId(0) { }
-	};
+	virtual ~dialog_modal() = default;
+	dialog_modal& operator=(const dialog_modal&) = delete;
 
-	setup_type setup;
-	virtual ~window_dialog_modal() = default;
-	window_dialog_modal& operator=(const window_dialog_modal&) = delete;
-
-	window_dialog_modal()
+	dialog_modal()
 	{
 		on_message(WM_CLOSE, [this](WPARAM wp, LPARAM lp)->INT_PTR {
 			EndDialog(hwnd(), IDOK);
@@ -40,12 +34,12 @@ public:
 	{
 		return static_cast<int>( DialogBoxParam(
 			reinterpret_cast<HINSTANCE>(GetWindowLongPtr(hParent, GWLP_HINSTANCE)),
-			MAKEINTRESOURCE(setup.dialogId), hParent, window_proc::_proc,
+			MAKEINTRESOURCE(setup.dialogId), hParent, proc::_process,
 			reinterpret_cast<LPARAM>(this)) ); // _hwnd member is set on first message processing
 	}
 
 private:
-	window_proc::_proc;
+	proc<traits_dialog>::_process;
 };
 
 }//namespace winlamb

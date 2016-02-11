@@ -1,5 +1,6 @@
 
 #include "CheckBox.h"
+using std::pair;
 
 CheckBox::CheckBox()
 	: _hWnd(nullptr)
@@ -15,6 +16,11 @@ CheckBox& CheckBox::operator=(HWND hWnd)
 {
 	_hWnd = hWnd;
 	return *this;
+}
+
+CheckBox& CheckBox::operator=(pair<HWND, int> hWndAndCtrlId)
+{
+	return operator=(GetDlgItem(hWndAndCtrlId.first, hWndAndCtrlId.second));
 }
 
 HWND CheckBox::hWnd() const

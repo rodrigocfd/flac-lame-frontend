@@ -1,6 +1,7 @@
 
 #include "ProgressBar.h"
 #include <CommCtrl.h>
+using std::pair;
 
 ProgressBar::ProgressBar()
 	: _hWnd(nullptr)
@@ -16,6 +17,11 @@ ProgressBar& ProgressBar::operator=(HWND hwnd)
 {
 	_hWnd = hwnd;
 	return *this;
+}
+
+ProgressBar& ProgressBar::operator=(pair<HWND, int> hWndAndCtrlId)
+{
+	return operator=(GetDlgItem(hWndAndCtrlId.first, hWndAndCtrlId.second));
 }
 
 HWND ProgressBar::hWnd() const
