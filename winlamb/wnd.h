@@ -10,18 +10,18 @@
 
 namespace winlamb {
 
-class handle {
+class wnd {
 protected:
 	HWND _hWnd;
 public:
-	virtual ~handle() = default;
+	virtual ~wnd() = default;
 
-	handle()                : _hWnd(nullptr) { }
-	handle(HWND h)          : _hWnd(h) { }
-	handle(const handle& w) : _hWnd(w._hWnd) { }
+	wnd()             : _hWnd(nullptr) { }
+	wnd(HWND h)       : _hWnd(h) { }
+	wnd(const wnd& w) : _hWnd(w._hWnd) { }
 
-	handle& operator=(HWND h)          { _hWnd = h; return *this; }
-	handle& operator=(const handle& w) { _hWnd = w._hWnd; return *this; }
+	wnd& operator=(HWND h)       { _hWnd = h; return *this; }
+	wnd& operator=(const wnd& w) { _hWnd = w._hWnd; return *this; }
 
 	HWND hwnd() const { return _hWnd; }
 };

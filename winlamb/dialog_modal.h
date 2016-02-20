@@ -7,13 +7,12 @@
 #pragma once
 #include "dialog.h"
 
- /**
-  * dialog_modal
-  *  dialog
-  *   threaded<traits_dialog>
-  *    proc<traits_dialog>
-  *     handle
-  */
+/**
+ * dialog_modal
+ *  dialog
+ *   proc<traits_dialog>
+ *    wnd
+ */
 
 namespace winlamb {
 
@@ -34,12 +33,12 @@ public:
 	{
 		return static_cast<int>( DialogBoxParam(
 			reinterpret_cast<HINSTANCE>(GetWindowLongPtr(hParent, GWLP_HINSTANCE)),
-			MAKEINTRESOURCE(setup.dialogId), hParent, proc::_process,
-			reinterpret_cast<LPARAM>(this)) ); // _hwnd member is set on first message processing
+			MAKEINTRESOURCE(setup.dialogId), hParent, wnd_proc::_process,
+			reinterpret_cast<LPARAM>(static_cast<wnd_proc*>(this))) ); // _hwnd member is set on first message processing
 	}
 
 private:
-	proc<traits_dialog>::_process;
+	wnd_proc<traits_dialog>::_process;
 };
 
 }//namespace winlamb

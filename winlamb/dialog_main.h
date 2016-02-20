@@ -7,13 +7,12 @@
 #pragma once
 #include "dialog.h"
 
- /**
-  * dialog_main
-  *  dialog
-  *   threaded<traits_dialog>
-  *    proc<traits_dialog>
-  *     handle
-  */
+/**
+ * dialog_main
+ *  dialog
+ *   proc<traits_dialog>
+ *    wnd
+ */
 
 namespace winlamb {
 
@@ -45,8 +44,9 @@ public:
 	{
 		InitCommonControls();
 		
-		if (!CreateDialogParam(hInst, MAKEINTRESOURCE(setup.dialogId), nullptr,
-			proc::_process, reinterpret_cast<LPARAM>(this))) return -1; // _hwnd member is set on first message processing
+		if (!CreateDialogParam(hInst, MAKEINTRESOURCE(setup.dialogId),
+			nullptr, wnd_proc::_process,
+			reinterpret_cast<LPARAM>(static_cast<wnd_proc*>(this)))) return -1; // _hwnd member is set on first message processing
 
 		if (setup.iconId) {
 			SendMessage(hwnd(), WM_SETICON, ICON_SMALL,
@@ -77,7 +77,7 @@ public:
 	}
 
 private:
-	proc<traits_dialog>::_process;
+	wnd_proc<traits_dialog>::_process;
 };
 
 }//namespace winlamb

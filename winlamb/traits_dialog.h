@@ -1,11 +1,11 @@
 /**
-* Part of WinLamb - Windows Lambda Library
-* @author Rodrigo Cesar de Freitas Dias
-* @see https://github.com/rodrigocfd/winlamb
-*/
+ * Part of WinLamb - Windows Lambda Library
+ * @author Rodrigo Cesar de Freitas Dias
+ * @see https://github.com/rodrigocfd/winlamb
+ */
 
 #pragma once
-#include <Windows.h>
+#include "font.h"
 
 namespace winlamb {
 
@@ -18,6 +18,7 @@ struct traits_dialog {
 		if (msg == WM_INITDIALOG) {
 			p = reinterpret_cast<void*>(lp);
 			SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(p));
+			font::set_ui_on_children(hWnd); // if user creates controls manually, font must be set manually on them
 		} else {
 			p = reinterpret_cast<void*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 		}

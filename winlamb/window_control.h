@@ -13,9 +13,8 @@
 /**
  * window_control
  *  window
- *   threaded<traits_window>
- *    proc<traits_window>
- *     handle
+ *   proc<traits_window>
+ *    wnd
  */
 
 namespace winlamb {

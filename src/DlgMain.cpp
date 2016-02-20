@@ -114,15 +114,6 @@ DlgMain::DlgMain()
 		return TRUE;
 	});
 
-	on_message(WM_INITMENUPOPUP, [this](WPARAM wp, LPARAM lp)->INT_PTR
-	{
-		Menu menu(reinterpret_cast<HMENU>(wp));
-		if (menu.getCommandId(0) == MNU_ADDFILES) {
-			menu.enableItem(MNU_REMSELECTED, _lstFiles.items.countSelected() > 0);
-		}
-		return TRUE;
-	});
-
 	on_message(WM_DROPFILES, [this](WPARAM wp, LPARAM lp)->INT_PTR
 	{
 		for (const wstring& drop : Sys::getDroppedFiles(reinterpret_cast<HDROP>(wp))) {
@@ -141,6 +132,13 @@ DlgMain::DlgMain()
 			}
 		}
 		_doUpdateCounter( _lstFiles.items.count() );
+		return TRUE;
+	});
+
+	on_initmenupopup(MNU_ADDFILES, [this](HMENU hMenu)->INT_PTR
+	{
+		Menu menu = hMenu;
+		menu.enableItem(MNU_REMSELECTED, _lstFiles.items.countSelected() > 0);
 		return TRUE;
 	});
 

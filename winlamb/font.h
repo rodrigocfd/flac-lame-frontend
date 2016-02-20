@@ -1,7 +1,7 @@
 /**
- * Part of WOLF - WinAPI Object Lambda Framework
+ * Part of WinLamb - Windows Lambda Library
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/wolf
+ * @see https://github.com/rodrigocfd/winlamb
  */
 
 #pragma once

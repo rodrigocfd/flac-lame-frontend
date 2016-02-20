@@ -7,13 +7,12 @@
 #pragma once
 #include "window.h"
 
- /**
-  * window_main
-  *  window
-  *   threaded<traits_window>
-  *    proc<traits_window>
-  *     handle
-  */
+/**
+ * window_main
+ *  window
+ *   proc<traits_window>
+ *    wnd
+ */
 
 namespace winlamb {
 

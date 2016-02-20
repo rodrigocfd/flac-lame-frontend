@@ -5,15 +5,14 @@
  */
 
 #pragma once
-#include "threaded.h"
+#include "wnd_proc.h"
 #include "traits_window.h"
 
- /**
-  * window
-  *  threaded<traits_window>
-  *   proc<traits_window>
-  *    handle
-  */
+/**
+ * window
+ *  wnd_proc<traits_window>
+ *   wnd
+ */
 
 namespace winlamb {
 
@@ -30,7 +29,7 @@ struct setup_window {
 
 
 template<typename setupT = setup_window>
-class window : public threaded<traits_window> {
+class window : virtual public wnd_proc<traits_window> {
 public:
 	setupT setup;
 	virtual ~window() = default;
@@ -47,7 +46,7 @@ public:
 		if (!hInst) hInst = reinterpret_cast<HINSTANCE>(GetWindowLongPtr(hParent, GWLP_HINSTANCE));
 
 		setup.wcx.cbSize = sizeof(WNDCLASSEX); // make sure of these
-		setup.wcx.lpfnWndProc = proc::_process;
+		setup.wcx.lpfnWndProc = wnd_proc::_process;
 		setup.wcx.hInstance = hInst;
 
 		ATOM atom = RegisterClassEx(&setup.wcx);
@@ -63,11 +62,11 @@ public:
 		return CreateWindowEx(setup.exStyle, MAKEINTATOM(atom), setup.title, setup.style,
 			setup.position.x, setup.position.y, setup.size.cx, setup.size.cy,
 			hParent, setup.menu, hInst,
-			static_cast<LPVOID>(this)) != nullptr; // _hwnd member is set on first message processing
+			static_cast<LPVOID>(static_cast<wnd_proc*>(this))) != nullptr; // _hwnd member is set on first message processing
 	}
 
 private:
-	proc<traits_window>::_process;
+	wnd_proc<traits_window>::_process;
 };
 
 }//namespace winlamb
