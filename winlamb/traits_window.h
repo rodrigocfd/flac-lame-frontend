@@ -9,17 +9,18 @@
 
 namespace winlamb {
 
-struct traits_window {
+struct traits_window final {
 	typedef LRESULT ret_type;
 
-	static void* get_instance_pointer(HWND hWnd, UINT msg, LPARAM lp)
+	template<typename instT>
+	static instT* get_instance_pointer(HWND hWnd, UINT msg, LPARAM lp)
 	{
-		void *p = nullptr;
+		instT *p = nullptr;
 		if (msg == WM_NCCREATE) {
-			p = reinterpret_cast<void*>((reinterpret_cast<CREATESTRUCT*>(lp))->lpCreateParams);
+			p = reinterpret_cast<instT*>((reinterpret_cast<CREATESTRUCT*>(lp))->lpCreateParams);
 			SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(p));
 		} else {
-			p = reinterpret_cast<void*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+			p = reinterpret_cast<instT*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 		}
 		return p;
 	}

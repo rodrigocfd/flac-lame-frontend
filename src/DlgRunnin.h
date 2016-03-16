@@ -9,7 +9,7 @@
 #include "../winutil/TaskBarProgress.h"
 
 class DlgRunnin final : public winlamb::dialog_modal,
-	winlamb::msg_thread_dialog
+	public winlamb::dialog_msg_thread
 {
 public:
 	enum class Target { NONE = 0, MP3, FLAC, WAV };

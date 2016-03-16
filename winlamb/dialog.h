@@ -24,11 +24,12 @@ struct setup_dialog {
 
 template<typename setupT = setup_dialog>
 class dialog : virtual public wnd_proc<traits_dialog> {
-private:
-	msg_func_type _userInitDialog;
 public:
 	setupT setup;
 	virtual ~dialog() = default;
+
+protected:
+	dialog() = default;
 };
 
 }//namespace winlamb

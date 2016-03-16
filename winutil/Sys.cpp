@@ -150,18 +150,3 @@ bool Sys::fontExists(const wchar_t *name)
 	ReleaseDC(nullptr, hdc);
 	return isInstalled;
 }
-
-vector<wstring> Sys::getDroppedFiles(HDROP hDrop)
-{
-	vector<wstring> files(DragQueryFile(hDrop, 0xFFFFFFFF, nullptr, 0)); // alloc return vector
-	for (size_t i = 0; i < files.size(); ++i) {
-		files[i].resize(DragQueryFile(hDrop, static_cast<UINT>(i), nullptr, 0) + 1, L'\0'); // alloc path string
-		DragQueryFile(hDrop, static_cast<UINT>(i), &files[i][0], static_cast<UINT>(files[i].size()));
-		files[i].resize(files[i].size() - 1); // trim null
-	}
-	DragFinish(hDrop);
-	std::sort(files.begin(), files.end(), [](const wstring& a, const wstring& b)->bool {
-		return lstrcmpi(a.c_str(), b.c_str()) < 0;
-	});
-	return files;
-}

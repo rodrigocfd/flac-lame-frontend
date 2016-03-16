@@ -9,18 +9,19 @@
 
 namespace winlamb {
 
-struct traits_dialog {
+struct traits_dialog final {
 	typedef INT_PTR ret_type;
 
-	static void* get_instance_pointer(HWND hWnd, UINT msg, LPARAM lp)
+	template<typename instT>
+	static instT* get_instance_pointer(HWND hWnd, UINT msg, LPARAM lp)
 	{
-		void *p = nullptr;
+		instT *p = nullptr;
 		if (msg == WM_INITDIALOG) {
-			p = reinterpret_cast<void*>(lp);
+			p = reinterpret_cast<instT*>(lp);
 			SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(p));
 			font::set_ui_on_children(hWnd); // if user creates controls manually, font must be set manually on them
 		} else {
-			p = reinterpret_cast<void*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+			p = reinterpret_cast<instT*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 		}
 		return p;
 	}

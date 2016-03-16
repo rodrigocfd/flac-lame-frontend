@@ -20,28 +20,28 @@ namespace winlamb {
 template<typename traitsT, UINT wm_threadT = WM_APP-1>
 class msg_thread : virtual public wnd_proc<traitsT> {
 public:
-	typedef std::function<void()> thread_func_type;
+	typedef std::function<void()> func_thread_type;
 
 private:
 	struct _callback_pack final {
-		thread_func_type callback;
+		func_thread_type callback;
 	};
 
 protected:
 	msg_thread()
 	{
-		on_message(wm_threadT, [this](WPARAM wp, LPARAM lp)->typename traitsT::ret_type {
-			_callback_pack *pack = reinterpret_cast<_callback_pack*>(lp);
+		on_message(wm_threadT, [this](params p)->typename traitsT::ret_type {
+			_callback_pack *pack = reinterpret_cast<_callback_pack*>(p.lParam);
 			pack->callback();
 			delete pack;
-			return traitsT::default_proc(hwnd(), wm_threadT, wp, lp);
+			return traitsT::default_proc(hwnd(), wm_threadT, p.wParam, p.lParam);
 		});
 	}
 
 public:
 	virtual ~msg_thread() = default;
 
-	void ui_thread(thread_func_type callback)
+	void ui_thread(func_thread_type callback)
 	{
 		// This method is analog to SendMessage (synchronous), but intended to be called from another
 		// thread, so a callback function can, tunelled by wndproc, run in the original thread of the
@@ -51,7 +51,7 @@ public:
 	}
 };
 
-typedef msg_thread<traits_window> msg_thread_window;
-typedef msg_thread<traits_dialog> msg_thread_dialog;
+typedef msg_thread<traits_window> window_msg_thread;
+typedef msg_thread<traits_dialog> dialog_msg_thread;
 
 }//namespace winlamb

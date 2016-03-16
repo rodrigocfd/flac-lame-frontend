@@ -20,58 +20,39 @@ namespace winlamb {
 template<typename traitsT>
 class msg_keydown : virtual public wnd_proc<traitsT> {
 public:
-	typedef std::function<typename traitsT::ret_type()> keydown_func_type;
+	struct params_keydown : public params {
+		params_keydown(const params& p) { wParam = p.wParam; lParam = p.lParam; }
+		WORD virt_key_code() const      { return wParam; }
+	};
+	typedef std::function<typename traitsT::ret_type(params_keydown)> func_keydown_type;
 
 private:
-	struct _keydown_unit final {
-		WORD virtKeyCode;
-		keydown_func_type callback;
-	};
-	std::vector<_keydown_unit> _keydowns;
+	callback_depot<WORD, func_keydown_type, params_keydown, traitsT> _callbacks;
 
 protected:
 	msg_keydown()
 	{
-		on_message(WM_KEYDOWN, [this](WPARAM wp, LPARAM lp)->typename traitsT::ret_type {
-			for (const auto& kd : _keydowns) {
-				if (kd.virtKeyCode == wp) {
-					return kd.callback();
-				}
-			}
-			return traitsT::default_proc(hwnd(), WM_KEYDOWN, wp, lp);
+		on_message(WM_KEYDOWN, [this](params p)->typename traitsT::ret_type {
+			params_keydown pk(p);
+			return _callbacks.process(hwnd(), WM_KEYDOWN, pk.virt_key_code(), pk);
 		});
 	}
 
 public:
 	virtual ~msg_keydown() = default;
 
-	void on_keydown(WORD virtKeyCode, keydown_func_type callback)
+	void on_keydown(WORD virtKeyCode, func_keydown_type callback)
 	{
-		for (auto& kd : _keydowns) {
-			if (kd.virtKeyCode == virtKeyCode) {
-				kd.callback = std::move(callback); // replace existing
-				return;
-			}
-		}
-		_keydowns.push_back({ virtKeyCode, std::move(callback) }); // add new WM_KEYDOWN handler
+		_callbacks.add(virtKeyCode, std::move(callback));
 	}
 
-	void on_keydown(std::initializer_list<WORD> virtKeyCodes, keydown_func_type callback)
+	void on_keydown(std::initializer_list<WORD> virtKeyCodes, func_keydown_type callback)
 	{
-		on_keydown(*virtKeyCodes.begin(), std::move(callback)); // store 1st message once
-		size_t m0 = _keydowns.size() - 1;
-
-		for (size_t i = 1; i < virtKeyCodes.size(); ++i) {
-			if (*(virtKeyCodes.begin() + i) != *virtKeyCodes.begin()) { // avoid overwriting
-				on_keydown(*(virtKeyCodes.begin() + i), [this, m0]()->typename traitsT::ret_type {
-					return _keydowns[m0].callback(); // store light wrapper to 1st message
-				});
-			}
-		}
+		_callbacks.add(virtKeyCodes, std::move(callback));
 	}
 };
 
-typedef msg_keydown<traits_window> msg_keydown_window;
-typedef msg_keydown<traits_dialog> msg_keydown_dialog;
+typedef msg_keydown<traits_window> window_msg_keydown;
+typedef msg_keydown<traits_dialog> dialog_msg_keydown;
 
 }//namespace winlamb

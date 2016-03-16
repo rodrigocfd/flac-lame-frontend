@@ -17,13 +17,13 @@
 namespace winlamb {
 
 struct setup_window {
-	WNDCLASSEX     wcx;
+	WNDCLASSEX     wndClassEx;
 	const wchar_t *title;
 	DWORD          style, exStyle;
 	POINT          position;
 	SIZE           size;
-	HMENU          menu;	
-	setup_window() : wcx({ 0 }), title(nullptr), style(0), exStyle(0),
+	HMENU          menu;
+	setup_window() : wndClassEx({ 0 }), title(nullptr), style(0), exStyle(0),
 		position({0,0}), size({0,0}), menu(nullptr) { }
 };
 
@@ -34,30 +34,31 @@ public:
 	setupT setup;
 	virtual ~window() = default;
 
+protected:
+	window() = default;
+
+public:
 	bool create(HWND hParent, HINSTANCE hInst = nullptr)
 	{
-		if (!setup.wcx.lpszClassName) {
+		if (!setup.wndClassEx.lpszClassName) {
 			OutputDebugString(L"ERROR: window not created, no class name given.\n");
 			return false;
 		}
 
-		if (hwnd()) return false; // window already created
+		if (hwnd()) {
+			OutputDebugString(L"ERROR: tried to create window twice.\n");
+			return false;
+		}
+
 		if (!hParent && !hInst) return false;
 		if (!hInst) hInst = reinterpret_cast<HINSTANCE>(GetWindowLongPtr(hParent, GWLP_HINSTANCE));
 
-		setup.wcx.cbSize = sizeof(WNDCLASSEX); // make sure of these
-		setup.wcx.lpfnWndProc = wnd_proc::_process;
-		setup.wcx.hInstance = hInst;
+		setup.wndClassEx.cbSize = sizeof(WNDCLASSEX); // make sure of these
+		setup.wndClassEx.lpfnWndProc = wnd_proc::_process;
+		setup.wndClassEx.hInstance = hInst;
 
-		ATOM atom = RegisterClassEx(&setup.wcx);
-		if (!atom) {
-			if (GetLastError() == ERROR_CLASS_ALREADY_EXISTS) {
-				atom = static_cast<ATOM>(GetClassInfoEx(hInst,
-					setup.wcx.lpszClassName, &setup.wcx)); // https://blogs.msdn.microsoft.com/oldnewthing/20041011-00/?p=37603
-			} else {
-				return false;
-			}
-		}
+		ATOM atom = _register_class(hInst);
+		if (!atom) return false;
 
 		return CreateWindowEx(setup.exStyle, MAKEINTATOM(atom), setup.title, setup.style,
 			setup.position.x, setup.position.y, setup.size.cx, setup.size.cy,
@@ -66,6 +67,21 @@ public:
 	}
 
 private:
+	ATOM _register_class(HINSTANCE hInst)
+	{
+		ATOM atom = RegisterClassEx(&setup.wndClassEx);
+		if (!atom) {
+			if (GetLastError() == ERROR_CLASS_ALREADY_EXISTS) {
+				atom = static_cast<ATOM>(GetClassInfoEx(hInst,
+					setup.wndClassEx.lpszClassName, &setup.wndClassEx)); // https://blogs.msdn.microsoft.com/oldnewthing/20041011-00/?p=37603
+			} else {
+				OutputDebugString(L"ERROR: window not created, failed to register class ATOM.\n");
+				return 0;
+			}
+		}
+		return atom;
+	}
+
 	wnd_proc<traits_window>::_process;
 };
 

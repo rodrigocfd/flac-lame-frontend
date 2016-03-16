@@ -20,58 +20,39 @@ namespace winlamb {
 template<typename traitsT>
 class msg_command : virtual public wnd_proc<traitsT> {
 public:
-	typedef std::function<typename traitsT::ret_type()> command_func_type;
+	struct params_command : public params {
+		params_command(const params& p) { wParam = p.wParam; lParam = p.lParam; }
+		WORD control_id() const         { return LOWORD(wParam); }
+	};
+	typedef std::function<typename traitsT::ret_type(params_command)> func_command_type;
 
 private:
-	struct _command_unit final {
-		WORD commandId;
-		command_func_type callback;
-	};
-	std::vector<_command_unit> _commands;
+	callback_depot<WORD, func_command_type, params_command, traitsT> _callbacks;
 
 protected:
 	msg_command()
 	{
-		on_message(WM_COMMAND, [this](WPARAM wp, LPARAM lp)->typename traitsT::ret_type {
-			for (const auto& cmd : _commands) {
-				if (cmd.commandId == LOWORD(wp)) {
-					return cmd.callback();
-				}
-			}
-			return traitsT::default_proc(hwnd(), WM_COMMAND, wp, lp);
+		on_message(WM_COMMAND, [this](params p)->typename traitsT::ret_type {
+			params_command pc(p);
+			return _callbacks.process(hwnd(), WM_COMMAND, pc.control_id(), pc);
 		});
 	}
 
 public:
 	virtual ~msg_command() = default;
 
-	void on_command(WORD commandId, command_func_type callback)
+	void on_command(WORD commandId, func_command_type callback)
 	{
-		for (auto& cmd : _commands) {
-			if (cmd.commandId == commandId) {
-				cmd.callback = std::move(callback); // replace existing
-				return;
-			}
-		}
-		_commands.push_back({ commandId, std::move(callback) }); // add new WM_COMMAND handler
+		_callbacks.add(commandId, std::move(callback));
 	}
 
-	void on_command(std::initializer_list<WORD> commandIds, command_func_type callback)
+	void on_command(std::initializer_list<WORD> commandIds, func_command_type callback)
 	{
-		on_command(*commandIds.begin(), std::move(callback)); // store 1st message once
-		size_t m0 = _commands.size() - 1;
-
-		for (size_t i = 1; i < commandIds.size(); ++i) {
-			if (*(commandIds.begin() + i) != *commandIds.begin()) { // avoid overwriting
-				on_command(*(commandIds.begin() + i), [this, m0]()->typename traitsT::ret_type {
-					return _commands[m0].callback(); // store light wrapper to 1st message
-				});
-			}
-		}
+		_callbacks.add(commandIds, std::move(callback));
 	}
 };
 
-typedef msg_command<traits_window> msg_command_window;
-typedef msg_command<traits_dialog> msg_command_dialog;
+typedef msg_command<traits_window> window_msg_command;
+typedef msg_command<traits_dialog> dialog_msg_command;
 
 }//namespace winlamb

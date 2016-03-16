@@ -20,60 +20,41 @@ namespace winlamb {
 template<typename traitsT>
 class msg_initmenupopup : virtual public wnd_proc<traitsT> {
 public:
-	typedef std::function<typename traitsT::ret_type(HMENU)> initmenupopup_func_type;
+	struct params_initmenupopup : public params {
+		params_initmenupopup(const params& p) { wParam = p.wParam; lParam = p.lParam; }
+		HMENU hmenu() const                   { return reinterpret_cast<HMENU>(wParam); }
+		WORD item_rel_pos() const             { return LOWORD(lParam); }
+	};
+	typedef std::function<typename traitsT::ret_type(params_initmenupopup)> func_initmenupopup_type;
 
 private:
-	struct _imp_unit final {
-		WORD commandIdOfFirstItem;
-		initmenupopup_func_type callback;
-	};
-	std::vector<_imp_unit> _imps;
+	callback_depot<WORD, func_initmenupopup_type, params_initmenupopup, traitsT> _callbacks;
 
 protected:
 	msg_initmenupopup()
 	{
-		on_message(WM_INITMENUPOPUP, [this](WPARAM wp, LPARAM lp)->typename traitsT::ret_type {
-			HMENU hMenu = reinterpret_cast<HMENU>(wp);
-			WORD cmdIdOfFirstItem = GetMenuItemID(hMenu, 0);
-			for (auto& imp : _imps) {
-				if (imp.commandIdOfFirstItem == cmdIdOfFirstItem) {
-					return imp.callback(hMenu);
-				}
-			}
-			return traitsT::default_proc(hwnd(), WM_INITMENUPOPUP, wp, lp);
+		on_message(WM_INITMENUPOPUP, [this](params p)->typename traitsT::ret_type {
+			params_initmenupopup pi(p);
+			return _callbacks.process(hwnd(), WM_INITMENUPOPUP,
+				GetMenuItemID(pi.hmenu(), 0), pi);
 		});
 	}
 
 public:
 	virtual ~msg_initmenupopup() = default;
 
-	void on_initmenupopup(WORD commandIdOfFirstItem, initmenupopup_func_type callback)
+	void on_initmenupopup(WORD commandIdOfFirstItem, func_initmenupopup_type callback)
 	{
-		for (auto& imp : _imps) {
-			if (imp.commandIdOfFirstItem == commandIdOfFirstItem) {
-				imp.callback = std::move(callback); // replace existing
-				return;
-			}
-		}
-		_imps.push_back({ commandIdOfFirstItem, std::move(callback) }); // add new WM_INITMENUPOPUP handler
+		_callbacks.add(commandIdOfFirstItem, std::move(callback));
 	}
 
-	void on_initmenupopup(std::initializer_list<WORD> commandIdOfFirstItems, initmenupopup_func_type callback)
+	void on_initmenupopup(std::initializer_list<WORD> commandIdOfFirstItems, func_initmenupopup_type callback)
 	{
-		on_initmenupopup(*commandIdOfFirstItems.begin(), std::move(callback)); // store 1st message once
-		size_t m0 = _imps.size() - 1;
-
-		for (size_t i = 1; i < commandIdOfFirstItems.size(); ++i) {
-			if (*(commandIdOfFirstItems.begin() + i) != *commandIdOfFirstItems.begin()) { // avoid overwriting
-				on_initmenupopup(*(commandIdOfFirstItems.begin() + i), [this, m0]()->typename traitsT::ret_type {
-					return _imps[m0].callback(); // store light wrapper to 1st message
-				});
-			}
-		}
+		_callbacks.add(commandIdOfFirstItems, std::move(callback));
 	}
 };
 
-typedef msg_initmenupopup<traits_window> msg_initmenupopup_window;
-typedef msg_initmenupopup<traits_dialog> msg_initmenupopup_dialog;
+typedef msg_initmenupopup<traits_window> window_msg_initmenupopup;
+typedef msg_initmenupopup<traits_dialog> dialog_msg_initmenupopup;
 
 }//namespace winlamb

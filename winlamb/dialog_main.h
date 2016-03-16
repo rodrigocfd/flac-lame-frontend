@@ -10,7 +10,7 @@
 /**
  * dialog_main
  *  dialog
- *   proc<traits_dialog>
+ *   wnd_proc<traits_dialog>
  *    wnd
  */
 
@@ -28,41 +28,61 @@ public:
 	virtual ~dialog_main() = default;
 	dialog_main& operator=(const dialog_main&) = delete;
 
+protected:
 	dialog_main()
 	{
-		on_message(WM_CLOSE, [this](WPARAM wp, LPARAM lp)->INT_PTR {
+		on_message(WM_CLOSE, [this](params p)->INT_PTR {
 			DestroyWindow(hwnd());
 			return TRUE;
 		});
-		on_message(WM_NCDESTROY, [](WPARAM wp, LPARAM lp)->INT_PTR {
+		on_message(WM_NCDESTROY, [](params p)->INT_PTR {
 			PostQuitMessage(0);
 			return TRUE;
 		});
 	}
 
+public:
 	int run(HINSTANCE hInst, int cmdShow)
 	{
 		InitCommonControls();
-		
-		if (!CreateDialogParam(hInst, MAKEINTRESOURCE(setup.dialogId),
-			nullptr, wnd_proc::_process,
-			reinterpret_cast<LPARAM>(static_cast<wnd_proc*>(this)))) return -1; // _hwnd member is set on first message processing
 
+		if (!setup.dialogId) {
+			OutputDebugString(L"ERROR: dialog not created, no dialog ID given.\n");
+			return -1;
+		}
+
+		HWND hwndRet = CreateDialogParam(hInst, MAKEINTRESOURCE(setup.dialogId),
+			nullptr, wnd_proc::_process,
+			reinterpret_cast<LPARAM>(static_cast<wnd_proc*>(this)) ); // _hwnd member is set on first message processing
+		if (!hwndRet) {
+			OutputDebugString(L"ERROR: dialog not created, CreateDialogParam failed.\n");
+			return -1;
+		}
+
+		_set_icon(hInst);
+		ShowWindow(hwnd(), cmdShow);
+		return _msg_loop(hInst); // this can be used as program return value
+	}
+
+private:
+	void _set_icon(HINSTANCE hInst)
+	{
 		if (setup.iconId) {
 			SendMessage(hwnd(), WM_SETICON, ICON_SMALL,
 				reinterpret_cast<LPARAM>(reinterpret_cast<HICON>(LoadImage(hInst,
-				MAKEINTRESOURCE(setup.iconId), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR))));
+					MAKEINTRESOURCE(setup.iconId), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR))));
 			SendMessage(hwnd(), WM_SETICON, ICON_BIG,
 				reinterpret_cast<LPARAM>(reinterpret_cast<HICON>(LoadImage(hInst,
-				MAKEINTRESOURCE(setup.iconId), IMAGE_ICON, 32, 32, LR_DEFAULTCOLOR))));
+					MAKEINTRESOURCE(setup.iconId), IMAGE_ICON, 32, 32, LR_DEFAULTCOLOR))));
 		}
+	}
 
+	int _msg_loop(HINSTANCE hInst)
+	{
 		HACCEL hAccel = nullptr;
 		if (setup.accelTableId) {
 			hAccel = LoadAccelerators(hInst, MAKEINTRESOURCE(setup.accelTableId));
 		}
-
-		ShowWindow(hwnd(), cmdShow);
 
 		MSG  msg = { 0 };
 		BOOL ret = 0;
@@ -76,7 +96,6 @@ public:
 		return static_cast<int>(msg.wParam); // this can be used as program return value
 	}
 
-private:
 	wnd_proc<traits_dialog>::_process;
 };
 

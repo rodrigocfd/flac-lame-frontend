@@ -24,7 +24,7 @@ DlgRunnin::DlgRunnin(
 {
 	setup.dialogId = DLG_RUNNIN;
 
-	on_message(WM_INITDIALOG, [this](WPARAM wp, LPARAM lp)->INT_PTR
+	on_message(WM_INITDIALOG, [this](params p)->INT_PTR
 	{
 		_lbl  = { hwnd(), LBL_STATUS };
 		_prog = { hwnd(), PRO_STATUS };
@@ -43,6 +43,8 @@ DlgRunnin::DlgRunnin(
 				_doProcessNextFile();
 			});
 		}
+
+		center_on_parent();
 		return TRUE;
 	});
 }

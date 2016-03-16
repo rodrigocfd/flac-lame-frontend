@@ -18,7 +18,7 @@ DlgMain::DlgMain()
 	setup.iconId = ICO_MAIN;
 	setup.accelTableId = ACC_MAIN;
 
-	on_message(WM_INITDIALOG, [this](WPARAM wp, LPARAM lp)->INT_PTR
+	on_message(WM_INITDIALOG, [this](params p)->INT_PTR
 	{
 		// Validate and load INI file.
 		_ini.path = Sys::pathOfExe().append(L"\\FlacLameFE.ini");
@@ -107,16 +107,18 @@ DlgMain::DlgMain()
 		return TRUE;
 	});
 
-	on_message(WM_SIZE, [this](WPARAM wp, LPARAM lp)->INT_PTR
+	on_message(WM_SIZE, [this](params p)->INT_PTR
 	{
-		_resizer.arrange(wp, lp);
+		_resizer.arrange(p.wParam, p.lParam);
 		_lstFiles.columnFit(0);
 		return TRUE;
 	});
 
-	on_message(WM_DROPFILES, [this](WPARAM wp, LPARAM lp)->INT_PTR
+	on_dropfiles([this](params_dropfiles p)->INT_PTR
 	{
-		for (const wstring& drop : Sys::getDroppedFiles(reinterpret_cast<HDROP>(wp))) {
+		vector<wstring> files = p.get_dropped_files();
+
+		for (const wstring& drop : files) {
 			if (File::isDir(drop)) { // if a directory, add all files inside of it
 				for (const wstring& f : File::listDir(drop.c_str(), L"*.mp3")) {
 					_doFileToList(f);
@@ -135,21 +137,21 @@ DlgMain::DlgMain()
 		return TRUE;
 	});
 
-	on_initmenupopup(MNU_ADDFILES, [this](HMENU hMenu)->INT_PTR
+	on_initmenupopup(MNU_ADDFILES, [this](params_initmenupopup p)->INT_PTR
 	{
-		Menu menu = hMenu;
+		Menu menu = p.hmenu();
 		menu.enableItem(MNU_REMSELECTED, _lstFiles.items.countSelected() > 0);
 		return TRUE;
 	});
 
-	on_command(MNU_ABOUT, [this]()->INT_PTR
+	on_command(MNU_ABOUT, [this](params_command p)->INT_PTR
 	{
 		Sys::msgBox(hwnd(), L"About",
 			L"FLAC/LAME graphical front-end.", MB_ICONINFORMATION);
 		return TRUE;
 	});
 
-	on_command(MNU_ADDFILES, [this]()->INT_PTR
+	on_command(MNU_ADDFILES, [this](params_command p)->INT_PTR
 	{
 		vector<wstring> files;
 		if (File::showOpen(hwnd(),
@@ -167,14 +169,14 @@ DlgMain::DlgMain()
 		return TRUE;
 	});
 
-	on_command(MNU_REMSELECTED, [this]()->INT_PTR
+	on_command(MNU_REMSELECTED, [this](params_command p)->INT_PTR
 	{
 		_lstFiles.items.removeSelected();
 		_doUpdateCounter( _lstFiles.items.count() );
 		return TRUE;
 	});
 
-	on_command(IDCANCEL, [this]()->INT_PTR
+	on_command(IDCANCEL, [this](params_command p)->INT_PTR
 	{
 		if (!_lstFiles.items.count() || IsWindowEnabled(GetDlgItem(hwnd(), BTN_RUN))) {
 			SendMessage(hwnd(), WM_CLOSE, 0, 0); // close on ESC only if not processing
@@ -182,7 +184,7 @@ DlgMain::DlgMain()
 		return TRUE;
 	});
 
-	on_command(BTN_DEST, [this]()->INT_PTR
+	on_command(BTN_DEST, [this](params_command p)->INT_PTR
 	{
 		wstring folder;
 		if (File::showChooseFolder(hwnd(), folder)) {
@@ -192,7 +194,7 @@ DlgMain::DlgMain()
 		return TRUE;
 	});
 
-	on_command({RAD_MP3, RAD_FLAC, RAD_WAV}, [this]()->INT_PTR
+	on_command({RAD_MP3, RAD_FLAC, RAD_WAV}, [this](params_command p)->INT_PTR
 	{
 		_radMp3Cbr.enable(_radMp3.isChecked());
 		_cmbCbr.enable(_radMp3.isChecked() && _radMp3Cbr.isChecked());
@@ -205,14 +207,14 @@ DlgMain::DlgMain()
 		return TRUE;
 	});
 
-	on_command({RAD_CBR, RAD_VBR}, [this]()->INT_PTR
+	on_command({RAD_CBR, RAD_VBR}, [this](params_command p)->INT_PTR
 	{
 		_cmbCbr.enable(_radMp3Cbr.isChecked());
 		_cmbVbr.enable(_radMp3Vbr.isChecked());
 		return TRUE;
 	});
 
-	on_command(BTN_RUN, [this]()->INT_PTR
+	on_command(BTN_RUN, [this](params_command p)->INT_PTR
 	{
 		vector<wstring> files;
 		if (!_destFolderIsOk() || !_filesExist(files)) {
@@ -248,13 +250,24 @@ DlgMain::DlgMain()
 		return TRUE;
 	});
 
-	on_notify(LST_FILES, LVN_INSERTITEM, [this](NMHDR& nm)->INT_PTR { return _doUpdateCounter(_lstFiles.items.count()); }); // new item inserted
-	on_notify(LST_FILES, LVN_DELETEITEM, [this](NMHDR& nm)->INT_PTR { return _doUpdateCounter(_lstFiles.items.count() - 1); }); // item about to be deleted
-	on_notify(LST_FILES, LVN_DELETEALLITEMS, [this](NMHDR& nm)->INT_PTR { return _doUpdateCounter(0); }); // all items about to be deleted
-
-	on_notify(LST_FILES, LVN_KEYDOWN, [this](NMHDR& nm)->INT_PTR
+	on_notify(LST_FILES, LVN_INSERTITEM, [this](params_notify p)->INT_PTR
 	{
-		NMLVKEYDOWN& nkd = reinterpret_cast<NMLVKEYDOWN&>(nm);
+		return _doUpdateCounter(_lstFiles.items.count()); // new item inserted
+	});
+
+	on_notify(LST_FILES, LVN_DELETEITEM, [this](params_notify p)->INT_PTR
+	{
+		return _doUpdateCounter(_lstFiles.items.count() - 1); // item about to be deleted
+	});
+
+	on_notify(LST_FILES, LVN_DELETEALLITEMS, [this](params_notify p)->INT_PTR
+	{
+		return _doUpdateCounter(0); // all items about to be deleted
+	});
+
+	on_notify(LST_FILES, LVN_KEYDOWN, [this](params_notify p)->INT_PTR
+	{
+		NMLVKEYDOWN& nkd = reinterpret_cast<NMLVKEYDOWN&>(p.nmhdr());
 		if (nkd.wVKey == VK_DELETE) { // Del key
 			SendMessage(hwnd(), WM_COMMAND, MAKEWPARAM(MNU_REMSELECTED, 0), 0);
 		}

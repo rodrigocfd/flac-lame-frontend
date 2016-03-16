@@ -10,7 +10,7 @@
 /**
  * window_main
  *  window
- *   proc<traits_window>
+ *   wnd_proc<traits_window>
  *    wnd
  */
 
@@ -27,18 +27,22 @@ public:
 	virtual ~window_main() = default;
 	window_main& operator=(const window_main&) = delete;
 
+protected:
 	window_main()
 	{
-		setup.wcx.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
-		setup.wcx.style = CS_DBLCLKS;
+		setup.wndClassEx.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
+		setup.wndClassEx.style = CS_DBLCLKS;
+		setup.position = { CW_USEDEFAULT, CW_USEDEFAULT };
+		setup.size = { CW_USEDEFAULT, CW_USEDEFAULT };
 		setup.style = WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_BORDER;
 
-		on_message(WM_NCDESTROY, [](WPARAM wp, LPARAM lp)->LRESULT {
+		on_message(WM_NCDESTROY, [](params p)->LRESULT {
 			PostQuitMessage(0);
 			return 0;
 		});
 	}
 
+public:
 	int run(HINSTANCE hInst, int cmdShow)
 	{
 		InitCommonControls();

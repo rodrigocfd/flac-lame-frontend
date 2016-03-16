@@ -13,41 +13,43 @@
 /**
  * window_control
  *  window
- *   proc<traits_window>
+ *   wnd_proc<traits_window>
  *    wnd
  */
 
 namespace winlamb {
 
-class window_control : public window<setup_window> {
+class window_control : public window<> {
 public:
 	virtual ~window_control() = default;
 	window_control& operator=(const window_control&) = delete;
 
+protected:
 	window_control()
 	{
-		setup.wcx.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
-		setup.wcx.style = CS_DBLCLKS;
+		setup.wndClassEx.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
+		setup.wndClassEx.style = CS_DBLCLKS;
 		//setup.exStyle = WS_EX_CLIENTEDGE; // border
 		setup.style = CS_DBLCLKS | WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 
-		on_message(WM_NCPAINT, [this](WPARAM wp, LPARAM lp)->LRESULT {
-			return _paint_themed_borders(wp, lp);
+		on_message(WM_NCPAINT, [this](params p)->LRESULT {
+			return _paint_themed_borders(p);
 		});
 	}
 
+public:
 	bool create(HWND hParent, int controlId, POINT position, SIZE size)
 	{
 		setup.position = position;
 		setup.size = size;
-		setup.menu = reinterpret_cast<HMENU>(controlId);
+		setup.menu = reinterpret_cast<HMENU>(static_cast<INT_PTR>(controlId));
 		return create(hParent);
 	}
 
 private:
-	LRESULT _paint_themed_borders(WPARAM wp, LPARAM lp)
+	LRESULT _paint_themed_borders(params p)
 	{
-		LRESULT defRet = DefWindowProc(hwnd(), WM_NCPAINT, wp, lp); // will make system draw the scrollbar for us
+		LRESULT defRet = DefWindowProc(hwnd(), WM_NCPAINT, p.wParam, p.lParam); // will make system draw the scrollbar for us
 		if ((GetWindowLongPtr(hwnd(), GWL_EXSTYLE) & WS_EX_CLIENTEDGE) && IsThemeActive() && IsAppThemed()) {
 			RECT rc = { 0 };
 			GetWindowRect(hwnd(), &rc); // window outmost coordinates, including margins

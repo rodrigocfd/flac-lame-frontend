@@ -2,6 +2,7 @@
 #pragma once
 #include "../winlamb/dialog_main.h"
 #include "../winlamb/msg_command.h"
+#include "../winlamb/msg_dropfiles.h"
 #include "../winlamb/msg_initmenupopup.h"
 #include "../winlamb/msg_notify.h"
 #include "../winutil/CheckBox.h"
@@ -13,9 +14,10 @@
 #include "../winutil/TextBox.h"
 
 class DlgMain final : public winlamb::dialog_main,
-	winlamb::msg_command_dialog,
-	winlamb::msg_initmenupopup_dialog,
-	winlamb::msg_notify_dialog
+	public winlamb::dialog_msg_command,
+	public winlamb::dialog_msg_dropfiles,
+	public winlamb::dialog_msg_initmenupopup,
+	public winlamb::dialog_msg_notify
 {
 private:
 	FileIni         _ini;
