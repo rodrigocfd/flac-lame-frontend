@@ -12,6 +12,7 @@ struct Sys final {
 	static bool         hasCtrl();
 	static bool         hasShift();
 	static int          msgBox(HWND hParent, std::wstring title, std::wstring text, UINT uType = 0);
+	static void         setWheelHoverBehavior(HWND hParent);
 	static void         enableXButton(HWND hWnd, bool enable);
 	static bool         fontExists(const wchar_t *name);
 };

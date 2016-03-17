@@ -104,6 +104,7 @@ DlgMain::DlgMain()
 				Resizer::Do::NOTHING, Resizer::Do::REPOS)
 			.add(hwnd(), { BTN_DEST, BTN_RUN }, Resizer::Do::REPOS, Resizer::Do::REPOS);
 
+		Sys::setWheelHoverBehavior(hwnd());
 		return TRUE;
 	});
 

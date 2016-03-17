@@ -68,8 +68,7 @@ ListView::Item& ListView::Item::ensureVisible()
 		if (xUs < xTop || xUs > xTop + cyList) { // if we're not visible
 			ListView_Scroll(_list->_hWnd, 0, xUs - xTop - cyList / 2 + cyItem * 2);
 		}
-	}
-	else {
+	} else {
 		ListView_EnsureVisible(_list->_hWnd, index, FALSE);
 	}
 	return *this;
@@ -531,15 +530,13 @@ int ListView::_showContextMenu(bool followCursor)
 			ListView_SetItemState(_hWnd, -1, 0, LVIS_SELECTED); // unselect all
 		}
 		SetFocus(_hWnd); // because a right-click won't set the focus by default
-	}
-	else { // usually fired with the context menu keyboard key
+	} else { // usually fired with the context menu keyboard key
 		int itemFocused = ListView_GetNextItem(_hWnd, -1, LVNI_FOCUSED);
 		if (itemFocused != -1 && ListView_IsItemVisible(_hWnd, itemFocused)) { // item focused and visible
 			RECT rcItem = { 0 };
 			ListView_GetItemRect(_hWnd, itemFocused, &rcItem, LVIR_BOUNDS); // relative to listview
 			coords = { rcItem.left + 16, rcItem.top + (rcItem.bottom - rcItem.top) / 2 };
-		}
-		else { // no focused and visible item
+		} else { // no focused and visible item
 			coords = { 6, 10 };
 		}
 	}

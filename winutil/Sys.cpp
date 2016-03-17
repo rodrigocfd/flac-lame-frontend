@@ -3,6 +3,7 @@
 #include "Sys.h"
 #include <process.h>
 #include <Shlobj.h>
+using std::initializer_list;
 using std::function;
 using std::vector;
 using std::wstring;
@@ -124,6 +125,40 @@ int Sys::msgBox(HWND hParent, wstring title, wstring text, UINT uType)
 		_hHookMsgBox = SetWindowsHookEx(WH_CBT, _msgBoxHookProc, nullptr, GetCurrentThreadId());
 	}
 	return MessageBox(hParent, text.c_str(), title.c_str(), uType);
+}
+
+static LRESULT CALLBACK _wheelHoverProc(HWND hChild, UINT msg, WPARAM wp, LPARAM lp, UINT_PTR idSubclass, DWORD_PTR refData)
+{
+	switch (msg)
+	{
+	case WM_MOUSEWHEEL:
+		if (!(LOWORD(wp) & 0x0800)) { // bitflag not set, this is the first and unprocessed WM_MOUSEWHEEL passage
+			HWND hParent = reinterpret_cast<HWND>(refData);
+			POINT pt = { LOWORD(lp), HIWORD(lp) };
+			ScreenToClient(hParent, &pt); // to client coordinates relative to parent
+			SendMessage(ChildWindowFromPoint(hParent, pt), // window below cursor
+				WM_MOUSEWHEEL,
+				MAKEWPARAM(LOWORD(wp) | 0x0800, HIWORD(wp)), // set 0x0800 bitflag and kick to window below cursor
+				lp);
+			return 0; // halt processing
+		} else { // bitflag is set, WM_MOUSEWHEEL has been kicked here and can be safely processed
+			wp &= ~0x0800; // unset bitflag
+			break; // finally dispatch to default processing
+		}
+	case WM_NCDESTROY:
+		RemoveWindowSubclass(hChild, _wheelHoverProc, idSubclass); // http://blogs.msdn.com/b/oldnewthing/archive/2003/11/11/55653.aspx
+	}
+	return DefSubclassProc(hChild, msg, wp, lp);
+}
+
+void Sys::setWheelHoverBehavior(HWND hParent)
+{
+	EnumChildWindows(hParent, [](HWND hChild, LPARAM lp)->BOOL {
+		static UINT_PTR _uniqueSubclassId = 1;
+		SetWindowSubclass(hChild, _wheelHoverProc, _uniqueSubclassId++,
+			reinterpret_cast<DWORD_PTR>(GetParent(hChild))); // yes, subclass every control
+		return TRUE;
+	}, 0);
 }
 
 void Sys::enableXButton(HWND hWnd, bool enable)
