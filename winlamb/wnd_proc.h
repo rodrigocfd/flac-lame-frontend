@@ -30,9 +30,7 @@ private:
 	bool _loopStarted;
 
 protected:
-	wnd_proc() : _loopStarted(false)
-	{
-	}
+	wnd_proc() : _loopStarted(false) { }
 
 public:
 	virtual ~wnd_proc() = default;

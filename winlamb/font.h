@@ -5,7 +5,6 @@
  */
 
 #pragma once
-#include <string>
 #include <Windows.h>
 
 namespace winlamb {
@@ -14,19 +13,11 @@ class font final {
 private:
 	HFONT _hFont;
 public:
-	~font()
-	{
-		release();
-	}
-
-	font() : _hFont(nullptr)
-	{
-	}
-
-	font(font&& f) : _hFont(f._hFont)
-	{
-		f._hFont = nullptr;
-	}
+	~font()        { release(); }
+	font()         : _hFont(nullptr)  { }
+	font(font&& f) : _hFont(f._hFont) { f._hFont = nullptr; }
+	
+	HFONT hfont() const { return _hFont; }
 
 	font& operator=(font&& f)
 	{
@@ -43,11 +34,6 @@ public:
 		return *this;
 	}
 	
-	HFONT hfont() const
-	{
-		return _hFont;
-	}
-
 	font& create(const LOGFONT& lf)
 	{
 		release();

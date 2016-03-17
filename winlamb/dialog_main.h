@@ -6,6 +6,7 @@
 
 #pragma once
 #include "dialog.h"
+#include "run.h"
 
 /**
  * dialog_main

@@ -166,6 +166,7 @@
     <ClInclude Include="winlamb\msg_keydown.h" />
     <ClInclude Include="winlamb\msg_notify.h" />
     <ClInclude Include="winlamb\msg_thread.h" />
+    <ClInclude Include="winlamb\run.h" />
     <ClInclude Include="winlamb\traits_dialog.h" />
     <ClInclude Include="winlamb\traits_window.h" />
     <ClInclude Include="winlamb\window.h" />

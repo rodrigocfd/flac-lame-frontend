@@ -17,12 +17,12 @@
 namespace winlamb {
 
 struct setup_window {
-	WNDCLASSEX     wndClassEx;
-	const wchar_t *title;
-	DWORD          style, exStyle;
-	POINT          position;
-	SIZE           size;
-	HMENU          menu;
+	WNDCLASSEX   wndClassEx;
+	const TCHAR *title;
+	DWORD        style, exStyle;
+	POINT        position;
+	SIZE         size;
+	HMENU        menu;
 	setup_window() : wndClassEx({ 0 }), title(nullptr), style(0), exStyle(0),
 		position({0,0}), size({0,0}), menu(nullptr) { }
 };
