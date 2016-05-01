@@ -1,6 +1,7 @@
 Debug/
 Release/
 *.aps
+*.db
 *.ffs_db
 *.ncb
 *.opensdf

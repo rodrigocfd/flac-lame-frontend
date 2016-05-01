@@ -2,11 +2,6 @@
 #include <utility>
 #include "Icon.h"
 
-Icon::~Icon()
-{
-	release();
-}
-
 Icon::Icon() :
 	_hIcon(nullptr)
 {
@@ -22,11 +17,6 @@ Icon& Icon::operator=(Icon&& i)
 {
 	std::swap(_hIcon, i._hIcon);
 	return *this;
-}
-
-HICON Icon::hIcon() const
-{
-	return _hIcon;
 }
 
 Icon& Icon::release()

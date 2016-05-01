@@ -1,32 +1,11 @@
 
 #include "ProgressBar.h"
 #include <CommCtrl.h>
-using std::pair;
-
-ProgressBar::ProgressBar()
-	: _hWnd(nullptr)
-{
-}
-
-ProgressBar::ProgressBar(HWND hwnd)
-	: _hWnd(hwnd)
-{
-}
 
 ProgressBar& ProgressBar::operator=(HWND hwnd)
 {
 	_hWnd = hwnd;
 	return *this;
-}
-
-ProgressBar& ProgressBar::operator=(pair<HWND, int> hWndAndCtrlId)
-{
-	return operator=(GetDlgItem(hWndAndCtrlId.first, hWndAndCtrlId.second));
-}
-
-HWND ProgressBar::hWnd() const
-{
-	return _hWnd;
 }
 
 ProgressBar& ProgressBar::create(HWND hParent, int id, POINT pos, SIZE size)
@@ -45,25 +24,10 @@ ProgressBar& ProgressBar::setRange(int minVal, int maxVal)
 	return *this;
 }
 
-ProgressBar& ProgressBar::setRange(int minVal, size_t maxVal)
-{
-	return setRange(minVal, static_cast<int>(maxVal));
-}
-
 ProgressBar& ProgressBar::setPos(int pos)
 {
 	SendMessage(_hWnd, PBM_SETPOS, pos, 0);
 	return *this;
-}
-
-ProgressBar& ProgressBar::setPos(size_t pos)
-{
-	return setPos(static_cast<int>(pos));
-}
-
-ProgressBar& ProgressBar::setPos(double pos)
-{
-	return setPos(static_cast<int>(pos + 0.5));
 }
 
 ProgressBar& ProgressBar::setWaiting(bool isWaiting)

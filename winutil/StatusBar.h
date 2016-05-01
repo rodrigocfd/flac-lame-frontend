@@ -16,7 +16,7 @@ private:
 	std::vector<Part> _parts;
 	std::vector<int>  _rightEdges;
 public:
-	StatusBar();
+	StatusBar() : _hWnd(nullptr) { }
 	StatusBar& operator=(const StatusBar& sb) = delete;
 	StatusBar& operator=(StatusBar&& sb) = delete;
 
@@ -25,7 +25,7 @@ public:
 	StatusBar&   addFixedPart(UINT sizePixels);
 	StatusBar&   addResizablePart(UINT resizeWeight);
 	StatusBar&   setText(const wchar_t *text, size_t iPart);
-	StatusBar&   setText(const std::wstring& text, size_t iPart);
+	StatusBar&   setText(const std::wstring& text, size_t iPart) { return setText(text.c_str(), iPart); }
 	std::wstring getText(size_t iPart) const;
 	StatusBar&   setIcon(HICON hIcon, size_t iPart);
 private:

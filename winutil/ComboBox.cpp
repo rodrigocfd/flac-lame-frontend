@@ -2,34 +2,13 @@
 #include "ComboBox.h"
 #include "Str.h"
 using std::initializer_list;
-using std::pair;
 using std::vector;
 using std::wstring;
-
-ComboBox::ComboBox()
-	: _hWnd(nullptr)
-{
-}
-
-ComboBox::ComboBox(HWND hWnd)
-	: _hWnd(hWnd)
-{
-}
 
 ComboBox& ComboBox::operator=(HWND hWnd)
 {
 	_hWnd = hWnd;
 	return *this;
-}
-
-ComboBox& ComboBox::operator=(pair<HWND, int> hWndAndCtrlId)
-{
-	return operator=(GetDlgItem(hWndAndCtrlId.first, hWndAndCtrlId.second));
-}
-
-HWND ComboBox::hWnd() const
-{
-	return _hWnd;
 }
 
 ComboBox& ComboBox::create(HWND hParent, int id, POINT pos, int width, bool sorted)
@@ -54,26 +33,16 @@ ComboBox& ComboBox::focus()
 	return *this;
 }
 
-int ComboBox::itemCount() const
-{
-	return static_cast<int>(SendMessage(_hWnd, CB_GETCOUNT, 0, 0));
-}
-
 ComboBox& ComboBox::itemRemoveAll()
 {
 	SendMessage(_hWnd, CB_RESETCONTENT, 0, 0);
 	return *this;
 }
 
-ComboBox& ComboBox::itemSetSelected(int i)
+ComboBox& ComboBox::itemSetSelected(size_t i)
 {
 	SendMessage(_hWnd, CB_SETCURSEL, i, 0);
 	return *this;
-}
-
-int ComboBox::itemGetSelected() const
-{
-	return static_cast<int>(SendMessage(_hWnd, CB_GETCURSEL, 0, 0));
 }
 
 ComboBox& ComboBox::itemAdd(initializer_list<const wchar_t*> entries)
@@ -94,16 +63,11 @@ ComboBox& ComboBox::itemAdd(const wchar_t* entries, wchar_t delimiter)
 	return *this;
 }
 
-wstring ComboBox::itemGetText(int i) const
+wstring ComboBox::itemGetText(size_t i) const
 {
-	int txtLen = static_cast<int>(SendMessage(_hWnd, CB_GETLBTEXTLEN, i, 0));
+	size_t txtLen = SendMessage(_hWnd, CB_GETLBTEXTLEN, i, 0);
 	wstring buf(txtLen + 1, L'\0');
 	SendMessage(_hWnd, CB_GETLBTEXT, i, reinterpret_cast<LPARAM>(&buf[0]));
 	buf.resize(txtLen);
 	return buf;
-}
-
-wstring ComboBox::itemGetSelectedText() const
-{
-	return itemGetText(itemGetSelected());
 }

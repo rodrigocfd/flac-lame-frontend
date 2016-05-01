@@ -71,29 +71,3 @@ wstring FileIni::serialize() const
 	}
 	return out;
 }
-
-wstring& FileIni::val(const wchar_t *section, const wchar_t *key)
-{
-	return data.at(section).at(key);
-}
-
-const wstring& FileIni::val(const wchar_t *section, const wchar_t *key) const
-{
-	return data.at(section).at(key);
-}
-
-bool FileIni::hasSection(const wchar_t *section) const
-{
-	return data.count(section) > 0;
-}
-
-bool FileIni::hasSection(const wstring& section) const
-{
-	return hasSection(section.c_str());
-}
-
-bool FileIni::hasKey(const wchar_t *section, const wchar_t *key) const
-{
-	return !hasSection(section) ? false :
-		data.at(section).count(key) > 0;
-}

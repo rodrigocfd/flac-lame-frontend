@@ -6,11 +6,12 @@ class Icon final {
 private:
 	HICON _hIcon;
 public:
-	~Icon();
+	~Icon() { release(); }
 	Icon();
 	Icon(Icon&& i);
 	Icon& operator=(Icon&& i);
-	HICON hIcon() const;
+
+	HICON hIcon() const { return _hIcon; }
 	Icon& release();
 	Icon& getFromExplorer(const wchar_t *fileExtension);
 	Icon& loadResource(int iconId, int size, HINSTANCE hInst = nullptr);

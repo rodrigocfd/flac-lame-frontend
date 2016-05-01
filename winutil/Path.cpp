@@ -12,10 +12,20 @@ wstring& Path::trimBackslash(wstring& path)
 	return path;
 }
 
+bool Path::isSame(const wstring& path, const wchar_t* other)
+{
+	return Str::eqI(path, other);
+}
+
+bool Path::hasExtension(const wstring& path, const wchar_t *extension)
+{
+	return Str::endsWithI(path, extension);
+}
+
 bool Path::hasExtension(const wstring& path, initializer_list<const wchar_t*> extensions)
 {
 	for (const wchar_t *ext : extensions) {
-		if (Str::endsWithI(path, ext)) {
+		if (Path::hasExtension(path, ext)) {
 			return true;
 		}
 	}
@@ -32,11 +42,6 @@ wstring& Path::changeExtension(wstring& path, const wchar_t *newExtension)
 	}
 	path.append(newExtension[0] == L'.' ? newExtension + 1 : newExtension);
 	return path;
-}
-
-wstring& Path::changeExtension(wstring& path, const wstring& newExtension)
-{
-	return changeExtension(path, newExtension.c_str());
 }
 
 wstring Path::folderFrom(const wstring& path)

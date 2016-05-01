@@ -93,16 +93,6 @@ wstring& Str::removeDiacritics(wstring& s)
 	return s;
 }
 
-bool Str::eqI(const wstring& s, const wchar_t *what)
-{
-	return !lstrcmpi(s.c_str(), what);
-}
-
-bool Str::eqI(const wstring& s, const wstring& what)
-{
-	return eqI(s.c_str(), what.c_str());
-}
-
 static bool _firstEndsBeginsCheck(const wstring& s, const wchar_t *what, size_t& whatLen)
 {
 	if (s.empty()) {
@@ -127,11 +117,6 @@ bool Str::endsWith(const wstring& s, const wchar_t *what)
 	return !lstrcmp(s.c_str() + s.size() - whatLen, what);
 }
 
-bool Str::endsWith(const wstring& s, const wstring& what)
-{
-	return endsWith(s, what.c_str());
-}
-
 bool Str::endsWithI(const wstring& s, const wchar_t *what)
 {
 	size_t whatLen = 0;
@@ -140,11 +125,6 @@ bool Str::endsWithI(const wstring& s, const wchar_t *what)
 	}
 
 	return !lstrcmpi(s.c_str() + s.size() - whatLen, what);
-}
-
-bool Str::endsWithI(const wstring& s, const wstring& what)
-{
-	return endsWithI(s, what.c_str());
 }
 
 bool Str::beginsWith(const wstring& s, const wchar_t *what)
@@ -157,11 +137,6 @@ bool Str::beginsWith(const wstring& s, const wchar_t *what)
 	return !wcsncmp(s.c_str(), what, whatLen);
 }
 
-bool Str::beginsWith(const wstring& s, const wstring& what)
-{
-	return beginsWith(s, what.c_str());
-}
-
 bool Str::beginsWithI(const wstring& s, const wchar_t *what)
 {
 	size_t whatLen = 0;
@@ -172,11 +147,6 @@ bool Str::beginsWithI(const wstring& s, const wchar_t *what)
 	return !_wcsnicmp(s.c_str(), what, whatLen);
 }
 
-bool Str::beginsWithI(const wstring& s, const wstring& what)
-{
-	return beginsWithI(s, what.c_str());
-}
-
 size_t Str::findI(const wstring& s, const wchar_t *what, size_t offset)
 {
 	wstring s2 = upper(s);
@@ -185,22 +155,12 @@ size_t Str::findI(const wstring& s, const wchar_t *what, size_t offset)
 	return s2.find(what2, offset);
 }
 
-size_t Str::findI(const wstring& s, const wstring& what, size_t offset)
-{
-	return findI(s, what.c_str(), offset);
-}
-
 size_t Str::rfindI(const wstring& s, const wchar_t *what, size_t offset)
 {
 	wstring s2 = upper(s);
 	wstring what2(what);
 	CharUpperBuff(&what2[0], static_cast<DWORD>(what2.size()));
 	return s2.rfind(what2, offset);
-}
-
-size_t Str::rfindI(const wstring& s, const wstring& what, size_t offset)
-{
-	return rfindI(s, what.c_str(), offset);
 }
 
 wstring& Str::replace(wstring& haystack, const wchar_t *needle, const wchar_t *replacement)
@@ -330,11 +290,6 @@ vector<wstring> Str::explode(const wstring& s, const wchar_t *delimiter)
 	return ret;
 }
 
-vector<wstring> Str::explode(const wstring& s, const wstring& delimiter)
-{
-	return explode(s, delimiter.c_str());
-}
-
 vector<wstring> Str::explodeMultiZero(const wchar_t *s)
 {
 	// Example multiStr:
@@ -446,11 +401,6 @@ wstring Str::parseAscii(const BYTE *data, size_t length)
 	return ret;
 }
 
-wstring Str::parseAscii(const std::vector<BYTE>& data)
-{
-	return parseAscii(&data[0], data.size());
-}
-
 wstring Str::parseUtf8(const BYTE *data, size_t length)
 {
 	wstring ret;
@@ -463,11 +413,6 @@ wstring Str::parseUtf8(const BYTE *data, size_t length)
 		trimNulls(ret);
 	}
 	return ret;
-}
-
-wstring Str::parseUtf8(const vector<BYTE>& data)
-{
-	return parseUtf8(&data[0], data.size());
 }
 
 vector<BYTE> Str::serializeUtf8(const wstring& s)

@@ -3,19 +3,9 @@
 using std::vector;
 using std::wstring;
 
-DC::Pen::~Pen()
-{
-	release();
-}
-
 DC::Pen::Pen(Style style, int width, COLORREF color)
 	: _hPen(CreatePen(static_cast<int>(style), width, color))
 {
-}
-
-HPEN DC::Pen::hPen() const
-{
-	return _hPen;
 }
 
 void DC::Pen::release()
@@ -26,11 +16,6 @@ void DC::Pen::release()
 	}
 }
 
-
-DC::Brush::~Brush()
-{
-	release();
-}
 
 DC::Brush::Brush(COLORREF color)
 	: _hBrush(CreateSolidBrush(color))
@@ -46,11 +31,6 @@ DC::Brush::Brush(int sysColor)
 	: _hBrush(GetSysColorBrush(static_cast<int>(sysColor)))
 {
 	// COLOR_BTNFACE COLOR_DESKTOP COLOR_BTNTEXT COLOR_WINDOW COLOR_APPWORKSPACE
-}
-
-HBRUSH DC::Brush::hBrush() const
-{
-	return _hBrush;
 }
 
 void DC::Brush::release()
@@ -71,45 +51,10 @@ DC::DC(HWND hWnd, HDC hDC)
 	_sz.cy = rcClient.bottom;
 }
 
-HDC DC::hDC() const
-{
-	return _hDC;
-}
-
-HWND DC::hWnd() const
-{
-	return _hWnd;
-}
-
-SIZE DC::size() const
-{
-	return _sz;
-}
-
 DC& DC::deleteObject(HGDIOBJ obj)
 {
 	DeleteObject(obj);
 	return *this;
-}
-
-HGDIOBJ DC::selectObject(HGDIOBJ obj)
-{
-	return SelectObject(_hDC, obj);
-}
-
-HGDIOBJ DC::selectStockFont()
-{
-	return selectObject(GetStockObject(SYSTEM_FONT));
-}
-
-HGDIOBJ DC::selectStockPen()
-{
-	return selectObject(GetStockObject(BLACK_PEN));
-}
-
-HGDIOBJ DC::selectStockBrush()
-{
-	return selectObject(GetStockObject(WHITE_BRUSH));
 }
 
 DC& DC::moveTo(int x, int y)
@@ -130,11 +75,6 @@ DC& DC::lineRect(int left, int top, int right, int bottom)
 		.lineTo(right, top)
 		.lineTo(right, bottom)
 		.lineTo(left, bottom);
-}
-
-DC& DC::lineRect(RECT rc)
-{
-	return lineRect(rc.left, rc.top, rc.right, rc.bottom);
 }
 
 DC& DC::setBkTransparent(bool yes)
@@ -219,31 +159,16 @@ DC& DC::fillRect(int left, int top, int right, int bottom, HBRUSH hBrush)
 	return *this;
 }
 
-DC& DC::fillRect(int left, int top, int right, int bottom, const Brush& brush)
-{
-	return fillRect(left, top, right, bottom, brush.hBrush());
-}
-
 DC& DC::fillRgn(HRGN hrgn, HBRUSH hBrush)
 {
 	FillRgn(_hDC, hrgn, hBrush);
 	return *this;
 }
 
-DC& DC::fillRgn(HRGN hrgn, const Brush& brush)
-{
-	return fillRgn(hrgn, brush.hBrush());
-}
-
 DC& DC::polygon(const POINT *points, size_t numPoints)
 {
 	Polygon(_hDC, points, static_cast<int>(numPoints));
 	return *this;
-}
-
-DC& DC::polygon(const vector<POINT>& points)
-{
-	return polygon(&points[0], points.size());
 }
 
 DC& DC::polygon(int left, int top, int right, int bottom)
@@ -270,17 +195,6 @@ DC& DC::drawEdge(int left, int top, int right, int bottom, int edgeType, int fla
 }
 
 
-DCSimple::~DCSimple()
-{
-	EndPaint(_hWnd, &_ps);
-}
-
-DCSimple::DCSimple(HWND hWnd)
-	: DC(hWnd, BeginPaint(hWnd, &_ps))
-{
-}
-
-
 DCBuffered::~DCBuffered()
 {
 	BITMAP bm = { 0 }; // http://www.ureader.com/msg/14721900.aspx
@@ -289,10 +203,11 @@ DCBuffered::~DCBuffered()
 	DeleteObject(SelectObject(_hDC, _hBmpOld));
 	DeleteObject(_hBmp);
 	DeleteDC(_hDC);
+	// ~DCSimple() kicks in
 }
 
-DCBuffered::DCBuffered(HWND hwnd)
-	: DCSimple(hwnd)
+DCBuffered::DCBuffered(HWND hWnd)
+	: DCSimple(hWnd)
 {
 	_hDC = CreateCompatibleDC(_ps.hdc); // overwrite our painting HDC
 	_hBmp = CreateCompatibleBitmap(_ps.hdc, _sz.cx, _sz.cy);

@@ -1,31 +1,6 @@
 
 #include "DateTime.h"
 
-DateTime::DateTime()
-{
-	setNow();
-}
-
-DateTime::DateTime(LONGLONG ms)
-{
-	setFromMs(ms);
-}
-
-DateTime::DateTime(const SYSTEMTIME& st)
-{
-	setFromSt(st);
-}
-
-DateTime::DateTime(const FILETIME& ft)
-{
-	setFromFt(ft);
-}
-
-const SYSTEMTIME& DateTime::get() const
-{
-	return _st;
-}
-
 DateTime& DateTime::setNow()
 {
 	SYSTEMTIME st1 = { 0 };
@@ -98,26 +73,6 @@ DateTime& DateTime::addMs(LONGLONG ms)
 	li.QuadPart += ms * 10000; // milliseconds to 100-nanoseconds
 	_liToSt(li, _st);
 	return *this;
-}
-
-DateTime& DateTime::addSec(LONGLONG sec)
-{
-	return addMs(sec * 1000);
-}
-
-DateTime& DateTime::addMin(LONGLONG min)
-{
-	return addSec(min * 60);
-}
-
-DateTime& DateTime::addHour(LONGLONG h)
-{
-	return addMin(h * 60);
-}
-
-DateTime& DateTime::addDay(LONGLONG d)
-{
-	return addHour(d * 24);
 }
 
 void DateTime::_stToLi(const SYSTEMTIME& st, LARGE_INTEGER& li)

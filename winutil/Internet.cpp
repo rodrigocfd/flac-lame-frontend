@@ -44,11 +44,6 @@ static wstring _formatError(DWORD lastError, const wchar_t *funcName)
 }
 
 
-InternetSession::~InternetSession()
-{
-	close();
-}
-
 InternetSession::InternetSession()
 	: _hSession(nullptr)
 {
@@ -64,11 +59,6 @@ InternetSession& InternetSession::operator=(InternetSession&& is)
 {
 	std::swap(_hSession, is._hSession);
 	return *this;
-}
-
-HINTERNET InternetSession::hSession() const
-{
-	return _hSession;
 }
 
 void InternetSession::close()
@@ -100,11 +90,6 @@ bool InternetSession::init(wstring *pErr, const wchar_t *userAgent)
 	return true;
 }
 
-
-InternetDownload::~InternetDownload()
-{
-	abort();
-}
 
 InternetDownload::InternetDownload(const InternetSession& session, wstring url, wstring verb)
 	: _session(session), _hConnect(nullptr), _hRequest(nullptr),
@@ -184,36 +169,11 @@ bool InternetDownload::hasData(wstring *pErr)
 	return true; // more data to come, call again
 }
 
-int InternetDownload::getContentLength() const
-{
-	return _contentLength;
-}
-
-int InternetDownload::getTotalDownloaded() const
-{
-	return _totalDownloaded;
-}
-
 float InternetDownload::getPercent() const
 {
 	return _contentLength ?
 		(static_cast<float>(_totalDownloaded) / _contentLength) * 100 :
 		0;
-}
-
-const vector<BYTE>& InternetDownload::getBuffer() const
-{
-	return _buffer;
-}
-
-const vector<wstring>& InternetDownload::getRequestHeaders() const
-{
-	return _requestHeaders;
-}
-
-const unordered_map<wstring, wstring>& InternetDownload::getResponseHeaders() const
-{
-	return _responseHeaders;
 }
 
 bool InternetDownload::_initHandles(wstring *pErr)
@@ -392,54 +352,9 @@ bool InternetUrl::crack(const wchar_t *address, wstring *pErr)
 	return true;
 }
 
-bool InternetUrl::crack(const wstring& address, wstring *pErr)
-{
-	return crack(address.c_str(), pErr);
-}
-
-const wchar_t* InternetUrl::scheme() const
-{
-	return _scheme;
-}
-
-const wchar_t* InternetUrl::host() const
-{
-	return _host;
-}
-
-const wchar_t* InternetUrl::user() const
-{
-	return _user;
-}
-
-const wchar_t* InternetUrl::pwd() const
-{
-	return _pwd;
-}
-
-const wchar_t* InternetUrl::path() const
-{
-	return _path;
-}
-
-const wchar_t* InternetUrl::extra() const
-{
-	return _extra;
-}
-
 wstring InternetUrl::pathAndExtra() const
 {
 	wstring ret = _path;
 	ret.append(_extra);
 	return ret;
-}
-
-int InternetUrl::port() const
-{
-	return _uc.nPort;
-}
-
-bool InternetUrl::isHttps() const
-{
-	return _uc.nScheme == INTERNET_SCHEME_HTTPS;
 }

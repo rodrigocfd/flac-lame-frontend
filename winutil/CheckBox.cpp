@@ -1,31 +1,10 @@
 
 #include "CheckBox.h"
-using std::pair;
-
-CheckBox::CheckBox()
-	: _hWnd(nullptr)
-{
-}
-
-CheckBox::CheckBox(HWND hWnd)
-	: _hWnd(hWnd)
-{
-}
 
 CheckBox& CheckBox::operator=(HWND hWnd)
 {
 	_hWnd = hWnd;
 	return *this;
-}
-
-CheckBox& CheckBox::operator=(pair<HWND, int> hWndAndCtrlId)
-{
-	return operator=(GetDlgItem(hWndAndCtrlId.first, hWndAndCtrlId.second));
-}
-
-HWND CheckBox::hWnd() const
-{
-	return _hWnd;
 }
 
 CheckBox& CheckBox::enable(bool doEnable)
@@ -48,17 +27,6 @@ CheckBox& CheckBox::focus()
 {
 	SetFocus(_hWnd);
 	return *this;
-}
-
-bool CheckBox::isChecked()
-{
-	return SendMessage(_hWnd, BM_GETCHECK, 0, 0) == BST_CHECKED;
-}
-
-void CheckBox::setCheck(bool checked)
-{
-	SendMessage(_hWnd, BM_SETCHECK,
-		checked ? BST_CHECKED : BST_UNCHECKED, 0);
 }
 
 void CheckBox::setCheckAndTrigger(bool checked)

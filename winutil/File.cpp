@@ -7,11 +7,6 @@
 using std::vector;
 using std::wstring;
 
-File::~File()
-{
-	close();
-}
-
 File::File()
 	: _hFile(nullptr), _access(Access::READONLY)
 {
@@ -31,16 +26,6 @@ File& File::operator=(File&& f)
 	return *this;
 }
 
-HANDLE File::hFile() const
-{
-	return _hFile;
-}
-
-File::Access File::getAccess() const
-{
-	return _access;
-}
-
 void File::close()
 {
 	if (_hFile) {
@@ -48,11 +33,6 @@ void File::close()
 		_hFile = nullptr;
 		_access = Access::READONLY;
 	}
-}
-
-size_t File::size() const
-{
-	return GetFileSize(_hFile, nullptr);
 }
 
 bool File::open(const wchar_t *path, Access access, wstring *pErr)
@@ -74,11 +54,6 @@ bool File::open(const wchar_t *path, Access access, wstring *pErr)
 	_access = access; // keep for future checks
 	if (pErr) pErr->clear();
 	return true;
-}
-
-bool File::open(const wstring& path, Access access, wstring *pErr)
-{
-	return open(path.c_str(), access, pErr);
 }
 
 bool File::setNewSize(size_t newSize, wstring *pErr)
@@ -127,11 +102,6 @@ bool File::setNewSize(size_t newSize, wstring *pErr)
 	return true;
 }
 
-bool File::truncate(wstring *pErr)
-{
-	return setNewSize(0, pErr);
-}
-
 bool File::getContent(vector<BYTE>& buf, wstring *pErr) const
 {
 	if (!_hFile) {
@@ -174,11 +144,6 @@ bool File::write(const BYTE *pData, size_t sz, wstring *pErr)
 	return true;
 }
 
-bool File::write(const vector<BYTE>& data, wstring *pErr)
-{
-	return write(&data[0], data.size(), pErr);
-}
-
 bool File::rewind(wstring *pErr)
 {
 	if (!_hFile) {
@@ -191,26 +156,6 @@ bool File::rewind(wstring *pErr)
 		return false;
 	}
 	return true;
-}
-
-bool File::exists(const wchar_t *path)
-{
-	return GetFileAttributes(path) != INVALID_FILE_ATTRIBUTES;
-}
-
-bool File::exists(const wstring& path)
-{
-	return exists(path.c_str());
-}
-
-bool File::isDir(const wchar_t *path)
-{
-	return (GetFileAttributes(path) & FILE_ATTRIBUTE_DIRECTORY) != 0;
-}
-
-bool File::isDir(const wstring& path)
-{
-	return isDir(path.c_str());
 }
 
 bool File::del(const wchar_t *path, wstring *pErr)
@@ -239,11 +184,6 @@ bool File::del(const wchar_t *path, wstring *pErr)
 	return true;
 }
 
-bool File::del(const wstring& path, wstring *pErr)
-{
-	return del(path.c_str(), pErr);
-}
-
 bool File::createDir(const wchar_t *path, wstring *pErr)
 {
 	if (!CreateDirectory(path, nullptr)) {
@@ -252,11 +192,6 @@ bool File::createDir(const wchar_t *path, wstring *pErr)
 	}
 	if (pErr) pErr->clear();
 	return true;
-}
-
-bool File::createDir(const wstring& path, wstring *pErr)
-{
-	return createDir(path.c_str(), pErr);
 }
 
 static vector<wchar_t> _formatFileFilter(const wchar_t *filterWithPipes)

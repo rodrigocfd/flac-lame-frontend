@@ -3,32 +3,16 @@
 #include "Icon.h"
 #include "Str.h"
 #include "Sys.h"
-using std::pair;
 using std::vector;
 using std::wstring;
-
-ListView::Item::Item(int itemIndex, ListView *pList)
-	: index(itemIndex), _list(pList)
-{
-}
-
-ListView::Item::Item()
-	: Item(-1, nullptr)
-{
-}
-
-void ListView::Item::remove()
-{
-	ListView_DeleteItem(_list->_hWnd, index);
-}
 
 void ListView::Item::swapWith(size_t itemIndex)
 {
 	Item newItem = _list->items[itemIndex];
 
-	int numCols = _list->columnCount();
+	size_t numCols = _list->columnCount();
 	wstring tmpstr;
-	for (int c = 0; c < numCols; ++c) { // swap texts of all columns
+	for (size_t c = 0; c < numCols; ++c) { // swap texts of all columns
 		tmpstr = getText(c);
 		setText(newItem.getText(c), c);
 		newItem.setText(tmpstr, c);
@@ -38,9 +22,9 @@ void ListView::Item::swapWith(size_t itemIndex)
 	setParam(newItem.getParam());
 	newItem.setParam(oldp);
 
-	int oldi = getIcon(); // swap icons
-	setIcon(newItem.getIcon());
-	newItem.setIcon(oldi);
+	int oldi = getIconIndex(); // swap icons
+	setIconIndex(newItem.getIconIndex());
+	newItem.setIconIndex(oldi);
 }
 
 ListView::Item& ListView::Item::ensureVisible()
@@ -61,7 +45,7 @@ ListView::Item& ListView::Item::ensureVisible()
 
 		SecureZeroMemory(&rc, sizeof(rc));
 		SecureZeroMemory(&lvii, sizeof(lvii));
-		lvii.iItem = index;
+		lvii.iItem = static_cast<int>(index);
 		ListView_GetItemIndexRect(_list->_hWnd, &lvii, 0, LVIR_BOUNDS, &rc);
 		int xUs = rc.top; // our current X
 
@@ -72,11 +56,6 @@ ListView::Item& ListView::Item::ensureVisible()
 		ListView_EnsureVisible(_list->_hWnd, index, FALSE);
 	}
 	return *this;
-}
-
-bool ListView::Item::isVisible() const
-{
-	return ListView_IsItemVisible(_list->_hWnd, index) == TRUE;
 }
 
 ListView::Item& ListView::Item::setSelect(bool select)
@@ -92,7 +71,7 @@ bool ListView::Item::isSelected() const
 		index, LVIS_SELECTED) & LVIS_SELECTED) != 0;
 }
 
-ListView::Item& ListView::Item::setFocus()
+ListView::Item& ListView::Item::focus()
 {
 	ListView_SetItemState(_list->_hWnd,
 		index, LVIS_FOCUSED, LVIS_FOCUSED);
@@ -116,7 +95,7 @@ wstring ListView::Item::getText(size_t columnIndex) const
 {
 	// http://forums.codeguru.com/showthread.php?351972-Getting-listView-item-text-length
 	LVITEM lvi = { 0 };
-	lvi.iItem = index;
+	lvi.iItem = static_cast<int>(index);
 	lvi.iSubItem = static_cast<int>(columnIndex);
 
 	// Notice that, since strings' size always increase, if the buffer
@@ -147,15 +126,10 @@ ListView::Item& ListView::Item::setText(const wchar_t *text, size_t columnIndex)
 	return *this;
 }
 
-ListView::Item& ListView::Item::setText(const wstring& text, size_t columnIndex)
-{
-	return setText(text.c_str(), columnIndex);
-}
-
 LPARAM ListView::Item::getParam() const
 {
 	LVITEM lvi = { 0 };
-	lvi.iItem = index;
+	lvi.iItem = static_cast<int>(index);
 	lvi.mask = LVIF_PARAM;
 
 	ListView_GetItem(_list->_hWnd, &lvi);
@@ -165,7 +139,7 @@ LPARAM ListView::Item::getParam() const
 ListView::Item& ListView::Item::setParam(LPARAM lp)
 {
 	LVITEM lvi = { 0 };
-	lvi.iItem = index;
+	lvi.iItem = static_cast<int>(index);
 	lvi.mask = LVIF_PARAM;
 	lvi.lParam = lp;
 
@@ -173,20 +147,20 @@ ListView::Item& ListView::Item::setParam(LPARAM lp)
 	return *this;
 }
 
-int ListView::Item::getIcon() const
+int ListView::Item::getIconIndex() const
 {
 	LVITEM lvi = { 0 };
-	lvi.iItem = index;
+	lvi.iItem = static_cast<int>(index);
 	lvi.mask = LVIF_IMAGE;
 
 	ListView_GetItem(_list->_hWnd, &lvi);
 	return lvi.iImage; // return index of icon within imagelist
 }
 
-ListView::Item& ListView::Item::setIcon(int imagelistIconIndex)
+ListView::Item& ListView::Item::setIconIndex(int imagelistIconIndex)
 {
 	LVITEM lvi = { 0 };
-	lvi.iItem = index;
+	lvi.iItem = static_cast<int>(index);
 	lvi.mask = LVIF_IMAGE;
 	lvi.iImage = imagelistIconIndex;
 
@@ -195,25 +169,10 @@ ListView::Item& ListView::Item::setIcon(int imagelistIconIndex)
 }
 
 
-ListView::Collection::Collection(ListView *pList)
-	: _list(pList)
-{
-}
-
-ListView::Item ListView::Collection::operator[](size_t itemIndex)
-{
-	return Item(static_cast<int>(itemIndex), _list);
-}
-
-int ListView::Collection::count() const
-{
-	return ListView_GetItemCount(_list->_hWnd);
-}
-
-ListView::Item ListView::Collection::add(const wchar_t *caption, int imagelistIconIndex, int positionIndex)
+ListView::Item ListView::Collection::add(const wchar_t *caption, int imagelistIconIndex, size_t positionIndex)
 {
 	LVITEM lvi = { 0 };
-	lvi.iItem = (positionIndex == -1 ? 0x0FFFFFFF : positionIndex);
+	lvi.iItem = static_cast<int>(positionIndex == -1 ? 0x0FFFFFFF : positionIndex);
 	lvi.mask = LVIF_TEXT | (imagelistIconIndex == -1 ? 0 : LVIF_IMAGE);
 	lvi.pszText = const_cast<wchar_t*>(caption);
 	lvi.iImage = imagelistIconIndex;
@@ -221,27 +180,17 @@ ListView::Item ListView::Collection::add(const wchar_t *caption, int imagelistIc
 	return Item(ListView_InsertItem(_list->_hWnd, &lvi), _list); // return index of newly inserted item
 }
 
-ListView::Item ListView::Collection::add(const wstring& caption, int imagelistIconIndex, int positionIndex)
-{
-	return add(caption.c_str(), imagelistIconIndex, positionIndex);
-}
-
 vector<ListView::Item> ListView::Collection::getAll() const
 {
-	int totItems = count();
+	size_t totItems = count();
 
 	vector<Item> items; // a big array with all items in list
 	items.reserve(totItems);
 
-	for (int i = 0; i < totItems; ++i) {
+	for (size_t i = 0; i < totItems; ++i) {
 		items.emplace_back(i, _list);
 	}
 	return items;
-}
-
-void ListView::Collection::removeAll()
-{
-	ListView_DeleteAllItems(_list->_hWnd);
 }
 
 ListView::Item ListView::Collection::find(const wchar_t *caption)
@@ -253,26 +202,6 @@ ListView::Item ListView::Collection::find(const wchar_t *caption)
 	return Item(ListView_FindItem(_list->_hWnd, -1, &lfi), _list); // returns -1 if not found
 }
 
-ListView::Item ListView::Collection::find(const wstring& caption)
-{
-	return find(caption.c_str());
-}
-
-bool ListView::Collection::exists(const wchar_t *caption)
-{
-	return find(caption).index != -1;
-}
-
-bool ListView::Collection::exists(const wstring& caption)
-{
-	return exists(caption.c_str());
-}
-
-int ListView::Collection::countSelected() const
-{
-	return ListView_GetSelectedCount(_list->_hWnd);
-}
-
 void ListView::Collection::select(const vector<size_t>& indexes)
 {
 	// Select the items whose indexes have been passed in the array.
@@ -280,16 +209,6 @@ void ListView::Collection::select(const vector<size_t>& indexes)
 		ListView_SetItemState(_list->_hWnd,
 			static_cast<int>(index), LVIS_SELECTED, LVIS_SELECTED);
 	}
-}
-
-void ListView::Collection::selectAll()
-{
-	ListView_SetItemState(_list->_hWnd, -1, LVIS_SELECTED, LVIS_SELECTED);
-}
-
-void ListView::Collection::selectNone()
-{
-	ListView_SetItemState(_list->_hWnd, -1, 0, LVIS_SELECTED);
 }
 
 void ListView::Collection::removeSelected()
@@ -316,51 +235,26 @@ vector<ListView::Item> ListView::Collection::getSelected() const
 	return items;
 }
 
-ListView::Item ListView::Collection::getFocused() const
-{
-	return Item(ListView_GetNextItem(_list->_hWnd, -1, LVNI_FOCUSED), _list);
-}
 
-
-ListView::~ListView()
-{
-	_contextMenu.destroy();
-}
-
-ListView::ListView()
-	: _hWnd(nullptr), items(this)
-{
-}
-
-ListView::ListView(HWND hwnd)
-	: ListView()
-{
-	operator=(hwnd);
-}
+const int IDSUBCLASS = 1;
 
 ListView& ListView::operator=(HWND hwnd)
 {
-	const int IDSUBCLASS = 1;
-
-	if (_hWnd) { // if previously assigned, remove previous subclassing
-		RemoveWindowSubclass(_hWnd, _proc, IDSUBCLASS);
+	if (_hWnd != hwnd) {
+		if (_hWnd) RemoveWindowSubclass(_hWnd, _proc, IDSUBCLASS);
+		_hWnd = hwnd;
+		SetWindowSubclass(_hWnd, _proc, IDSUBCLASS, reinterpret_cast<DWORD_PTR>(this));
+		_contextMenu.destroy();
 	}
-
-	_hWnd = hwnd;
-	SetWindowSubclass(_hWnd, _proc, IDSUBCLASS, reinterpret_cast<DWORD_PTR>(this));
-	items = Collection(this); // initialize internal object
-	_contextMenu.destroy();
 	return *this;
 }
 
-ListView& ListView::operator=(pair<HWND, int> hWndAndCtrlId)
+ListView& ListView::operator=(ListView&& other)
 {
-	return operator=(GetDlgItem(hWndAndCtrlId.first, hWndAndCtrlId.second));
-}
-
-HWND ListView::hWnd() const
-{
-	return _hWnd;
+	operator=(other._hWnd);
+	other._hWnd = nullptr;
+	_contextMenu = std::move(other._contextMenu);
+	return *this;
 }
 
 ListView& ListView::create(HWND hParent, int id, POINT pos, SIZE size, View view)
@@ -406,11 +300,6 @@ ListView& ListView::setView(View view)
 	return *this;
 }
 
-ListView::View ListView::getView() const
-{
-	return static_cast<View>(ListView_GetView(_hWnd));
-}
-
 ListView& ListView::iconPush(int iconId)
 {
 	HIMAGELIST hImg = _proceedImagelist();
@@ -433,11 +322,6 @@ ListView& ListView::iconPush(const wchar_t *fileExtension)
 	return *this; // return the index of the new icon
 }
 
-int ListView::columnCount() const
-{
-	return Header_GetItemCount(ListView_GetHeader(_hWnd));
-}
-
 ListView& ListView::columnAdd(const wchar_t *caption, int cx)
 {
 	LVCOLUMN lvc = { 0 };
@@ -452,10 +336,10 @@ ListView& ListView::columnAdd(const wchar_t *caption, int cx)
 
 ListView& ListView::columnFit(size_t columnIndex)
 {
-	int numCols = columnCount();
+	size_t numCols = columnCount();
 	int cxUsed = 0;
 
-	for (int i = 0; i < numCols; ++i) {
+	for (size_t i = 0; i < numCols; ++i) {
 		if (i != columnIndex) {
 			LVCOLUMN lvc = { 0 };
 			lvc.mask = LVCF_WIDTH;
@@ -466,7 +350,7 @@ ListView& ListView::columnFit(size_t columnIndex)
 
 	RECT rc = { 0 };
 	GetClientRect(_hWnd, &rc); // listview client area
-	ListView_SetColumnWidth(_hWnd, static_cast<int>(columnIndex),
+	ListView_SetColumnWidth(_hWnd, columnIndex,
 		rc.right /*- GetSystemMetrics(SM_CXVSCROLL)*/ - cxUsed); // fit the rest of available space
 	return *this;
 }
@@ -525,8 +409,7 @@ int ListView::_showContextMenu(bool followCursor)
 				}
 				ListView_SetItemState(_hWnd, itemBelowCursor, LVIS_FOCUSED, LVIS_FOCUSED); // focus clicked
 			}
-		}
-		else if (!Sys::hasCtrl() && !Sys::hasShift()) {
+		} else if (!Sys::hasCtrl() && !Sys::hasShift()) {
 			ListView_SetItemState(_hWnd, -1, 0, LVIS_SELECTED); // unselect all
 		}
 		SetFocus(_hWnd); // because a right-click won't set the focus by default
@@ -547,8 +430,7 @@ int ListView::_showContextMenu(bool followCursor)
 	return itemBelowCursor; // -1 if none
 }
 
-LRESULT CALLBACK ListView::_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp,
-	UINT_PTR idSubclass, DWORD_PTR refData)
+LRESULT CALLBACK ListView::_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp, UINT_PTR idSubclass, DWORD_PTR refData)
 {
 	switch (msg) {
 	case WM_GETDLGCODE:

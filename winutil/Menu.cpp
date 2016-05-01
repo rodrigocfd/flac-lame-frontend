@@ -3,27 +3,6 @@
 using std::initializer_list;
 using std::wstring;
 
-Menu::Menu()
-	: _hMenu(nullptr)
-{
-}
-
-Menu::Menu(HMENU hMenu)
-	: _hMenu(hMenu)
-{
-}
-
-Menu::Menu(const Menu& m)
-	: _hMenu(m._hMenu)
-{
-}
-
-Menu::Menu(Menu&& m)
-	: _hMenu(m._hMenu)
-{
-	m._hMenu = nullptr;
-}
-
 Menu& Menu::operator=(HMENU hMenu)
 {
 	_hMenu = hMenu;
@@ -38,13 +17,9 @@ Menu& Menu::operator=(const Menu& m)
 
 Menu& Menu::operator=(Menu&& m)
 {
-	std::swap(_hMenu, m._hMenu);
+	_hMenu = m._hMenu;
+	m._hMenu = nullptr;
 	return *this;
-}
-
-HMENU Menu::hMenu() const
-{
-	return _hMenu;
 }
 
 Menu& Menu::loadResource(int resourceId, HINSTANCE hInst)
@@ -70,21 +45,6 @@ void Menu::destroy()
 	}
 }
 
-int Menu::size() const
-{
-	return GetMenuItemCount(_hMenu);
-}
-
-Menu Menu::getSubmenu(size_t pos) const
-{
-	return Menu(GetSubMenu(_hMenu, static_cast<int>(pos)));
-}
-
-WORD Menu::getCommandId(size_t pos) const
-{
-	return GetMenuItemID(_hMenu, static_cast<int>(pos));
-}
-
 wstring Menu::getCaption(WORD commandId) const
 {
 	wchar_t captionBuf[64]; // arbitrary buffer length
@@ -99,11 +59,6 @@ wstring Menu::getCaption(WORD commandId) const
 	return captionBuf;
 }
 
-size_t Menu::getItemCount() const
-{
-	return static_cast<size_t>(GetMenuItemCount(_hMenu));
-}
-
 Menu& Menu::addSeparator()
 {
 	InsertMenu(_hMenu, -1, MF_BYPOSITION | MF_SEPARATOR, 0, nullptr);
@@ -114,11 +69,6 @@ Menu& Menu::addItem(WORD commandId, const wchar_t *caption)
 {
 	InsertMenu(_hMenu, -1, MF_BYPOSITION | MF_STRING, commandId, caption);
 	return *this;
-}
-
-Menu& Menu::addItem(WORD commandId, const wstring& caption)
-{
-	return addItem(commandId, caption.c_str());
 }
 
 Menu& Menu::enableItem(WORD commandId, bool doEnable)
@@ -156,6 +106,12 @@ Menu& Menu::enableItem(initializer_list<WORD> commandIds, bool doEnable)
 	return *this;
 }
 
+Menu& Menu::setDefaultItem(WORD commandId)
+{
+	SetMenuDefaultItem(_hMenu, commandId, MF_BYCOMMAND);
+	return *this;
+}
+
 Menu Menu::addSubmenu(const wchar_t *caption)
 {
 	Menu sub;
@@ -163,11 +119,6 @@ Menu Menu::addSubmenu(const wchar_t *caption)
 	AppendMenu(_hMenu, MF_STRING | MF_POPUP,
 		reinterpret_cast<UINT_PTR>(sub._hMenu), caption);
 	return sub; // return new submenu, so it can be edited
-}
-
-Menu Menu::addSubmenu(const wstring& caption)
-{
-	return addSubmenu(caption.c_str());
 }
 
 Menu& Menu::showAtPoint(HWND hParent, POINT pt, HWND hWndCoordsRelativeTo)

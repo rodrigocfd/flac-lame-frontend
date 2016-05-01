@@ -3,11 +3,6 @@
 #include <CommCtrl.h>
 using std::wstring;
 
-StatusBar::StatusBar()
-	: _hWnd(nullptr)
-{
-}
-
 StatusBar& StatusBar::create(HWND hParent)
 {
 	if (!_hWnd) {
@@ -46,7 +41,7 @@ void StatusBar::stretch(WPARAM wp, LPARAM lp)
 
 		// Fill right edges array with the right edge of each part.
 		int cxTotal = cx;
-		for (auto i = _parts.size(); i-- > 0; ) {
+		for (size_t i = _parts.size(); i-- > 0; ) {
 			_rightEdges[i] = cxTotal;
 			cxTotal -= (!_parts[i].resizeWeight) ? // fixed-width?
 				_parts[i].sizePixels :
@@ -86,11 +81,6 @@ StatusBar& StatusBar::setText(const wchar_t *text, size_t iPart)
 	SendMessage(_hWnd, SB_SETTEXT, MAKEWPARAM(MAKEWORD(iPart, 0), 0),
 		reinterpret_cast<LPARAM>(text));
 	return *this;
-}
-
-StatusBar& StatusBar::setText(const wstring& text, size_t iPart)
-{
-	return setText(text.c_str(), iPart);
 }
 
 wstring StatusBar::getText(size_t iPart) const

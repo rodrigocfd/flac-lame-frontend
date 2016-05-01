@@ -1,6 +1,7 @@
 
 #include <algorithm>
 #include "Sys.h"
+#include "Str.h"
 #include <process.h>
 #include <Shlobj.h>
 using std::initializer_list;
@@ -50,6 +51,17 @@ DWORD Sys::exec(wstring cmdLine)
 	return dwExitCode;
 }
 
+DWORD Sys::execShell(wstring file)
+{
+	return static_cast<DWORD>(reinterpret_cast<INT_PTR>(
+		ShellExecute(nullptr, L"open", file.c_str(), nullptr, nullptr, SW_SHOWNORMAL) ));
+}
+
+vector<wstring> Sys::getCmdLine()
+{
+	return Str::explodeQuoted(GetCommandLine());
+}
+
 wstring Sys::pathOfExe()
 {
 	wchar_t buf[MAX_PATH] = { L'\0' };
@@ -68,16 +80,6 @@ wstring Sys::pathOfDesktop()
 	wchar_t buf[MAX_PATH] = { L'\0' };
 	SHGetFolderPath(nullptr, CSIDL_DESKTOPDIRECTORY, nullptr, 0, buf); // won't have trailing backslash
 	return buf;
-}
-
-bool Sys::hasCtrl()
-{
-	return (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
-}
-
-bool Sys::hasShift()
-{
-	return (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0;
 }
 
 static HHOOK _hHookMsgBox = nullptr;

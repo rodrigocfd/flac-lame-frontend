@@ -26,8 +26,8 @@ DlgRunnin::DlgRunnin(
 
 	on_message(WM_INITDIALOG, [this](params p)->INT_PTR
 	{
-		_lbl  = { hwnd(), LBL_STATUS };
-		_prog = { hwnd(), PRO_STATUS };
+		_lbl  = GetDlgItem(hwnd(), LBL_STATUS);
+		_prog = GetDlgItem(hwnd(), PRO_STATUS);
 	
 		_prog.setRange(0, _files.size());
 		_taskBar.setPos(0);

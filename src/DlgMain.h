@@ -33,6 +33,6 @@ public:
 private:
 	bool    _destFolderIsOk();
 	bool    _filesExist(std::vector<std::wstring>& files);
-	LRESULT _doUpdateCounter(int newCount);
+	LRESULT _doUpdateCounter(size_t newCount);
 	void    _doFileToList(const std::wstring& file);
 };

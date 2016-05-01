@@ -42,30 +42,6 @@ Xml::Node* Xml::Node::firstChildByName(const wchar_t *elemName)
 }
 
 
-Xml::Xml()
-{
-}
-
-Xml::Xml(const Xml& other)
-	: root(other.root)
-{
-}
-
-Xml::Xml(Xml&& other)
-	: root(std::move(other.root))
-{
-}
-
-Xml::Xml(const wchar_t *str)
-{
-	parse(str);
-}
-
-Xml::Xml(const wstring& str)
-{
-	parse(str);
-}
-
 Xml& Xml::operator=(const Xml& other)
 {
 	root = other.root;
@@ -207,9 +183,4 @@ bool Xml::parse(const wchar_t *str)
 	doc->Release();
 	CoUninitialize();
 	return true;
-}
-
-bool Xml::parse(const wstring& str)
-{
-	return parse(str.c_str());
 }

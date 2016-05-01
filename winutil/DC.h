@@ -18,9 +18,9 @@ public:
 	private:
 		HPEN _hPen;
 	public:
-		~Pen();
+		~Pen() { release(); }
 		Pen(Style style, int width, COLORREF color);
-		HPEN hPen() const;
+		HPEN hPen() const { return _hPen; }
 		void release();
 	};
 
@@ -37,11 +37,11 @@ public:
 	private:
 		HBRUSH _hBrush;
 	public:
-		~Brush();
+		~Brush() { release(); }
 		Brush(COLORREF color);
 		Brush(Pattern hatch, COLORREF color);
 		Brush(int sysColor);
-		HBRUSH hBrush() const;
+		HBRUSH hBrush() const { return _hBrush; }
 		void   release();
 	};
 
@@ -53,18 +53,18 @@ public:
 	virtual ~DC() = default;
 	explicit DC(HWND hWnd, HDC hDC = nullptr);
 
-	HDC      hDC() const;
-	HWND     hWnd() const;
-	SIZE     size() const;
+	HDC      hDC() const               { return _hDC; }
+	HWND     hWnd() const              { return _hWnd; }
+	SIZE     size() const              { return _sz; }
 	DC&      deleteObject(HGDIOBJ obj);
-	HGDIOBJ  selectObject(HGDIOBJ obj);
-	HGDIOBJ  selectStockFont();
-	HGDIOBJ  selectStockPen();
-	HGDIOBJ  selectStockBrush();
+	HGDIOBJ  selectObject(HGDIOBJ obj) { return SelectObject(_hDC, obj); }
+	HGDIOBJ  selectStockFont()         { return selectObject(GetStockObject(SYSTEM_FONT)); }
+	HGDIOBJ  selectStockPen()          { return selectObject(GetStockObject(BLACK_PEN)); }
+	HGDIOBJ  selectStockBrush()        { return selectObject(GetStockObject(WHITE_BRUSH)); }
 	DC&      moveTo(int x, int y);
 	DC&      lineTo(int x, int y);
 	DC&      lineRect(int left, int top, int right, int bottom);
-	DC&      lineRect(RECT rc);
+	DC&      lineRect(RECT rc)         { return lineRect(rc.left, rc.top, rc.right, rc.bottom); }
 	DC&      setBkTransparent(bool yes);
 	DC&      setBkColor(COLORREF color = -1);
 	COLORREF getBkBrushColor();
@@ -76,11 +76,11 @@ public:
 	SIZE     getTextExtent(const wchar_t *text, size_t numChars = std::wstring::npos);
 	SIZE     getTextExtent(const std::wstring& text, size_t numChars = std::wstring::npos);
 	DC&      fillRect(int left, int top, int right, int bottom, HBRUSH hBrush);
-	DC&      fillRect(int left, int top, int right, int bottom, const Brush& brush);
+	DC&      fillRect(int left, int top, int right, int bottom, const Brush& brush) { return fillRect(left, top, right, bottom, brush.hBrush()); }
 	DC&      fillRgn(HRGN hrgn, HBRUSH hBrush);
-	DC&      fillRgn(HRGN hrgn, const Brush& brush);
+	DC&      fillRgn(HRGN hrgn, const Brush& brush)    { return fillRgn(hrgn, brush.hBrush()); }
 	DC&      polygon(const POINT *points, size_t numPoints);
-	DC&      polygon(const std::vector<POINT>& points);
+	DC&      polygon(const std::vector<POINT>& points) { return polygon(&points[0], points.size()); }
 	DC&      polygon(int left, int top, int right, int bottom);
 	DC&      drawEdge(RECT rc, int edgeType, int flags);
 	DC&      drawEdge(int left, int top, int right, int bottom, int edgeType, int flags);
@@ -92,8 +92,8 @@ class DCSimple : public DC {
 protected:
 	PAINTSTRUCT _ps;
 public:
-	virtual ~DCSimple();
-	explicit DCSimple(HWND hwnd);
+	virtual ~DCSimple()          { EndPaint(_hWnd, &_ps); }
+	explicit DCSimple(HWND hWnd) : DC(hWnd, BeginPaint(hWnd, &_ps)) { }
 };
 
 

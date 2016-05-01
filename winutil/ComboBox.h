@@ -7,21 +7,20 @@ class ComboBox final {
 private:
 	HWND _hWnd;
 public:
-	ComboBox();
-	ComboBox(HWND hWnd);
+	ComboBox()          : _hWnd(nullptr) { }
+	ComboBox(HWND hwnd) : _hWnd(hwnd) { }
 	ComboBox& operator=(HWND hWnd);
-	ComboBox& operator=(std::pair<HWND, int> hWndAndCtrlId);
 
-	HWND         hWnd() const;
+	HWND         hWnd() const                { return _hWnd; }
 	ComboBox&    create(HWND hParent, int id, POINT pos, int width, bool sorted);
 	ComboBox&    enable(bool doEnable);
 	ComboBox&    focus();
-	int          itemCount() const;
+	size_t       itemCount() const           { return SendMessage(_hWnd, CB_GETCOUNT, 0, 0); }
 	ComboBox&    itemRemoveAll();
-	ComboBox&    itemSetSelected(int i);
-	int          itemGetSelected() const;
+	ComboBox&    itemSetSelected(size_t i);
+	int          itemGetSelected() const     { return static_cast<int>(SendMessage(_hWnd, CB_GETCURSEL, 0, 0)); }
 	ComboBox&    itemAdd(std::initializer_list<const wchar_t*> entries);
 	ComboBox&    itemAdd(const wchar_t* entries, wchar_t delimiter = L'|');
-	std::wstring itemGetText(int i) const;
-	std::wstring itemGetSelectedText() const;
+	std::wstring itemGetText(size_t i) const;
+	std::wstring itemGetSelectedText() const { return itemGetText(itemGetSelected()); }
 };

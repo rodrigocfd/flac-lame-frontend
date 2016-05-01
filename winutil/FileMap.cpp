@@ -4,11 +4,6 @@
 using std::vector;
 using std::wstring;
 
-FileMap::~FileMap()
-{
-	close();
-}
-
 FileMap::FileMap()
 	: _hMap(nullptr), _pMem(nullptr), _size(0)
 {
@@ -29,11 +24,6 @@ FileMap& FileMap::operator=(FileMap&& fm)
 	std::swap(_pMem, fm._pMem);
 	std::swap(_size, fm._size);
 	return *this;
-}
-
-File::Access FileMap::getAccess() const
-{
-	return _file.getAccess();
 }
 
 void FileMap::close()
@@ -85,26 +75,6 @@ bool FileMap::open(const wchar_t *path, File::Access access, wstring *pErr)
 	return true;
 }
 
-bool FileMap::open(const wstring& path, File::Access access, wstring *pErr)
-{
-	return open(path.c_str(), access, pErr);
-}
-
-size_t FileMap::size() const
-{
-	return _size;
-}
-
-BYTE* FileMap::pMem() const
-{
-	return reinterpret_cast<BYTE*>(_pMem);
-}
-
-BYTE* FileMap::pPastMem() const
-{
-	return pMem() + size();
-}
-
 bool FileMap::setNewSize(size_t newSize, wstring *pErr)
 {
 	// This method will truncate or expand the file, according to the new size.
@@ -146,16 +116,16 @@ bool FileMap::setNewSize(size_t newSize, wstring *pErr)
 	return true;
 }
 
-bool FileMap::getContent(vector<BYTE>& buf, int offset, int numBytes, wstring *pErr) const
+bool FileMap::getContent(vector<BYTE>& buf, size_t offset, size_t numBytes, wstring *pErr) const
 {
 	if (!_hMap || !_pMem || !_file.hFile()) {
 		if (pErr) *pErr = L"File is not mapped into memory.";
 		return false;
-	} else if (offset >= static_cast<int>(_size)) {
+	} else if (offset >= _size) {
 		if (pErr) *pErr = L"Offset is beyond end of file.";
 		return false;
-	} else if (numBytes == -1 || offset + numBytes > static_cast<int>(_size)) {
-		numBytes = static_cast<int>(_size) - offset; // avoid reading beyond EOF
+	} else if (numBytes == -1 || offset + numBytes > _size) {
+		numBytes = _size - offset; // avoid reading beyond EOF
 	}
 
 	buf.resize(numBytes);

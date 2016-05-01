@@ -4,65 +4,33 @@
 #include "Str.h"
 #include "Sys.h"
 using std::function;
-using std::pair;
 using std::vector;
 using std::wstring;
 
-TextBox::TextBox()
-	: _hWnd(nullptr)
-{
-}
-
-TextBox::TextBox(HWND hwnd)
-	: _hWnd(nullptr)
-{
-	operator=(hwnd);
-}
+const int IDSUBCLASS = 1;
 
 TextBox& TextBox::operator=(HWND hwnd)
 {
-	const int IDSUBCLASS = 1;
-
-	if (_hWnd) RemoveWindowSubclass(_hWnd, _proc, IDSUBCLASS);
-	_hWnd = hwnd;
-	SetWindowSubclass(_hWnd, _proc, IDSUBCLASS, reinterpret_cast<DWORD_PTR>(this));
+	if (_hWnd != hwnd) {
+		if (_hWnd) RemoveWindowSubclass(_hWnd, _proc, IDSUBCLASS);
+		_hWnd = hwnd;
+		SetWindowSubclass(_hWnd, _proc, IDSUBCLASS, reinterpret_cast<DWORD_PTR>(this));
+	}
 	return *this;
 }
 
-TextBox& TextBox::operator=(pair<HWND, int> hWndAndCtrlId)
+TextBox& TextBox::operator=(TextBox&& other)
 {
-	return operator=(GetDlgItem(hWndAndCtrlId.first, hWndAndCtrlId.second));
-}
-
-HWND TextBox::hWnd() const
-{
-	return _hWnd;
-}
-
-TextBox& TextBox::create(HWND hParent, int id, POINT pos, LONG width)
-{
-	return _create(hParent, id, pos, {width,21}, ES_AUTOHSCROLL);
-}
-
-TextBox& TextBox::createPassword(HWND hParent, int id, POINT pos, LONG width)
-{
-	return _create(hParent, id, pos, {width,21}, ES_AUTOHSCROLL | ES_PASSWORD);
-}
-
-TextBox& TextBox::createMultiLine(HWND hParent, int id, POINT pos, SIZE size)
-{
-	return _create(hParent, id, pos, size, ES_MULTILINE | ES_WANTRETURN);
+	_onKeyUp = std::move(other._onKeyUp);
+	operator=(other._hWnd);
+	other._hWnd = nullptr;
+	return *this;
 }
 
 TextBox& TextBox::setText(const wchar_t *t)
 {
 	SetWindowText(_hWnd, t);
 	return *this;
-}
-
-TextBox& TextBox::setText(const wstring& t)
-{
-	return setText(t.c_str());
 }
 
 wstring TextBox::getText() const
@@ -85,23 +53,18 @@ TextBox& TextBox::setSelection(int start, int length)
 	return *this;
 }
 
-pair<int, int> TextBox::getSelection() const
+TextBox::Selection TextBox::getSelection() const
 {
 	int p0 = 0, p1 = 0;
 	SendMessage(_hWnd, EM_GETSEL,
 		reinterpret_cast<WPARAM>(&p0), reinterpret_cast<LPARAM>(&p1));
-	return std::make_pair(p0, p1 - p0); // start, length
+	return { p0, p1 - p0 }; // start, length
 }
 
 TextBox& TextBox::replaceSelection(const wchar_t *t)
 {
 	SendMessage(_hWnd, EM_REPLACESEL, TRUE, reinterpret_cast<LPARAM>(t));
 	return *this;
-}
-
-TextBox& TextBox::replaceSelection(const std::wstring& t)
-{
-	return replaceSelection(t.c_str());
 }
 
 TextBox& TextBox::enable(bool doEnable)
@@ -133,8 +96,7 @@ TextBox& TextBox::_create(HWND hParent, int id, POINT pos, SIZE size, DWORD extr
 		nullptr) );
 }
 
-LRESULT CALLBACK TextBox::_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp,
-	UINT_PTR idSubclass, DWORD_PTR refData)
+LRESULT CALLBACK TextBox::_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp, UINT_PTR idSubclass, DWORD_PTR refData)
 {
 	TextBox *pSelf = reinterpret_cast<TextBox*>(refData);
 

@@ -1,5 +1,4 @@
 
-#include <vector>
 #include <Windows.h>
 #include "FileText.h"
 #include "FileMap.h"
@@ -8,11 +7,11 @@ using std::pair;
 using std::vector;
 using std::wstring;
 
-static pair<FileText::Encoding, int> _tellEncoding(const FileMap& fin)
+pair<FileText::Encoding, int> FileText::getEncoding(const BYTE *src, size_t sz)
 {
-	auto match = [&fin](const BYTE *pBom, int szBom)->bool {
-		return (fin.size() >= static_cast<size_t>(szBom)) &&
-			!memcmp(fin.pMem(), pBom, sizeof(BYTE) * szBom);
+	auto match = [&](const BYTE *pBom, int szBom)->bool {
+		return (sz >= static_cast<size_t>(szBom)) &&
+			!memcmp(src, pBom, sizeof(BYTE) * szBom);
 	};
 
 	// https://en.wikipedia.org/wiki/Byte_order_mark
@@ -52,13 +51,12 @@ static pair<FileText::Encoding, int> _tellEncoding(const FileMap& fin)
 		return std::make_pair(FileText::Encoding::BOCU1, 3);
 	}
 
-	if (IsTextUnicode(fin.pMem(), static_cast<int>(fin.size()), nullptr)) {
+	if (IsTextUnicode(src, static_cast<int>(sz), nullptr)) {
 		return std::make_pair(FileText::Encoding::UTF8, 0); // no BOM
 	}
 
 	return std::make_pair(FileText::Encoding::ASCII, 0);
 }
-
 
 pair<FileText::Encoding, int> FileText::getEncoding(const wchar_t *path, wstring *pErr)
 {
@@ -68,12 +66,49 @@ pair<FileText::Encoding, int> FileText::getEncoding(const wchar_t *path, wstring
 	}
 	
 	if (pErr) pErr->clear();
-	return _tellEncoding(fin);
+	return getEncoding(fin.pMem(), fin.size());
 }
 
-pair<FileText::Encoding, int> FileText::getEncoding(const wstring& path, wstring *pErr)
+const wchar_t* FileText::getLinebreak(const wstring& src)
 {
-	return getEncoding(path.c_str(), pErr);
+	for (size_t i = 0; i < src.size() - 1; ++i) {
+		if (src[i] == L'\r') {
+			return src[i + 1] == L'\n' ? L"\r\n" : L"\r";
+		} else if (src[i] == L'\n') {
+			return src[i + 1] == L'\r' ? L"\n\r" : L"\n";
+		}
+	}
+	return nullptr; // unknown
+}
+
+bool FileText::read(wstring& buf, const BYTE *src, size_t sz, wstring *pErr)
+{
+	pair<Encoding, int> fileEnc = getEncoding(src, sz);
+	src += fileEnc.second; // skip BOM, if any
+
+	auto happy = [&]()->bool {
+		if (pErr) pErr->clear();
+		return true;
+	};
+
+	auto fail = [&](const wchar_t *errMsg)->bool {
+		if (pErr) *pErr = errMsg;
+		return false;
+	};
+
+	switch (fileEnc.first) {
+	case Encoding::UNKNOWN:
+	case Encoding::ASCII:   buf = Str::parseAscii(src, sz); return happy();
+	case Encoding::UTF8:    buf = Str::parseUtf8(src, sz); return happy();
+	case Encoding::UTF16BE: return fail(L"UTF-16 big endian: encoding not implemented.");
+	case Encoding::UTF16LE: return fail(L"UTF-16 little endian: encoding not implemented.");
+	case Encoding::UTF32BE: return fail(L"UTF-32 big endian: encoding not implemented.");
+	case Encoding::UTF32LE: return fail(L"UTF-32 little endian: encoding not implemented.");
+	case Encoding::SCSU:    return fail(L"Standard compression scheme for Unicode: encoding not implemented.");
+	case Encoding::BOCU1:   return fail(L"Binary ordered compression for Unicode: encoding not implemented.");
+	}
+
+	return fail(L"Failed to parse: unknown encoding.");
 }
 
 bool FileText::read(wstring& buf, const wchar_t *path, wstring *pErr)
@@ -83,49 +118,35 @@ bool FileText::read(wstring& buf, const wchar_t *path, wstring *pErr)
 		return false;
 	}
 
-	pair<Encoding, int> fileEnc = _tellEncoding(fin);
-	vector<BYTE> byteBuf;
-	if (!fin.getContent(byteBuf, fileEnc.second, -1, pErr)) { // skip BOM, if any
-		return false;
-	}
-	fin.close();
-	if (pErr) pErr->clear();
-
-	switch (fileEnc.first) {
-	case Encoding::UNKNOWN:
-	case Encoding::ASCII:
-		buf = Str::parseAscii(byteBuf);
-		return true;
-	case Encoding::UTF8:
-		buf = Str::parseUtf8(byteBuf);
-		return true;
-	case Encoding::UTF16BE:
-		if (pErr) *pErr = L"UTF-16 big endian: encoding not implemented.";
-		return false;
-	case Encoding::UTF16LE:
-		if (pErr) *pErr = L"UTF-16 little endian: encoding not implemented.";
-		return false;
-	case Encoding::UTF32BE:
-		if (pErr) *pErr = L"UTF-32 big endian: encoding not implemented.";
-		return false;
-	case Encoding::UTF32LE:
-		if (pErr) *pErr = L"UTF-32 little endian: encoding not implemented.";
-		return false;
-	case Encoding::SCSU:
-		if (pErr) *pErr = L"Standard compression scheme for Unicode: encoding not implemented.";
-		return false;
-	case Encoding::BOCU1:
-		if (pErr) *pErr = L"Binary ordered compression for Unicode: encoding not implemented.";
-		return false;
-	}
-
-	if (pErr) *pErr = L"Failed to parse: unknown encoding.";
-	return false;
+	return read(buf, fin.pMem(), fin.size(), pErr);
 }
 
-bool FileText::read(wstring& buf, const wstring& path, wstring *pErr)
+bool FileText::readLines(vector<wstring>& buf, const BYTE *src, size_t sz, wstring *pErr)
 {
-	return read(buf, path.c_str(), pErr);
+	wstring blob;
+	if (!read(blob, src, sz, pErr)) {
+		return false;
+	}
+
+	const wchar_t *delim = getLinebreak(blob);
+	if (!delim) {
+		if (pErr) *pErr = L"Linebreak could not be determined.";
+		return false;
+	}
+
+	buf = Str::explode(blob, delim);
+	if (pErr) pErr->clear();
+	return true;
+}
+
+bool FileText::readLines(vector<wstring>& buf, const wchar_t *path, wstring *pErr)
+{
+	FileMap fin;
+	if (!fin.open(path, File::Access::READONLY, pErr)) {
+		return false;
+	}
+
+	return readLines(buf, fin.pMem(), fin.size(), pErr);
 }
 
 bool FileText::writeUtf8(const wstring& text, const wchar_t *path, wstring *pErr)
@@ -136,15 +157,10 @@ bool FileText::writeUtf8(const wstring& text, const wchar_t *path, wstring *pErr
 	}
 
 	std::vector<BYTE> data = Str::serializeUtf8(text);
-	if (!fout.write(data, pErr)) {
+	if (!fout.write(data, pErr)) { // no BOM is written
 		return false;
 	}
 
 	if (pErr) pErr->clear();
 	return true;
-}
-
-bool FileText::writeUtf8(const wstring& text, const wstring& path, wstring *pErr)
-{
-	return writeUtf8(text, path.c_str(), pErr);
 }

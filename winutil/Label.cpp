@@ -1,32 +1,11 @@
 
 #include "Label.h"
-using std::pair;
 using std::wstring;
-
-Label::Label()
-	: _hWnd(nullptr)
-{
-}
-
-Label::Label(HWND hwnd)
-	: _hWnd(hwnd)
-{
-}
 
 Label& Label::operator=(HWND hwnd)
 {
 	_hWnd = hwnd;
 	return *this;
-}
-
-Label& Label::operator=(pair<HWND, int> hWndAndCtrlId)
-{
-	return operator=(GetDlgItem(hWndAndCtrlId.first, hWndAndCtrlId.second));
-}
-
-HWND Label::hWnd() const
-{
-	return _hWnd;
 }
 
 Label& Label::create(HWND hParent, int id, POINT pos, SIZE size)
@@ -43,11 +22,6 @@ Label& Label::setText(const wchar_t *t)
 {
 	SetWindowText(_hWnd, t);
 	return *this;
-}
-
-Label& Label::setText(const wstring& t)
-{
-	return setText(t.c_str());
 }
 
 wstring Label::getText() const
