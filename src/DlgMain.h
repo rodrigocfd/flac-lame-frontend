@@ -5,13 +5,13 @@
 #include "../winlamb/msg_dropfiles.h"
 #include "../winlamb/msg_initmenupopup.h"
 #include "../winlamb/msg_notify.h"
-#include "../winutil/CheckBox.h"
-#include "../winutil/ComboBox.h"
-#include "../winutil/FileIni.h"
-#include "../winutil/ListView.h"
-#include "../winutil/Resizer.h"
-#include "../winutil/TaskBarProgress.h"
-#include "../winutil/TextBox.h"
+#include "../winutil/checkbox.h"
+#include "../winutil/combobox.h"
+#include "../winutil/file_ini.h"
+#include "../winutil/listview.h"
+#include "../winutil/resizer.h"
+#include "../winutil/taskbar_progress.h"
+#include "../winutil/textbox.h"
 
 class DlgMain final : public winlamb::dialog_main,
 	public winlamb::dialog_msg_command,
@@ -20,14 +20,14 @@ class DlgMain final : public winlamb::dialog_main,
 	public winlamb::dialog_msg_notify
 {
 private:
-	FileIni         _ini;
-	TaskBarProgress _taskBar;
-	Resizer         _resizer;
-	ListView        _lstFiles;
-	TextBox         _txtDest;
-	ComboBox        _cmbCbr, _cmbVbr, _cmbFlac, _cmbNumThreads;
-	CheckBox        _radMp3, _radMp3Cbr, _radMp3Vbr, _radFlac, _radWav;
-	CheckBox        _chkDelSrc;
+	winutil::file_ini         _ini;
+	winutil::taskbar_progress _taskBar;
+	winutil::resizer          _resizer;
+	winutil::listview         _lstFiles;
+	winutil::textbox          _txtDest;
+	winutil::combobox         _cmbCbr, _cmbVbr, _cmbFlac, _cmbNumThreads;
+	winutil::checkbox         _radMp3, _radMp3Cbr, _radMp3Vbr, _radFlac, _radWav;
+	winutil::checkbox         _chkDelSrc;
 public:
 	DlgMain();
 private:

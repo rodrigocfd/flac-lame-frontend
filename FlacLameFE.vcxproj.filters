@@ -29,75 +29,6 @@
     <ClInclude Include="src\DlgRunnin.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="winutil\ComboBox.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\DateTime.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\DC.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\File.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\FileIni.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\FileMap.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\FileText.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\Icon.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\Internet.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\Label.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\ListView.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\Menu.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\MenuRecent.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\ProgressBar.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\Resizer.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\StatusBar.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\Str.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\Sys.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\TaskBarProgress.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\TextBox.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\Xml.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\CheckBox.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\Path.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
     <ClInclude Include="winlamb\dialog_main.h">
       <Filter>winlamb</Filter>
     </ClInclude>
@@ -158,6 +89,72 @@
     <ClInclude Include="winlamb\dialog.h">
       <Filter>winlamb</Filter>
     </ClInclude>
+    <ClInclude Include="winutil\file_map.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\file_text.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\icon.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\internet.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\label.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\listview.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\menu.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\menu_recent.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\path.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\progressbar.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\resizer.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\statusbar.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\str.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\sys.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\taskbar_progress.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\textbox.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\xml.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\checkbox.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\combobox.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\datetime.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\file.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\file_ini.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\Ron Burgundy.ico">
@@ -179,73 +176,70 @@
     <ClCompile Include="src\DlgRunnin.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\ComboBox.cpp">
+    <ClCompile Include="winutil\checkbox.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\DateTime.cpp">
+    <ClCompile Include="winutil\combobox.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\DC.cpp">
+    <ClCompile Include="winutil\datetime.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\File.cpp">
+    <ClCompile Include="winutil\file.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\FileIni.cpp">
+    <ClCompile Include="winutil\file_ini.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\FileMap.cpp">
+    <ClCompile Include="winutil\file_map.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\FileText.cpp">
+    <ClCompile Include="winutil\file_text.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\Icon.cpp">
+    <ClCompile Include="winutil\icon.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\Internet.cpp">
+    <ClCompile Include="winutil\internet.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\Label.cpp">
+    <ClCompile Include="winutil\label.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\ListView.cpp">
+    <ClCompile Include="winutil\listview.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\Menu.cpp">
+    <ClCompile Include="winutil\menu.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\MenuRecent.cpp">
+    <ClCompile Include="winutil\menu_recent.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\ProgressBar.cpp">
+    <ClCompile Include="winutil\path.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\Resizer.cpp">
+    <ClCompile Include="winutil\progressbar.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\StatusBar.cpp">
+    <ClCompile Include="winutil\resizer.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\Str.cpp">
+    <ClCompile Include="winutil\statusbar.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\Sys.cpp">
+    <ClCompile Include="winutil\str.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\TaskBarProgress.cpp">
+    <ClCompile Include="winutil\sys.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\TextBox.cpp">
+    <ClCompile Include="winutil\taskbar_progress.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\Xml.cpp">
+    <ClCompile Include="winutil\textbox.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
-    <ClCompile Include="winutil\CheckBox.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\Path.cpp">
+    <ClCompile Include="winutil\xml.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
   </ItemGroup>

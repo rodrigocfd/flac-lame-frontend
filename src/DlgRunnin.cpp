@@ -1,21 +1,22 @@
 
 #include "DlgRunnin.h"
 #include "Convert.h"
-#include "../winutil/Str.h"
-#include "../winutil/Sys.h"
+#include "../winutil/str.h"
+#include "../winutil/sys.h"
 #include "../res/resource.h"
+using namespace winutil;
 using std::wstring;
 using std::vector;
 
 DlgRunnin::DlgRunnin(
-	TaskBarProgress&       taskBar,
+	taskbar_progress&      taskBar,
 	int                    numThreads,
 	Target                 targetType,
 	const vector<wstring>& files,
 	bool                   delSrc,
 	bool                   isVbr,
 	const wstring&         quality,
-	const FileIni&         ini,
+	const file_ini&        ini,
 	const wstring&         destFolder
 )
 	: _taskBar(taskBar), _numThreads(numThreads), _targetType(targetType), _files(files),
@@ -29,17 +30,17 @@ DlgRunnin::DlgRunnin(
 		_lbl  = GetDlgItem(hwnd(), LBL_STATUS);
 		_prog = GetDlgItem(hwnd(), PRO_STATUS);
 	
-		_prog.setRange(0, _files.size());
-		_taskBar.setPos(0);
-		_lbl.setText( Str::format(L"0 of %d files finished...", _files.size()) ); // initial text
-		_time0.setNow(); // start timer
-		Sys::enableXButton(hwnd(), false);
+		_prog.set_range(0, _files.size());
+		_taskBar.set_pos(0);
+		_lbl.set_text( str::format(L"0 of %d files finished...", _files.size()) ); // initial text
+		_time0.set_now(); // start timer
+		sys::enable_x_button(hwnd(), false);
 	
 		// Proceed to the file conversion straight away.
 		int nFiles = static_cast<int>(_files.size());
 		int batchSz = (_numThreads < nFiles) ? _numThreads : nFiles; // limit parallel processing
 		for (int i = 0; i < batchSz; ++i) {
-			Sys::thread([this]()->void {
+			sys::thread([this]()->void {
 				_doProcessNextFile();
 			});
 		}
@@ -72,8 +73,8 @@ void DlgRunnin::_doProcessNextFile()
 	if (!good) {
 		_curFile = static_cast<int>(_files.size()); // error, so avoid further processing
 		ui_thread([&]()->void {
-			Sys::msgBox(hwnd(), L"Conversion failed",
-				Str::format(L"File #%d:\n%s\n%s", index, file.c_str(), err.c_str()),
+			sys::msg_box(hwnd(), L"Conversion failed",
+				str::format(L"File #%d:\n%s\n%s", index, file.c_str(), err.c_str()),
 				MB_ICONERROR);
 			_taskBar.clear();
 			EndDialog(hwnd(), IDCANCEL);
@@ -82,18 +83,18 @@ void DlgRunnin::_doProcessNextFile()
 		++_filesDone;
 
 		ui_thread([this]()->void {
-			_prog.setPos(_filesDone);
-			_taskBar.setPos(_filesDone, _files.size());
-			_lbl.setText( Str::format(L"%d of %d files finished...", _filesDone, _files.size()) );
+			_prog.set_pos(_filesDone);
+			_taskBar.set_pos(_filesDone, _files.size());
+			_lbl.set_text( str::format(L"%d of %d files finished...", _filesDone, _files.size()) );
 		});
 			
 		if (_filesDone < static_cast<int>(_files.size())) { // more files to come
 			_doProcessNextFile();
 		} else { // finished all processing
 			ui_thread([this]()->void {
-				DateTime fin;
-				Sys::msgBox(hwnd(), L"Conversion finished",
-					Str::format(L"%d files processed in %.2f seconds.",
+				datetime fin;
+				sys::msg_box(hwnd(), L"Conversion finished",
+					str::format(L"%d files processed in %.2f seconds.",
 						_files.size(), static_cast<double>(fin.minus(_time0)) / 1000),
 					MB_ICONINFORMATION);
 				_taskBar.clear();
