@@ -22,14 +22,14 @@ struct sys final {
 	static bool         has_shift() { return (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0; }
 	
 	static int  msg_box(HWND hParent, std::wstring title, std::wstring text, UINT uType = 0);
-	static bool show_open_file(HWND hWnd, const wchar_t *filter, std::wstring& buf);
-	static bool show_open_file(HWND hWnd, const wchar_t *filter, std::vector<std::wstring>& arrBuf);
-	static bool show_save_file(HWND hWnd, const wchar_t *filter, std::wstring& buf, const wchar_t *defFile);
+	static bool show_open_file(HWND hWnd, const wchar_t* filter, std::wstring& buf);
+	static bool show_open_file(HWND hWnd, const wchar_t* filter, std::vector<std::wstring>& arrBuf);
+	static bool show_save_file(HWND hWnd, const wchar_t* filter, std::wstring& buf, const wchar_t* defFile);
 	static bool show_choose_folder(HWND hWnd, std::wstring& buf);
 	
 	static void set_wheel_hover_behavior(HWND hParent);
 	static void enable_x_button(HWND hWnd, bool enable);
-	static bool font_exists(const wchar_t *name);
+	static bool font_exists(const wchar_t* name);
 };
 
 }//namespace winutil

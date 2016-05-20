@@ -13,7 +13,7 @@ class file_map final {
 private:
 	file   _file;
 	HANDLE _hMap;
-	void  *_pMem;
+	void*  _pMem;
 	size_t _size;
 public:
 	~file_map() { close(); }
@@ -23,13 +23,12 @@ public:
 
 	file::access get_access() const { return _file.get_access(); }
 	void         close();
-	bool         open(const wchar_t *path, file::access access, std::wstring *pErr = nullptr);
-	bool         open(const std::wstring& path, file::access access, std::wstring *pErr = nullptr) { return open(path.c_str(), access, pErr); }
+	bool         open(const std::wstring& filePath, file::access accessType, std::wstring* pErr = nullptr);
 	size_t       size() const       { return _size; }
 	BYTE*        p_mem() const      { return reinterpret_cast<BYTE*>(_pMem); }
 	BYTE*        p_past_mem() const { return p_mem() + size(); }
-	bool         set_new_size(size_t newSize, std::wstring *pErr = nullptr);
-	bool         get_content(std::vector<BYTE>& buf, size_t offset = 0, size_t numBytes = -1, std::wstring *pErr = nullptr) const;
+	bool         set_new_size(size_t newSize, std::wstring* pErr = nullptr);
+	bool         get_content(std::vector<BYTE>& buf, size_t offset = 0, size_t numBytes = -1, std::wstring* pErr = nullptr) const;
 };
 
 }//namespace winutil

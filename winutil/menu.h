@@ -31,7 +31,7 @@ public:
 	std::wstring get_caption(WORD commandId) const;
 	size_t       get_item_count() const           { return static_cast<size_t>(GetMenuItemCount(_hMenu)); }
 	menu&        add_separator(WORD insertBeforeCmdId = 0);
-	menu&        add_item(WORD commandId, const wchar_t *caption, WORD insertBeforeCmdId = 0);
+	menu&        add_item(WORD commandId, const wchar_t* caption, WORD insertBeforeCmdId = 0);
 	menu&        add_item(WORD commandId, const std::wstring& caption, WORD insertBeforeCmdId = 0) { return add_item(commandId, caption.c_str(), insertBeforeCmdId); }
 	menu&        enable_item(WORD commandId, bool doEnable);
 	menu&        enable_item(std::initializer_list<WORD> commandIds, bool doEnable);
@@ -39,7 +39,7 @@ public:
 	menu&        delete_item_by_pos(size_t pos);
 	menu&        delete_item_by_id(WORD commandId);
 	menu&        delete_all_items();
-	menu         add_submenu(const wchar_t *caption, WORD insertBeforeCmdId = 0);
+	menu         add_submenu(const wchar_t* caption, WORD insertBeforeCmdId = 0);
 	menu         add_submenu(const std::wstring& caption, WORD insertBeforeCmdId = 0) { return add_submenu(caption.c_str(), insertBeforeCmdId); }
 	menu&        show_at_point(HWND hParent, POINT pt, HWND hWndCoordsRelativeTo);
 };

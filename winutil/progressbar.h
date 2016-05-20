@@ -5,7 +5,6 @@
  */
 
 #pragma once
-#include <utility>
 #include <Windows.h>
 
 namespace winutil {
@@ -20,6 +19,7 @@ public:
 
 	HWND         hwnd() const                         { return _hWnd; }
 	progressbar& create(HWND hParent, int id, POINT pos, SIZE size);
+	int          get_id() const                       { return GetDlgCtrlID(_hWnd); }
 	progressbar& set_range(int minVal, int maxVal);
 	progressbar& set_range(int minVal, size_t maxVal) { return set_range(minVal, static_cast<int>(maxVal)); }
 	progressbar& set_pos(int pos);

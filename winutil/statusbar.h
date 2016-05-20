@@ -31,7 +31,7 @@ public:
 	void         stretch(WPARAM wp, LPARAM lp);
 	statusbar&   add_fixed_part(UINT sizePixels);
 	statusbar&   add_resizable_part(UINT resizeWeight);
-	statusbar&   set_text(const wchar_t *text, size_t iPart);
+	statusbar&   set_text(const wchar_t* text, size_t iPart);
 	statusbar&   set_text(const std::wstring& text, size_t iPart) { return set_text(text.c_str(), iPart); }
 	std::wstring get_text(size_t iPart) const;
 	statusbar&   set_icon(HICON hIcon, size_t iPart);

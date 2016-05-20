@@ -41,28 +41,38 @@ void file::close()
 	}
 }
 
-bool file::open(const wchar_t *path, access access, wstring *pErr)
+bool file::open(const wstring& filePath, access accessType, wstring* pErr)
 {
+	if (filePath.empty()) {
+		if (pErr) *pErr = L"Path is empty.";
+		return false;
+	}
+
+	if (accessType == access::READONLY && !file::exists(filePath)) {
+		if (pErr) *pErr = L"File doesn't exist.";
+		return false;
+	}
+
 	close();
-	_hFile = CreateFile(path,
-		GENERIC_READ | (access == access::READWRITE ? GENERIC_WRITE : 0),
-		(access == access::READWRITE) ? 0 : FILE_SHARE_READ, nullptr,
-		(access == access::READWRITE) ? OPEN_ALWAYS : OPEN_EXISTING,
+	_hFile = CreateFile(filePath.c_str(),
+		GENERIC_READ | (accessType == access::READWRITE ? GENERIC_WRITE : 0),
+		(accessType == access::READWRITE) ? 0 : FILE_SHARE_READ, nullptr,
+		(accessType == access::READWRITE) ? OPEN_ALWAYS : OPEN_EXISTING,
 		0, nullptr); // if file doesn't exist, will be created
 
 	if (_hFile == INVALID_HANDLE_VALUE) {
 		_hFile = nullptr;
 		if (pErr) *pErr = str::format(L"CreateFile() failed to open file as %s, error code %d.",
-			(access == access::READONLY) ? L"read-only" : L"read-write", GetLastError());
+			(accessType == access::READONLY) ? L"read-only" : L"read-write", GetLastError());
 		return false;
 	}
 
-	_access = access; // keep for future checks
+	_access = accessType; // keep for future checks
 	if (pErr) pErr->clear();
 	return true;
 }
 
-bool file::set_new_size(size_t newSize, wstring *pErr)
+bool file::set_new_size(size_t newSize, wstring* pErr)
 {
 	// This method will truncate or expand the file, according to the new size.
 	// Size zero will empty the file.
@@ -108,7 +118,7 @@ bool file::set_new_size(size_t newSize, wstring *pErr)
 	return true;
 }
 
-bool file::get_content(vector<BYTE>& buf, wstring *pErr) const
+bool file::get_content(vector<BYTE>& buf, wstring* pErr) const
 {
 	if (!_hFile) {
 		if (pErr) *pErr = L"File has not been opened.";
@@ -126,7 +136,7 @@ bool file::get_content(vector<BYTE>& buf, wstring *pErr) const
 	return true;
 }
 
-bool file::write(const BYTE *pData, size_t sz, wstring *pErr)
+bool file::write(const BYTE* pData, size_t sz, wstring* pErr)
 {
 	if (!_hFile) {
 		if (pErr) *pErr = L"File has not been opened.";
@@ -150,7 +160,7 @@ bool file::write(const BYTE *pData, size_t sz, wstring *pErr)
 	return true;
 }
 
-bool file::rewind(wstring *pErr)
+bool file::rewind(wstring* pErr)
 {
 	if (!_hFile) {
 		if (pErr) *pErr = L"File has not been opened.";
@@ -164,12 +174,12 @@ bool file::rewind(wstring *pErr)
 	return true;
 }
 
-bool file::del(const wchar_t *path, wstring *pErr)
+bool file::del(const wstring& fileOrFolder, wstring* pErr)
 {
-	if (is_dir(path)) {
+	if (is_dir(fileOrFolder)) {
 		// http://stackoverflow.com/questions/1468774/why-am-i-having-problems-recursively-deleting-directories
 		wchar_t szDir[MAX_PATH + 1] = { L'\0' }; // +1 for the double null terminate
-		lstrcpy(szDir, path);
+		lstrcpy(szDir, fileOrFolder.c_str());
 
 		SHFILEOPSTRUCTW fos = { 0 };
 		fos.wFunc  = FO_DELETE;
@@ -181,7 +191,7 @@ bool file::del(const wchar_t *path, wstring *pErr)
 			return false;
 		}
 	} else {
-		if (!DeleteFile(path)) {
+		if (!DeleteFile(fileOrFolder.c_str())) {
 			if (pErr) *pErr = str::format(L"DeleteFile() failed, error code %d.", GetLastError());
 			return false;
 		}
@@ -190,9 +200,9 @@ bool file::del(const wchar_t *path, wstring *pErr)
 	return true;
 }
 
-bool file::create_dir(const wchar_t *path, wstring *pErr)
+bool file::create_dir(const wstring& thePath, wstring* pErr)
 {
-	if (!CreateDirectory(path, nullptr)) {
+	if (!CreateDirectory(thePath.c_str(), nullptr)) {
 		if (pErr) *pErr = str::format(L"CreateDirectory() failed, error code %d.", GetLastError());
 		return false;
 	}
@@ -200,7 +210,7 @@ bool file::create_dir(const wchar_t *path, wstring *pErr)
 	return true;
 }
 
-bool file::unzip(wstring zipFile, wstring destFolder, wstring *pErr)
+bool file::unzip(const wstring& zipFile, const wstring& destFolder, wstring* pErr)
 {
 	if (!exists(zipFile)) {
 		if (pErr) *pErr = str::format(L"File doesn't exist: \"%s\".", zipFile.c_str());
@@ -214,7 +224,7 @@ bool file::unzip(wstring zipFile, wstring destFolder, wstring *pErr)
 	// http://social.msdn.microsoft.com/Forums/vstudio/en-US/45668d18-2840-4887-87e1-4085201f4103/visual-c-to-unzip-a-zip-file-to-a-specific-directory
 	CoInitialize(nullptr);
 
-	IShellDispatch *pISD = nullptr;
+	IShellDispatch* pISD = nullptr;
 	if (FAILED(CoCreateInstance(CLSID_Shell, nullptr, CLSCTX_INPROC_SERVER,
 		IID_IShellDispatch, reinterpret_cast<void**>(&pISD))))
 	{
@@ -227,7 +237,7 @@ bool file::unzip(wstring zipFile, wstring destFolder, wstring *pErr)
 	inZipFile.vt = VT_BSTR;
 	inZipFile.bstrVal = bstrZipFile;
 
-	Folder *pZippedFile = nullptr;
+	Folder* pZippedFile = nullptr;
 	pISD->NameSpace(inZipFile, &pZippedFile);
 	if (!pZippedFile) {
 		SysFreeString(bstrZipFile);
@@ -242,7 +252,7 @@ bool file::unzip(wstring zipFile, wstring destFolder, wstring *pErr)
 	outFolder.vt = VT_BSTR;
 	outFolder.bstrVal = bstrFolder;
 
-	Folder *pDestination = nullptr;
+	Folder* pDestination = nullptr;
 	pISD->NameSpace(outFolder, &pDestination);
 	if (!pDestination) {
 		SysFreeString(bstrFolder);
@@ -254,7 +264,7 @@ bool file::unzip(wstring zipFile, wstring destFolder, wstring *pErr)
 		return false;
 	}
 
-	FolderItems *pFilesInside = nullptr;
+	FolderItems* pFilesInside = nullptr;
 	pZippedFile->Items(&pFilesInside);
 	if (!pFilesInside) {
 		pDestination->Release();
@@ -281,7 +291,7 @@ bool file::unzip(wstring zipFile, wstring destFolder, wstring *pErr)
 		return false;
 	}
 
-	IDispatch *pItem = nullptr;
+	IDispatch* pItem = nullptr;
 	pFilesInside->QueryInterface(IID_IDispatch, reinterpret_cast<void**>(&pItem));
 
 	VARIANT item = { 0 };
@@ -311,7 +321,7 @@ bool file::unzip(wstring zipFile, wstring destFolder, wstring *pErr)
 	return true;
 }
 
-vector<wstring> file::list_dir(wstring pathAndPattern)
+vector<wstring> file::list_dir(const wstring& pathAndPattern)
 {
 	// Entry example: "C:\\myfolder\\*.mp3"
 	
@@ -335,9 +345,10 @@ vector<wstring> file::list_dir(wstring pathAndPattern)
 	return files;
 }
 
-vector<wstring> file::list_dir(wstring path, wstring pattern)
+vector<wstring> file::list_dir(const wstring& dirPath, const wstring& pattern)
 {
-	if (path.back() != L'\\') path.append(L"\\");
-	path.append(pattern);
-	return list_dir(path);
+	wstring pathAndPattern = dirPath;
+	if (pathAndPattern.back() != L'\\') pathAndPattern.append(L"\\");
+	pathAndPattern.append(pattern);
+	return list_dir(pathAndPattern);
 }

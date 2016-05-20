@@ -22,7 +22,7 @@ public:
 	internet_session& operator=(internet_session&& is);
 	HINTERNET         hsession() const { return _hSession; }
 	void              close();
-	bool              init(std::wstring *pErr = nullptr, const wchar_t *userAgent = L"Win32/1.0");
+	bool              init(std::wstring* pErr = nullptr, const wchar_t* userAgent = L"Win32/1.0");
 };
 
 
@@ -39,12 +39,11 @@ public:
 	~internet_download() { abort(); }
 	internet_download(const internet_session& session, std::wstring url, std::wstring verb = L"GET");
 	void               abort();
-	internet_download& add_request_header(const wchar_t *requestHeader);
+	internet_download& add_request_header(const wchar_t* requestHeader);
 	internet_download& add_request_header(std::initializer_list<const wchar_t*> requestHeaders);
-	internet_download& set_referrer(const wchar_t *referrer);
-	internet_download& set_referrer(const std::wstring& referrer) { return set_referrer(referrer.c_str()); }
-	bool               start(std::wstring *pErr = nullptr);
-	bool               has_data(std::wstring *pErr = nullptr);
+	internet_download& set_referrer(const std::wstring& referrer);
+	bool               start(std::wstring* pErr = nullptr);
+	bool               has_data(std::wstring* pErr = nullptr);
 	int                get_content_length() const   { return _contentLength; }
 	int                get_total_downloaded() const { return _totalDownloaded; }
 	float              get_percent() const;
@@ -52,19 +51,18 @@ public:
 	const std::vector<std::wstring>&                      get_request_headers() const  { return _requestHeaders; }
 	const std::unordered_map<std::wstring, std::wstring>& get_response_headers() const { return _responseHeaders; }
 private:
-	bool _init_handles(std::wstring *pErr = nullptr);
-	bool _contact_server(std::wstring *pErr = nullptr);
-	bool _parse_headers(std::wstring *pErr = nullptr);
-	bool _get_incoming_byte_count(DWORD& count, std::wstring *pErr = nullptr);
-	bool _receive_bytes(UINT nBytesToRead, std::wstring *pErr = nullptr);
+	bool _init_handles(std::wstring* pErr = nullptr);
+	bool _contact_server(std::wstring* pErr = nullptr);
+	bool _parse_headers(std::wstring* pErr = nullptr);
+	bool _get_incoming_byte_count(DWORD& count, std::wstring* pErr = nullptr);
+	bool _receive_bytes(UINT nBytesToRead, std::wstring* pErr = nullptr);
 };
 
 
 class internet_url final {
 public:
 	internet_url();
-	bool           crack(const wchar_t *address, std::wstring *pErr = nullptr);
-	bool           crack(const std::wstring& address, std::wstring *pErr = nullptr) { return crack(address.c_str(), pErr); }
+	bool           crack(const std::wstring& address, std::wstring* pErr = nullptr);
 	const wchar_t* scheme() const   { return _scheme; }
 	const wchar_t* host() const     { return _host; }
 	const wchar_t* user() const     { return _user; }

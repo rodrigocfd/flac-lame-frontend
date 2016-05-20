@@ -20,7 +20,7 @@ menu_recent::menu_recent()
 {	
 }
 
-menu_recent& menu_recent::init(HWND hWnd, size_t subMenuIndex, WORD subMenuItemCmdId, file_ini& iniFile, const wchar_t *iniSection, size_t maxEntries)
+menu_recent& menu_recent::init(HWND hWnd, size_t subMenuIndex, WORD subMenuItemCmdId, file_ini& iniFile, const wstring& iniSection, size_t maxEntries)
 {
 	if (_firstCmdId) return *this; // avoid running twice
 
@@ -66,7 +66,7 @@ wstring menu_recent::get_entry(size_t index) const
 	return L"";
 }
 
-menu_recent& menu_recent::add_entry(const wchar_t *newPath)
+menu_recent& menu_recent::add_entry(const wstring& newPath)
 {
 	vector<wstring> entries = _read_entries();
 
@@ -131,7 +131,7 @@ void menu_recent::_write_entries(const vector<wstring> entries)
 	}
 }
 
-void menu_recent::_rebuild_menu_entries(const vector<wstring> *entries)
+void menu_recent::_rebuild_menu_entries(const vector<wstring>* entries)
 {
 	if (_injectedMenu.hmenu()) {
 		_injectedMenu.delete_all_items();
@@ -147,7 +147,7 @@ void menu_recent::_rebuild_menu_entries(const vector<wstring> *entries)
 			_injectedMenu.enable_item(_firstCmdId, false);
 		} else {
 			for (size_t i = 0; i < entries->size(); ++i) {
-				const wchar_t *fmtStr = (i <= 8) ? L"&%u %s" : L"%u %s";
+				const wchar_t* fmtStr = (i <= 8) ? L"&%u %s" : L"%u %s";
 				_injectedMenu.add_item(static_cast<WORD>(_firstCmdId + i), // unique command ID
 					str::format(fmtStr, i + 1, (*entries)[i].c_str()) );
 			}
@@ -159,7 +159,7 @@ LRESULT CALLBACK menu_recent::_proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp, U
 {
 	switch (msg) {
 	case WM_COMMAND: {
-		menu_recent *pSelf = reinterpret_cast<menu_recent*>(refData);
+		menu_recent* pSelf = reinterpret_cast<menu_recent*>(refData);
 		bool isOurCmd = (LOWORD(wp) >= pSelf->_firstCmdId) &&
 			(LOWORD(wp) <= pSelf->_firstCmdId + pSelf->_maxEntries - 1);
 		if (isOurCmd && pSelf->_onClick) {

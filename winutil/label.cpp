@@ -24,7 +24,7 @@ label& label::create(HWND hParent, int id, POINT pos, SIZE size)
 		nullptr) );
 }
 
-label& label::set_text(const wchar_t *t)
+label& label::set_text(const wchar_t* t)
 {
 	SetWindowText(_hWnd, t);
 	return *this;

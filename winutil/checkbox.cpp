@@ -13,13 +13,7 @@ checkbox& checkbox::operator=(HWND hWnd)
 	return *this;
 }
 
-checkbox& checkbox::enable(bool doEnable)
-{
-	EnableWindow(_hWnd, doEnable);
-	return *this;
-}
-
-checkbox& checkbox::create(HWND hParent, int id, const wchar_t *caption, POINT pos, SIZE size)
+checkbox& checkbox::create(HWND hParent, int id, const wchar_t* caption, POINT pos, SIZE size)
 {
 	return operator=( CreateWindowEx(0, L"Button", caption,
 		WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX,
@@ -27,6 +21,12 @@ checkbox& checkbox::create(HWND hParent, int id, const wchar_t *caption, POINT p
 		hParent, reinterpret_cast<HMENU>(static_cast<UINT_PTR>(id)),
 		reinterpret_cast<HINSTANCE>(GetWindowLongPtr(hParent, GWLP_HINSTANCE)),
 		nullptr) );
+}
+
+checkbox& checkbox::enable(bool doEnable)
+{
+	EnableWindow(_hWnd, doEnable);
+	return *this;
 }
 
 checkbox& checkbox::focus()

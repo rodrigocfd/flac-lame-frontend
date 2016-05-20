@@ -151,9 +151,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="res\resource.h" />
-    <ClInclude Include="src\Convert.h" />
-    <ClInclude Include="src\DlgMain.h" />
-    <ClInclude Include="src\DlgRunnin.h" />
+    <ClInclude Include="src\convert.h" />
+    <ClInclude Include="src\dlg_main.h" />
+    <ClInclude Include="src\dlg_runnin.h" />
     <ClInclude Include="winlamb\callback_depot.h" />
     <ClInclude Include="winlamb\dialog.h" />
     <ClInclude Include="winlamb\dialog_main.h" />
@@ -176,6 +176,7 @@
     <ClInclude Include="winlamb\wnd_proc.h" />
     <ClInclude Include="winutil\checkbox.h" />
     <ClInclude Include="winutil\combobox.h" />
+    <ClInclude Include="winutil\com_ptr.h" />
     <ClInclude Include="winutil\datetime.h" />
     <ClInclude Include="winutil\file.h" />
     <ClInclude Include="winutil\file_ini.h" />
@@ -204,9 +205,9 @@
     <ResourceCompile Include="res\FlacLameFE.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Convert.cpp" />
-    <ClCompile Include="src\DlgMain.cpp" />
-    <ClCompile Include="src\DlgRunnin.cpp" />
+    <ClCompile Include="src\convert.cpp" />
+    <ClCompile Include="src\dlg_main.cpp" />
+    <ClCompile Include="src\dlg_runnin.cpp" />
     <ClCompile Include="winutil\checkbox.cpp" />
     <ClCompile Include="winutil\combobox.cpp" />
     <ClCompile Include="winutil\datetime.cpp" />

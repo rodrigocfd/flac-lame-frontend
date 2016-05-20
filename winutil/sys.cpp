@@ -20,10 +20,10 @@ void sys::thread(function<void()> callback)
 	// Cheap alternative to std::thread([](){}).detach().
 
 	struct CbPack { function<void()> cb; };
-	CbPack *pack = new CbPack{ std::move(callback) };
+	CbPack* pack = new CbPack{ std::move(callback) };
 
-	HANDLE thandle = reinterpret_cast<HANDLE>(_beginthreadex(nullptr, 0, [](void *ptr)->unsigned int {
-		CbPack *pPack = reinterpret_cast<CbPack*>(ptr);
+	HANDLE thandle = reinterpret_cast<HANDLE>(_beginthreadex(nullptr, 0, [](void* ptr)->unsigned int {
+		CbPack* pPack = reinterpret_cast<CbPack*>(ptr);
 		pPack->cb(); // invoke user callback
 		delete pPack;
 		_endthreadex(0); // http://www.codeproject.com/Articles/7732/A-class-to-synchronise-thread-completions/
@@ -135,7 +135,7 @@ int sys::msg_box(HWND hParent, wstring title, wstring text, UINT uType)
 	return MessageBox(hParent, text.c_str(), title.c_str(), uType);
 }
 
-static vector<wchar_t> _formatFileFilter(const wchar_t *filterWithPipes)
+static vector<wchar_t> _formatFileFilter(const wchar_t* filterWithPipes)
 {
 	// Input filter follows same C# syntax:
 	// L"Text Files (*.txt)|*.txt|All Files (*.*)|*.*"
@@ -147,7 +147,7 @@ static vector<wchar_t> _formatFileFilter(const wchar_t *filterWithPipes)
 	return ret;
 }
 
-bool sys::show_open_file(HWND hWnd, const wchar_t *filter, wstring& buf)
+bool sys::show_open_file(HWND hWnd, const wchar_t* filter, wstring& buf)
 {
 	OPENFILENAME    ofn = { 0 };
 	wchar_t         tmpBuf[MAX_PATH] = { L'\0' };
@@ -165,7 +165,7 @@ bool sys::show_open_file(HWND hWnd, const wchar_t *filter, wstring& buf)
 	return ret;
 }
 
-bool sys::show_open_file(HWND hWnd, const wchar_t *filter, vector<wstring>& arrBuf)
+bool sys::show_open_file(HWND hWnd, const wchar_t* filter, vector<wstring>& arrBuf)
 {
 	OPENFILENAME    ofn = { 0 };
 	vector<wchar_t> multiBuf(65536, L'\0'); // http://www.askjf.com/?q=2179s http://www.askjf.com/?q=2181s
@@ -217,7 +217,7 @@ bool sys::show_open_file(HWND hWnd, const wchar_t *filter, vector<wstring>& arrB
 	return false;
 }
 
-bool sys::show_save_file(HWND hWnd, const wchar_t *filter, wstring& buf, const wchar_t *defFile)
+bool sys::show_save_file(HWND hWnd, const wchar_t* filter, wstring& buf, const wchar_t* defFile)
 {
 	OPENFILENAME    ofn = { 0 };
 	wchar_t         tmpBuf[MAX_PATH] = { L'\0' };
@@ -306,14 +306,14 @@ void sys::enable_x_button(HWND hWnd, bool enable)
 	}
 }
 
-bool sys::font_exists(const wchar_t *name)
+bool sys::font_exists(const wchar_t* name)
 {
 	// http://cboard.cprogramming.com/windows-programming/90066-how-determine-if-font-support-unicode.html
 	bool isInstalled = false;
 	HDC hdc = GetDC(nullptr);
 	EnumFontFamilies(hdc, name,
-		(FONTENUMPROC)[](const LOGFONT *lpelf, const TEXTMETRIC *lpntm, DWORD fontType, LPARAM lp)->int {
-		bool *pIsInstalled = reinterpret_cast<bool*>(lp);
+		(FONTENUMPROC)[](const LOGFONT* lpelf, const TEXTMETRIC *lpntm, DWORD fontType, LPARAM lp)->int {
+		bool* pIsInstalled = reinterpret_cast<bool*>(lp);
 		*pIsInstalled = true; // if we're here, font does exist
 		return 0;
 	}, reinterpret_cast<LPARAM>(&isInstalled));

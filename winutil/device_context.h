@@ -76,17 +76,17 @@ public:
 	device_context& set_bk_color(COLORREF color = -1);
 	COLORREF        get_bk_brush_color();
 	device_context& set_text_color(COLORREF color);
-	device_context& text_out(int x, int y, const wchar_t *text, size_t numChars = std::wstring::npos);
+	device_context& text_out(int x, int y, const wchar_t* text, size_t numChars = std::wstring::npos);
 	device_context& text_out(int x, int y, const std::wstring& text, size_t numChars = std::wstring::npos);
-	device_context& draw_text(int x, int y, int cx, int cy, const wchar_t *text, UINT fmtFlags = 0, size_t numChars = std::wstring::npos);
+	device_context& draw_text(int x, int y, int cx, int cy, const wchar_t* text, UINT fmtFlags = 0, size_t numChars = std::wstring::npos);
 	device_context& draw_text(int x, int y, int cx, int cy, const std::wstring& text, UINT fmtFlags = 0, size_t numChars = std::wstring::npos);
-	SIZE            get_text_extent(const wchar_t *text, size_t numChars = std::wstring::npos);
+	SIZE            get_text_extent(const wchar_t* text, size_t numChars = std::wstring::npos);
 	SIZE            get_text_extent(const std::wstring& text, size_t numChars = std::wstring::npos);
 	device_context& fill_rect(int left, int top, int right, int bottom, HBRUSH hBrush);
 	device_context& fill_rect(int left, int top, int right, int bottom, const brush& brush) { return fill_rect(left, top, right, bottom, brush.hbrush()); }
 	device_context& fill_rgn(HRGN hrgn, HBRUSH hBrush);
 	device_context& fill_rgn(HRGN hrgn, const brush& brush)   { return fill_rgn(hrgn, brush.hbrush()); }
-	device_context& polygon(const POINT *points, size_t numPoints);
+	device_context& polygon(const POINT* points, size_t numPoints);
 	device_context& polygon(const std::vector<POINT>& points) { return polygon(&points[0], points.size()); }
 	device_context& polygon(int left, int top, int right, int bottom);
 	device_context& draw_edge(RECT rc, int edgeType, int flags);

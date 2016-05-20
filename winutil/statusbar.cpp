@@ -82,7 +82,7 @@ statusbar& statusbar::add_resizable_part(UINT resizeWeight)
 	return *this;
 }
 
-statusbar& statusbar::set_text(const wchar_t *text, size_t iPart)
+statusbar& statusbar::set_text(const wchar_t* text, size_t iPart)
 {
 	SendMessage(_hWnd, SB_SETTEXT, MAKEWPARAM(MAKEWORD(iPart, 0), 0),
 		reinterpret_cast<LPARAM>(text));

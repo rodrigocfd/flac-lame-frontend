@@ -13,7 +13,7 @@ using std::unordered_map;
 using std::vector;
 using std::wstring;
 
-vector<xml::node*> xml::node::children_by_name(const wchar_t *elemName)
+vector<xml::node*> xml::node::children_by_name(const wchar_t* elemName)
 {
 	int howMany = 0;
 	size_t firstIndex = -1, lastIndex = -1;
@@ -37,7 +37,7 @@ vector<xml::node*> xml::node::children_by_name(const wchar_t *elemName)
 	return nodeBuf;
 }
 
-xml::node* xml::node::first_child_by_name(const wchar_t *elemName)
+xml::node* xml::node::first_child_by_name(const wchar_t* elemName)
 {
 	for (node& node : children) {
 		if (!lstrcmpi(node.name.c_str(), elemName)) { // case-insensitive match
@@ -60,10 +60,10 @@ xml& xml::operator=(xml&& other)
 	return *this;
 }
 
-static void _readAttrs(IXMLDOMNode *xmlnode, unordered_map<wstring, wstring>& attrbuf)
+static void _readAttrs(IXMLDOMNode* xmlnode, unordered_map<wstring, wstring>& attrbuf)
 {
 	// Read attribute collection.
-	IXMLDOMNamedNodeMap *attrs = nullptr;
+	IXMLDOMNamedNodeMap* attrs = nullptr;
 	xmlnode->get_attributes(&attrs);
 
 	long attrCount = 0;
@@ -72,7 +72,7 @@ static void _readAttrs(IXMLDOMNode *xmlnode, unordered_map<wstring, wstring>& at
 	attrbuf.reserve(attrCount);
 
 	for (long i = 0; i < attrCount; ++i) {
-		IXMLDOMNode *attr = nullptr;
+		IXMLDOMNode* attr = nullptr;
 		attrs->get_item(i, &attr);
 
 		DOMNodeType type = NODE_INVALID;
@@ -93,14 +93,14 @@ static void _readAttrs(IXMLDOMNode *xmlnode, unordered_map<wstring, wstring>& at
 	attrs->Release();
 }
 
-static int _countChildNodes(IXMLDOMNodeList *nodeList)
+static int _countChildNodes(IXMLDOMNodeList* nodeList)
 {
 	int childCount = 0;
 	long totalCount = 0;
 	nodeList->get_length(&totalCount); // includes text and actual element nodes
 
 	for (long i = 0; i < totalCount; ++i) {
-		IXMLDOMNode *child = nullptr;
+		IXMLDOMNode* child = nullptr;
 		nodeList->get_item(i, &child);
 
 		DOMNodeType type = NODE_INVALID;
@@ -112,7 +112,7 @@ static int _countChildNodes(IXMLDOMNodeList *nodeList)
 	return childCount;
 }
 
-static void _buildNode(IXMLDOMNode *xmlnode, xml::node& nodebuf)
+static void _buildNode(IXMLDOMNode* xmlnode, xml::node& nodebuf)
 {
 	// Get node name.
 	BSTR bstr = nullptr;
@@ -127,7 +127,7 @@ static void _buildNode(IXMLDOMNode *xmlnode, xml::node& nodebuf)
 	VARIANT_BOOL vb = FALSE;
 	xmlnode->hasChildNodes(&vb);
 	if (vb) {
-		IXMLDOMNodeList *nodeList = nullptr;
+		IXMLDOMNodeList* nodeList = nullptr;
 		xmlnode->get_childNodes(&nodeList);
 		nodebuf.children.resize(_countChildNodes(nodeList));
 
@@ -136,7 +136,7 @@ static void _buildNode(IXMLDOMNode *xmlnode, xml::node& nodebuf)
 		nodeList->get_length(&totalCount);
 
 		for (long i = 0; i < totalCount; ++i) {
-			IXMLDOMNode *child = nullptr;
+			IXMLDOMNode* child = nullptr;
 			nodeList->get_item(i, &child);
 
 			// Node can be text or an actual child node.
@@ -162,12 +162,12 @@ static void _buildNode(IXMLDOMNode *xmlnode, xml::node& nodebuf)
 	}
 }
 
-bool xml::parse(const wchar_t *str)
+bool xml::parse(const wchar_t* str)
 {
 	CoInitialize(nullptr); // http://stackoverflow.com/questions/7824383/double-calls-to-coinitialize
 
 	// Create COM object for XML document.
-	IXMLDOMDocument2 *doc = nullptr;
+	IXMLDOMDocument2* doc = nullptr;
 	CoCreateInstance(CLSID_DOMDocument30, nullptr, CLSCTX_INPROC_SERVER,
 		IID_IXMLDOMDocument, reinterpret_cast<void**>(&doc));
 	doc->put_async(FALSE);
@@ -177,10 +177,10 @@ bool xml::parse(const wchar_t *str)
 	doc->loadXML(static_cast<BSTR>(const_cast<wchar_t*>(str)), &vb);
 
 	// Get document element and root node from XML.
-	IXMLDOMElement *docElem = nullptr;
+	IXMLDOMElement* docElem = nullptr;
 	doc->get_documentElement(&docElem);
 
-	IXMLDOMNode *rootNode = nullptr;
+	IXMLDOMNode* rootNode = nullptr;
 	docElem->QueryInterface(IID_IXMLDOMNode, reinterpret_cast<void**>(&rootNode));
 	_buildNode(rootNode, root); // recursive
 

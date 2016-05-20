@@ -18,8 +18,9 @@ public:
 	checkbox& operator=(HWND hwnd);
 
 	HWND      hwnd() const            { return _hWnd; }
+	checkbox& create(HWND hParent, int id, const wchar_t* caption, POINT pos, SIZE size);
 	checkbox& enable(bool doEnable);
-	checkbox& create(HWND hParent, int id, const wchar_t *caption, POINT pos, SIZE size);
+	int       get_id() const          { return GetDlgCtrlID(_hWnd); }
 	checkbox& focus();
 	bool      is_checked()            { return SendMessage(_hWnd, BM_GETCHECK, 0, 0) == BST_CHECKED; }
 	void      set_check(bool checked) { SendMessage(_hWnd, BM_SETCHECK, checked ? BST_CHECKED : BST_UNCHECKED, 0); }

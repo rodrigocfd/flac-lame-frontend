@@ -13,9 +13,9 @@ using std::pair;
 using std::vector;
 using std::wstring;
 
-file_text::encoding_info file_text::get_encoding(const BYTE *src, size_t sz)
+file_text::encoding_info file_text::get_encoding(const BYTE* src, size_t sz)
 {
-	auto match = [&](const BYTE *pBom, int szBom)->bool {
+	auto match = [&](const BYTE* pBom, int szBom)->bool {
 		return (sz >= static_cast<size_t>(szBom)) &&
 			!memcmp(src, pBom, sizeof(BYTE) * szBom);
 	};
@@ -64,10 +64,10 @@ file_text::encoding_info file_text::get_encoding(const BYTE *src, size_t sz)
 	return { encoding::ASCII, 0 };
 }
 
-file_text::encoding_info file_text::get_encoding(const wchar_t *path, wstring *pErr)
+file_text::encoding_info file_text::get_encoding(const wstring& filePath, wstring* pErr)
 {
 	file_map fin;
-	if (!fin.open(path, file::access::READONLY, pErr)) {
+	if (!fin.open(filePath, file::access::READONLY, pErr)) {
 		return { encoding::UNKNOWN, 0 };
 	}
 	
@@ -87,7 +87,7 @@ const wchar_t* file_text::get_linebreak(const wstring& src)
 	return nullptr; // unknown
 }
 
-bool file_text::read(wstring& buf, const BYTE *src, size_t sz, wstring *pErr)
+bool file_text::read(wstring& buf, const BYTE* src, size_t sz, wstring* pErr)
 {
 	encoding_info fileEnc = get_encoding(src, sz);
 	src += fileEnc.bomSize; // skip BOM, if any
@@ -97,7 +97,7 @@ bool file_text::read(wstring& buf, const BYTE *src, size_t sz, wstring *pErr)
 		return true;
 	};
 
-	auto fail = [&](const wchar_t *errMsg)->bool {
+	auto fail = [&](const wchar_t* errMsg)->bool {
 		if (pErr) *pErr = errMsg;
 		return false;
 	};
@@ -117,24 +117,24 @@ bool file_text::read(wstring& buf, const BYTE *src, size_t sz, wstring *pErr)
 	return fail(L"Failed to parse: unknown encoding.");
 }
 
-bool file_text::read(wstring& buf, const wchar_t *path, wstring *pErr)
+bool file_text::read(wstring& buf, const wstring& srcPath, wstring* pErr)
 {
 	file_map fin;
-	if (!fin.open(path, file::access::READONLY, pErr)) {
+	if (!fin.open(srcPath, file::access::READONLY, pErr)) {
 		return false;
 	}
 
 	return read(buf, fin.p_mem(), fin.size(), pErr);
 }
 
-bool file_text::read_lines(vector<wstring>& buf, const BYTE *src, size_t sz, wstring *pErr)
+bool file_text::read_lines(vector<wstring>& buf, const BYTE* src, size_t sz, wstring* pErr)
 {
 	wstring blob;
 	if (!read(blob, src, sz, pErr)) {
 		return false;
 	}
 
-	const wchar_t *delim = get_linebreak(blob);
+	const wchar_t* delim = get_linebreak(blob);
 	if (!delim) {
 		if (pErr) *pErr = L"Linebreak could not be determined.";
 		return false;
@@ -145,20 +145,20 @@ bool file_text::read_lines(vector<wstring>& buf, const BYTE *src, size_t sz, wst
 	return true;
 }
 
-bool file_text::read_lines(vector<wstring>& buf, const wchar_t *path, wstring *pErr)
+bool file_text::read_lines(vector<wstring>& buf, const wstring& srcPath, wstring* pErr)
 {
 	file_map fin;
-	if (!fin.open(path, file::access::READONLY, pErr)) {
+	if (!fin.open(srcPath, file::access::READONLY, pErr)) {
 		return false;
 	}
 
 	return read_lines(buf, fin.p_mem(), fin.size(), pErr);
 }
 
-bool file_text::write_utf8(const wstring& text, const wchar_t *path, wstring *pErr)
+bool file_text::write_utf8(const wstring& text, const wstring& destPath, wstring* pErr)
 {
 	file fout;
-	if (!fout.open(path, file::access::READWRITE, pErr)) {
+	if (!fout.open(destPath, file::access::READWRITE, pErr)) {
 		return false;
 	}
 

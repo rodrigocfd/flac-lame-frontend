@@ -13,7 +13,7 @@ namespace winutil {
 class taskbar_progress final {
 private:
 	HWND           _hWnd;
-	ITaskbarList3 *_bar;
+	ITaskbarList3* _bar;
 public:
 	~taskbar_progress();
 	taskbar_progress() : _hWnd(nullptr), _bar(nullptr) { }

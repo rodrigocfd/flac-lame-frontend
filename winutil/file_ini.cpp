@@ -13,15 +13,10 @@ using std::map;
 using std::vector;
 using std::wstring;
 
-bool file_ini::load_from_file(wstring *pErr)
+bool file_ini::load_from_file(const wstring& src, wstring* pErr)
 {
-	if (iniPath.empty()) {
-		if (pErr) *pErr = L"Current path is empty.";
-		return false;
-	}
-
 	wstring content;
-	if (!file_text::read(content, iniPath, pErr)) {
+	if (!file_text::read(content, src, pErr)) {
 		return false;
 	}
 
@@ -54,15 +49,10 @@ bool file_ini::load_from_file(wstring *pErr)
 	return true;
 }
 
-bool file_ini::save_to_file(wstring *pErr) const
+bool file_ini::save_to_file(const wstring& dest, wstring* pErr) const
 {
-	if (iniPath.empty()) {
-		if (pErr) *pErr = L"Current path is empty.";
-		return false;
-	}
-
 	wstring out = serialize();
-	return file_text::write_utf8(out, iniPath, pErr);
+	return file_text::write_utf8(out, dest, pErr);
 }
 
 wstring file_ini::serialize() const
@@ -78,7 +68,7 @@ wstring file_ini::serialize() const
 	return out;
 }
 
-file_ini& file_ini::add(const wchar_t *section)
+file_ini& file_ini::add(const wstring& section)
 {
 	if (!has_section(section)) {
 		data.emplace(section, map<wstring, wstring>()); // new section added
@@ -87,7 +77,7 @@ file_ini& file_ini::add(const wchar_t *section)
 	return *this;
 }
 
-file_ini& file_ini::add(const wchar_t *section, const wchar_t *key, const wchar_t *value)
+file_ini& file_ini::add(const wstring& section, const wstring& key, const wstring& value)
 {
 	if (!has_section(section)) {
 		add(section);
@@ -102,7 +92,7 @@ file_ini& file_ini::add(const wchar_t *section, const wchar_t *key, const wchar_
 	return *this;
 }
 
-file_ini& file_ini::clear_section(const wchar_t *section)
+file_ini& file_ini::clear_section(const wstring& section)
 {
 	if (has_section(section)) {
 		data[section].clear();

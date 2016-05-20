@@ -46,19 +46,19 @@ void file_map::close()
 	_size = 0;
 }
 
-bool file_map::open(const wchar_t *path, file::access access, wstring *pErr)
+bool file_map::open(const wstring& filePath, file::access accessType, wstring* pErr)
 {
 	close();
 
 	// Open file.
-	if (!_file.open(path, access, pErr)) {
+	if (!_file.open(filePath, accessType, pErr)) {
 		close();
 		return false;
 	}
 
 	// Mapping into memory.
 	_hMap = CreateFileMapping(_file.hfile(), nullptr,
-		(access == file::access::READWRITE) ? PAGE_READWRITE : PAGE_READONLY, 0, 0, nullptr);
+		(accessType == file::access::READWRITE) ? PAGE_READWRITE : PAGE_READONLY, 0, 0, nullptr);
 	if (!_hMap) {
 		DWORD err = GetLastError();
 		close();
@@ -68,7 +68,7 @@ bool file_map::open(const wchar_t *path, file::access access, wstring *pErr)
 
 	// Get pointer to data block.
 	_pMem = MapViewOfFile(_hMap,
-		(access == file::access::READWRITE) ? FILE_MAP_WRITE : FILE_MAP_READ, 0, 0, 0);
+		(accessType == file::access::READWRITE) ? FILE_MAP_WRITE : FILE_MAP_READ, 0, 0, 0);
 	if (!_pMem) {
 		DWORD err = GetLastError();
 		close();
@@ -81,7 +81,7 @@ bool file_map::open(const wchar_t *path, file::access access, wstring *pErr)
 	return true;
 }
 
-bool file_map::set_new_size(size_t newSize, wstring *pErr)
+bool file_map::set_new_size(size_t newSize, wstring* pErr)
 {
 	// This method will truncate or expand the file, according to the new size.
 	// It will probably fail if file was opened as read-only.
@@ -122,7 +122,7 @@ bool file_map::set_new_size(size_t newSize, wstring *pErr)
 	return true;
 }
 
-bool file_map::get_content(vector<BYTE>& buf, size_t offset, size_t numBytes, wstring *pErr) const
+bool file_map::get_content(vector<BYTE>& buf, size_t offset, size_t numBytes, wstring* pErr) const
 {
 	if (!_hMap || !_pMem || !_file.hfile()) {
 		if (pErr) *pErr = L"File is not mapped into memory.";

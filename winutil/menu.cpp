@@ -75,7 +75,7 @@ menu& menu::add_separator(WORD insertBeforeCmdId)
 	return *this;
 }
 
-menu& menu::add_item(WORD commandId, const wchar_t *caption, WORD insertBeforeCmdId)
+menu& menu::add_item(WORD commandId, const wchar_t* caption, WORD insertBeforeCmdId)
 {
 	if (insertBeforeCmdId) { // insert before the specified command ID
 		InsertMenu(_hMenu, insertBeforeCmdId, MF_BYCOMMAND | MF_STRING, commandId, caption);
@@ -126,7 +126,7 @@ menu& menu::set_default_item(WORD commandId)
 	return *this;
 }
 
-menu menu::add_submenu(const wchar_t *caption, WORD insertBeforeCmdId)
+menu menu::add_submenu(const wchar_t* caption, WORD insertBeforeCmdId)
 {
 	menu sub;
 	sub._hMenu = CreatePopupMenu();

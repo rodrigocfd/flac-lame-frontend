@@ -33,7 +33,7 @@ textbox& textbox::operator=(textbox&& other)
 	return *this;
 }
 
-textbox& textbox::set_text(const wchar_t *t)
+textbox& textbox::set_text(const wchar_t* t)
 {
 	SetWindowText(_hWnd, t);
 	return *this;
@@ -67,7 +67,7 @@ textbox::selection textbox::get_selection() const
 	return { p0, p1 - p0 }; // start, length
 }
 
-textbox& textbox::replace_selection(const wchar_t *t)
+textbox& textbox::replace_selection(const wchar_t* t)
 {
 	SendMessage(_hWnd, EM_REPLACESEL, TRUE, reinterpret_cast<LPARAM>(t));
 	return *this;
@@ -104,11 +104,11 @@ textbox& textbox::_create(HWND hParent, int id, POINT pos, SIZE size, DWORD extr
 
 LRESULT CALLBACK textbox::_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp, UINT_PTR idSubclass, DWORD_PTR refData)
 {
-	textbox *pSelf = reinterpret_cast<textbox*>(refData);
+	textbox* pSelf = reinterpret_cast<textbox*>(refData);
 
-	switch(msg) {
+	switch (msg) {
 	case WM_KEYDOWN:
-		switch(LOWORD(wp)) {
+		switch (LOWORD(wp)) {
 		case VK_ESCAPE: // ESC http://www.williamwilling.com/blog/?p=28
 			SendMessage(GetAncestor(hwnd, GA_PARENT), WM_COMMAND,
 				IDCANCEL, reinterpret_cast<LPARAM>(hwnd));
@@ -116,14 +116,14 @@ LRESULT CALLBACK textbox::_proc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp, UINT_
 		}
 		break;
 	case WM_GETDLGCODE:
-		if(lp && wp == 'A' && sys::has_ctrl()) { // Ctrl+A to select all text
+		if (lp && wp == 'A' && sys::has_ctrl()) { // Ctrl+A to select all text
 			reinterpret_cast<MSG*>(lp)->wParam = 0; // prevent propagation, therefore beep
 			SendMessage(hwnd, EM_SETSEL, 0, -1);
 			return DLGC_WANTCHARS;
 		}
 		break;
 	case WM_KEYUP:
-		if(pSelf->_onKeyUp) {
+		if (pSelf->_onKeyUp) {
 			pSelf->_onKeyUp(static_cast<BYTE>(wp));
 		}
 		break;

@@ -115,7 +115,7 @@ device_context& device_context::set_text_color(COLORREF color)
 	return *this;
 }
 
-device_context& device_context::text_out(int x, int y, const wchar_t *text, size_t numChars)
+device_context& device_context::text_out(int x, int y, const wchar_t* text, size_t numChars)
 {
 	TextOut(_hDC, x, y, text,
 		(numChars == wstring::npos) ? lstrlen(text) : static_cast<int>(numChars));
@@ -128,7 +128,7 @@ device_context& device_context::text_out(int x, int y, const wstring& text, size
 		(numChars == wstring::npos) ? text.size() : numChars);
 }
 
-device_context& device_context::draw_text(int x, int y, int cx, int cy, const wchar_t *text, UINT fmtFlags, size_t numChars)
+device_context& device_context::draw_text(int x, int y, int cx, int cy, const wchar_t* text, UINT fmtFlags, size_t numChars)
 {
 	RECT rc = { x, y, x + cx, y + cy };
 	DrawText(_hDC, text,
@@ -143,7 +143,7 @@ device_context& device_context::draw_text(int x, int y, int cx, int cy, const ws
 		(numChars == wstring::npos) ? text.size() : numChars);
 }
 
-SIZE device_context::get_text_extent(const wchar_t *text, size_t numChars)
+SIZE device_context::get_text_extent(const wchar_t* text, size_t numChars)
 {
 	SIZE sz;
 	GetTextExtentPoint32(_hDC, text,
@@ -171,7 +171,7 @@ device_context& device_context::fill_rgn(HRGN hrgn, HBRUSH hBrush)
 	return *this;
 }
 
-device_context& device_context::polygon(const POINT *points, size_t numPoints)
+device_context& device_context::polygon(const POINT* points, size_t numPoints)
 {
 	Polygon(_hDC, points, static_cast<int>(numPoints));
 	return *this;

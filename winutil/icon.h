@@ -20,7 +20,7 @@ public:
 
 	HICON hicon() const { return _hIcon; }
 	icon& release();
-	icon& get_from_explorer(const wchar_t *fileExtension);
+	icon& get_from_explorer(const wchar_t* fileExtension);
 	icon& load_resource(int iconId, int size, HINSTANCE hInst = nullptr);
 
 	static void icon_to_label(HWND hStatic, int idIconRes, BYTE size);

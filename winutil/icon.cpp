@@ -34,7 +34,7 @@ icon& icon::release()
 	return *this;
 }
 
-icon& icon::get_from_explorer(const wchar_t *fileExtension)
+icon& icon::get_from_explorer(const wchar_t* fileExtension)
 {
 	release();
 	

@@ -125,7 +125,7 @@ wstring listview::item::get_text(size_t columnIndex) const
 	return buf;
 }
 
-listview::item& listview::item::set_text(const wchar_t *text, size_t columnIndex)
+listview::item& listview::item::set_text(const wchar_t* text, size_t columnIndex)
 {
 	ListView_SetItemText(_list->_hWnd, index,
 		static_cast<int>(columnIndex), const_cast<wchar_t*>(text));
@@ -175,7 +175,7 @@ listview::item& listview::item::set_icon_index(int imagelistIconIndex)
 }
 
 
-listview::item listview::collection::add(const wchar_t *caption, int imagelistIconIndex, size_t positionIndex)
+listview::item listview::collection::add(const wchar_t* caption, int imagelistIconIndex, size_t positionIndex)
 {
 	LVITEM lvi = { 0 };
 	lvi.iItem = static_cast<int>(positionIndex == -1 ? 0x0FFFFFFF : positionIndex);
@@ -199,7 +199,7 @@ vector<listview::item> listview::collection::get_all() const
 	return items;
 }
 
-listview::item listview::collection::find(const wchar_t *caption)
+listview::item listview::collection::find(const wchar_t* caption)
 {
 	LVFINDINFO lfi = { 0 };
 	lfi.flags = LVFI_STRING; // search is case-insensitive
@@ -317,7 +317,7 @@ listview& listview::icon_push(int iconId)
 	return *this;
 }
 
-listview& listview::icon_push(const wchar_t *fileExtension)
+listview& listview::icon_push(const wchar_t* fileExtension)
 {
 	HIMAGELIST hImg = _proceed_imagelist();
 	if (hImg) {
@@ -328,7 +328,7 @@ listview& listview::icon_push(const wchar_t *fileExtension)
 	return *this; // return the index of the new icon
 }
 
-listview& listview::column_add(const wchar_t *caption, int cx)
+listview& listview::column_add(const wchar_t* caption, int cx)
 {
 	LVCOLUMN lvc = { 0 };
 

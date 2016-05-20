@@ -51,9 +51,15 @@ combobox& combobox::item_set_selected(size_t i)
 	return *this;
 }
 
+combobox& combobox::item_add(const wstring& entry)
+{
+	SendMessage(_hWnd, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(entry.c_str()));
+	return *this;
+}
+
 combobox& combobox::item_add(initializer_list<const wchar_t*> entries)
 {
-	for (const wchar_t *s : entries) {
+	for (const wchar_t* s : entries) {
 		SendMessage(_hWnd, CB_ADDSTRING, 0, reinterpret_cast<LPARAM>(s));
 	}
 	return *this;

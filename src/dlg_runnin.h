@@ -8,18 +8,18 @@
 #include "../winutil/progressbar.h"
 #include "../winutil/taskbar_progress.h"
 
-class DlgRunnin final : public winlamb::dialog_modal,
+class dlg_runnin final : public winlamb::dialog_modal,
 	public winlamb::dialog_msg_thread
 {
 public:
-	enum class Target { NONE = 0, MP3, FLAC, WAV };
+	enum class target { NONE = 0, MP3, FLAC, WAV };
 
 private:
 	winutil::taskbar_progress&       _taskBar;
 	winutil::label                   _lbl;
 	winutil::progressbar             _prog;
 	int                              _numThreads;
-	Target                           _targetType;
+	target                           _targetType;
 	const std::vector<std::wstring>& _files;
 	bool                             _delSrc;
 	bool                             _isVbr;
@@ -29,10 +29,10 @@ private:
 	int                              _curFile, _filesDone;
 	winutil::datetime                _time0;
 public:
-	DlgRunnin(
+	dlg_runnin(
 		winutil::taskbar_progress&       taskBar,
 		int                              numThreads,
-		Target                           targetType,
+		target                           targetType,
 		const std::vector<std::wstring>& files,
 		bool                             delSrc,
 		bool                             isVbr,
@@ -41,5 +41,5 @@ public:
 		const std::wstring&              destFolder
 	);
 private:
-	void _doProcessNextFile();
+	void _process_next_file();
 };

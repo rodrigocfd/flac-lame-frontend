@@ -1,7 +1,7 @@
 
-#include "DlgMain.h"
-#include "DlgRunnin.h"
-#include "Convert.h"
+#include "dlg_main.h"
+#include "dlg_runnin.h"
+#include "convert.h"
 #include "../winutil/file.h"
 #include "../winutil/menu.h"
 #include "../winutil/str.h"
@@ -11,9 +11,9 @@ using namespace winutil;
 using std::vector;
 using std::wstring;
 
-RUN(DlgMain);
+RUN(dlg_main);
 
-DlgMain::DlgMain()
+dlg_main::dlg_main()
 {
 	setup.dialogId = DLG_MAIN;
 	setup.iconId = ICO_MAIN;
@@ -22,19 +22,19 @@ DlgMain::DlgMain()
 	on_message(WM_INITDIALOG, [this](params p)->INT_PTR
 	{
 		// Validate and load INI file.
-		_ini.iniPath = sys::path_of_exe().append(L"\\FlacLameFE.ini");
-		if (!file::exists(_ini.iniPath)) {
+		wstring iniPath = sys::path_of_exe().append(L"\\FlacLameFE.ini");
+		if (!file::exists(iniPath)) {
 			sys::msg_box(hwnd(), L"Fail",
-				str::format(L"File not found:\n%s", _ini.iniPath.c_str()),
+				str::format(L"File not found:\n%s", iniPath.c_str()),
 				MB_ICONERROR);
 			SendMessage(hwnd(), WM_CLOSE, 0, 0); // halt program
 			return TRUE;
 		}
 
 		wstring err;
-		if (!_ini.load_from_file(&err)) {
+		if (!_ini.load_from_file(iniPath, &err)) {
 			sys::msg_box(hwnd(), L"Fail",
-				str::format(L"Failed to load:\n%s\n%s", _ini.iniPath.c_str(), err.c_str()),
+				str::format(L"Failed to load:\n%s\n%s", iniPath.c_str(), err.c_str()),
 				MB_ICONERROR);
 			SendMessage(hwnd(), WM_CLOSE, 0, 0); // halt program
 			return TRUE;
@@ -123,19 +123,19 @@ DlgMain::DlgMain()
 		for (const wstring& drop : files) {
 			if (file::is_dir(drop)) { // if a directory, add all files inside of it
 				for (const wstring& f : file::list_dir(drop.c_str(), L"*.mp3")) {
-					_doFileToList(f);
+					_file_to_list(f);
 				}
 				for (const wstring& f : file::list_dir(drop.c_str(), L"*.flac")) {
-					_doFileToList(f);
+					_file_to_list(f);
 				}
 				for (const wstring& f : file::list_dir(drop.c_str(), L"*.wav")) {
-					_doFileToList(f);
+					_file_to_list(f);
 				}
 			} else {
-				_doFileToList(drop); // add single file
+				_file_to_list(drop); // add single file
 			}
 		}
-		_doUpdateCounter( _lstFiles.items.count() );
+		_update_counter( _lstFiles.items.count() );
 		return TRUE;
 	});
 
@@ -164,9 +164,9 @@ DlgMain::DlgMain()
 			files))
 		{
 			for (const wstring& file : files) {
-				_doFileToList(file);
+				_file_to_list(file);
 			}
-			_doUpdateCounter( _lstFiles.items.count() );
+			_update_counter( _lstFiles.items.count() );
 		}
 		return TRUE;
 	});
@@ -174,7 +174,7 @@ DlgMain::DlgMain()
 	on_command(MNU_REMSELECTED, [this](params_command p)->INT_PTR
 	{
 		_lstFiles.items.remove_selected();
-		_doUpdateCounter( _lstFiles.items.count() );
+		_update_counter( _lstFiles.items.count() );
 		return TRUE;
 	});
 
@@ -219,7 +219,7 @@ DlgMain::DlgMain()
 	on_command(BTN_RUN, [this](params_command p)->INT_PTR
 	{
 		vector<wstring> files;
-		if (!_destFolderIsOk() || !_filesExist(files)) {
+		if (!_dest_folder_is_ok() || !_files_exist(files)) {
 			return TRUE;
 		}
 
@@ -238,14 +238,14 @@ DlgMain::DlgMain()
 		}
 
 		// Which format are we converting to?
-		DlgRunnin::Target targetType = DlgRunnin::Target::NONE;
+		dlg_runnin::target targetType = dlg_runnin::target::NONE;
 	
-		if (_radMp3.is_checked())       targetType = DlgRunnin::Target::MP3;
-		else if (_radFlac.is_checked()) targetType = DlgRunnin::Target::FLAC;
-		else if (_radWav.is_checked())  targetType = DlgRunnin::Target::WAV;
+		if (_radMp3.is_checked())       targetType = dlg_runnin::target::MP3;
+		else if (_radFlac.is_checked()) targetType = dlg_runnin::target::FLAC;
+		else if (_radWav.is_checked())  targetType = dlg_runnin::target::WAV;
 
 		// Finally invoke dialog.
-		DlgRunnin rd(_taskBar, numThreads, targetType,
+		dlg_runnin rd(_taskBar, numThreads, targetType,
 			files, delSrc, isVbr, quality, _ini,
 			_txtDest.get_text());
 		rd.show(hwnd());
@@ -254,17 +254,17 @@ DlgMain::DlgMain()
 
 	on_notify(LST_FILES, LVN_INSERTITEM, [this](params_notify p)->INT_PTR
 	{
-		return _doUpdateCounter(_lstFiles.items.count()); // new item inserted
+		return _update_counter(_lstFiles.items.count()); // new item inserted
 	});
 
 	on_notify(LST_FILES, LVN_DELETEITEM, [this](params_notify p)->INT_PTR
 	{
-		return _doUpdateCounter(_lstFiles.items.count() - 1); // item about to be deleted
+		return _update_counter(_lstFiles.items.count() - 1); // item about to be deleted
 	});
 
 	on_notify(LST_FILES, LVN_DELETEALLITEMS, [this](params_notify p)->INT_PTR
 	{
-		return _doUpdateCounter(0); // all items about to be deleted
+		return _update_counter(0); // all items about to be deleted
 	});
 
 	on_notify(LST_FILES, LVN_KEYDOWN, [this](params_notify p)->INT_PTR
@@ -277,7 +277,7 @@ DlgMain::DlgMain()
 	});
 }
 
-bool DlgMain::_destFolderIsOk()
+bool dlg_main::_dest_folder_is_ok()
 {
 	wstring destFolder = _txtDest.get_text();
 	if (!destFolder.empty()) {
@@ -306,7 +306,7 @@ bool DlgMain::_destFolderIsOk()
 	return true;
 }
 
-bool DlgMain::_filesExist(vector<wstring>& files)
+bool dlg_main::_files_exist(vector<wstring>& files)
 {
 	vector<listview::item> allItems = _lstFiles.items.get_all();
 	files = listview::get_all_text(allItems, 0);
@@ -322,7 +322,7 @@ bool DlgMain::_filesExist(vector<wstring>& files)
 	return true;
 }
 
-LRESULT DlgMain::_doUpdateCounter(size_t newCount)
+LRESULT dlg_main::_update_counter(size_t newCount)
 {
 	// Update counter on Run button.
 	wstring caption = newCount ?
@@ -333,7 +333,7 @@ LRESULT DlgMain::_doUpdateCounter(size_t newCount)
 	return 0;
 };
 
-void DlgMain::_doFileToList(const wstring& file)
+void dlg_main::_file_to_list(const wstring& file)
 {
 	int iType = -1;
 	if (str::ends_withi(file, L".mp3"))       iType = 0;

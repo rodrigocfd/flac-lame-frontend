@@ -18,19 +18,19 @@ wstring& path::trim_backslash(wstring& path)
 	return path;
 }
 
-bool path::is_same(const wstring& path, const wchar_t* other)
+bool path::is_same(const wstring& path, const wstring& other)
 {
 	return str::eqi(path, other);
 }
 
-bool path::has_extension(const wstring& path, const wchar_t *extension)
+bool path::has_extension(const wstring& path, const wchar_t* extension)
 {
 	return str::ends_withi(path, extension);
 }
 
 bool path::has_extension(const wstring& path, initializer_list<const wchar_t*> extensions)
 {
-	for (const wchar_t *ext : extensions) {
+	for (const wchar_t* ext : extensions) {
 		if (path::has_extension(path, ext)) {
 			return true;
 		}
@@ -38,7 +38,7 @@ bool path::has_extension(const wstring& path, initializer_list<const wchar_t*> e
 	return false;
 }
 
-wstring& path::change_extension(wstring& path, const wchar_t *newExtension)
+wstring& path::change_extension(wstring& path, const wchar_t* newExtension)
 {
 	size_t dotIdx = path.find_last_of(L'.');
 	if (dotIdx != wstring::npos) {

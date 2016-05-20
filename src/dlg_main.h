@@ -13,7 +13,7 @@
 #include "../winutil/taskbar_progress.h"
 #include "../winutil/textbox.h"
 
-class DlgMain final : public winlamb::dialog_main,
+class dlg_main final : public winlamb::dialog_main,
 	public winlamb::dialog_msg_command,
 	public winlamb::dialog_msg_dropfiles,
 	public winlamb::dialog_msg_initmenupopup,
@@ -29,10 +29,10 @@ private:
 	winutil::checkbox         _radMp3, _radMp3Cbr, _radMp3Vbr, _radFlac, _radWav;
 	winutil::checkbox         _chkDelSrc;
 public:
-	DlgMain();
+	dlg_main();
 private:
-	bool    _destFolderIsOk();
-	bool    _filesExist(std::vector<std::wstring>& files);
-	LRESULT _doUpdateCounter(size_t newCount);
-	void    _doFileToList(const std::wstring& file);
+	bool    _dest_folder_is_ok();
+	bool    _files_exist(std::vector<std::wstring>& files);
+	LRESULT _update_counter(size_t newCount);
+	void    _file_to_list(const std::wstring& file);
 };

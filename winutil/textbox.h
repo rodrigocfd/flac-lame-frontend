@@ -7,7 +7,6 @@
 #pragma once
 #include <functional>
 #include <string>
-#include <utility>
 #include <vector>
 #include <Windows.h>
 
@@ -31,11 +30,12 @@ public:
 	textbox& operator=(const textbox&) = delete;
 	textbox& operator=(textbox&& other);
 
-	HWND                      hwnd() const { return _hWnd; }
+	HWND                      hwnd() const                             { return _hWnd; }
 	textbox&                  create(HWND hParent, int id, POINT pos, LONG width)           { return _create(hParent, id, pos, {width,21}, ES_AUTOHSCROLL); }
 	textbox&                  create_password(HWND hParent, int id, POINT pos, LONG width)  { return _create(hParent, id, pos, {width,21}, ES_AUTOHSCROLL | ES_PASSWORD); }
 	textbox&                  create_multi_line(HWND hParent, int id, POINT pos, SIZE size) { return _create(hParent, id, pos, size, ES_MULTILINE | ES_WANTRETURN); }
-	textbox&                  set_text(const wchar_t *t);
+	int                       get_id() const { return GetDlgCtrlID(_hWnd); }
+	textbox&                  set_text(const wchar_t* t);
 	textbox&                  set_text(const std::wstring& t)          { return set_text(t.c_str()); }
 	std::wstring              get_text() const;
 	size_t                    get_text_len() const                     { return GetWindowTextLength(_hWnd); }
@@ -43,7 +43,7 @@ public:
 	textbox&                  set_selection(selection selec);
 	textbox&                  set_selection_all()                      { return set_selection({0, -1}); }
 	selection                 get_selection() const;
-	textbox&                  replace_selection(const wchar_t *t);
+	textbox&                  replace_selection(const wchar_t* t);
 	textbox&                  replace_selection(const std::wstring& t) { return replace_selection(t.c_str()); }
 	textbox&                  enable(bool doEnable);
 	textbox&                  focus();

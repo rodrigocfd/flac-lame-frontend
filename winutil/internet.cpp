@@ -13,9 +13,9 @@ using std::unordered_map;
 using std::vector;
 using std::wstring;
 
-static wstring _formatError(DWORD lastError, const wchar_t *funcName)
+static wstring _formatError(DWORD lastError, const wchar_t* funcName)
 {
-	const wchar_t *s = nullptr;
+	const wchar_t* s = nullptr;
 
 	switch (lastError) {
 	case ERROR_NOT_ENOUGH_MEMORY:               s = L"not enough memory"; break;
@@ -75,7 +75,7 @@ void internet_session::close()
 	}
 }
 
-bool internet_session::init(wstring *pErr, const wchar_t *userAgent)
+bool internet_session::init(wstring* pErr, const wchar_t* userAgent)
 {
 	if (!_hSession) {
 		// http://social.msdn.microsoft.com/forums/en-US/vclanguage/thread/45ccd91c-6794-4f9b-8f4f-865c76cc146d
@@ -115,7 +115,7 @@ void internet_download::abort()
 	}
 }
 
-internet_download& internet_download::add_request_header(const wchar_t *requestHeader)
+internet_download& internet_download::add_request_header(const wchar_t* requestHeader)
 {
 	_requestHeaders.emplace_back(requestHeader);
 	return *this;
@@ -123,19 +123,19 @@ internet_download& internet_download::add_request_header(const wchar_t *requestH
 
 internet_download& internet_download::add_request_header(initializer_list<const wchar_t*> requestHeaders)
 {
-	for (const wchar_t *rh : requestHeaders) {
+	for (const wchar_t* rh : requestHeaders) {
 		add_request_header(rh);
 	}
 	return *this;
 }
 
-internet_download& internet_download::set_referrer(const wchar_t *referrer)
+internet_download& internet_download::set_referrer(const wstring& referrer)
 {
 	_referrer = referrer;
 	return *this;
 }
 
-bool internet_download::start(wstring *pErr)
+bool internet_download::start(wstring* pErr)
 {
 	if (_hConnect) {
 		if (pErr) *pErr = L"A download is already in progress.";
@@ -151,7 +151,7 @@ bool internet_download::start(wstring *pErr)
 	return true;
 }
 
-bool internet_download::has_data(wstring *pErr)
+bool internet_download::has_data(wstring* pErr)
 {
 	// Receive the data from server; user must call this until false.
 	DWORD incomingBytes = 0;
@@ -182,7 +182,7 @@ float internet_download::get_percent() const
 		0;
 }
 
-bool internet_download::_init_handles(wstring *pErr)
+bool internet_download::_init_handles(wstring* pErr)
 {
 	// Crack the URL.
 	internet_url crackedUrl;
@@ -214,7 +214,7 @@ bool internet_download::_init_handles(wstring *pErr)
 	return true;
 }
 
-bool internet_download::_contact_server(wstring *pErr)
+bool internet_download::_contact_server(wstring* pErr)
 {
 	// Add the request headers to request handle.
 	for (wstring& rh : _requestHeaders) {
@@ -246,7 +246,7 @@ bool internet_download::_contact_server(wstring *pErr)
 	return true;
 }
 
-bool internet_download::_parse_headers(wstring *pErr)
+bool internet_download::_parse_headers(wstring* pErr)
 {
 	// Retrieve the response header.
 	DWORD dwSize = 0;
@@ -296,7 +296,7 @@ bool internet_download::_parse_headers(wstring *pErr)
 	return true;
 }
 
-bool internet_download::_get_incoming_byte_count(DWORD& count, wstring *pErr)
+bool internet_download::_get_incoming_byte_count(DWORD& count, wstring* pErr)
 {
 	DWORD dwSize = 0;
 	if (!WinHttpQueryDataAvailable(_hRequest, &dwSize)) { // how many bytes are about to come
@@ -310,7 +310,7 @@ bool internet_download::_get_incoming_byte_count(DWORD& count, wstring *pErr)
 	return true;
 }
 
-bool internet_download::_receive_bytes(UINT nBytesToRead, wstring *pErr)
+bool internet_download::_receive_bytes(UINT nBytesToRead, wstring* pErr)
 {
 	DWORD dwRead = 0;
 	if (!WinHttpReadData(_hRequest, static_cast<void*>(&_buffer[0]), nBytesToRead, &dwRead)) {
@@ -335,7 +335,7 @@ internet_url::internet_url()
 	*_extra  = L'\0';
 }
 
-bool internet_url::crack(const wchar_t *address, wstring *pErr)
+bool internet_url::crack(const wstring& address, wstring* pErr)
 {
 	// This helper class simply breaks an URL address into several parts.
 
@@ -349,7 +349,7 @@ bool internet_url::crack(const wchar_t *address, wstring *pErr)
 	_uc.lpszUrlPath   = _path;   _uc.dwUrlPathLength   = ARRAYSIZE(_path);
 	_uc.lpszExtraInfo = _extra;  _uc.dwExtraInfoLength = ARRAYSIZE(_extra);
 
-	if (!WinHttpCrackUrl(address, 0, 0, &_uc)) {
+	if (!WinHttpCrackUrl(address.c_str(), 0, 0, &_uc)) {
 		if (pErr) *pErr = _formatError(GetLastError(), L"WinHttpCrackUrl");
 		return false;
 	}

@@ -1,6 +1,6 @@
 
-#include "DlgRunnin.h"
-#include "Convert.h"
+#include "dlg_runnin.h"
+#include "convert.h"
 #include "../winutil/str.h"
 #include "../winutil/sys.h"
 #include "../res/resource.h"
@@ -8,10 +8,10 @@ using namespace winutil;
 using std::wstring;
 using std::vector;
 
-DlgRunnin::DlgRunnin(
+dlg_runnin::dlg_runnin(
 	taskbar_progress&      taskBar,
 	int                    numThreads,
-	Target                 targetType,
+	target                 targetType,
 	const vector<wstring>& files,
 	bool                   delSrc,
 	bool                   isVbr,
@@ -41,7 +41,7 @@ DlgRunnin::DlgRunnin(
 		int batchSz = (_numThreads < nFiles) ? _numThreads : nFiles; // limit parallel processing
 		for (int i = 0; i < batchSz; ++i) {
 			sys::thread([this]()->void {
-				_doProcessNextFile();
+				_process_next_file();
 			});
 		}
 
@@ -50,7 +50,7 @@ DlgRunnin::DlgRunnin(
 	});
 }
 
-void DlgRunnin::_doProcessNextFile()
+void dlg_runnin::_process_next_file()
 {
 	int index = _curFile++;
 	if (index >= static_cast<int>(_files.size())) return;
@@ -60,13 +60,13 @@ void DlgRunnin::_doProcessNextFile()
 	wstring err;
 
 	switch (_targetType) {
-	case Target::MP3:
+	case target::MP3:
 		good = Convert::toMp3(_ini, file, _destFolder, _delSrc, _quality, _isVbr, &err);
 		break;
-	case Target::FLAC:
+	case target::FLAC:
 		good = Convert::toFlac(_ini, file, _destFolder, _delSrc, _quality, &err);
 		break;
-	case Target::WAV:
+	case target::WAV:
 		good = Convert::toWav(_ini, file, _destFolder, _delSrc, &err);
 	}
 
@@ -89,7 +89,7 @@ void DlgRunnin::_doProcessNextFile()
 		});
 			
 		if (_filesDone < static_cast<int>(_files.size())) { // more files to come
-			_doProcessNextFile();
+			_process_next_file();
 		} else { // finished all processing
 			ui_thread([this]()->void {
 				datetime fin;

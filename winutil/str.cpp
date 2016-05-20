@@ -9,7 +9,7 @@ using namespace winutil;
 using std::vector;
 using std::wstring;
 
-wstring str::format(const wchar_t *format, ...)
+wstring str::format(const wchar_t* format, ...)
 {
 	va_list args;
 	va_start(args, format);
@@ -87,11 +87,12 @@ wstring& str::remove_diacritics(wstring& s)
 {
 	// Simple diacritics removal.
 
-	const wchar_t *diacritics   = L"ÁáÀàÃãÂâÄäÉéÈèÊêËëÍíÌìÎîÏïÓóÒòÕõÔôÖöÚúÙùÛûÜüÇçÅåĞğÑñØøİı";
-	const wchar_t *replacements = L"AaAaAaAaAaEeEeEeEeIiIiIiIiOoOoOoOoOoUuUuUuUuCcAaDdNnOoYy";
+	const wchar_t* diacritics   = L"ÁáÀàÃãÂâÄäÉéÈèÊêËëÍíÌìÎîÏïÓóÒòÕõÔôÖöÚúÙùÛûÜüÇçÅåĞğÑñØøİı";
+	const wchar_t* replacements = L"AaAaAaAaAaEeEeEeEeIiIiIiIiOoOoOoOoOoUuUuUuUuCcAaDdNnOoYy";
 
 	for (wchar_t& ch : s) {
-		const wchar_t *pDiac = diacritics, *pRepl = replacements;
+		const wchar_t* pDiac = diacritics;
+		const wchar_t* pRepl = replacements;
 		while (*pDiac) {
 			if (ch == *pDiac) ch = *pRepl; // in-place replacement
 			++pDiac;
@@ -101,7 +102,7 @@ wstring& str::remove_diacritics(wstring& s)
 	return s;
 }
 
-static bool _firstEndsBeginsCheck(const wstring& s, const wchar_t *what, size_t& whatLen)
+static bool _firstEndsBeginsCheck(const wstring& s, const wchar_t* what, size_t& whatLen)
 {
 	if (s.empty()) {
 		return false;
@@ -115,7 +116,7 @@ static bool _firstEndsBeginsCheck(const wstring& s, const wchar_t *what, size_t&
 	return true;
 }
 
-bool str::ends_with(const wstring& s, const wchar_t *what)
+bool str::ends_with(const wstring& s, const wchar_t* what)
 {
 	size_t whatLen = 0;
 	if (!_firstEndsBeginsCheck(s, what, whatLen)) {
@@ -125,7 +126,7 @@ bool str::ends_with(const wstring& s, const wchar_t *what)
 	return !lstrcmp(s.c_str() + s.size() - whatLen, what);
 }
 
-bool str::ends_withi(const wstring& s, const wchar_t *what)
+bool str::ends_withi(const wstring& s, const wchar_t* what)
 {
 	size_t whatLen = 0;
 	if (!_firstEndsBeginsCheck(s, what, whatLen)) {
@@ -135,7 +136,7 @@ bool str::ends_withi(const wstring& s, const wchar_t *what)
 	return !lstrcmpi(s.c_str() + s.size() - whatLen, what);
 }
 
-bool str::begins_with(const wstring& s, const wchar_t *what)
+bool str::begins_with(const wstring& s, const wchar_t* what)
 {
 	size_t whatLen = 0;
 	if (!_firstEndsBeginsCheck(s, what, whatLen)) {
@@ -145,7 +146,7 @@ bool str::begins_with(const wstring& s, const wchar_t *what)
 	return !wcsncmp(s.c_str(), what, whatLen);
 }
 
-bool str::begins_withi(const wstring& s, const wchar_t *what)
+bool str::begins_withi(const wstring& s, const wchar_t* what)
 {
 	size_t whatLen = 0;
 	if (!_firstEndsBeginsCheck(s, what, whatLen)) {
@@ -155,7 +156,7 @@ bool str::begins_withi(const wstring& s, const wchar_t *what)
 	return !_wcsnicmp(s.c_str(), what, whatLen);
 }
 
-size_t str::findi(const wstring& s, const wchar_t *what, size_t offset)
+size_t str::findi(const wstring& s, const wchar_t* what, size_t offset)
 {
 	wstring s2 = upper(s);
 	wstring what2(what);
@@ -163,7 +164,7 @@ size_t str::findi(const wstring& s, const wchar_t *what, size_t offset)
 	return s2.find(what2, offset);
 }
 
-size_t str::rfindi(const wstring& s, const wchar_t *what, size_t offset)
+size_t str::rfindi(const wstring& s, const wchar_t* what, size_t offset)
 {
 	wstring s2 = upper(s);
 	wstring what2(what);
@@ -171,7 +172,7 @@ size_t str::rfindi(const wstring& s, const wchar_t *what, size_t offset)
 	return s2.rfind(what2, offset);
 }
 
-wstring& str::replace(wstring& haystack, const wchar_t *needle, const wchar_t *replacement)
+wstring& str::replace(wstring& haystack, const wchar_t* needle, const wchar_t* replacement)
 {
 	if (haystack.empty()) return haystack;
 
@@ -199,7 +200,7 @@ wstring& str::replace(wstring& haystack, const wchar_t *needle, const wchar_t *r
 	return haystack;
 }
 
-wstring& str::replacei(wstring& haystack, const wchar_t *needle, const wchar_t *replacement)
+wstring& str::replacei(wstring& haystack, const wchar_t* needle, const wchar_t* replacement)
 {
 	if (!haystack.size()) return haystack;
 
@@ -277,7 +278,7 @@ bool str::is_float(const wstring& s)
 	return true;
 }
 
-vector<wstring> str::explode(const wstring& s, const wchar_t *delimiter)
+vector<wstring> str::explode(const wstring& s, const wchar_t* delimiter)
 {
 	vector<wstring> ret;
 	size_t delimiterLen = lstrlen(delimiter);
@@ -298,7 +299,7 @@ vector<wstring> str::explode(const wstring& s, const wchar_t *delimiter)
 	return ret;
 }
 
-vector<wstring> str::explode_multi_zero(const wchar_t *s)
+vector<wstring> str::explode_multi_zero(const wchar_t* s)
 {
 	// Example multiStr:
 	// L"first one\0second one\0third one\0"
@@ -306,7 +307,7 @@ vector<wstring> str::explode_multi_zero(const wchar_t *s)
 
 	// Count number of null-delimited strings; string end with double null.
 	size_t numStrings = 0;
-	const wchar_t *pRun = s;
+	const wchar_t* pRun = s;
 	while (*pRun) {
 		++numStrings;
 		pRun += lstrlen(pRun) + 1;
@@ -326,14 +327,14 @@ vector<wstring> str::explode_multi_zero(const wchar_t *s)
 	return ret;
 }
 
-vector<wstring> str::explode_quoted(const wchar_t *s)
+vector<wstring> str::explode_quoted(const wchar_t* s)
 {
 	// Example quotedStr:
 	// "First one" NoQuoteSecond "Third one"
 
 	// Count number of strings.
 	size_t numStrings = 0;
-	const wchar_t *pRun = s;
+	const wchar_t* pRun = s;
 	while (*pRun) {
 		if (*pRun == L'\"') { // begin of quoted string
 			++pRun; // point to 1st char of string
@@ -362,7 +363,7 @@ vector<wstring> str::explode_quoted(const wchar_t *s)
 
 	// Alloc and copy each string.
 	pRun = s;
-	const wchar_t *pBase;
+	const wchar_t* pBase;
 	int i = 0;
 	while (*pRun) {
 		if (*pRun == L'\"') { // begin of quoted string
@@ -397,7 +398,7 @@ vector<wstring> str::explode_quoted(const wchar_t *s)
 	return ret;
 }
 
-wstring str::parse_ascii(const BYTE *data, size_t length)
+wstring str::parse_ascii(const BYTE* data, size_t length)
 {
 	wstring ret;
 	if (data && length) {
@@ -409,7 +410,7 @@ wstring str::parse_ascii(const BYTE *data, size_t length)
 	return ret;
 }
 
-wstring str::parse_utf8(const BYTE *data, size_t length)
+wstring str::parse_utf8(const BYTE* data, size_t length)
 {
 	wstring ret;
 	if (data && length) {

@@ -20,15 +20,6 @@
     <ClInclude Include="res\resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Convert.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\DlgMain.h">
-      <Filter>src</Filter>
-    </ClInclude>
-    <ClInclude Include="src\DlgRunnin.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="winlamb\dialog_main.h">
       <Filter>winlamb</Filter>
     </ClInclude>
@@ -155,6 +146,18 @@
     <ClInclude Include="winutil\file_ini.h">
       <Filter>winutil</Filter>
     </ClInclude>
+    <ClInclude Include="src\dlg_main.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\dlg_runnin.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\convert.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="winutil\com_ptr.h">
+      <Filter>winutil</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\Ron Burgundy.ico">
@@ -167,15 +170,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Convert.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\DlgMain.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\DlgRunnin.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="winutil\checkbox.cpp">
       <Filter>winutil</Filter>
     </ClCompile>
@@ -241,6 +235,15 @@
     </ClCompile>
     <ClCompile Include="winutil\xml.cpp">
       <Filter>winutil</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dlg_main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\dlg_runnin.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\convert.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
