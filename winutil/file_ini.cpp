@@ -52,7 +52,7 @@ bool file_ini::load_from_file(const wstring& src, wstring* pErr)
 bool file_ini::save_to_file(const wstring& dest, wstring* pErr) const
 {
 	wstring out = serialize();
-	return file_text::write_utf8(out, dest, pErr);
+	return file_text::write_utf8(out, dest, true, pErr);
 }
 
 wstring file_ini::serialize() const

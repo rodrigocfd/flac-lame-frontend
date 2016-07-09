@@ -27,17 +27,20 @@ public:
 	void   close();
 	size_t size() const       { return GetFileSize(_hFile, nullptr); }
 	bool   open(const std::wstring& filePath, access accessType, std::wstring* pErr = nullptr);
+	bool   open_or_create(const std::wstring& filePath, std::wstring* pErr = nullptr);
 	bool   set_new_size(size_t newSize, std::wstring* pErr = nullptr);
-	bool   truncate(std::wstring* pErr = nullptr)                                  { return set_new_size(0, pErr); }
 	bool   get_content(std::vector<BYTE>& buf, std::wstring* pErr = nullptr) const;
 	bool   write(const BYTE* pData, size_t sz, std::wstring* pErr = nullptr);
-	bool   write(const std::vector<BYTE>& data, std::wstring* pErr = nullptr)      { return write(&data[0], data.size(), pErr); }
+	bool   write(const std::vector<BYTE>& data, std::wstring* pErr = nullptr) { return write(&data[0], data.size(), pErr); }
 	bool   rewind(std::wstring* pErr = nullptr);
+private:
+	bool  _raw_open(const std::wstring& filePath, DWORD desiredAccess, DWORD shareMode, DWORD creationDisposition, std::wstring* pErr);
 
+public:
 	static bool exists(const wchar_t* fileOrFolder)      { return GetFileAttributes(fileOrFolder) != INVALID_FILE_ATTRIBUTES; }
 	static bool exists(const std::wstring& fileOrFolder) { return exists(fileOrFolder.c_str()); }
-	static bool is_dir(const wchar_t* thePath)      { return (GetFileAttributes(thePath) & FILE_ATTRIBUTE_DIRECTORY) != 0; }
-	static bool is_dir(const std::wstring& thePath) { return is_dir(thePath.c_str()); }
+	static bool is_dir(const wchar_t* thePath)           { return (GetFileAttributes(thePath) & FILE_ATTRIBUTE_DIRECTORY) != 0; }
+	static bool is_dir(const std::wstring& thePath)      { return is_dir(thePath.c_str()); }
 	static bool del(const std::wstring& fileOrFolder, std::wstring* pErr = nullptr);
 	static bool create_dir(const std::wstring& thePath, std::wstring* pErr = nullptr);
 	static bool unzip(const std::wstring& zipFile, const std::wstring& destFolder, std::wstring* pErr = nullptr);

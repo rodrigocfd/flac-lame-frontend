@@ -211,7 +211,7 @@ bool sys::show_open_file(HWND hWnd, const wchar_t* filter, vector<wstring>& arrB
 		MessageBox(hWnd, L"GetOpenFileName: buffer too small.", L"Error", MB_ICONERROR);
 	} else if (errNo) {
 		wchar_t txtBuf[64] = { L'\0' };
-		wsprintf(txtBuf, L"GetOpenFileName: failed with error %d.", errNo);
+		wsprintf(txtBuf, L"GetOpenFileName: failed with error %u.", errNo);
 		MessageBox(hWnd, txtBuf, L"Error", MB_ICONERROR);
 	}
 	return false;

@@ -20,6 +20,7 @@ template<typename traitsT>
 class wnd_proc : public wnd {
 public:
 	struct params {
+		UINT   msg;
 		WPARAM wParam;
 		LPARAM lParam;
 	};
@@ -52,13 +53,13 @@ public:
 protected:
 	static typename traitsT::ret_type CALLBACK _process(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
-		wnd_proc *pSelf = traitsT::get_instance_pointer<wnd_proc>(hWnd, msg, lp);
+		wnd_proc* pSelf = traitsT::get_instance_pointer<wnd_proc>(hWnd, msg, lp);
 		if (pSelf) {
 			if (!pSelf->_loopStarted) {
 				pSelf->_loopStarted = true; // no more messages can be added
 				pSelf->_hWnd = hWnd; // store HWND
 			}
-			return pSelf->_callbacks.process(hWnd, msg, msg, { wp, lp });
+			return pSelf->_callbacks.process(hWnd, msg, msg, {msg, wp, lp});
 		}
 		return traitsT::default_proc(hWnd, msg, wp, lp);
 	}

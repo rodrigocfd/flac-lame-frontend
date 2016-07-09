@@ -21,7 +21,7 @@ template<typename traitsT>
 class msg_getdlgcode : virtual public wnd_proc<traitsT> {
 public:
 	struct params_getdlgcode : public params {
-		params_getdlgcode(const params& p) { wParam = p.wParam; lParam = p.lParam; }
+		params_getdlgcode(const params& p) : params(p) { }
 		WORD virt_key_code() const         { return wParam; }
 		MSG* system_msg() const            { return reinterpret_cast<MSG*>(lParam); }
 	};

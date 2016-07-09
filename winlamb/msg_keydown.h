@@ -21,8 +21,11 @@ template<typename traitsT>
 class msg_keydown : virtual public wnd_proc<traitsT> {
 public:
 	struct params_keydown : public params {
-		params_keydown(const params& p) { wParam = p.wParam; lParam = p.lParam; }
-		WORD virt_key_code() const      { return wParam; }
+		params_keydown(const params& p)     : params(p) { }
+		WORD virt_key_code() const          { return LOWORD(wParam); }
+		WORD repeat_count() const           { return LOWORD(lParam); }
+		bool is_extended_key() const        { return (lParam & (1 << 24)) != 0; }
+		bool is_previous_state_down() const { return (lParam & (1 << 30)) != 0; }
 	};
 	typedef std::function<typename traitsT::ret_type(params_keydown)> func_keydown_type;
 

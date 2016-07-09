@@ -62,7 +62,7 @@ bool file_map::open(const wstring& filePath, file::access accessType, wstring* p
 	if (!_hMap) {
 		DWORD err = GetLastError();
 		close();
-		if (pErr) *pErr = str::format(L"CreateFileMapping() failed to create file mapping, error code %d.", err);
+		if (pErr) *pErr = str::format(L"CreateFileMapping() failed to create file mapping, error code %u.", err);
 		return false;
 	}
 
@@ -72,7 +72,7 @@ bool file_map::open(const wstring& filePath, file::access accessType, wstring* p
 	if (!_pMem) {
 		DWORD err = GetLastError();
 		close();
-		if (pErr) *pErr = str::format(L"MapViewOfFile() failed to map view of file, error code %d.", err);
+		if (pErr) *pErr = str::format(L"MapViewOfFile() failed to map view of file, error code %u.", err);
 		return false;
 	}
 
@@ -105,7 +105,7 @@ bool file_map::set_new_size(size_t newSize, wstring* pErr)
 	if (!( _hMap = CreateFileMapping(_file.hfile(), 0, PAGE_READWRITE, 0, 0, nullptr) )) {
 		DWORD err = GetLastError();
 		close();
-		if (pErr) *pErr = str::format(L"CreateFileMapping() failed to recreate file mapping, error code %d.", err);
+		if (pErr) *pErr = str::format(L"CreateFileMapping() failed to recreate file mapping, error code %u.", err);
 		return false;
 	}
 
@@ -113,7 +113,7 @@ bool file_map::set_new_size(size_t newSize, wstring* pErr)
 	if (!( _pMem = MapViewOfFile(_hMap, FILE_MAP_WRITE, 0, 0, 0) )) {
 		DWORD err = GetLastError();
 		close();
-		if (pErr) *pErr = str::format(L"MapViewOfFile() failed to remap view of file, error code %d.", err);
+		if (pErr) *pErr = str::format(L"MapViewOfFile() failed to remap view of file, error code %u.", err);
 		return false;
 	}
 

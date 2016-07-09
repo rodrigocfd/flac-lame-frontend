@@ -48,7 +48,7 @@ public:
 		InitCommonControls();
 
 		if (!setup.dialogId) {
-			OutputDebugString(L"ERROR: dialog not created, no dialog ID given.\n");
+			OutputDebugString(TEXT("ERROR: dialog not created, no dialog ID given.\n"));
 			return -1;
 		}
 
@@ -56,7 +56,7 @@ public:
 			nullptr, wnd_proc::_process,
 			reinterpret_cast<LPARAM>(static_cast<wnd_proc*>(this)) ); // _hwnd member is set on first message processing
 		if (!hwndRet) {
-			OutputDebugString(L"ERROR: dialog not created, CreateDialogParam failed.\n");
+			OutputDebugString(TEXT("ERROR: dialog not created, CreateDialogParam failed.\n"));
 			return -1;
 		}
 

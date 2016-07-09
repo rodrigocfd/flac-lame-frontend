@@ -13,7 +13,7 @@ class datetime final {
 private:
 	SYSTEMTIME _st;
 public:
-	datetime() = default;
+	datetime()                              { set_now(); }
 	explicit datetime(LONGLONG ms)          { set_from_ms(ms); }
 	explicit datetime(const SYSTEMTIME& st) { set_from_st(st); }
 	explicit datetime(const FILETIME& ft)   { set_from_ft(ft); }
@@ -24,7 +24,7 @@ public:
 	datetime&         set_from_ft(const FILETIME& ft);
 	const SYSTEMTIME& get() const          { return _st; }
 	LONGLONG          get_timestamp() const;
-	LONGLONG          minus(const datetime& other) const;
+	size_t            minus(const datetime& other) const;
 	datetime&         add_ms(LONGLONG ms);
 	datetime&         add_sec(LONGLONG sec) { return add_ms(sec * 1000); }
 	datetime&         add_min(LONGLONG min) { return add_sec(min * 60); }

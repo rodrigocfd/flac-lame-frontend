@@ -21,9 +21,10 @@ template<typename traitsT>
 class msg_initmenupopup : virtual public wnd_proc<traitsT> {
 public:
 	struct params_initmenupopup : public params {
-		params_initmenupopup(const params& p) { wParam = p.wParam; lParam = p.lParam; }
-		HMENU hmenu() const                   { return reinterpret_cast<HMENU>(wParam); }
-		WORD item_rel_pos() const             { return LOWORD(lParam); }
+		params_initmenupopup(const params& p)  : params(p) { }
+		HMENU hmenu() const                    { return reinterpret_cast<HMENU>(wParam); }
+		WORD  opened_item_relative_pos() const { return LOWORD(lParam); }
+		bool  is_window_menu() const           { return HIWORD(lParam) == TRUE; }
 	};
 	typedef std::function<typename traitsT::ret_type(params_initmenupopup)> func_initmenupopup_type;
 

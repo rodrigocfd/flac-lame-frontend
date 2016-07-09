@@ -40,10 +40,10 @@ bool Convert::toWav(const file_ini& ini, wstring src, wstring dest, bool delSrc,
 	}
 
 	wstring cmdLine;
-	if (str::ends_withi(src, L".mp3")) {
+	if (path::has_extension(src, L".mp3")) {
 		cmdLine = str::format(L"\"%s\" --decode \"%s\"",
 			ini.val(L"Tools", L"lame").c_str(), src.c_str());
-	} else if (str::ends_withi(src, L".flac")) {
+	} else if (path::has_extension(src, L".flac")) {
 		cmdLine = str::format(L"\"%s\" -d \"%s\"",
 			ini.val(L"Tools", L"flac").c_str(), src.c_str());
 		if (!dest.empty()) {
@@ -79,11 +79,11 @@ bool Convert::toFlac(const file_ini& ini, wstring src, wstring dest, bool delSrc
 	}
 
 	if (path::has_extension(src, { L".flac", L".mp3" })) { // needs intermediary WAV conversion
-		if (str::ends_withi(src, L".mp3")) {
+		if (path::has_extension(src, L".mp3")) {
 			if (!toWav(ini, src, dest, delSrc, pErr)) { // send WAV straight to new folder, if any
 				return false;
 			}
-		} else if (str::ends_withi(src, L".flac")) {
+		} else if (path::has_extension(src, L".flac")) {
 			toWav(ini, src, dest, // send WAV straight to new folder, if any
 				dest.empty() ? true : delSrc, // if same destination folder, then delete source (will be replaced)
 				pErr);
@@ -96,7 +96,7 @@ bool Convert::toFlac(const file_ini& ini, wstring src, wstring dest, bool delSrc
 
 		path::change_extension(src, L".wav"); // our source is now a WAV
 		delSrc = true; // delete the WAV at end
-	} else if (!str::ends_withi(src, L".wav")) {
+	} else if (!path::has_extension(src, L".wav")) {
 		if (pErr) *pErr = str::format(L"Not a FLAC/WAV: %s\n", src.c_str());
 		return false;
 	}
@@ -129,11 +129,11 @@ bool Convert::toMp3(const file_ini& ini, wstring src, wstring dest, bool delSrc,
 	}
 
 	if (path::has_extension(src, { L".flac", L".mp3" })) { // needs intermediary WAV conversion
-		if (str::ends_withi(src, L".flac")) {
+		if (path::has_extension(src, L".flac")) {
 			if (!toWav(ini, src, dest, delSrc, pErr)) { // send WAV straight to new folder, if any
 				return false;
 			}
-		} else if (str::ends_withi(src, L".mp3")) {
+		} else if (path::has_extension(src, L".mp3")) {
 			if (!toWav(ini, src, dest, // send WAV straight to new folder, if any
 				dest.empty() ? true : delSrc, // if same destination folder, then delete source (will be replaced)
 				pErr))
@@ -147,7 +147,7 @@ bool Convert::toMp3(const file_ini& ini, wstring src, wstring dest, bool delSrc,
 
 		path::change_extension(src, L".wav"); // our source is now a WAV
 		delSrc = true; // delete the WAV at end
-	} else if (!str::ends_withi(src, L".wav")) {
+	} else if (!path::has_extension(src, L".wav")) {
 		if (pErr) *pErr = str::format(L"Not a FLAC/MP3/WAV: %s\n", src.c_str());
 		return false;
 	}

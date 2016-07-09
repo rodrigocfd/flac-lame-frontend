@@ -20,66 +20,6 @@
     <ClInclude Include="res\resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\dialog_main.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\dialog_modal.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\font.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\msg_command.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\msg_dropfiles.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\msg_getdlgcode.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\msg_initmenupopup.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\msg_keydown.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\msg_notify.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\msg_thread.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\run.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\traits_dialog.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\traits_window.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\window.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\window_control.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\window_main.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\wnd.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\wnd_proc.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\callback_depot.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\dialog.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
     <ClInclude Include="winutil\file_map.h">
       <Filter>winutil</Filter>
     </ClInclude>
@@ -157,6 +97,72 @@
     </ClInclude>
     <ClInclude Include="winutil\com_ptr.h">
       <Filter>winutil</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\dialog_modal.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\font.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\msg_char.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\msg_command.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\msg_dropfiles.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\msg_getdlgcode.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\msg_initmenupopup.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\msg_keydown.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\msg_keyup.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\msg_notify.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\msg_thread.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\run.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\traits_dialog.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\traits_window.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\window.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\window_control.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\window_main.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\wnd.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\wnd_proc.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\callback_depot.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\dialog.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\dialog_main.h">
+      <Filter>winlamb</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

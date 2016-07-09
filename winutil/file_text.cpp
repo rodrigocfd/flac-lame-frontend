@@ -22,7 +22,7 @@ file_text::encoding_info file_text::get_encoding(const BYTE* src, size_t sz)
 
 	// https://en.wikipedia.org/wiki/Byte_order_mark
 
-	BYTE utf8[] = { 0xEF, 0xBB, 0xBF };
+	BYTE utf8[] = { 0xEF, 0xBB, 0xBF }; // UTF-8 BOM
 	if (match(utf8, 3)) {
 		return { encoding::UTF8, 3 }; // BOM size in bytes
 	}
@@ -57,11 +57,21 @@ file_text::encoding_info file_text::get_encoding(const BYTE* src, size_t sz)
 		return { encoding::BOCU1, 3 };
 	}
 
-	if (IsTextUnicode(src, static_cast<int>(sz), nullptr)) {
-		return { encoding::UTF8, 0 }; // no BOM
+	// No BOM found, guess UTF-8 without BOM or Windows-1252 (superset of ISO-8859-1).
+	bool canBeWin1252 = false;
+	for (size_t i = 0; i < sz; ++i) {
+		if (src[i] > 0x7F) { // 127
+			canBeWin1252 = true;
+			if ( i <= sz - 2 && (
+				(src[i] == 0xC2 && (src[i+1] >= 0xA1 && src[i+1] <= 0xBF)) || // http://www.utf8-chartable.de
+				(src[i] == 0xC3 && (src[i+1] >= 0x80 && src[i+1] <= 0xBF)) ))
+			{
+				return { encoding::UTF8, 0 }; // UTF-8 without no BOM
+			}
+		}
 	}
 
-	return { encoding::ASCII, 0 };
+	return { (canBeWin1252 ? encoding::WIN1252 : encoding::ASCII), 0 };
 }
 
 file_text::encoding_info file_text::get_encoding(const wstring& filePath, wstring* pErr)
@@ -105,6 +115,7 @@ bool file_text::read(wstring& buf, const BYTE* src, size_t sz, wstring* pErr)
 	switch (fileEnc.encType) {
 	case encoding::UNKNOWN:
 	case encoding::ASCII:   buf = str::parse_ascii(src, sz); return happy();
+	case encoding::WIN1252: buf = str::parse_win1252(src, sz); return happy();
 	case encoding::UTF8:    buf = str::parse_utf8(src, sz); return happy();
 	case encoding::UTF16BE: return fail(L"UTF-16 big endian: encoding not implemented.");
 	case encoding::UTF16LE: return fail(L"UTF-16 little endian: encoding not implemented.");
@@ -155,15 +166,25 @@ bool file_text::read_lines(vector<wstring>& buf, const wstring& srcPath, wstring
 	return read_lines(buf, fin.p_mem(), fin.size(), pErr);
 }
 
-bool file_text::write_utf8(const wstring& text, const wstring& destPath, wstring* pErr)
+bool file_text::write_utf8(const wstring& text, const wstring& destPath, bool writeBom, wstring* pErr)
 {
 	file fout;
-	if (!fout.open(destPath, file::access::READWRITE, pErr)) {
+	if (!fout.open_or_create(destPath, pErr)) {
+		return false;
+	}
+	if (!fout.set_new_size(0, pErr)) { // truncate to zero, erase any content
 		return false;
 	}
 
+	if (writeBom) {
+		BYTE utf8[] = { 0xEF, 0xBB, 0xBF }; // UTF-8 BOM
+		if (!fout.write(utf8, sizeof(BYTE) * ARRAYSIZE(utf8), pErr)) {
+			return false;
+		}
+	}
+
 	std::vector<BYTE> data = str::serialize_utf8(text);
-	if (!fout.write(data, pErr)) { // no BOM is written
+	if (!fout.write(data, pErr)) {
 		return false;
 	}
 

@@ -29,8 +29,13 @@ protected:
 	{
 		setup.wndClassEx.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
 		setup.wndClassEx.style = CS_DBLCLKS;
-		//setup.exStyle = WS_EX_CLIENTEDGE; // border
 		setup.style = CS_DBLCLKS | WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
+
+		// Useful styles to add:
+		// WS_TABSTOP will receive focus on Tab key rotation
+		// WS_HSCROLL adds horizontal scrollbar
+		// WS_VSCROLL adds vertical scrollbar
+		// WS_EX_CLIENTEDGE adds border (extended style, add on exStyle)
 
 		on_message(WM_NCPAINT, [this](params p)->LRESULT {
 			return _paint_themed_borders(p);
@@ -59,7 +64,7 @@ private:
 
 			RECT rc2 = { 0 }; // clipping region; will draw only within this rectangle
 			HDC hdc = GetWindowDC(hwnd());
-			HTHEME hTheme = OpenThemeData(hwnd(), L"LISTVIEW"); // borrow style from listview
+			HTHEME hTheme = OpenThemeData(hwnd(), TEXT("LISTVIEW")); // borrow style from listview
 
 			SetRect(&rc2, rc.left, rc.top, rc.left + 2, rc.bottom); // draw only the borders to avoid flickering
 			DrawThemeBackground(hTheme, hdc, LVP_LISTGROUP, 0, &rc, &rc2); // draw themed left border

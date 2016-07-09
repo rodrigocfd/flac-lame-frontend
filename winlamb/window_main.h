@@ -36,6 +36,12 @@ protected:
 		setup.position = { CW_USEDEFAULT, CW_USEDEFAULT };
 		setup.size = { CW_USEDEFAULT, CW_USEDEFAULT };
 		setup.style = WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN | WS_BORDER;
+		
+		// Useful styles to add:
+		// WS_SIZEBOX resizable window
+		// WS_MAXIMIZEBOX adds maximize button
+		// WS_MINIMIZEBOX adds minimize button
+		// WS_EX_ACCEPTFILES accepts dropped files (extended style, add on exStyle)
 
 		on_message(WM_NCDESTROY, [](params p)->LRESULT {
 			PostQuitMessage(0);

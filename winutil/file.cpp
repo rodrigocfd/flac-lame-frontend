@@ -43,31 +43,33 @@ void file::close()
 
 bool file::open(const wstring& filePath, access accessType, wstring* pErr)
 {
-	if (filePath.empty()) {
-		if (pErr) *pErr = L"Path is empty.";
-		return false;
-	}
-
-	if (accessType == access::READONLY && !file::exists(filePath)) {
+	if (!file::exists(filePath)) {
 		if (pErr) *pErr = L"File doesn't exist.";
 		return false;
 	}
 
-	close();
-	_hFile = CreateFile(filePath.c_str(),
+	if (!_raw_open(filePath,
 		GENERIC_READ | (accessType == access::READWRITE ? GENERIC_WRITE : 0),
-		(accessType == access::READWRITE) ? 0 : FILE_SHARE_READ, nullptr,
-		(accessType == access::READWRITE) ? OPEN_ALWAYS : OPEN_EXISTING,
-		0, nullptr); // if file doesn't exist, will be created
-
-	if (_hFile == INVALID_HANDLE_VALUE) {
-		_hFile = nullptr;
-		if (pErr) *pErr = str::format(L"CreateFile() failed to open file as %s, error code %d.",
-			(accessType == access::READONLY) ? L"read-only" : L"read-write", GetLastError());
+		(accessType == access::READWRITE) ? 0 : FILE_SHARE_READ,
+		OPEN_EXISTING, pErr) ) // fails if file doesn't exist
+	{
 		return false;
 	}
 
 	_access = accessType; // keep for future checks
+	if (pErr) pErr->clear();
+	return true;
+}
+
+bool file::open_or_create(const wstring& filePath, wstring* pErr)
+{
+	// Intended to be called when you want to save a file, so it's always READWRITE.
+
+	if (!_raw_open(filePath, GENERIC_READ | GENERIC_WRITE, 0, OPEN_ALWAYS, pErr)) {
+		return false;
+	}
+
+	_access = access::READWRITE; // keep for future checks
 	if (pErr) pErr->clear();
 	return true;
 }
@@ -95,14 +97,14 @@ bool file::set_new_size(size_t newSize, wstring* pErr)
 	if (r == INVALID_SET_FILE_POINTER) {
 		DWORD err = GetLastError();
 		close();
-		if (pErr) *pErr = str::format(L"SetFilePointer() failed with offset of %d, error code %d.", newSize, err);
+		if (pErr) *pErr = str::format(L"SetFilePointer() failed with offset of %u, error code %u.", newSize, err);
 		return false;
 	}
 
 	if (!SetEndOfFile(_hFile)) {
 		DWORD err = GetLastError();
 		close();
-		if (pErr) *pErr = str::format(L"SetEndOfFile() failed with offset of %d, error code %d.", newSize, err);
+		if (pErr) *pErr = str::format(L"SetEndOfFile() failed with offset of %u, error code %u.", newSize, err);
 		return false;
 	}
 
@@ -110,7 +112,7 @@ bool file::set_new_size(size_t newSize, wstring* pErr)
 	if (r == INVALID_SET_FILE_POINTER) {
 		DWORD err = GetLastError();
 		close();
-		if (pErr) *pErr = str::format(L"SetFilePointer() failed to rewind the file, error code %d.", err);
+		if (pErr) *pErr = str::format(L"SetFilePointer() failed to rewind the file, error code %u.", err);
 		return false;
 	}
 
@@ -128,7 +130,7 @@ bool file::get_content(vector<BYTE>& buf, wstring* pErr) const
 	buf.resize(size());
 	DWORD bytesRead = 0;
 	if (!ReadFile(_hFile, &buf[0], static_cast<DWORD>(buf.size()), &bytesRead, nullptr)) {
-		if (pErr) *pErr = str::format(L"ReadFile() failed to read %d bytes.", buf.size());
+		if (pErr) *pErr = str::format(L"ReadFile() failed to read %u bytes.", buf.size());
 		return false;
 	}
 
@@ -152,7 +154,7 @@ bool file::write(const BYTE* pData, size_t sz, wstring* pErr)
 	// Internal file pointer will move forward.
 	DWORD dwWritten = 0;
 	if (!WriteFile(_hFile, pData, static_cast<DWORD>(sz), &dwWritten, nullptr)) {
-		if (pErr) *pErr = str::format(L"WriteFile() failed to write %d bytes.", sz);
+		if (pErr) *pErr = str::format(L"WriteFile() failed to write %u bytes.", sz);
 		return false;
 	}
 
@@ -168,9 +170,32 @@ bool file::rewind(wstring* pErr)
 	}
 
 	if (SetFilePointer(_hFile, 0, nullptr, FILE_BEGIN) == INVALID_SET_FILE_POINTER) {
-		if (pErr) *pErr = str::format(L"SetFilePointer() failed, error code %d.", GetLastError());
+		if (pErr) *pErr = str::format(L"SetFilePointer() failed, error code %u.", GetLastError());
 		return false;
 	}
+	return true;
+}
+
+bool file::_raw_open(const wstring& filePath, DWORD desiredAccess, DWORD shareMode, DWORD creationDisposition, wstring* pErr)
+{
+	if (filePath.empty()) {
+		if (pErr) *pErr = L"Path is empty.";
+		return false;
+	}
+
+	close();
+	_hFile = CreateFile(filePath.c_str(), desiredAccess, shareMode,
+		nullptr, creationDisposition, 0, nullptr);
+
+	if (_hFile == INVALID_HANDLE_VALUE) {
+		_hFile = nullptr;
+		if (pErr) *pErr = str::format(L"CreateFile() failed to open file as %s, error code %u.",
+			(desiredAccess & GENERIC_WRITE) ? L"read-only" : L"read-write",
+			GetLastError());
+		return false;
+	}
+
+	if (pErr) pErr->clear();
 	return true;
 }
 
@@ -192,7 +217,7 @@ bool file::del(const wstring& fileOrFolder, wstring* pErr)
 		}
 	} else {
 		if (!DeleteFile(fileOrFolder.c_str())) {
-			if (pErr) *pErr = str::format(L"DeleteFile() failed, error code %d.", GetLastError());
+			if (pErr) *pErr = str::format(L"DeleteFile() failed, error code %u.", GetLastError());
 			return false;
 		}
 	}
@@ -203,7 +228,7 @@ bool file::del(const wstring& fileOrFolder, wstring* pErr)
 bool file::create_dir(const wstring& thePath, wstring* pErr)
 {
 	if (!CreateDirectory(thePath.c_str(), nullptr)) {
-		if (pErr) *pErr = str::format(L"CreateDirectory() failed, error code %d.", GetLastError());
+		if (pErr) *pErr = str::format(L"CreateDirectory() failed, error code %u.", GetLastError());
 		return false;
 	}
 	if (pErr) pErr->clear();

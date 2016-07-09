@@ -15,23 +15,10 @@ using std::wstring;
 
 vector<xml::node*> xml::node::children_by_name(const wchar_t* elemName)
 {
-	int howMany = 0;
-	size_t firstIndex = -1, lastIndex = -1;
-	for (size_t i = 0; i < children.size(); ++i) {
-		if (!lstrcmpi(children[i].name.c_str(), elemName)) { // case-insensitive match
-			++howMany;
-			if (firstIndex == -1) firstIndex = i;
-			lastIndex = i;
-		}
-	}
-
 	vector<node*> nodeBuf;
-	nodeBuf.reserve(howMany); // alloc return array
-
-	howMany = 0;
-	for (size_t i = firstIndex; i <= lastIndex; ++i) {
-		if (!lstrcmpi(children[i].name.c_str(), elemName)) {
-			nodeBuf.emplace_back(&children[i]);
+	for (node& node : children) {
+		if (!lstrcmpi(node.name.c_str(), elemName)) { // case-insensitive match
+			nodeBuf.emplace_back(&node);
 		}
 	}
 	return nodeBuf;

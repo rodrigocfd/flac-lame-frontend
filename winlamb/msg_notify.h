@@ -21,7 +21,7 @@ template<typename traitsT>
 class msg_notify : virtual public wnd_proc<traitsT> {
 public:
 	struct params_notify : public params {
-		params_notify(const params& p) { wParam = p.wParam; lParam = p.lParam; }
+		params_notify(const params& p) : params(p) { }
 		NMHDR& nmhdr() const           { return *reinterpret_cast<NMHDR*>(lParam); }
 	};
 	typedef std::function<typename traitsT::ret_type(params_notify)> func_notify_type;

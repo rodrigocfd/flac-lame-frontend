@@ -38,14 +38,16 @@ struct str final {
 	static bool          is_uint(const std::wstring& s);
 	static bool          is_hex(const std::wstring& s);
 	static bool          is_float(const std::wstring& s);
-	static std::vector<std::wstring> explode(const std::wstring& s, const wchar_t* delimiter);
-	static std::vector<std::wstring> explode(const std::wstring& s, const std::wstring& delimiter) { return explode(s, delimiter.c_str()); }
+	static std::wstring  to_str_with_separator(int n, wchar_t separator = L',');
+	static std::vector<std::wstring> explode(const std::wstring& s, const std::wstring& delimiter);
 	static std::vector<std::wstring> explode_multi_zero(const wchar_t* s);
 	static std::vector<std::wstring> explode_quoted(const wchar_t* s);
 	static std::wstring              parse_ascii(const BYTE* data, size_t length);
-	static std::wstring              parse_ascii(const std::vector<BYTE>& data) { return parse_ascii(&data[0], data.size()); }
+	static std::wstring              parse_ascii(const std::vector<BYTE>& data)   { return parse_ascii(&data[0], data.size()); }
+	static std::wstring              parse_win1252(const BYTE* data, size_t length);
+	static std::wstring              parse_win1252(const std::vector<BYTE>& data) { return parse_win1252(&data[0], data.size()); }
 	static std::wstring              parse_utf8(const BYTE* data, size_t length);
-	static std::wstring              parse_utf8(const std::vector<BYTE>& data)  { return parse_utf8(&data[0], data.size()); }
+	static std::wstring              parse_utf8(const std::vector<BYTE>& data)    { return parse_utf8(&data[0], data.size()); }
 	static std::vector<BYTE>         serialize_utf8(const std::wstring& s);
 };
 

@@ -15,7 +15,7 @@ struct traits_window final {
 	template<typename instT>
 	static instT* get_instance_pointer(HWND hWnd, UINT msg, LPARAM lp)
 	{
-		instT *p = nullptr;
+		instT* p = nullptr;
 		if (msg == WM_NCCREATE) {
 			p = reinterpret_cast<instT*>((reinterpret_cast<CREATESTRUCT*>(lp))->lpCreateParams);
 			SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(p));

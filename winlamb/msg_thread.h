@@ -31,7 +31,7 @@ protected:
 	msg_thread()
 	{
 		on_message(wm_threadT, [this](params p)->typename traitsT::ret_type {
-			_callback_pack *pack = reinterpret_cast<_callback_pack*>(p.lParam);
+			_callback_pack* pack = reinterpret_cast<_callback_pack*>(p.lParam);
 			pack->callback();
 			delete pack;
 			return traitsT::default_proc(hwnd(), wm_threadT, p.wParam, p.lParam);
@@ -46,7 +46,7 @@ public:
 		// This method is analog to SendMessage (synchronous), but intended to be called from another
 		// thread, so a callback function can, tunelled by wndproc, run in the original thread of the
 		// window, thus allowing GUI updates. This avoids the user to deal with a custom WM_ message.
-		_callback_pack *pack = new _callback_pack{ std::move(callback) };
+		_callback_pack* pack = new _callback_pack{ std::move(callback) };
 		SendMessage(hwnd(), wm_threadT, 0, reinterpret_cast<LPARAM>(pack));
 	}
 };

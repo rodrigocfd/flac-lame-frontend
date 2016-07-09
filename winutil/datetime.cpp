@@ -64,12 +64,15 @@ LONGLONG datetime::get_timestamp() const
 	return date.QuadPart / 10000; // to milliseconds; to printf use %I64u
 }
 
-LONGLONG datetime::minus(const datetime& other) const
+size_t datetime::minus(const datetime& other) const
 {
 	LARGE_INTEGER liUs, liThem;
 	_st_to_li(_st, liUs);
 	_st_to_li(other._st, liThem);
-	return (liUs.QuadPart - liThem.QuadPart) / 10000; // 100-nanoseconds to milliseconds; to printf use %I64u
+
+	// 100-nanoseconds to milliseconds; to printf a LARGE_INTEGER use %I64u.
+	// To int32, max is 1,193 hours; to int64, a shitload of hours.
+	return static_cast<size_t>((liUs.QuadPart - liThem.QuadPart) / 10000);
 }
 
 datetime& datetime::add_ms(LONGLONG ms)

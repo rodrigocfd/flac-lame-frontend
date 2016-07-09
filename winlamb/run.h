@@ -5,8 +5,8 @@
  */
 
 #pragma once
+#include <tchar.h>
 #include <CommCtrl.h>
-
 #pragma comment(lib, "Comctl32.lib")
 #pragma comment(linker, \
 	"\"/manifestdependency:type='Win32' " \
@@ -17,7 +17,7 @@
 	"language='*'\"")
 
 #define RUN(class_main) \
-int WINAPI wWinMain(HINSTANCE hInst, HINSTANCE, PWSTR, int cmdShow) \
+int APIENTRY _tWinMain(HINSTANCE hInst, HINSTANCE, LPTSTR, int cmdShow) \
 { \
 	int ret = 0; \
 	{ \

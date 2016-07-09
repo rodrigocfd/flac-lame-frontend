@@ -278,10 +278,50 @@ bool str::is_float(const wstring& s)
 	return true;
 }
 
-vector<wstring> str::explode(const wstring& s, const wchar_t* delimiter)
+wstring str::to_str_with_separator(int n, wchar_t separator)
+{
+	wstring ret;
+	ret.reserve(16);
+
+	int abso = abs(n);
+	BYTE blocks = 0;
+	while (abso >= 1000) {
+		abso = (abso - (abso % 1000)) / 1000;
+		++blocks;
+	}
+
+	abso = abs(n);
+	bool firstPass = true;
+	do {
+		int num = abso % 1000;
+		wchar_t buf[8] = { 0 };
+
+		if (blocks) {
+			if (num < 100) lstrcat(buf, L"0");
+			if (num < 10) lstrcat(buf, L"0");
+		}
+		
+		#pragma warning (disable: 4996)
+		_itow(num, buf + lstrlen(buf), 10);
+		#pragma warning (default: 4996)
+
+		if (firstPass) {
+			firstPass = false;
+		} else {
+			ret.insert(0, 1, separator);
+		}
+
+		ret.insert(0, buf);
+		abso = (abso - (abso % 1000)) / 1000;
+	} while (blocks--);
+
+	if (n < 0) ret.insert(0, 1, L'-'); // prepend minus signal
+	return ret;
+}
+
+vector<wstring> str::explode(const wstring& s, const wstring& delimiter)
 {
 	vector<wstring> ret;
-	size_t delimiterLen = lstrlen(delimiter);
 	size_t base = 0, head = 0;
 
 	for (;;) {
@@ -289,7 +329,7 @@ vector<wstring> str::explode(const wstring& s, const wchar_t* delimiter)
 		if (head == wstring::npos) break;
 		ret.emplace_back();
 		ret.back().insert(0, s, base, head - base);
-		head += delimiterLen;
+		head += delimiter.size();
 		base = head;
 	}
 
@@ -301,7 +341,7 @@ vector<wstring> str::explode(const wstring& s, const wchar_t* delimiter)
 
 vector<wstring> str::explode_multi_zero(const wchar_t* s)
 {
-	// Example multiStr:
+	// Example multi-zero string:
 	// L"first one\0second one\0third one\0"
 	// Assumes a well-formed multiStr, which ends with two nulls.
 
@@ -329,7 +369,7 @@ vector<wstring> str::explode_multi_zero(const wchar_t* s)
 
 vector<wstring> str::explode_quoted(const wchar_t* s)
 {
-	// Example quotedStr:
+	// Example quoted string:
 	// "First one" NoQuoteSecond "Third one"
 
 	// Count number of strings.
@@ -410,18 +450,28 @@ wstring str::parse_ascii(const BYTE* data, size_t length)
 	return ret;
 }
 
-wstring str::parse_utf8(const BYTE* data, size_t length)
+static wstring _parseEncoded(const BYTE* data, size_t length, UINT codePage)
 {
 	wstring ret;
 	if (data && length) {
-		int neededLen = MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<const char*>(data),
+		int neededLen = MultiByteToWideChar(codePage, 0, reinterpret_cast<const char*>(data),
 			static_cast<int>(length), nullptr, 0);
 		ret.resize(neededLen);
-		MultiByteToWideChar(CP_UTF8, 0, reinterpret_cast<const char*>(data),
+		MultiByteToWideChar(codePage, 0, reinterpret_cast<const char*>(data),
 			static_cast<int>(length), &ret[0], neededLen);
-		trim_nulls(ret);
+		str::trim_nulls(ret);
 	}
 	return ret;
+}
+
+wstring str::parse_win1252(const BYTE* data, size_t length)
+{
+	return _parseEncoded(data, length, 1252);
+}
+
+wstring str::parse_utf8(const BYTE* data, size_t length)
+{
+	return _parseEncoded(data, length, CP_UTF8);
 }
 
 vector<BYTE> str::serialize_utf8(const wstring& s)
@@ -437,5 +487,5 @@ vector<BYTE> str::serialize_utf8(const wstring& s)
 			reinterpret_cast<char*>(&ret[0]),
 			neededLen, nullptr, nullptr);
 	}
-	return ret;
+	return ret; // no BOM here
 }

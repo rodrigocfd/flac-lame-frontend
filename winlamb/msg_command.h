@@ -21,8 +21,11 @@ template<typename traitsT>
 class msg_command : virtual public wnd_proc<traitsT> {
 public:
 	struct params_command : public params {
-		params_command(const params& p) { wParam = p.wParam; lParam = p.lParam; }
-		WORD control_id() const         { return LOWORD(wParam); }
+		params_command(const params& p)  : params(p) { }
+		WORD control_id() const          { return LOWORD(wParam); }
+		HWND control_hwnd() const        { return reinterpret_cast<HWND>(lParam); }
+		bool is_from_menu() const        { return HIWORD(wParam) == 0; }
+		bool is_from_accelerator() const { return HIWORD(wParam) == 1; }
 	};
 	typedef std::function<typename traitsT::ret_type(params_command)> func_command_type;
 

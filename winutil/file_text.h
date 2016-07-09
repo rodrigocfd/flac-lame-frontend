@@ -13,7 +13,7 @@ namespace winutil {
 
 class file_text final {
 public:
-	enum class encoding { UNKNOWN, ASCII, UTF8, UTF16BE, UTF16LE, UTF32BE, UTF32LE, SCSU, BOCU1 };	
+	enum class encoding { UNKNOWN, ASCII, WIN1252, UTF8, UTF16BE, UTF16LE, UTF32BE, UTF32LE, SCSU, BOCU1 };
 	struct encoding_info final {
 		encoding encType;
 		size_t   bomSize;
@@ -33,7 +33,7 @@ public:
 	static bool read_lines(std::vector<std::wstring>& buf, const std::vector<BYTE> src, std::wstring* pErr = nullptr) { return read_lines(buf, src.data(), src.size(), pErr); }
 	static bool read_lines(std::vector<std::wstring>& buf, const std::wstring& srcPath, std::wstring* pErr = nullptr);
 
-	static bool write_utf8(const std::wstring& text, const std::wstring& destPath, std::wstring* pErr = nullptr);
+	static bool write_utf8(const std::wstring& text, const std::wstring& destPath, bool writeBom, std::wstring* pErr = nullptr);
 };
 
 }//namespace winutil

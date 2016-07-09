@@ -18,7 +18,7 @@ namespace winlamb {
 
 struct setup_window {
 	WNDCLASSEX     wndClassEx;
-	const wchar_t *title;
+	const wchar_t* title;
 	DWORD          style, exStyle;
 	POINT          position;
 	SIZE           size;
@@ -41,12 +41,12 @@ public:
 	bool create(HWND hParent, HINSTANCE hInst = nullptr)
 	{
 		if (!setup.wndClassEx.lpszClassName) {
-			OutputDebugString(L"ERROR: window not created, no class name given.\n");
+			OutputDebugString(TEXT("ERROR: window not created, no class name given.\n"));
 			return false;
 		}
 
 		if (hwnd()) {
-			OutputDebugString(L"ERROR: tried to create window twice.\n");
+			OutputDebugString(TEXT("ERROR: tried to create window twice.\n"));
 			return false;
 		}
 
@@ -75,7 +75,7 @@ private:
 				atom = static_cast<ATOM>(GetClassInfoEx(hInst,
 					setup.wndClassEx.lpszClassName, &setup.wndClassEx)); // https://blogs.msdn.microsoft.com/oldnewthing/20041011-00/?p=37603
 			} else {
-				OutputDebugString(L"ERROR: window not created, failed to register class ATOM.\n");
+				OutputDebugString(TEXT("ERROR: window not created, failed to register class ATOM.\n"));
 				return 0;
 			}
 		}

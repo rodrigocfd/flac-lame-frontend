@@ -4,6 +4,7 @@
 #include "convert.h"
 #include "../winutil/file.h"
 #include "../winutil/menu.h"
+#include "../winutil/path.h"
 #include "../winutil/str.h"
 #include "../winutil/sys.h"
 #include "../res/resource.h"
@@ -67,7 +68,7 @@ dlg_main::dlg_main()
 
 		(_cmbVbr = GetDlgItem(hwnd(), CMB_VBR))
 			.item_add(L"0 (~245 kbps)|1 (~225 kbps)|2 (~190 kbps)|3 (~175 kbps)|"
-				L"4 (~165 kbps); default|5 (~130 kbps)|6 (~115 kbps)|7 (~100 kbps)"
+				L"4 (~165 kbps); default|5 (~130 kbps)|6 (~115 kbps)|7 (~100 kbps)|"
 				L"8 (~85 kbps)|9 (~65 kbps)")
 			.item_set_selected(4);
 
@@ -336,9 +337,9 @@ LRESULT dlg_main::_update_counter(size_t newCount)
 void dlg_main::_file_to_list(const wstring& file)
 {
 	int iType = -1;
-	if (str::ends_withi(file, L".mp3"))       iType = 0;
-	else if (str::ends_withi(file, L".flac")) iType = 1;
-	else if (str::ends_withi(file, L".wav"))  iType = 2; // what type of audio file is this?
+	if (path::has_extension(file, L".mp3"))       iType = 0;
+	else if (path::has_extension(file, L".flac")) iType = 1;
+	else if (path::has_extension(file, L".wav"))  iType = 2; // what type of audio file is this?
 
 	if (iType == -1) {
 		return; // bypass file if unaccepted format
