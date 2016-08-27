@@ -8,10 +8,7 @@
 #include "dialog.h"
 
 /**
- * dialog_modal
- *  dialog
- *   wnd_proc<traits_dialog>
- *    wnd
+ * wnd <-- wnd_proc<traits_dialog> <-- dialog <-- dialog_modal
  */
 
 namespace winlamb {
@@ -24,8 +21,8 @@ public:
 protected:
 	dialog_modal()
 	{
-		on_message(WM_CLOSE, [this](params p)->INT_PTR {
-			EndDialog(hwnd(), IDOK);
+		this->wnd_proc::on_message(WM_CLOSE, [this](params p)->INT_PTR {
+			EndDialog(this->wnd::hwnd(), IDOK);
 			return TRUE;
 		});
 	}
@@ -33,19 +30,19 @@ protected:
 public:
 	int show(HWND hParent)
 	{
-		return static_cast<int>( DialogBoxParam(
+		return static_cast<int>(DialogBoxParam(
 			reinterpret_cast<HINSTANCE>(GetWindowLongPtr(hParent, GWLP_HINSTANCE)),
-			MAKEINTRESOURCE(setup.dialogId), hParent, wnd_proc::_process,
-			reinterpret_cast<LPARAM>(static_cast<wnd_proc*>(this))) ); // _hwnd member is set on first message processing
+			MAKEINTRESOURCE(this->dialog::setup.dialogId), hParent, wnd_proc::_process,
+			reinterpret_cast<LPARAM>(static_cast<wnd_proc*>(this)))); // _hwnd member is set on first message processing
 	}
 
 protected:
 	void center_on_parent()
 	{
 		RECT rc = { 0 }, rcParent = { 0 };
-		GetWindowRect(hwnd(), &rc);
-		GetWindowRect(GetParent(hwnd()), &rcParent); // both relative to screen
-		SetWindowPos(hwnd(), nullptr,
+		GetWindowRect(this->wnd::hwnd(), &rc);
+		GetWindowRect(GetParent(this->wnd::hwnd()), &rcParent); // both relative to screen
+		SetWindowPos(this->wnd::hwnd(), nullptr,
 			rcParent.left + (rcParent.right - rcParent.left)/2 - (rc.right - rc.left)/2,
 			rcParent.top + (rcParent.bottom - rcParent.top)/2 - (rc.bottom - rc.top)/2,
 			0, 0, SWP_NOZORDER | SWP_NOSIZE);

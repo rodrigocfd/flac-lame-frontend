@@ -9,9 +9,7 @@
 #include "traits_window.h"
 
 /**
- * window
- *  wnd_proc<traits_window>
- *   wnd
+ * wnd <-- wnd_proc<traits_window> <-- window
  */
 
 namespace winlamb {
@@ -40,12 +38,12 @@ protected:
 public:
 	bool create(HWND hParent, HINSTANCE hInst = nullptr)
 	{
-		if (!setup.wndClassEx.lpszClassName) {
+		if (!this->setup.wndClassEx.lpszClassName) {
 			OutputDebugString(TEXT("ERROR: window not created, no class name given.\n"));
 			return false;
 		}
 
-		if (hwnd()) {
+		if (this->wnd::hwnd()) {
 			OutputDebugString(TEXT("ERROR: tried to create window twice.\n"));
 			return false;
 		}
@@ -53,27 +51,30 @@ public:
 		if (!hParent && !hInst) return false;
 		if (!hInst) hInst = reinterpret_cast<HINSTANCE>(GetWindowLongPtr(hParent, GWLP_HINSTANCE));
 
-		setup.wndClassEx.cbSize = sizeof(WNDCLASSEX); // make sure of these
-		setup.wndClassEx.lpfnWndProc = wnd_proc::_process;
-		setup.wndClassEx.hInstance = hInst;
+		this->setup.wndClassEx.cbSize = sizeof(WNDCLASSEX); // make sure of these
+		this->setup.wndClassEx.lpfnWndProc = wnd_proc::_process;
+		this->setup.wndClassEx.hInstance = hInst;
 
-		ATOM atom = _register_class(hInst);
+		ATOM atom = this->_register_class(hInst);
 		if (!atom) return false;
 
-		return CreateWindowEx(setup.exStyle, MAKEINTATOM(atom), setup.title, setup.style,
-			setup.position.x, setup.position.y, setup.size.cx, setup.size.cy,
-			hParent, setup.menu, hInst,
+		return CreateWindowEx(this->setup.exStyle, MAKEINTATOM(atom),
+			this->setup.title, this->setup.style,
+			this->setup.position.x, this->setup.position.y,
+			this->setup.size.cx, this->setup.size.cy,
+			hParent, this->setup.menu, hInst,
 			static_cast<LPVOID>(static_cast<wnd_proc*>(this))) != nullptr; // _hwnd member is set on first message processing
 	}
 
 private:
 	ATOM _register_class(HINSTANCE hInst)
 	{
-		ATOM atom = RegisterClassEx(&setup.wndClassEx);
+		ATOM atom = RegisterClassEx(&this->setup.wndClassEx);
 		if (!atom) {
 			if (GetLastError() == ERROR_CLASS_ALREADY_EXISTS) {
 				atom = static_cast<ATOM>(GetClassInfoEx(hInst,
-					setup.wndClassEx.lpszClassName, &setup.wndClassEx)); // https://blogs.msdn.microsoft.com/oldnewthing/20041011-00/?p=37603
+					this->setup.wndClassEx.lpszClassName,
+					&this->setup.wndClassEx)); // https://blogs.msdn.microsoft.com/oldnewthing/20041011-00/?p=37603
 			} else {
 				OutputDebugString(TEXT("ERROR: window not created, failed to register class ATOM.\n"));
 				return 0;

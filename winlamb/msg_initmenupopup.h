@@ -10,9 +10,9 @@
 #include "traits_dialog.h"
 
 /**
- * msg_initmenupopup
- *  wnd_proc
- *   wnd
+ *                     +-- msg_initmenupopup<traits_window> <-- window_msg_initmenupopup
+ * wnd <-- wnd_proc <--+
+ *                     +-- msg_initmenupopup<traits_dialog> <-- dialog_msg_initmenupopup
  */
 
 namespace winlamb {
@@ -22,9 +22,9 @@ class msg_initmenupopup : virtual public wnd_proc<traitsT> {
 public:
 	struct params_initmenupopup : public params {
 		params_initmenupopup(const params& p)  : params(p) { }
-		HMENU hmenu() const                    { return reinterpret_cast<HMENU>(wParam); }
-		WORD  opened_item_relative_pos() const { return LOWORD(lParam); }
-		bool  is_window_menu() const           { return HIWORD(lParam) == TRUE; }
+		HMENU hmenu() const                    { return reinterpret_cast<HMENU>(this->params::wParam); }
+		WORD  opened_item_relative_pos() const { return LOWORD(this->params::lParam); }
+		bool  is_window_menu() const           { return HIWORD(this->params::lParam) == TRUE; }
 	};
 	typedef std::function<typename traitsT::ret_type(params_initmenupopup)> func_initmenupopup_type;
 
@@ -34,9 +34,9 @@ private:
 protected:
 	msg_initmenupopup()
 	{
-		on_message(WM_INITMENUPOPUP, [this](params p)->typename traitsT::ret_type {
+		this->wnd_proc::on_message(WM_INITMENUPOPUP, [this](params p)->typename traitsT::ret_type {
 			params_initmenupopup pi(p);
-			return _callbacks.process(hwnd(), WM_INITMENUPOPUP,
+			return this->_callbacks.process(this->wnd::hwnd(), WM_INITMENUPOPUP,
 				GetMenuItemID(pi.hmenu(), 0), pi);
 		});
 	}
@@ -46,12 +46,12 @@ public:
 
 	void on_initmenupopup(WORD commandIdOfFirstItem, func_initmenupopup_type callback)
 	{
-		_callbacks.add(commandIdOfFirstItem, std::move(callback));
+		this->_callbacks.add(commandIdOfFirstItem, std::move(callback));
 	}
 
 	void on_initmenupopup(std::initializer_list<WORD> commandIdOfFirstItems, func_initmenupopup_type callback)
 	{
-		_callbacks.add(commandIdOfFirstItems, std::move(callback));
+		this->_callbacks.add(commandIdOfFirstItems, std::move(callback));
 	}
 };
 

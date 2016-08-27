@@ -1,5 +1,5 @@
 
-#include "dlg_runnin.h"
+#include "DlgRunnin.h"
 #include "convert.h"
 #include "../winutil/str.h"
 #include "../winutil/sys.h"
@@ -8,7 +8,7 @@ using namespace winutil;
 using std::wstring;
 using std::vector;
 
-dlg_runnin::dlg_runnin(
+DlgRunnin::DlgRunnin(
 	taskbar_progress&      taskBar,
 	int                    numThreads,
 	target                 targetType,
@@ -50,7 +50,7 @@ dlg_runnin::dlg_runnin(
 	});
 }
 
-void dlg_runnin::_process_next_file()
+void DlgRunnin::_process_next_file()
 {
 	int index = _curFile++;
 	if (index >= static_cast<int>(_files.size())) return;

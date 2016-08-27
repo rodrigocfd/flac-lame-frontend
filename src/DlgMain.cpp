@@ -1,6 +1,6 @@
 
-#include "dlg_main.h"
-#include "dlg_runnin.h"
+#include "DlgMain.h"
+#include "DlgRunnin.h"
 #include "convert.h"
 #include "../winutil/file.h"
 #include "../winutil/menu.h"
@@ -12,9 +12,9 @@ using namespace winutil;
 using std::vector;
 using std::wstring;
 
-RUN(dlg_main);
+RUN(DlgMain);
 
-dlg_main::dlg_main()
+DlgMain::DlgMain()
 {
 	setup.dialogId = DLG_MAIN;
 	setup.iconId = ICO_MAIN;
@@ -239,14 +239,14 @@ dlg_main::dlg_main()
 		}
 
 		// Which format are we converting to?
-		dlg_runnin::target targetType = dlg_runnin::target::NONE;
+		DlgRunnin::target targetType = DlgRunnin::target::NONE;
 	
-		if (_radMp3.is_checked())       targetType = dlg_runnin::target::MP3;
-		else if (_radFlac.is_checked()) targetType = dlg_runnin::target::FLAC;
-		else if (_radWav.is_checked())  targetType = dlg_runnin::target::WAV;
+		if (_radMp3.is_checked())       targetType = DlgRunnin::target::MP3;
+		else if (_radFlac.is_checked()) targetType = DlgRunnin::target::FLAC;
+		else if (_radWav.is_checked())  targetType = DlgRunnin::target::WAV;
 
 		// Finally invoke dialog.
-		dlg_runnin rd(_taskBar, numThreads, targetType,
+		DlgRunnin rd(_taskBar, numThreads, targetType,
 			files, delSrc, isVbr, quality, _ini,
 			_txtDest.get_text());
 		rd.show(hwnd());
@@ -278,7 +278,7 @@ dlg_main::dlg_main()
 	});
 }
 
-bool dlg_main::_dest_folder_is_ok()
+bool DlgMain::_dest_folder_is_ok()
 {
 	wstring destFolder = _txtDest.get_text();
 	if (!destFolder.empty()) {
@@ -307,7 +307,7 @@ bool dlg_main::_dest_folder_is_ok()
 	return true;
 }
 
-bool dlg_main::_files_exist(vector<wstring>& files)
+bool DlgMain::_files_exist(vector<wstring>& files)
 {
 	vector<listview::item> allItems = _lstFiles.items.get_all();
 	files = listview::get_all_text(allItems, 0);
@@ -323,7 +323,7 @@ bool dlg_main::_files_exist(vector<wstring>& files)
 	return true;
 }
 
-LRESULT dlg_main::_update_counter(size_t newCount)
+LRESULT DlgMain::_update_counter(size_t newCount)
 {
 	// Update counter on Run button.
 	wstring caption = newCount ?
@@ -334,7 +334,7 @@ LRESULT dlg_main::_update_counter(size_t newCount)
 	return 0;
 };
 
-void dlg_main::_file_to_list(const wstring& file)
+void DlgMain::_file_to_list(const wstring& file)
 {
 	int iType = -1;
 	if (path::has_extension(file, L".mp3"))       iType = 0;

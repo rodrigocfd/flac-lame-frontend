@@ -6,13 +6,13 @@
 
 #pragma once
 #include "dialog.h"
+#include "wnd_loop.h"
 #include "run.h"
 
 /**
- * dialog_main
- *  dialog
- *   wnd_proc<traits_dialog>
- *    wnd
+ *        +-- wnd_proc<traits_dialog> <-- dialog <--+
+ * wnd <--+                                         +-- dialog_main
+ *        +------------- wnd_loop <-----------------+
  */
 
 namespace winlamb {
@@ -24,7 +24,7 @@ struct setup_dialog_main final : public setup_dialog {
 };
 
 
-class dialog_main : public dialog<setup_dialog_main> {
+class dialog_main : public dialog<setup_dialog_main>, public wnd_loop {
 public:
 	virtual ~dialog_main() = default;
 	dialog_main& operator=(const dialog_main&) = delete;
@@ -32,11 +32,12 @@ public:
 protected:
 	dialog_main()
 	{
-		on_message(WM_CLOSE, [this](params p)->INT_PTR {
-			DestroyWindow(hwnd());
+		this->wnd_proc::on_message(WM_CLOSE, [this](params p)->INT_PTR {
+			DestroyWindow(this->wnd::hwnd());
 			return TRUE;
 		});
-		on_message(WM_NCDESTROY, [](params p)->INT_PTR {
+
+		this->wnd_proc::on_message(WM_NCDESTROY, [](params p)->INT_PTR {
 			PostQuitMessage(0);
 			return TRUE;
 		});
@@ -47,57 +48,46 @@ public:
 	{
 		InitCommonControls();
 
-		if (!setup.dialogId) {
-			OutputDebugString(TEXT("ERROR: dialog not created, no dialog ID given.\n"));
+		if (!this->dialog::setup.dialogId) {
+			OutputDebugString(TEXT("ERROR: main dialog not created, no dialog ID given.\n"));
 			return -1;
 		}
 
-		HWND hwndRet = CreateDialogParam(hInst, MAKEINTRESOURCE(setup.dialogId),
+		HWND hwndRet = CreateDialogParam(hInst, MAKEINTRESOURCE(this->dialog::setup.dialogId),
 			nullptr, wnd_proc::_process,
 			reinterpret_cast<LPARAM>(static_cast<wnd_proc*>(this)) ); // _hwnd member is set on first message processing
 		if (!hwndRet) {
-			OutputDebugString(TEXT("ERROR: dialog not created, CreateDialogParam failed.\n"));
+			OutputDebugString(TEXT("ERROR: main dialog not created, CreateDialogParam failed.\n"));
 			return -1;
 		}
 
-		_set_icon(hInst);
-		ShowWindow(hwnd(), cmdShow);
-		return _msg_loop(hInst); // this can be used as program return value
+		HACCEL hAccel = nullptr;
+		if (this->dialog::setup.accelTableId) {
+			hAccel = LoadAccelerators(hInst, MAKEINTRESOURCE(this->dialog::setup.accelTableId));
+		}
+
+		this->_set_icon(hInst);
+		ShowWindow(this->wnd::hwnd(), cmdShow);
+		return this->wnd_loop::_msg_loop(hAccel); // this can be used as program return value
 	}
 
 private:
 	void _set_icon(HINSTANCE hInst)
 	{
-		if (setup.iconId) {
-			SendMessage(hwnd(), WM_SETICON, ICON_SMALL,
+		if (this->dialog::setup.iconId) {
+			SendMessage(this->wnd::hwnd(), WM_SETICON, ICON_SMALL,
 				reinterpret_cast<LPARAM>(reinterpret_cast<HICON>(LoadImage(hInst,
-					MAKEINTRESOURCE(setup.iconId), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR))));
+					MAKEINTRESOURCE(this->dialog::setup.iconId),
+					IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR))));
 			SendMessage(hwnd(), WM_SETICON, ICON_BIG,
 				reinterpret_cast<LPARAM>(reinterpret_cast<HICON>(LoadImage(hInst,
-					MAKEINTRESOURCE(setup.iconId), IMAGE_ICON, 32, 32, LR_DEFAULTCOLOR))));
+					MAKEINTRESOURCE(this->dialog::setup.iconId),
+					IMAGE_ICON, 32, 32, LR_DEFAULTCOLOR))));
 		}
-	}
-
-	int _msg_loop(HINSTANCE hInst)
-	{
-		HACCEL hAccel = nullptr;
-		if (setup.accelTableId) {
-			hAccel = LoadAccelerators(hInst, MAKEINTRESOURCE(setup.accelTableId));
-		}
-
-		MSG  msg = { 0 };
-		BOOL ret = 0;
-		while ((ret = GetMessage(&msg, nullptr, 0, 0)) != 0) {
-			if (ret == -1) return -1;
-			if ( (hAccel && TranslateAccelerator(hwnd(), hAccel, &msg)) ||
-				IsDialogMessage(hwnd(), &msg) ) continue;
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-		return static_cast<int>(msg.wParam); // this can be used as program return value
 	}
 
 	wnd_proc<traits_dialog>::_process;
+	wnd_loop::_msg_loop;
 };
 
 }//namespace winlamb

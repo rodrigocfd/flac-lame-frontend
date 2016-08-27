@@ -10,9 +10,9 @@
 #include "traits_dialog.h"
 
 /**
- * msg_keyup
- *  wnd_proc
- *   wnd
+ *                     +-- msg_keyup<traits_window> <-- window_msg_keyup
+ * wnd <-- wnd_proc <--+
+ *                     +-- msg_keyup<traits_dialog> <-- dialog_msg_keyup
  */
 
 namespace winlamb {
@@ -22,8 +22,8 @@ class msg_keyup : virtual public wnd_proc<traitsT> {
 public:
 	struct params_keyup : public params {
 		params_keyup(const params& p) : params(p) { }
-		WORD virt_key_code() const    { return LOWORD(wParam); }
-		bool is_extended_key() const  { return (lParam & (1 << 24)) != 0; }
+		WORD virt_key_code() const    { return LOWORD(this->params::wParam); }
+		bool is_extended_key() const  { return (this->params::lParam & (1 << 24)) != 0; }
 	};
 	typedef std::function<typename traitsT::ret_type(params_keyup)> func_keyup_type;
 
@@ -33,9 +33,9 @@ private:
 protected:
 	msg_keyup()
 	{
-		on_message(WM_KEYUP, [this](params p)->typename traitsT::ret_type {
+		this->wnd_proc::on_message(WM_KEYUP, [this](params p)->typename traitsT::ret_type {
 			params_keyup pk(p);
-			return _callbacks.process(hwnd(), WM_KEYUP, pk.virt_key_code(), pk);
+			return this->_callbacks.process(this->wnd::hwnd(), WM_KEYUP, pk.virt_key_code(), pk);
 		});
 	}
 
@@ -44,12 +44,12 @@ public:
 
 	void on_keyup(WORD virtKeyCode, func_keyup_type callback)
 	{
-		_callbacks.add(virtKeyCode, std::move(callback));
+		this->_callbacks.add(virtKeyCode, std::move(callback));
 	}
 
 	void on_keyup(std::initializer_list<WORD> virtKeyCodes, func_keyup_type callback)
 	{
-		_callbacks.add(virtKeyCodes, std::move(callback));
+		this->_callbacks.add(virtKeyCodes, std::move(callback));
 	}
 };
 

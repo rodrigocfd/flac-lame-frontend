@@ -10,9 +10,9 @@
 #include "traits_dialog.h"
 
 /**
- * msg_keydown
- *  wnd_proc
- *   wnd
+ *                     +-- msg_keydown<traits_window> <-- window_msg_keydown
+ * wnd <-- wnd_proc <--+
+ *                     +-- msg_keydown<traits_dialog> <-- dialog_msg_keydown
  */
 
 namespace winlamb {
@@ -22,10 +22,10 @@ class msg_keydown : virtual public wnd_proc<traitsT> {
 public:
 	struct params_keydown : public params {
 		params_keydown(const params& p)     : params(p) { }
-		WORD virt_key_code() const          { return LOWORD(wParam); }
-		WORD repeat_count() const           { return LOWORD(lParam); }
-		bool is_extended_key() const        { return (lParam & (1 << 24)) != 0; }
-		bool is_previous_state_down() const { return (lParam & (1 << 30)) != 0; }
+		WORD virt_key_code() const          { return LOWORD(this->params::wParam); }
+		WORD repeat_count() const           { return LOWORD(this->params::lParam); }
+		bool is_extended_key() const        { return (this->params::lParam & (1 << 24)) != 0; }
+		bool is_previous_state_down() const { return (this->params::lParam & (1 << 30)) != 0; }
 	};
 	typedef std::function<typename traitsT::ret_type(params_keydown)> func_keydown_type;
 
@@ -35,9 +35,9 @@ private:
 protected:
 	msg_keydown()
 	{
-		on_message(WM_KEYDOWN, [this](params p)->typename traitsT::ret_type {
+		this->wnd_proc::on_message(WM_KEYDOWN, [this](params p)->typename traitsT::ret_type {
 			params_keydown pk(p);
-			return _callbacks.process(hwnd(), WM_KEYDOWN, pk.virt_key_code(), pk);
+			return this->_callbacks.process(this->wnd::hwnd(), WM_KEYDOWN, pk.virt_key_code(), pk);
 		});
 	}
 
@@ -46,12 +46,12 @@ public:
 
 	void on_keydown(WORD virtKeyCode, func_keydown_type callback)
 	{
-		_callbacks.add(virtKeyCode, std::move(callback));
+		this->_callbacks.add(virtKeyCode, std::move(callback));
 	}
 
 	void on_keydown(std::initializer_list<WORD> virtKeyCodes, func_keydown_type callback)
 	{
-		_callbacks.add(virtKeyCodes, std::move(callback));
+		this->_callbacks.add(virtKeyCodes, std::move(callback));
 	}
 };
 

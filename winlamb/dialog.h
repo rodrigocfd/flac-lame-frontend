@@ -9,9 +9,7 @@
 #include "traits_dialog.h"
 
 /**
- * dialog
- *  wnd_proc<traits_dialog>
- *   wnd
+ * wnd <-- wnd_proc<traits_dialog> <-- dialog
  */
 
 namespace winlamb {

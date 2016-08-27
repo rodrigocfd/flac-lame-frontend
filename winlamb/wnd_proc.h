@@ -10,14 +10,13 @@
 #include "callback_depot.h"
 
 /**
- * wnd_proc
- *  wnd
+ * wnd <-- wnd_proc
  */
 
 namespace winlamb {
 
 template<typename traitsT>
-class wnd_proc : public wnd {
+class wnd_proc : virtual public wnd {
 public:
 	struct params {
 		UINT   msg;
@@ -38,15 +37,15 @@ public:
 
 	void on_message(UINT msg, func_msg_type callback)
 	{
-		if (!_loopStarted) {
-			_callbacks.add(msg, std::move(callback));
+		if (!this->_loopStarted) {
+			this->_callbacks.add(msg, std::move(callback));
 		}
 	}
 
 	void on_message(std::initializer_list<UINT> msgs, func_msg_type callback)
 	{
-		if (!_loopStarted) {
-			_callbacks.add(msgs, std::move(callback));
+		if (!this->_loopStarted) {
+			this->_callbacks.add(msgs, std::move(callback));
 		}
 	}
 
@@ -58,8 +57,15 @@ protected:
 			if (!pSelf->_loopStarted) {
 				pSelf->_loopStarted = true; // no more messages can be added
 				pSelf->_hWnd = hWnd; // store HWND
+			}			
+			traitsT::ret_type retVal = pSelf->_callbacks.process(hWnd, msg, msg, {msg, wp, lp});
+			
+			if (msg == WM_NCDESTROY) { // cleanup
+				SetWindowLongPtr(hWnd, GWLP_USERDATA, 0);
+				pSelf->_hWnd = nullptr;
+				pSelf->_loopStarted = false; // allows window object to be recreated
 			}
-			return pSelf->_callbacks.process(hWnd, msg, msg, {msg, wp, lp});
+			return retVal;
 		}
 		return traitsT::default_proc(hWnd, msg, wp, lp);
 	}

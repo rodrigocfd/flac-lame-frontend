@@ -8,7 +8,7 @@
 #include "../winutil/progressbar.h"
 #include "../winutil/taskbar_progress.h"
 
-class dlg_runnin final : public winlamb::dialog_modal,
+class DlgRunnin final : public winlamb::dialog_modal,
 	public winlamb::dialog_msg_thread
 {
 public:
@@ -29,7 +29,7 @@ private:
 	int                              _curFile, _filesDone;
 	winutil::datetime                _time0;
 public:
-	dlg_runnin(
+	DlgRunnin(
 		winutil::taskbar_progress&       taskBar,
 		int                              numThreads,
 		target                           targetType,

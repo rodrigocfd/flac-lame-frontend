@@ -10,9 +10,9 @@
 #include "traits_dialog.h"
 
 /**
- * msg_thread
- *  wnd_proc
- *   wnd
+ *                     +-- msg_thread<traits_window> <-- window_msg_thread
+ * wnd <-- wnd_proc <--+
+ *                     +-- msg_thread<traits_dialog> <-- dialog_msg_thread
  */
 
 namespace winlamb {
@@ -30,11 +30,11 @@ private:
 protected:
 	msg_thread()
 	{
-		on_message(wm_threadT, [this](params p)->typename traitsT::ret_type {
+		this->wnd_proc::on_message(wm_threadT, [this](params p)->typename traitsT::ret_type {
 			_callback_pack* pack = reinterpret_cast<_callback_pack*>(p.lParam);
 			pack->callback();
 			delete pack;
-			return traitsT::default_proc(hwnd(), wm_threadT, p.wParam, p.lParam);
+			return traitsT::default_proc(this->wnd::hwnd(), wm_threadT, p.wParam, p.lParam);
 		});
 	}
 
@@ -47,7 +47,7 @@ public:
 		// thread, so a callback function can, tunelled by wndproc, run in the original thread of the
 		// window, thus allowing GUI updates. This avoids the user to deal with a custom WM_ message.
 		_callback_pack* pack = new _callback_pack{ std::move(callback) };
-		SendMessage(hwnd(), wm_threadT, 0, reinterpret_cast<LPARAM>(pack));
+		SendMessage(this->wnd::hwnd(), wm_threadT, 0, reinterpret_cast<LPARAM>(pack));
 	}
 };
 

@@ -11,10 +11,7 @@
 #pragma comment(lib, "UxTheme.lib")
 
 /**
- * window_control
- *  window
- *   wnd_proc<traits_window>
- *    wnd
+ * wnd <-- wnd_proc<traits_window> <-- window <-- window_control
  */
 
 namespace winlamb {
@@ -27,9 +24,9 @@ public:
 protected:
 	window_control()
 	{
-		setup.wndClassEx.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
-		setup.wndClassEx.style = CS_DBLCLKS;
-		setup.style = CS_DBLCLKS | WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
+		this->window::setup.wndClassEx.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
+		this->window::setup.wndClassEx.style = CS_DBLCLKS;
+		this->window::setup.style = CS_DBLCLKS | WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
 
 		// Useful styles to add:
 		// WS_TABSTOP will receive focus on Tab key rotation
@@ -37,34 +34,34 @@ protected:
 		// WS_VSCROLL adds vertical scrollbar
 		// WS_EX_CLIENTEDGE adds border (extended style, add on exStyle)
 
-		on_message(WM_NCPAINT, [this](params p)->LRESULT {
-			return _paint_themed_borders(p);
+		this->wnd_proc::on_message(WM_NCPAINT, [this](params p)->LRESULT {
+			return this->_paint_themed_borders(p);
 		});
 	}
 
 public:
 	bool create(HWND hParent, int controlId, POINT position, SIZE size)
 	{
-		setup.position = position;
-		setup.size = size;
-		setup.menu = reinterpret_cast<HMENU>(static_cast<INT_PTR>(controlId));
-		return create(hParent);
+		this->window::setup.position = position;
+		this->window::setup.size = size;
+		this->window::setup.menu = reinterpret_cast<HMENU>(static_cast<INT_PTR>(controlId));
+		return this->window::create(hParent);
 	}
 
 private:
 	LRESULT _paint_themed_borders(params p)
 	{
-		LRESULT defRet = DefWindowProc(hwnd(), WM_NCPAINT, p.wParam, p.lParam); // will make system draw the scrollbar for us
-		if ((GetWindowLongPtr(hwnd(), GWL_EXSTYLE) & WS_EX_CLIENTEDGE) && IsThemeActive() && IsAppThemed()) {
+		LRESULT defRet = DefWindowProc(this->wnd::hwnd(), WM_NCPAINT, p.wParam, p.lParam); // will make system draw the scrollbar for us
+		if ((GetWindowLongPtr(this->wnd::hwnd(), GWL_EXSTYLE) & WS_EX_CLIENTEDGE) && IsThemeActive() && IsAppThemed()) {
 			RECT rc = { 0 };
-			GetWindowRect(hwnd(), &rc); // window outmost coordinates, including margins
-			ScreenToClient(hwnd(), reinterpret_cast<POINT*>(&rc));
-			ScreenToClient(hwnd(), reinterpret_cast<POINT*>(&rc.right));
+			GetWindowRect(this->wnd::hwnd(), &rc); // window outmost coordinates, including margins
+			ScreenToClient(this->wnd::hwnd(), reinterpret_cast<POINT*>(&rc));
+			ScreenToClient(this->wnd::hwnd(), reinterpret_cast<POINT*>(&rc.right));
 			rc.left += 2; rc.top += 2; rc.right += 2; rc.bottom += 2; // because it comes up anchored at -2,-2
 
 			RECT rc2 = { 0 }; // clipping region; will draw only within this rectangle
-			HDC hdc = GetWindowDC(hwnd());
-			HTHEME hTheme = OpenThemeData(hwnd(), TEXT("LISTVIEW")); // borrow style from listview
+			HDC hdc = GetWindowDC(this->wnd::hwnd());
+			HTHEME hTheme = OpenThemeData(this->wnd::hwnd(), TEXT("LISTVIEW")); // borrow style from listview
 
 			SetRect(&rc2, rc.left, rc.top, rc.left + 2, rc.bottom); // draw only the borders to avoid flickering
 			DrawThemeBackground(hTheme, hdc, LVP_LISTGROUP, 0, &rc, &rc2); // draw themed left border
@@ -76,7 +73,7 @@ private:
 			DrawThemeBackground(hTheme, hdc, LVP_LISTGROUP, 0, &rc, &rc2); // draw themed bottom border
 
 			CloseThemeData(hTheme);
-			ReleaseDC(hwnd(), hdc);
+			ReleaseDC(this->wnd::hwnd(), hdc);
 			return 0;
 		}
 		return defRet;
