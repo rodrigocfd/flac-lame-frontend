@@ -92,23 +92,11 @@
     <ClInclude Include="winutil\com_ptr.h">
       <Filter>winutil</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\callback_depot.h">
-      <Filter>winlamb</Filter>
+    <ClInclude Include="src\DlgMain.h">
+      <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\dialog.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\dialog_main.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\dialog_modal.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\dialog_modeless.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\font.h">
-      <Filter>winlamb</Filter>
+    <ClInclude Include="src\DlgRunnin.h">
+      <Filter>src</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\msg_char.h">
       <Filter>winlamb</Filter>
@@ -158,17 +146,35 @@
     <ClInclude Include="winlamb\wnd.h">
       <Filter>winlamb</Filter>
     </ClInclude>
+    <ClInclude Include="winlamb\wnd_control.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
     <ClInclude Include="winlamb\wnd_loop.h">
       <Filter>winlamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\wnd_proc.h">
       <Filter>winlamb</Filter>
     </ClInclude>
-    <ClInclude Include="src\DlgMain.h">
-      <Filter>src</Filter>
+    <ClInclude Include="winlamb\callback_depot.h">
+      <Filter>winlamb</Filter>
     </ClInclude>
-    <ClInclude Include="src\DlgRunnin.h">
-      <Filter>src</Filter>
+    <ClInclude Include="winlamb\dialog.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\dialog_control.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\dialog_main.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\dialog_modal.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\dialog_modeless.h">
+      <Filter>winlamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\font.h">
+      <Filter>winlamb</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

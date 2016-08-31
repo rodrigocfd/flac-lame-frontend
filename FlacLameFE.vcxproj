@@ -158,6 +158,7 @@
     <ClInclude Include="src\DlgRunnin.h" />
     <ClInclude Include="winlamb\callback_depot.h" />
     <ClInclude Include="winlamb\dialog.h" />
+    <ClInclude Include="winlamb\dialog_control.h" />
     <ClInclude Include="winlamb\dialog_main.h" />
     <ClInclude Include="winlamb\dialog_modal.h" />
     <ClInclude Include="winlamb\dialog_modeless.h" />
@@ -178,6 +179,7 @@
     <ClInclude Include="winlamb\window_control.h" />
     <ClInclude Include="winlamb\window_main.h" />
     <ClInclude Include="winlamb\wnd.h" />
+    <ClInclude Include="winlamb\wnd_control.h" />
     <ClInclude Include="winlamb\wnd_loop.h" />
     <ClInclude Include="winlamb\wnd_proc.h" />
     <ClInclude Include="winutil\checkbox.h" />

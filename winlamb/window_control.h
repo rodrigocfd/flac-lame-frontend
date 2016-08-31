@@ -6,17 +6,15 @@
 
 #pragma once
 #include "window.h"
-#include <VsStyle.h>
-#include <Uxtheme.h>
-#pragma comment(lib, "UxTheme.lib")
+#include "wnd_control.h"
 
 /**
- * wnd <-- wnd_proc<traits_window> <-- window <-- window_control
+ * wnd <-- wnd_proc<traits_dialog> <-- window <-- window_control
  */
 
 namespace winlamb {
 
-class window_control : public window<> {
+class window_control : public window<>, public wnd_control {
 public:
 	virtual ~window_control() = default;
 	window_control& operator=(const window_control&) = delete;
@@ -35,12 +33,12 @@ protected:
 		// WS_EX_CLIENTEDGE adds border (extended style, add on exStyle)
 
 		this->wnd_proc::on_message(WM_NCPAINT, [this](params p)->LRESULT {
-			return this->_paint_themed_borders(p);
+			return this->wnd_control::_paint_themed_borders(p.wParam, p.lParam);
 		});
 	}
 
 public:
-	bool create(HWND hParent, int controlId, POINT position, SIZE size)
+	bool create(HWND hParent, int controlId, POINT position, SIZE size) override
 	{
 		this->window::setup.position = position;
 		this->window::setup.size = size;
@@ -49,37 +47,8 @@ public:
 	}
 
 private:
-	LRESULT _paint_themed_borders(params p)
-	{
-		LRESULT defRet = DefWindowProc(this->wnd::hwnd(), WM_NCPAINT, p.wParam, p.lParam); // will make system draw the scrollbar for us
-		if ((GetWindowLongPtr(this->wnd::hwnd(), GWL_EXSTYLE) & WS_EX_CLIENTEDGE) && IsThemeActive() && IsAppThemed()) {
-			RECT rc = { 0 };
-			GetWindowRect(this->wnd::hwnd(), &rc); // window outmost coordinates, including margins
-			ScreenToClient(this->wnd::hwnd(), reinterpret_cast<POINT*>(&rc));
-			ScreenToClient(this->wnd::hwnd(), reinterpret_cast<POINT*>(&rc.right));
-			rc.left += 2; rc.top += 2; rc.right += 2; rc.bottom += 2; // because it comes up anchored at -2,-2
-
-			RECT rc2 = { 0 }; // clipping region; will draw only within this rectangle
-			HDC hdc = GetWindowDC(this->wnd::hwnd());
-			HTHEME hTheme = OpenThemeData(this->wnd::hwnd(), TEXT("LISTVIEW")); // borrow style from listview
-
-			SetRect(&rc2, rc.left, rc.top, rc.left + 2, rc.bottom); // draw only the borders to avoid flickering
-			DrawThemeBackground(hTheme, hdc, LVP_LISTGROUP, 0, &rc, &rc2); // draw themed left border
-			SetRect(&rc2, rc.left, rc.top, rc.right, rc.top + 2);
-			DrawThemeBackground(hTheme, hdc, LVP_LISTGROUP, 0, &rc, &rc2); // draw themed top border
-			SetRect(&rc2, rc.right - 2, rc.top, rc.right, rc.bottom);
-			DrawThemeBackground(hTheme, hdc, LVP_LISTGROUP, 0, &rc, &rc2); // draw themed right border
-			SetRect(&rc2, rc.left, rc.bottom - 2, rc.right, rc.bottom);
-			DrawThemeBackground(hTheme, hdc, LVP_LISTGROUP, 0, &rc, &rc2); // draw themed bottom border
-
-			CloseThemeData(hTheme);
-			ReleaseDC(this->wnd::hwnd(), hdc);
-			return 0;
-		}
-		return defRet;
-	}
-
 	window::create;
+	wnd_control::_paint_themed_borders;
 };
 
 }//namespace winlamb
