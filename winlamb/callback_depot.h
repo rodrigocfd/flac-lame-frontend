@@ -10,17 +10,24 @@
 
 namespace winlamb {
 
-template<typename idT, typename callbackT, typename paramsT, typename traitsT>
+template<typename idtypeT, typename paramsT, typename traitsT>
 class callback_depot final {
+public:
+	using depot_callback_type = std::function<typename traitsT::ret_type(paramsT)>;
 private:
 	struct _unit final {
-		idT identifier;
-		callbackT callback;
+		idtypeT identifier;
+		depot_callback_type callback;
 	};
 	std::vector<_unit> _units;
 
 public:
-	void add(idT identifier, callbackT callback)
+	bool empty() const
+	{
+		return this->_units.empty();
+	}
+
+	void add(idtypeT identifier, depot_callback_type callback)
 	{
 		for (auto& unit : this->_units) {
 			if (unit.identifier == identifier) {
@@ -31,13 +38,14 @@ public:
 		this->_units.push_back({ identifier, std::move(callback) }); // add new
 	}
 
-	void add(std::initializer_list<idT> identifiers, callbackT callback)
+	void add(std::initializer_list<idtypeT> identifiers, depot_callback_type callback)
 	{
-		this->add(*identifiers.begin(), std::move(callback)); // store 1st callback once
+		idtypeT firstId = *identifiers.begin();
+		this->add(firstId, std::move(callback)); // store user callback once
 		size_t idxLast = this->_units.size() - 1;
 
 		for (size_t i = 1; i < identifiers.size(); ++i) {
-			if (*(identifiers.begin() + i) != *identifiers.begin()) { // avoid overwriting
+			if (*(identifiers.begin() + i) != firstId) { // avoid overwriting
 				this->add(*(identifiers.begin() + i), [this, idxLast](paramsT p)->typename traitsT::ret_type {
 					return this->_units[idxLast].callback(p); // store light wrapper to 1st callback
 				});
@@ -45,7 +53,7 @@ public:
 		}
 	}
 
-	typename traitsT::ret_type process(HWND hWnd, UINT msg, idT identifier, paramsT p) const
+	typename traitsT::ret_type process(HWND hWnd, UINT msg, idtypeT identifier, paramsT p) const
 	{
 		for (const auto& unit : this->_units) {
 			if (unit.identifier == identifier) {

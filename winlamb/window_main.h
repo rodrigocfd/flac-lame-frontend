@@ -6,13 +6,17 @@
 
 #pragma once
 #include "window.h"
+#include "wnd_main.h"
 #include "wnd_loop.h"
-#include "run.h"
 
 /**
- *        +-- wnd_proc<traits_window> <-- window <--+
- * wnd <--+                                         +-- window_main
- *        +------------- wnd_loop <-----------------+
+ *                        +--- wnd_msgs <---+
+ *        +-- wnd_proc <--+                 +-- window <--+
+ *        |               +-- wnd_thread <--+             |
+ * wnd <--+               |                               +-- window_main
+ *        |               +--- wnd_main <-----------------+
+ *        |                                               |
+ *        +------------------- wnd_loop <-----------------+
  */
 
 namespace winlamb {
@@ -23,7 +27,11 @@ struct setup_window_main final : public setup_window {
 };
 
 
-class window_main : public window<setup_window_main>, public wnd_loop {
+class window_main :
+	public window<setup_window_main>,
+	public wnd_main<traits_window>,
+	public wnd_loop
+{
 public:
 	virtual ~window_main() = default;
 	window_main& operator=(const window_main&) = delete;
@@ -42,15 +50,10 @@ protected:
 		// WS_MAXIMIZEBOX adds maximize button
 		// WS_MINIMIZEBOX adds minimize button
 		// WS_EX_ACCEPTFILES accepts dropped files (extended style, add on exStyle)
-
-		this->wnd_proc::on_message(WM_NCDESTROY, [](params p)->LRESULT {
-			PostQuitMessage(0);
-			return 0;
-		});
 	}
 
 public:
-	int run(HINSTANCE hInst, int cmdShow)
+	int run(HINSTANCE hInst, int cmdShow) override
 	{
 		InitCommonControls();
 		if (!this->window::create(nullptr, hInst)) return -1;

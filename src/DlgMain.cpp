@@ -20,7 +20,7 @@ DlgMain::DlgMain()
 	setup.iconId = ICO_MAIN;
 	setup.accelTableId = ACC_MAIN;
 
-	on_message(WM_INITDIALOG, [this](params p)->INT_PTR
+	on.INITDIALOG([this](par::initdialog p)->INT_PTR
 	{
 		// Validate and load INI file.
 		wstring iniPath = sys::path_of_exe().append(L"\\FlacLameFE.ini");
@@ -110,16 +110,16 @@ DlgMain::DlgMain()
 		return TRUE;
 	});
 
-	on_message(WM_SIZE, [this](params p)->INT_PTR
+	on.SIZE([this](par::size p)->INT_PTR
 	{
 		_resizer.arrange(p.wParam, p.lParam);
 		_lstFiles.column_fit(0);
 		return TRUE;
 	});
 
-	on_dropfiles([this](params_dropfiles p)->INT_PTR
+	on.DROPFILES([this](par::dropfiles p)->INT_PTR
 	{
-		vector<wstring> files = p.get_dropped_files();
+		vector<wstring> files = p.files();
 
 		for (const wstring& drop : files) {
 			if (file::is_dir(drop)) { // if a directory, add all files inside of it
@@ -140,21 +140,24 @@ DlgMain::DlgMain()
 		return TRUE;
 	});
 
-	on_initmenupopup(MNU_ADDFILES, [this](params_initmenupopup p)->INT_PTR
+	on.INITMENUPOPUP([this](par::initmenupopup p)->INT_PTR
 	{
 		menu menu = p.hmenu();
-		menu.enable_item(MNU_REMSELECTED, _lstFiles.items.count_selected() > 0);
-		return TRUE;
+		if (menu.get_command_id(0) == MNU_ADDFILES) {
+			menu.enable_item(MNU_REMSELECTED, _lstFiles.items.count_selected() > 0);
+			return TRUE;
+		}
+		return FALSE;
 	});
 
-	on_command(MNU_ABOUT, [this](params_command p)->INT_PTR
+	on.COMMAND(MNU_ABOUT, [this](par::command p)->INT_PTR
 	{
 		sys::msg_box(hwnd(), L"About",
 			L"FLAC/LAME graphical front-end.", MB_ICONINFORMATION);
 		return TRUE;
 	});
 
-	on_command(MNU_ADDFILES, [this](params_command p)->INT_PTR
+	on.COMMAND(MNU_ADDFILES, [this](par::command p)->INT_PTR
 	{
 		vector<wstring> files;
 		if (sys::show_open_file(hwnd(),
@@ -172,14 +175,14 @@ DlgMain::DlgMain()
 		return TRUE;
 	});
 
-	on_command(MNU_REMSELECTED, [this](params_command p)->INT_PTR
+	on.COMMAND(MNU_REMSELECTED, [this](par::command p)->INT_PTR
 	{
 		_lstFiles.items.remove_selected();
 		_update_counter( _lstFiles.items.count() );
 		return TRUE;
 	});
 
-	on_command(IDCANCEL, [this](params_command p)->INT_PTR
+	on.COMMAND(IDCANCEL, [this](par::command p)->INT_PTR
 	{
 		if (!_lstFiles.items.count() || IsWindowEnabled(GetDlgItem(hwnd(), BTN_RUN))) {
 			SendMessage(hwnd(), WM_CLOSE, 0, 0); // close on ESC only if not processing
@@ -187,7 +190,7 @@ DlgMain::DlgMain()
 		return TRUE;
 	});
 
-	on_command(BTN_DEST, [this](params_command p)->INT_PTR
+	on.COMMAND(BTN_DEST, [this](par::command p)->INT_PTR
 	{
 		wstring folder;
 		if (sys::show_choose_folder(hwnd(), folder)) {
@@ -197,7 +200,7 @@ DlgMain::DlgMain()
 		return TRUE;
 	});
 
-	on_command({RAD_MP3, RAD_FLAC, RAD_WAV}, [this](params_command p)->INT_PTR
+	on.COMMAND({RAD_MP3, RAD_FLAC, RAD_WAV}, [this](par::command p)->INT_PTR
 	{
 		_radMp3Cbr.enable(_radMp3.is_checked());
 		_cmbCbr.enable(_radMp3.is_checked() && _radMp3Cbr.is_checked());
@@ -210,14 +213,14 @@ DlgMain::DlgMain()
 		return TRUE;
 	});
 
-	on_command({RAD_CBR, RAD_VBR}, [this](params_command p)->INT_PTR
+	on.COMMAND({RAD_CBR, RAD_VBR}, [this](par::command p)->INT_PTR
 	{
 		_cmbCbr.enable(_radMp3Cbr.is_checked());
 		_cmbVbr.enable(_radMp3Vbr.is_checked());
 		return TRUE;
 	});
 
-	on_command(BTN_RUN, [this](params_command p)->INT_PTR
+	on.COMMAND(BTN_RUN, [this](par::command p)->INT_PTR
 	{
 		vector<wstring> files;
 		if (!_dest_folder_is_ok() || !_files_exist(files)) {
@@ -253,22 +256,22 @@ DlgMain::DlgMain()
 		return TRUE;
 	});
 
-	on_notify(LST_FILES, LVN_INSERTITEM, [this](params_notify p)->INT_PTR
+	on.NOTIFY(LST_FILES, LVN_INSERTITEM, [this](par::notify p)->INT_PTR
 	{
 		return _update_counter(_lstFiles.items.count()); // new item inserted
 	});
 
-	on_notify(LST_FILES, LVN_DELETEITEM, [this](params_notify p)->INT_PTR
+	on.NOTIFY(LST_FILES, LVN_DELETEITEM, [this](par::notify p)->INT_PTR
 	{
 		return _update_counter(_lstFiles.items.count() - 1); // item about to be deleted
 	});
 
-	on_notify(LST_FILES, LVN_DELETEALLITEMS, [this](params_notify p)->INT_PTR
+	on.NOTIFY(LST_FILES, LVN_DELETEALLITEMS, [this](par::notify p)->INT_PTR
 	{
 		return _update_counter(0); // all items about to be deleted
 	});
 
-	on_notify(LST_FILES, LVN_KEYDOWN, [this](params_notify p)->INT_PTR
+	on.NOTIFY(LST_FILES, LVN_KEYDOWN, [this](par::notify p)->INT_PTR
 	{
 		NMLVKEYDOWN& nkd = reinterpret_cast<NMLVKEYDOWN&>(p.nmhdr());
 		if (nkd.wVKey == VK_DELETE) { // Del key

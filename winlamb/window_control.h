@@ -9,12 +9,19 @@
 #include "wnd_control.h"
 
 /**
- * wnd <-- wnd_proc<traits_dialog> <-- window <-- window_control
+ *                     +--- wnd_msgs <----+
+ *                     |                  +-- window <--+
+ * wnd <-- wnd_proc <--+-- wnd_thread <---+             +-- window_control
+ *                     |                                |
+ *                     +-- wnd_control <----------------+
  */
 
 namespace winlamb {
 
-class window_control : public window<>, public wnd_control {
+class window_control :
+	public window<>,
+	public wnd_control<traits_window>
+{
 public:
 	virtual ~window_control() = default;
 	window_control& operator=(const window_control&) = delete;
@@ -31,10 +38,6 @@ protected:
 		// WS_HSCROLL adds horizontal scrollbar
 		// WS_VSCROLL adds vertical scrollbar
 		// WS_EX_CLIENTEDGE adds border (extended style, add on exStyle)
-
-		this->wnd_proc::on_message(WM_NCPAINT, [this](params p)->LRESULT {
-			return this->wnd_control::_paint_themed_borders(p.wParam, p.lParam);
-		});
 	}
 
 public:
@@ -48,7 +51,6 @@ public:
 
 private:
 	window::create;
-	wnd_control::_paint_themed_borders;
 };
 
 }//namespace winlamb

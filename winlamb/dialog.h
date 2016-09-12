@@ -5,11 +5,14 @@
  */
 
 #pragma once
-#include "wnd_proc.h"
+#include "wnd_msgs.h"
+#include "wnd_thread.h"
 #include "traits_dialog.h"
 
 /**
- * wnd <-- wnd_proc<traits_dialog> <-- dialog
+ *                     +--- wnd_msgs <----+
+ * wnd <-- wnd_proc <--+                  +-- dialog
+ *                     +-- wnd_thread <---+
  */
 
 namespace winlamb {
@@ -21,12 +24,15 @@ struct setup_dialog {
 
 
 template<typename setupT = setup_dialog>
-class dialog : virtual public wnd_proc<traits_dialog> {
+class dialog :
+	public wnd_msgs<traits_dialog>,
+	public wnd_thread<traits_dialog>
+{
 public:
-	setupT setup;
 	virtual ~dialog() = default;
 
 protected:
+	setupT setup;
 	dialog() = default;
 };
 

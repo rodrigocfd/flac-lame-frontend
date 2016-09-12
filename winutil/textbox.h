@@ -14,7 +14,7 @@ namespace winutil {
 
 class textbox final {
 public:
-	typedef std::function<void(BYTE)> func_keyup_type;
+	using func_keyup_type = std::function<void(BYTE)>;
 	struct selection final { int start, len; };
 
 private:

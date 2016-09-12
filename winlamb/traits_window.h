@@ -10,7 +10,8 @@
 namespace winlamb {
 
 struct traits_window final {
-	typedef LRESULT ret_type;
+	using ret_type = LRESULT;
+	static const LRESULT processed_val = 0;
 
 	template<typename instT>
 	static instT* get_instance_pointer(HWND hWnd, UINT msg, LPARAM lp)

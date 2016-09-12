@@ -1,16 +1,13 @@
 
 #pragma once
 #include "../winlamb/dialog_modal.h"
-#include "../winlamb/msg_thread.h"
 #include "../winutil/datetime.h"
 #include "../winutil/file_ini.h"
 #include "../winutil/label.h"
 #include "../winutil/progressbar.h"
 #include "../winutil/taskbar_progress.h"
 
-class DlgRunnin final : public winlamb::dialog_modal,
-	public winlamb::dialog_msg_thread
-{
+class DlgRunnin final : public winlamb::dialog_modal {
 public:
 	enum class target { NONE = 0, MP3, FLAC, WAV };
 

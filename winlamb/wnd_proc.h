@@ -18,15 +18,15 @@ namespace winlamb {
 template<typename traitsT>
 class wnd_proc : virtual public wnd {
 public:
-	struct params {
-		UINT   msg;
+	struct params final {
+		UINT   message;
 		WPARAM wParam;
 		LPARAM lParam;
 	};
-	typedef std::function<typename traitsT::ret_type(params)> func_msg_type;
+	using callback_type = std::function<typename traitsT::ret_type(params)>;
 
 private:
-	callback_depot<UINT, func_msg_type, params, traitsT> _callbacks;
+	callback_depot<UINT, params, traitsT> _callbacks;
 	bool _loopStarted;
 
 protected:
@@ -35,14 +35,14 @@ protected:
 public:
 	virtual ~wnd_proc() = default;
 
-	void on_message(UINT msg, func_msg_type callback)
+	void on_message(UINT msg, callback_type callback)
 	{
 		if (!this->_loopStarted) {
 			this->_callbacks.add(msg, std::move(callback));
 		}
 	}
 
-	void on_message(std::initializer_list<UINT> msgs, func_msg_type callback)
+	void on_message(std::initializer_list<UINT> msgs, callback_type callback)
 	{
 		if (!this->_loopStarted) {
 			this->_callbacks.add(msgs, std::move(callback));

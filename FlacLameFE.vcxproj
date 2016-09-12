@@ -163,16 +163,6 @@
     <ClInclude Include="winlamb\dialog_modal.h" />
     <ClInclude Include="winlamb\dialog_modeless.h" />
     <ClInclude Include="winlamb\font.h" />
-    <ClInclude Include="winlamb\msg_char.h" />
-    <ClInclude Include="winlamb\msg_command.h" />
-    <ClInclude Include="winlamb\msg_dropfiles.h" />
-    <ClInclude Include="winlamb\msg_getdlgcode.h" />
-    <ClInclude Include="winlamb\msg_initmenupopup.h" />
-    <ClInclude Include="winlamb\msg_keydown.h" />
-    <ClInclude Include="winlamb\msg_keyup.h" />
-    <ClInclude Include="winlamb\msg_notify.h" />
-    <ClInclude Include="winlamb\msg_thread.h" />
-    <ClInclude Include="winlamb\run.h" />
     <ClInclude Include="winlamb\traits_dialog.h" />
     <ClInclude Include="winlamb\traits_window.h" />
     <ClInclude Include="winlamb\window.h" />
@@ -181,7 +171,10 @@
     <ClInclude Include="winlamb\wnd.h" />
     <ClInclude Include="winlamb\wnd_control.h" />
     <ClInclude Include="winlamb\wnd_loop.h" />
+    <ClInclude Include="winlamb\wnd_main.h" />
+    <ClInclude Include="winlamb\wnd_msgs.h" />
     <ClInclude Include="winlamb\wnd_proc.h" />
+    <ClInclude Include="winlamb\wnd_thread.h" />
     <ClInclude Include="winutil\checkbox.h" />
     <ClInclude Include="winutil\combobox.h" />
     <ClInclude Include="winutil\com_ptr.h" />

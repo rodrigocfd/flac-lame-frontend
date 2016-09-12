@@ -57,7 +57,7 @@ file_text::encoding_info file_text::get_encoding(const BYTE* src, size_t sz)
 		return { encoding::BOCU1, 3 };
 	}
 
-	// No BOM found, guess UTF-8 without BOM or Windows-1252 (superset of ISO-8859-1).
+	// No BOM found, guess UTF-8 without BOM, or Windows-1252 (superset of ISO-8859-1).
 	bool canBeWin1252 = false;
 	for (size_t i = 0; i < sz; ++i) {
 		if (src[i] > 0x7F) { // 127

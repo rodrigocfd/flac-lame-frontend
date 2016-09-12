@@ -6,13 +6,17 @@
 
 #pragma once
 #include "dialog.h"
+#include "wnd_main.h"
 #include "wnd_loop.h"
-#include "run.h"
 
 /**
- *        +-- wnd_proc<traits_dialog> <-- dialog <--+
- * wnd <--+                                         +-- dialog_main
- *        +------------- wnd_loop <-----------------+
+*                        +--- wnd_msgs <---+
+*        +-- wnd_proc <--+                 +-- dialog <--+
+*        |               +-- wnd_thread <--+             |
+* wnd <--+               |                               +-- dialog_main
+*        |               +--- wnd_main <-----------------+
+*        |                                               |
+*        +------------------- wnd_loop <-----------------+
  */
 
 namespace winlamb {
@@ -24,7 +28,11 @@ struct setup_dialog_main final : public setup_dialog {
 };
 
 
-class dialog_main : public dialog<setup_dialog_main>, public wnd_loop {
+class dialog_main :
+	public dialog<setup_dialog_main>,
+	public wnd_main<traits_dialog>,
+	public wnd_loop
+{
 public:
 	virtual ~dialog_main() = default;
 	dialog_main& operator=(const dialog_main&) = delete;
@@ -36,15 +44,10 @@ protected:
 			DestroyWindow(this->wnd::hwnd());
 			return TRUE;
 		});
-
-		this->wnd_proc::on_message(WM_NCDESTROY, [](params p)->INT_PTR {
-			PostQuitMessage(0);
-			return TRUE;
-		});
 	}
 
 public:
-	int run(HINSTANCE hInst, int cmdShow)
+	int run(HINSTANCE hInst, int cmdShow) override
 	{
 		InitCommonControls();
 

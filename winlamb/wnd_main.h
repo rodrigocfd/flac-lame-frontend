@@ -5,6 +5,7 @@
  */
 
 #pragma once
+#include "wnd_proc.h"
 #include <tchar.h>
 #include <CommCtrl.h>
 #pragma comment(lib, "Comctl32.lib")
@@ -27,3 +28,28 @@ int APIENTRY _tWinMain(HINSTANCE hInst, HINSTANCE, LPTSTR, int cmdShow) \
 	_ASSERT(!_CrtDumpMemoryLeaks()); \
 	return ret; \
 }
+
+
+/**
+ * wnd <-- wnd_proc <-- wnd_main
+ */
+
+namespace winlamb {
+
+template<typename traitsT>
+class wnd_main : virtual public wnd_proc<traitsT> {
+public:
+	virtual ~wnd_main() = default;
+	virtual int run(HINSTANCE hInst, int cmdShow) = 0;
+
+protected:
+	wnd_main()
+	{
+		this->wnd_proc::on_message(WM_NCDESTROY, [](wnd_proc::params p)->typename traitsT::ret_type {
+			PostQuitMessage(0);
+			return traitsT::processed_val;
+		});
+	}
+};
+
+}//namespace winlamb

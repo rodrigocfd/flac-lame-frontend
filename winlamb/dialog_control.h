@@ -9,23 +9,25 @@
 #include "wnd_control.h"
 
 /**
- * wnd <-- wnd_proc<traits_dialog> <-- dialog <-- dialog_control
+ *                     +--- wnd_msgs <----+
+ *                     |                  +-- dialog <--+
+ * wnd <-- wnd_proc <--+-- wnd_thread <---+             +-- dialog_control
+ *                     |                                |
+ *                     +-- wnd_control <----------------+
  */
 
 namespace winlamb {
 
-class dialog_control : public dialog<>, public wnd_control {
+class dialog_control :
+	public dialog<>,
+	public wnd_control<traits_dialog>
+{
 public:
 	virtual ~dialog_control() = default;
 	dialog_control& operator=(const dialog_control&) = delete;
 
 protected:
-	dialog_control()
-	{
-		this->wnd_proc::on_message(WM_NCPAINT, [this](params p)->LRESULT {
-			return this->wnd_control::_paint_themed_borders(p.wParam, p.lParam);
-		});
-	}
+	dialog_control() = default;
 
 public:
 	bool create(HWND hParent, int controlId, POINT position, SIZE size) override
@@ -33,7 +35,8 @@ public:
 		// Dialog styles to be set on the resource editor:
 		// - Control: true
 		// - Style: child
-		// - Visible: true
+		// - Visible: true (otherwise will start invisible)
+		// - Client Edge: true (if you want a border, will add WS_EX_CLIENTEDGE)
 
 		if (this->wnd::hwnd()) {
 			OutputDebugString(TEXT("ERROR: control dialog already created.\n"));
@@ -50,6 +53,7 @@ public:
 			return false;
 		}
 
+		this->_check_bad_styles();
 		SetWindowPos(this->wnd::hwnd(), nullptr,
 			position.x, position.y,
 			size.cx, size.cy, SWP_NOZORDER);
@@ -57,7 +61,16 @@ public:
 	}
 
 private:
-	wnd_control::_paint_themed_borders;
+	void _check_bad_styles()
+	{
+		DWORD style = GetWindowLongPtr(this->wnd::hwnd(), GWL_STYLE);
+		if (!(style & DS_CONTROL)) {
+			OutputDebugString(TEXT("ERROR: control template doesn't have DS_CONTROL style.\n"));
+		}
+		if (!(style & WS_CHILD)) {
+			OutputDebugString(TEXT("ERROR: control template doesn't have WS_CHILD style.\n"));
+		}
+	}
 };
 
 }//namespace winlamb

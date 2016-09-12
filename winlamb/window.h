@@ -5,11 +5,14 @@
  */
 
 #pragma once
-#include "wnd_proc.h"
+#include "wnd_msgs.h"
+#include "wnd_thread.h"
 #include "traits_window.h"
 
 /**
- * wnd <-- wnd_proc<traits_window> <-- window
+ *                     +--- wnd_msgs <----+
+ * wnd <-- wnd_proc <--+                  +-- window
+ *                     +-- wnd_thread <---+
  */
 
 namespace winlamb {
@@ -27,12 +30,15 @@ struct setup_window {
 
 
 template<typename setupT = setup_window>
-class window : virtual public wnd_proc<traits_window> {
+class window :
+	public wnd_thread<traits_window>,
+	public wnd_msgs<traits_window>
+{
 public:
-	setupT setup;
 	virtual ~window() = default;
 
 protected:
+	setupT setup;
 	window() = default;
 
 public:

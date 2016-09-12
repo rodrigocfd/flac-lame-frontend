@@ -8,7 +8,9 @@
 #include "dialog.h"
 
 /**
- * wnd <-- wnd_proc<traits_dialog> <-- dialog <-- dialog_modal
+ *                     +--- wnd_msgs <----+
+ * wnd <-- wnd_proc <--+                  +-- dialog <-- dialog_modal
+ *                     +-- wnd_thread <---+
  */
 
 namespace winlamb {
@@ -33,7 +35,7 @@ public:
 		return static_cast<int>(DialogBoxParam(
 			reinterpret_cast<HINSTANCE>(GetWindowLongPtr(hParent, GWLP_HINSTANCE)),
 			MAKEINTRESOURCE(this->dialog::setup.dialogId), hParent, wnd_proc::_process,
-			reinterpret_cast<LPARAM>(static_cast<wnd_proc*>(this)))); // _hwnd member is set on first message processing
+			reinterpret_cast<LPARAM>(static_cast<wnd_proc*>(this)) )); // _hwnd member is set on first message processing
 	}
 
 protected:

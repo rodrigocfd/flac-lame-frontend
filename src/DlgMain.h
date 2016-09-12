@@ -1,10 +1,6 @@
 
 #pragma once
 #include "../winlamb/dialog_main.h"
-#include "../winlamb/msg_command.h"
-#include "../winlamb/msg_dropfiles.h"
-#include "../winlamb/msg_initmenupopup.h"
-#include "../winlamb/msg_notify.h"
 #include "../winutil/checkbox.h"
 #include "../winutil/combobox.h"
 #include "../winutil/file_ini.h"
@@ -13,12 +9,7 @@
 #include "../winutil/taskbar_progress.h"
 #include "../winutil/textbox.h"
 
-class DlgMain final : public winlamb::dialog_main,
-	public winlamb::dialog_msg_command,
-	public winlamb::dialog_msg_dropfiles,
-	public winlamb::dialog_msg_initmenupopup,
-	public winlamb::dialog_msg_notify
-{
+class DlgMain final : public winlamb::dialog_main {
 private:
 	winutil::file_ini         _ini;
 	winutil::taskbar_progress _taskBar;

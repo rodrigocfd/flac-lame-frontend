@@ -9,11 +9,11 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="winlamb">
-      <UniqueIdentifier>{b47e950b-7871-4b52-93c1-a1e52695f34d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="winutil">
       <UniqueIdentifier>{ebd59609-2a8a-4879-959d-369912e1ea40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="WinLamb">
+      <UniqueIdentifier>{b47e950b-7871-4b52-93c1-a1e52695f34d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -98,83 +98,62 @@
     <ClInclude Include="src\DlgRunnin.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\msg_char.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\msg_command.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\msg_dropfiles.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\msg_getdlgcode.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\msg_initmenupopup.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\msg_keydown.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\msg_keyup.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\msg_notify.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\msg_thread.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\run.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\traits_dialog.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\traits_window.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\window.h">
-      <Filter>winlamb</Filter>
-    </ClInclude>
     <ClInclude Include="winlamb\window_control.h">
-      <Filter>winlamb</Filter>
+      <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\window_main.h">
-      <Filter>winlamb</Filter>
+      <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\wnd.h">
-      <Filter>winlamb</Filter>
+      <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\wnd_control.h">
-      <Filter>winlamb</Filter>
+      <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\wnd_loop.h">
-      <Filter>winlamb</Filter>
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\wnd_main.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\wnd_msgs.h">
+      <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\wnd_proc.h">
-      <Filter>winlamb</Filter>
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\wnd_thread.h">
+      <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\callback_depot.h">
-      <Filter>winlamb</Filter>
+      <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\dialog.h">
-      <Filter>winlamb</Filter>
+      <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\dialog_control.h">
-      <Filter>winlamb</Filter>
+      <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\dialog_main.h">
-      <Filter>winlamb</Filter>
+      <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\dialog_modal.h">
-      <Filter>winlamb</Filter>
+      <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\dialog_modeless.h">
-      <Filter>winlamb</Filter>
+      <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\font.h">
-      <Filter>winlamb</Filter>
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\traits_dialog.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\traits_window.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\window.h">
+      <Filter>WinLamb</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -25,7 +25,7 @@ DlgRunnin::DlgRunnin(
 {
 	setup.dialogId = DLG_RUNNIN;
 
-	on_message(WM_INITDIALOG, [this](params p)->INT_PTR
+	on.INITDIALOG([this](par::initdialog p)->INT_PTR
 	{
 		_lbl  = GetDlgItem(hwnd(), LBL_STATUS);
 		_prog = GetDlgItem(hwnd(), PRO_STATUS);
@@ -72,7 +72,7 @@ void DlgRunnin::_process_next_file()
 
 	if (!good) {
 		_curFile = static_cast<int>(_files.size()); // error, so avoid further processing
-		ui_thread([&]()->void {
+		on_ui_thread([&]()->void {
 			sys::msg_box(hwnd(), L"Conversion failed",
 				str::format(L"File #%d:\n%s\n%s", index, file.c_str(), err.c_str()),
 				MB_ICONERROR);
@@ -82,7 +82,7 @@ void DlgRunnin::_process_next_file()
 	} else {
 		++_filesDone;
 
-		ui_thread([this]()->void {
+		on_ui_thread([this]()->void {
 			_prog.set_pos(_filesDone);
 			_taskBar.set_pos(_filesDone, _files.size());
 			_lbl.set_text( str::format(L"%d of %d files finished...", _filesDone, _files.size()) );
@@ -91,7 +91,7 @@ void DlgRunnin::_process_next_file()
 		if (_filesDone < static_cast<int>(_files.size())) { // more files to come
 			_process_next_file();
 		} else { // finished all processing
-			ui_thread([this]()->void {
+			on_ui_thread([this]()->void {
 				datetime fin;
 				sys::msg_box(hwnd(), L"Conversion finished",
 					str::format(L"%d files processed in %.2f seconds.",

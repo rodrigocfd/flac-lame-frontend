@@ -8,7 +8,9 @@
 #include "dialog.h"
 
 /**
- * wnd <-- wnd_proc<traits_dialog> <-- dialog <-- dialog_modeless
+ *                     +--- wnd_msgs <----+
+ * wnd <-- wnd_proc <--+                  +-- dialog <-- dialog_modeless
+ *                     +-- wnd_thread <---+
  */
 
 namespace winlamb {
