@@ -32,9 +32,14 @@ protected:
 public:
 	int show(HWND hParent)
 	{
+		if (!this->dialog::setup.dialogId) {
+			OutputDebugString(TEXT("ERROR: modal dialog not created, no dialog ID given.\n"));
+			return -1;
+		}
+
 		return static_cast<int>(DialogBoxParam(
 			reinterpret_cast<HINSTANCE>(GetWindowLongPtr(hParent, GWLP_HINSTANCE)),
-			MAKEINTRESOURCE(this->dialog::setup.dialogId), hParent, wnd_proc::_process,
+			MAKEINTRESOURCE(this->dialog::setup.dialogId), hParent, wnd_proc::_raw_proc,
 			reinterpret_cast<LPARAM>(static_cast<wnd_proc*>(this)) )); // _hwnd member is set on first message processing
 	}
 
@@ -51,7 +56,7 @@ protected:
 	}
 
 private:
-	wnd_proc<traits_dialog>::_process;
+	wnd_proc<traits_dialog>::_raw_proc;
 };
 
 }//namespace winlamb

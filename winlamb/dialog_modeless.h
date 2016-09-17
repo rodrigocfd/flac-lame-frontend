@@ -39,10 +39,15 @@ public:
 			return;
 		}
 
+		if (!this->dialog::setup.dialogId) {
+			OutputDebugString(TEXT("ERROR: modeless dialog not created, no dialog ID given.\n"));
+			return;
+		}
+
 		HINSTANCE hInst = reinterpret_cast<HINSTANCE>(GetWindowLongPtr(hParent, GWLP_HINSTANCE));
 
 		if (!CreateDialogParam(hInst, MAKEINTRESOURCE(this->dialog::setup.dialogId),
-			hParent, wnd_proc::_process,
+			hParent, wnd_proc::_raw_proc,
 			reinterpret_cast<LPARAM>(static_cast<wnd_proc*>(this))) ) // _hWnd member is set on first message processing
 		{
 			OutputDebugString(TEXT("ERROR: modeless dialog not created, CreateDialogParam failed.\n"));
@@ -51,6 +56,9 @@ public:
 
 		ShowWindow(this->wnd::hwnd(), SW_SHOW);
 	}
+
+private:
+	wnd_proc<traits_dialog>::_raw_proc;
 };
 
 }//namespace winlamb

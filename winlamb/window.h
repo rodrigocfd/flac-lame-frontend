@@ -58,7 +58,7 @@ public:
 		if (!hInst) hInst = reinterpret_cast<HINSTANCE>(GetWindowLongPtr(hParent, GWLP_HINSTANCE));
 
 		this->setup.wndClassEx.cbSize = sizeof(WNDCLASSEX); // make sure of these
-		this->setup.wndClassEx.lpfnWndProc = wnd_proc::_process;
+		this->setup.wndClassEx.lpfnWndProc = wnd_proc::_raw_proc;
 		this->setup.wndClassEx.hInstance = hInst;
 
 		ATOM atom = this->_register_class(hInst);
@@ -89,7 +89,7 @@ private:
 		return atom;
 	}
 
-	wnd_proc<traits_window>::_process;
+	wnd_proc<traits_window>::_raw_proc;
 };
 
 }//namespace winlamb

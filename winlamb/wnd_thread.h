@@ -13,12 +13,18 @@
 
 namespace winlamb {
 
-template<typename traitsT, UINT wm_threadT = WM_APP + 0x3FFF>
+template<
+	typename traitsT,
+	UINT wm_threadT = WM_APP + 0x3FFF
+>
 class wnd_thread : virtual public wnd_proc<traitsT> {
 private:
 	struct _callback_pack final {
 		std::function<void()> callback;
 	};
+
+public:
+	virtual ~wnd_thread() = default;
 
 protected:
 	wnd_thread()
@@ -30,9 +36,6 @@ protected:
 			return traitsT::default_proc(this->wnd::hwnd(), wm_threadT, p.wParam, p.lParam);
 		});
 	}
-
-public:
-	virtual ~wnd_thread() = default;
 
 	void on_ui_thread(std::function<void()> callback)
 	{

@@ -10,13 +10,13 @@
 #include "wnd_loop.h"
 
 /**
-*                        +--- wnd_msgs <---+
-*        +-- wnd_proc <--+                 +-- dialog <--+
-*        |               +-- wnd_thread <--+             |
-* wnd <--+               |                               +-- dialog_main
-*        |               +--- wnd_main <-----------------+
-*        |                                               |
-*        +------------------- wnd_loop <-----------------+
+ *                        +--- wnd_msgs <---+
+ *        +-- wnd_proc <--+                 +-- dialog <--+
+ *        |               +-- wnd_thread <--+             |
+ * wnd <--+               |                               +-- dialog_main
+ *        |               +--- wnd_main <-----------------+
+ *        |                                               |
+ *        +------------------- wnd_loop <-----------------+
  */
 
 namespace winlamb {
@@ -57,7 +57,7 @@ public:
 		}
 
 		HWND hwndRet = CreateDialogParam(hInst, MAKEINTRESOURCE(this->dialog::setup.dialogId),
-			nullptr, wnd_proc::_process,
+			nullptr, wnd_proc::_raw_proc,
 			reinterpret_cast<LPARAM>(static_cast<wnd_proc*>(this)) ); // _hwnd member is set on first message processing
 		if (!hwndRet) {
 			OutputDebugString(TEXT("ERROR: main dialog not created, CreateDialogParam failed.\n"));
@@ -89,7 +89,7 @@ private:
 		}
 	}
 
-	wnd_proc<traits_dialog>::_process;
+	wnd_proc<traits_dialog>::_raw_proc;
 	wnd_loop::_msg_loop;
 };
 

@@ -7,7 +7,7 @@
 #pragma once
 #include <functional>
 #include "wnd.h"
-#include "callback_depot.h"
+#include "callbacks.h"
 
 /**
  * wnd <-- wnd_proc
@@ -23,34 +23,33 @@ public:
 		WPARAM wParam;
 		LPARAM lParam;
 	};
-	using callback_type = std::function<typename traitsT::ret_type(params)>;
+	using callback_message_type = std::function<typename traitsT::ret_type(params)>;
 
 private:
-	callback_depot<UINT, params, traitsT> _callbacks;
+	callbacks<UINT, params, traitsT> _callbacksMessage;
 	bool _loopStarted;
-
-protected:
-	wnd_proc() : _loopStarted(false) { }
 
 public:
 	virtual ~wnd_proc() = default;
 
-	void on_message(UINT msg, callback_type callback)
-	{
-		if (!this->_loopStarted) {
-			this->_callbacks.add(msg, std::move(callback));
-		}
-	}
-
-	void on_message(std::initializer_list<UINT> msgs, callback_type callback)
-	{
-		if (!this->_loopStarted) {
-			this->_callbacks.add(msgs, std::move(callback));
-		}
-	}
-
 protected:
-	static typename traitsT::ret_type CALLBACK _process(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
+	wnd_proc() : _loopStarted(false) { }
+
+	void on_message(UINT msg, callback_message_type callback)
+	{
+		if (!this->_loopStarted) {
+			this->_callbacksMessage.add(msg, std::move(callback));
+		}
+	}
+
+	void on_message(std::initializer_list<UINT> msgs, callback_message_type callback)
+	{
+		if (!this->_loopStarted) {
+			this->_callbacksMessage.add(msgs, std::move(callback));
+		}
+	}
+
+	static typename traitsT::ret_type CALLBACK _raw_proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		wnd_proc* pSelf = traitsT::get_instance_pointer<wnd_proc>(hWnd, msg, lp);
 		if (pSelf) {
@@ -58,7 +57,8 @@ protected:
 				pSelf->_loopStarted = true; // no more messages can be added
 				pSelf->_hWnd = hWnd; // store HWND
 			}			
-			traitsT::ret_type retVal = pSelf->_callbacks.process(hWnd, msg, msg, {msg, wp, lp});
+			traitsT::ret_type retVal =
+				pSelf->_callbacksMessage.process(hWnd, msg, msg, {msg, wp, lp});
 			
 			if (msg == WM_NCDESTROY) { // cleanup
 				SetWindowLongPtr(hWnd, GWLP_USERDATA, 0);

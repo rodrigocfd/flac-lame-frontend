@@ -8,6 +8,11 @@
 #include <algorithm>
 #include "wnd_proc.h"
 #include <Dbt.h>
+#include <Ras.h>
+
+/**
+ * wnd <-- wnd_proc <-- wnd_msgs
+ */
 
 namespace winlamb {
 
@@ -24,7 +29,6 @@ public:
 			LPARAM lParam;
 			_parm_shim(const params& p) : message(p.message), wParam(p.wParam), lParam(p.lParam) { }
 		};
-	public:
 
 #define PARMDEC_BEGIN(ftype) \
 		struct ftype final : public _parm_shim { \
@@ -35,6 +39,8 @@ public:
 		PARMDEC_END \
 		PARMDEC_BEGIN(ftype)
 
+#pragma region Parameter declarations
+	public:
 		PARMDEC_BEGIN(command)
 			WORD control_id() const          { return LOWORD(this->_parm_shim::wParam); }
 			HWND control_hwnd() const        { return reinterpret_cast<HWND>(this->_parm_shim::lParam); }
@@ -53,8 +59,8 @@ public:
 			bool  is_being_activated() const { return this->_parm_shim::wParam != FALSE; }
 			DWORD thread_id() const          { return reinterpret_cast<DWORD>(this->_parm_shim::lParam); }
 		PARMDEC(askcbformatname)
-			UINT         szbuffer() const { return static_cast<UINT>(this->_parm_shim::wParam); }
-			const TCHAR* buffer() const   { return reinterpret_cast<const TCHAR*>(this->_parm_shim::lParam); }
+			UINT   szbuffer() const { return static_cast<UINT>(this->_parm_shim::wParam); }
+			TCHAR* buffer() const   { return reinterpret_cast<TCHAR*>(this->_parm_shim::lParam); }
 		PARMDEC(cancelmode)
 		PARMDEC(capturechanged)
 			HWND window_gaining_mouse() const { return reinterpret_cast<HWND>(this->_parm_shim::lParam); }
@@ -172,7 +178,7 @@ public:
 			bool uses_trackpopupmenu() const { return this->_parm_shim::wParam != FALSE; }
 		PARMDEC(entersizemove)
 		PARMDEC(erasebkgnd)
-			HDC device_context() const { return reinterpret_cast<HDC>(this->_parm_shim::wParam); }
+			HDC hdc() const { return reinterpret_cast<HDC>(this->_parm_shim::wParam); }
 		PARMDEC(exitmenuloop)
 			bool is_shortcut_menu() const { return this->_parm_shim::wParam != FALSE; }
 		PARMDEC(exitsizemove)
@@ -255,20 +261,28 @@ public:
 			HWND focused_window() const { return reinterpret_cast<HWND>(this->_parm_shim::wParam); }
 		PARMDEC_END
 
-#define PARMDEC_BUTTON(btnmsg) \
+#define PARMDEC_MOUSE(btnmsg) \
 		PARMDEC_BEGIN(btnmsg) \
-			WORD  vkey_flags() const { return static_cast<WORD>(this->_parm_shim::lParam); } \
-			POINT pos() const        { return { GET_X_LPARAM(this->_parm_shim::lParam), GET_Y_LPARAM(this->_parm_shim::lParam) }; } \
+			bool  has_ctrl() const       { return (this->_parm_shim::wParam & MK_CONTROL) != 0; } \
+			bool  has_left_btn() const   { return (this->_parm_shim::wParam & MK_LBUTTON) != 0; } \
+			bool  has_middle_btn() const { return (this->_parm_shim::wParam & MK_MBUTTON) != 0; } \
+			bool  has_right_btn() const  { return (this->_parm_shim::wParam & MK_RBUTTON) != 0; } \
+			bool  has_shift() const      { return (this->_parm_shim::wParam & MK_SHIFT) != 0; } \
+			bool  has_xbtn1() const      { return (this->_parm_shim::wParam & MK_XBUTTON1) != 0; } \
+			bool  has_xbtn2() const      { return (this->_parm_shim::wParam & MK_XBUTTON2) != 0; } \
+			POINT pos() const            { return { GET_X_LPARAM(this->_parm_shim::lParam), GET_Y_LPARAM(this->_parm_shim::lParam) }; } \
 		PARMDEC_END
-		PARMDEC_BUTTON(lbuttondblclk)
-		PARMDEC_BUTTON(lbuttondown)
-		PARMDEC_BUTTON(lbuttonup)
-		PARMDEC_BUTTON(mbuttondblclk)
-		PARMDEC_BUTTON(mbuttondown)
-		PARMDEC_BUTTON(mbuttonup)
-		PARMDEC_BUTTON(rbuttondblclk)
-		PARMDEC_BUTTON(rbuttondown)
-		PARMDEC_BUTTON(rbuttonup)
+		PARMDEC_MOUSE(lbuttondblclk)
+		PARMDEC_MOUSE(lbuttondown)
+		PARMDEC_MOUSE(lbuttonup)
+		PARMDEC_MOUSE(mbuttondblclk)
+		PARMDEC_MOUSE(mbuttondown)
+		PARMDEC_MOUSE(mbuttonup)
+		PARMDEC_MOUSE(mousehover)
+		PARMDEC_MOUSE(mousemove)
+		PARMDEC_MOUSE(rbuttondblclk)
+		PARMDEC_MOUSE(rbuttondown)
+		PARMDEC_MOUSE(rbuttonup)
 
 		PARMDEC_BEGIN(mdiactivate)
 			HWND activated_child() const   { return reinterpret_cast<HWND>(this->_parm_shim::wParam); }
@@ -279,20 +293,41 @@ public:
 			WORD  char_code() const      { return LOWORD(this->_parm_shim::wParam); }
 			bool  is_window_menu() const { return HIWORD(this->_parm_shim::wParam) == MF_SYSMENU; }
 			HMENU hmenu() const          { return reinterpret_cast<HMENU>(this->_parm_shim::lParam); }
-		PARMDEC(menuitem)
-			WORD  item() const  { return LOWORD(this->_parm_shim::wParam); }
-			WORD  flags() const { return HIWORD(this->_parm_shim::wParam); }
+		PARMDEC(menudrag)
+			UINT  initial_pos() const { static_cast<UINT>(this->_parm_shim::wParam); }
+			HMENU hmenu() const       { return reinterpret_cast<HMENU>(this->_parm_shim::lParam); }
+		PARMDEC(menugetobject)
+			MENUGETOBJECTINFO& menugetobjectinfo() const { return *reinterpret_cast<MENUGETOBJECTINFO*>(this->_parm_shim::lParam); }
+		PARMDEC(menurbuttonup)
+			UINT  index() const { return static_cast<UINT>(this->_parm_shim::wParam); }
 			HMENU hmenu() const { return reinterpret_cast<HMENU>(this->_parm_shim::lParam); }
+		PARMDEC(menuselect)
+			WORD  item() const              { return LOWORD(this->_parm_shim::wParam); }
+			bool  has_bitmap() const        { return (HIWORD(this->_parm_shim::wParam) & MF_BITMAP) != 0; }
+			bool  is_checked() const        { return (HIWORD(this->_parm_shim::wParam) & MF_CHECKED) != 0; }
+			bool  is_disabled() const       { return (HIWORD(this->_parm_shim::wParam) & MF_DISABLED) != 0; }
+			bool  is_grayed() const         { return (HIWORD(this->_parm_shim::wParam) & MF_GRAYED) != 0; }
+			bool  is_highlighted() const    { return (HIWORD(this->_parm_shim::wParam) & MF_HILITE) != 0; }
+			bool  mouse_selected() const    { return (HIWORD(this->_parm_shim::wParam) & MF_MOUSESELECT) != 0; }
+			bool  is_owner_draw() const     { return (HIWORD(this->_parm_shim::wParam) & MF_OWNERDRAW) != 0; }
+			bool  opens_popup() const       { return (HIWORD(this->_parm_shim::wParam) & MF_POPUP) != 0; }
+			bool  is_sysmenu() const        { return (HIWORD(this->_parm_shim::wParam) & MF_SYSMENU) != 0; }
+			bool  system_has_closed() const { return HIWORD(this->_parm_shim::wParam) == 0xFFFF && !this->_parm_shim::lParam; }
+			HMENU hmenu() const             { return (this->opens_popup() || this->is_sysmenu()) ? reinterpret_cast<HMENU>(this->_parm_shim::lParam) : nullptr; }
 		PARMDEC(mouseactivate)
 			short hit_test_code() const { return static_cast<short>(LOWORD(this->_parm_shim::lParam)); }
 			WORD  mouse_msg_id() const  { return HIWORD(this->_parm_shim::lParam); }
-		PARMDEC(mousemove)
-			WORD  vkey_flags() const { return static_cast<WORD>(this->_parm_shim::lParam); }
-			POINT pos() const        { return { GET_X_LPARAM(this->_parm_shim::lParam), GET_Y_LPARAM(this->_parm_shim::lParam) }; }
+		PARMDEC(mouseleave)
 		PARMDEC(mousewheel)
-			short wheel_delta() const { return GET_WHEEL_DELTA_WPARAM(this->_parm_shim::wParam); }
-			WORD  vkey_flags() const  { return GET_KEYSTATE_WPARAM(this->_parm_shim::wParam); }
-			POINT pos() const         { return { GET_X_LPARAM(this->_parm_shim::lParam), GET_Y_LPARAM(this->_parm_shim::lParam) }; }
+			short wheel_delta() const    { return GET_WHEEL_DELTA_WPARAM(this->_parm_shim::wParam); }
+			bool  has_ctrl() const       { return (LOWORD(this->_parm_shim::wParam) & MK_CONTROL) != 0; }
+			bool  has_left_btn() const   { return (LOWORD(this->_parm_shim::wParam) & MK_LBUTTON) != 0; }
+			bool  has_middle_btn() const { return (LOWORD(this->_parm_shim::wParam) & MK_MBUTTON) != 0; }
+			bool  has_right_btn() const  { return (LOWORD(this->_parm_shim::wParam) & MK_RBUTTON) != 0; }
+			bool  has_shift() const      { return (LOWORD(this->_parm_shim::wParam) & MK_SHIFT) != 0; }
+			bool  has_xbtn1() const      { return (LOWORD(this->_parm_shim::wParam) & MK_XBUTTON1) != 0; }
+			bool  has_xbtn2() const      { return (LOWORD(this->_parm_shim::wParam) & MK_XBUTTON2) != 0; }
+			POINT pos() const            { return { GET_X_LPARAM(this->_parm_shim::lParam), GET_Y_LPARAM(this->_parm_shim::lParam) }; }
 		PARMDEC(move)
 			POINT pos() const { return { GET_X_LPARAM(this->_parm_shim::lParam), GET_Y_LPARAM(this->_parm_shim::lParam) }; }
 		PARMDEC(moving)
@@ -329,6 +364,17 @@ public:
 
 		PARMDEC_BEGIN(ncpaint)
 			HRGN hrgn() const { return reinterpret_cast<HRGN>(this->_parm_shim::wParam); }
+		PARMDEC(nextdlgctl)
+			bool has_ctrl_receiving_focus() const { return LOWORD(this->_parm_shim::lParam) != FALSE; }
+			HWND ctrl_receiving_focus() const     { return LOWORD(this->_parm_shim::lParam) ? reinterpret_cast<HWND>(this->_parm_shim::wParam) : nullptr; }
+			bool focus_next() const               { return this->_parm_shim::wParam == 0; }
+		PARMDEC(nextmenu)
+			WORD         vkey_code() const   { return static_cast<WORD>(this->_parm_shim::wParam); }
+			MDINEXTMENU& mdinextmenu() const { return *reinterpret_cast<MDINEXTMENU*>(this->_parm_shim::lParam); }
+		PARMDEC(notifyformat)
+			HWND window_from() const           { return reinterpret_cast<HWND>(this->_parm_shim::wParam); }
+			bool is_query_from_control() const { return this->_parm_shim::lParam == NF_QUERY; }
+			bool is_requery_to_control() const { return this->_parm_shim::lParam == NF_REQUERY; }
 		PARMDEC(paint)
 		PARMDEC(paintclipboard)
 			HWND               clipboard_viewer() const { return reinterpret_cast<HWND>(this->_parm_shim::wParam); }
@@ -344,6 +390,18 @@ public:
 			POINT pos() const           { return { GET_X_LPARAM(this->_parm_shim::lParam), GET_Y_LPARAM(this->_parm_shim::lParam) }; }
 			bool  is_xbutton1() const   { return HIWORD(this->_parm_shim::wParam) == XBUTTON1; }
 			WORD  pointer_flag() const  { return HIWORD(this->_parm_shim::wParam); }
+		PARMDEC(powerbroadcast)
+			bool                    is_power_status_change() const  { return this->_parm_shim::wParam == PBT_APMPOWERSTATUSCHANGE; }
+			bool                    is_resuming() const             { return this->_parm_shim::wParam == PBT_APMRESUMEAUTOMATIC; }
+			bool                    is_suspending() const           { return this->_parm_shim::wParam == PBT_APMSUSPEND; }
+			bool                    is_power_setting_change() const { return this->_parm_shim::wParam == PBT_POWERSETTINGCHANGE; }
+			POWERBROADCAST_SETTING& power_setting() const           { return *reinterpret_cast<POWERBROADCAST_SETTING*>(this->_parm_shim::lParam); }
+		PARMDEC(print)
+			HDC  hdc() const   { return reinterpret_cast<HDC>(this->_parm_shim::wParam); }
+			UINT flags() const { return static_cast<UINT>(this->_parm_shim::lParam); }
+		PARMDEC(printclient)
+			HDC  hdc() const   { return reinterpret_cast<HDC>(this->_parm_shim::wParam); }
+			UINT flags() const { return static_cast<UINT>(this->_parm_shim::lParam); }
 		PARMDEC(querydragicon)
 		PARMDEC(queryendsession)
 			bool is_system_issue() const    { return (this->_parm_shim::lParam & ENDSESSION_CLOSEAPP) != 0; }
@@ -352,6 +410,9 @@ public:
 			bool is_shutdown() const        { return this->_parm_shim::lParam == 0; }
 		PARMDEC(querynewpalette)
 		PARMDEC(queryopen)
+		PARMDEC(rasdialevent)
+			RASCONNSTATE rasconnstate() const { return reinterpret_cast<RASCONNSTATE>(this->_parm_shim::wParam); }
+			DWORD        error() const        { return static_cast<DWORD>(this->_parm_shim::lParam); }
 		PARMDEC(renderallformats)
 		PARMDEC(renderformat)
 			WORD clipboard_format() const { return static_cast<WORD>(this->_parm_shim::wParam); }
@@ -361,6 +422,23 @@ public:
 			WORD  mouse_msg_id() const  { return HIWORD(this->_parm_shim::wParam); }
 		PARMDEC(setfocus)
 			HWND unfocused_window() const { return reinterpret_cast<HWND>(this->_parm_shim::wParam); }
+		PARMDEC(setfont)
+			HFONT hfont() const         { return reinterpret_cast<HFONT>(this->_parm_shim::wParam); }
+			bool  should_redraw() const { return LOWORD(this->_parm_shim::lParam) != FALSE; }
+		PARMDEC(sethotkey)
+			WORD vkey_code() const    { return LOWORD(this->_parm_shim::wParam); }
+			bool has_alt() const      { return (HIWORD(this->_parm_shim::wParam) & HOTKEYF_ALT) != 0; }
+			bool has_ctrl() const     { return (HIWORD(this->_parm_shim::wParam) & HOTKEYF_CONTROL) != 0; }
+			bool has_extended() const { return (HIWORD(this->_parm_shim::wParam) & HOTKEYF_EXT) != 0; }
+			bool has_shift() const    { return (HIWORD(this->_parm_shim::wParam) & HOTKEYF_SHIFT) != 0; }
+		PARMDEC(seticon)
+			bool  is_small() const   { return this->_parm_shim::wParam == ICON_SMALL; }
+			HICON hicon() const      { return reinterpret_cast<HICON>(this->_parm_shim::lParam); }
+			bool  is_removed() const { return this->hicon() == nullptr; }
+		PARMDEC(setredraw)
+			bool can_redraw() const { return this->_parm_shim::wParam != FALSE; }
+		PARMDEC(settext)
+			const TCHAR* text() const { return reinterpret_cast<const TCHAR*>(this->_parm_shim::lParam); }
 		PARMDEC(settingchange)
 			const TCHAR* string_id() const           { return reinterpret_cast<const TCHAR*>(this->_parm_shim::lParam); }
 			bool         is_policy() const           { return !lstrcmp(this->string_id(), TEXT("Policy")); }
@@ -435,6 +513,10 @@ public:
 		PARMDEC(timer)
 			UINT_PTR  timer_id() const { return static_cast<UINT_PTR>(this->_parm_shim::wParam); }
 			TIMERPROC callback() const { return static_cast<TIMERPROC>(this->_parm_shim::lParam); }
+		PARMDEC(uninitmenupopup)
+			HMENU hmenu() const   { return reinterpret_cast<HMENU>(this->_parm_shim::wParam); }
+			WORD  menu_id() const { return HIWORD(this->_parm_shim::lParam); }
+		PARMDEC(userchanged)
 		PARMDEC(vkeytoitem)
 			WORD vkey_code() const         { return LOWORD(this->_parm_shim::wParam); }
 			WORD current_caret_pos() const { return HIWORD(this->_parm_shim::wParam); }
@@ -444,18 +526,18 @@ public:
 		PARMDEC(windowposchanging)
 			WINDOWPOS& windowpos() const { return *reinterpret_cast<WINDOWPOS*>(this->_parm_shim::lParam); }
 		PARMDEC_END
+#pragma endregion
 	};
 
 	class handlers final {
 	private:
-		wnd_proc& _owner;
+		wnd_msgs& _owner;
 	public:
-		handlers(wnd_proc& owner) : _owner(owner) { }
+		handlers(wnd_msgs& owner) : _owner(owner) { }
 
-// ---- WM_COMMAND handler ----
-
+#pragma region WM_COMMAND handler
 	private:
-		callback_depot<WORD, typename par::command, traitsT> _callbacksCommand;
+		callbacks<WORD, typename par::command, traitsT> _callbacksCommand;
 		void _register_command() {
 			if (this->_callbacksCommand.empty()) {
 				this->_owner.on_message(WM_COMMAND, [this](params p)->typename traitsT::ret_type {
@@ -475,17 +557,17 @@ public:
 			this->_register_command();
 			this->_callbacksCommand.add(commandIds, std::move(callback));
 		}
+#pragma endregion
 
-// ---- WM_NOTIFY handler ----
-
+#pragma region WM_NOTIFY handler
 	private:
-		callback_depot<std::pair<UINT_PTR, UINT>, typename par::notify, traitsT> _callbacksNotify;
+		callbacks<std::pair<UINT_PTR, UINT>, typename par::notify, traitsT> _callbacksNotify;
 		void _register_notify() {
 			if (this->_callbacksNotify.empty()) {
 				this->_owner.on_message(WM_NOTIFY, [this](params p)->typename traitsT::ret_type {
 					par::notify pnot{p};
 					return this->_callbacksNotify.process(this->_owner.hwnd(), WM_NOTIFY,
-					{ pnot.nmhdr().idFrom, pnot.nmhdr().code }, pnot);
+						{ pnot.nmhdr().idFrom, pnot.nmhdr().code }, pnot);
 				});
 			}
 		}
@@ -499,17 +581,18 @@ public:
 			this->_register_notify();
 			this->_callbacksNotify.add(idFromAndCodes, std::move(callback));
 		}
-
-// ---- Ordinary handlers ----
+#pragma endregion
 
 #define HANDL(fname, ftype) \
 		void fname(std::function<typename traitsT::ret_type(typename par::ftype)> callback) { \
-			this->_owner.on_message(WM_##fname, \
+			this->_owner._on_message_proxy(WM_##fname, \
 				[cbfunc = std::move(callback)](params p)->typename traitsT::ret_type { \
 					return cbfunc(par::ftype{p}); \
 				}); \
 		}
 
+#pragma region Ordinary handlers
+	public:
 		HANDL(ACTIVATE, activate)
 		HANDL(ACTIVATEAPP, activateapp)
 		HANDL(ASKCBFORMATNAME, askcbformatname)
@@ -579,9 +662,14 @@ public:
 		HANDL(MDIACTIVATE, mdiactivate)
 		HANDL(MEASUREITEM, measureitem)
 		HANDL(MENUCHAR, menuchar)
-		HANDL(MENUITEM, menuitem)
+		HANDL(MENUDRAG, menudrag)
+		HANDL(MENUGETOBJECT, menugetobject)
+		HANDL(MENURBUTTONUP, menurbuttonup)
+		HANDL(MENUSELECT, menuselect)
 		HANDL(MOUSEACTIVATE, mouseactivate)
+		HANDL(MOUSEHOVER, mousehover)
 		HANDL(MOUSEMOVE, mousemove)
+		HANDL(MOUSELEAVE, mouseleave)
 		HANDL(MOUSEWHEEL, mousewheel)
 		HANDL(MOVE, move)
 		HANDL(MOVING, moving)
@@ -601,15 +689,23 @@ public:
 		HANDL(NCRBUTTONDBLCLK, ncrbuttondblclk)
 		HANDL(NCRBUTTONDOWN, ncrbuttondown)
 		HANDL(NCRBUTTONUP, ncrbuttonup)
+		HANDL(NEXTDLGCTL, nextdlgctl)
+		HANDL(NEXTMENU, nextmenu)
+		HANDL(NOTIFYFORMAT, notifyformat)
 		HANDL(PAINT, paint)
 		HANDL(PAINTCLIPBOARD, paintclipboard)
 		HANDL(PALETTECHANGED, palettechanged)
 		HANDL(PALETTEISCHANGING, paletteischanging)
 		HANDL(PARENTNOTIFY, parentnotify)
+		HANDL(POWERBROADCAST, powerbroadcast)
+		HANDL(PRINT, print)
+		HANDL(PRINTCLIENT, printclient)
 		HANDL(QUERYDRAGICON, querydragicon)
 		HANDL(QUERYENDSESSION, queryendsession)
 		HANDL(QUERYNEWPALETTE, querynewpalette)
 		HANDL(QUERYOPEN, queryopen)
+#define WM_RASDIALEVENT_ WM_RASDIALEVENT
+		HANDL(RASDIALEVENT_, rasdialevent)
 		HANDL(RBUTTONDBLCLK, rbuttondblclk)
 		HANDL(RBUTTONDOWN, rbuttondown)
 		HANDL(RBUTTONUP, rbuttonup)
@@ -617,6 +713,11 @@ public:
 		HANDL(RENDERFORMAT, renderformat)
 		HANDL(SETCURSOR, setcursor)
 		HANDL(SETFOCUS, setfocus)
+		HANDL(SETFONT, setfont)
+		HANDL(SETHOTKEY, sethotkey)
+		HANDL(SETICON, seticon)
+		HANDL(SETREDRAW, setredraw)
+		HANDL(SETTEXT, settext)
 		HANDL(SETTINGCHANGE, settingchange)
 		HANDL(SHOWWINDOW, showwindow)
 		HANDL(SIZE, size)
@@ -634,13 +735,23 @@ public:
 		HANDL(TCARD, tcard)
 		HANDL(TIMECHANGE, timechange)
 		HANDL(TIMER, timer)
+		HANDL(UNINITMENUPOPUP, uninitmenupopup)
+		HANDL(USERCHANGED, userchanged)
 		HANDL(VKEYTOITEM, vkeytoitem)
 		HANDL(VSCROLL, vscroll)
 		HANDL(VSCROLLCLIPBOARD, vscrollclipboard)
 		HANDL(WINDOWPOSCHANGED, windowposchanged)
 		HANDL(WINDOWPOSCHANGING, windowposchanging)
+#pragma endregion
 	};
 
+private:
+	friend handlers;
+	void _on_message_proxy(UINT msg, typename wnd_proc::callback_message_type callback) {
+		this->wnd_proc::on_message(msg, std::move(callback));
+	}
+	
+protected:
 	handlers on;
 	wnd_msgs() : on(*this) { }
 };
