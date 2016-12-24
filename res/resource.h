@@ -28,7 +28,7 @@
 #define LBL_STATUS                      1019
 #define LBL_NUMTHREADS                  1020
 #define MNU_ABOUT                       1021
-#define MNU_ADDFILES                    1022
+#define MNU_OPENFILES                   1022
 #define MNU_REMSELECTED                 1023
 
 // Next default values for new objects

@@ -9,151 +9,166 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="winutil">
-      <UniqueIdentifier>{ebd59609-2a8a-4879-959d-369912e1ea40}</UniqueIdentifier>
+    <Filter Include="WET core">
+      <UniqueIdentifier>{869f8b2f-581b-4b16-a401-89c4478845c3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="WinLamb">
-      <UniqueIdentifier>{b47e950b-7871-4b52-93c1-a1e52695f34d}</UniqueIdentifier>
+    <Filter Include="WET ctrls">
+      <UniqueIdentifier>{30d089cd-da9b-4f18-9947-ea3b5d85fa21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="WET util">
+      <UniqueIdentifier>{cc3810eb-34c6-4a30-84db-97ef6a3cb149}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="res\resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
-    <ClInclude Include="winutil\file_map.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\file_text.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\icon.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\internet.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\label.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\listview.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\menu.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\menu_recent.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\path.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\progressbar.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\resizer.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\statusbar.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\str.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\sys.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\taskbar_progress.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\textbox.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\xml.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\checkbox.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\combobox.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\datetime.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\file.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="winutil\file_ini.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="src\convert.h">
+    <ClInclude Include="src\Dlg_Main.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="winutil\com_ptr.h">
-      <Filter>winutil</Filter>
-    </ClInclude>
-    <ClInclude Include="src\DlgMain.h">
+    <ClInclude Include="src\Dlg_Runnin.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\DlgRunnin.h">
+    <ClInclude Include="src\Convert.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\callbacks.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="wet\dialog.h">
+      <Filter>WET core</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\dialog.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="wet\dialog_control.h">
+      <Filter>WET core</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\dialog_control.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="wet\dialog_main.h">
+      <Filter>WET core</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\dialog_main.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="wet\dialog_modal.h">
+      <Filter>WET core</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\dialog_modal.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="wet\dialog_modeless.h">
+      <Filter>WET core</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\dialog_modeless.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="wet\params.h">
+      <Filter>WET core</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\font.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="wet\wheel_hover.h">
+      <Filter>WET core</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\traits_dialog.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="wet\window.h">
+      <Filter>WET core</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\traits_window.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="wet\window_control.h">
+      <Filter>WET core</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\window.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="wet\window_main.h">
+      <Filter>WET core</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\window_control.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="wet\base_wnd.h">
+      <Filter>WET core</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\window_main.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="wet\base_wnd_control.h">
+      <Filter>WET core</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\wnd.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="wet\base_wnd_loop.h">
+      <Filter>WET core</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\wnd_control.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="wet\base_wnd_main.h">
+      <Filter>WET core</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\wnd_loop.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="wet\base_wnd_thread.h">
+      <Filter>WET core</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\wnd_main.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="wet\base_wnd_toplevel.h">
+      <Filter>WET core</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\wnd_msgs.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="wet\checkbox.h">
+      <Filter>WET ctrls</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\wnd_proc.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="wet\combo.h">
+      <Filter>WET ctrls</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\wnd_thread.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="wet\label.h">
+      <Filter>WET ctrls</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\listview.h">
+      <Filter>WET ctrls</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\menu.h">
+      <Filter>WET ctrls</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\progress_taskbar.h">
+      <Filter>WET ctrls</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\progressbar.h">
+      <Filter>WET ctrls</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\statusbar.h">
+      <Filter>WET ctrls</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\textbox.h">
+      <Filter>WET ctrls</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\drop_files.h">
+      <Filter>WET util</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\file.h">
+      <Filter>WET util</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\file_ini.h">
+      <Filter>WET util</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\file_mapped.h">
+      <Filter>WET util</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\font.h">
+      <Filter>WET util</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\icon.h">
+      <Filter>WET util</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\com_ptr.h">
+      <Filter>WET util</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\datetime.h">
+      <Filter>WET util</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\device_context.h">
+      <Filter>WET util</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\path.h">
+      <Filter>WET util</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\resizer.h">
+      <Filter>WET util</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\str.h">
+      <Filter>WET util</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\zip.h">
+      <Filter>WET util</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\xml.h">
+      <Filter>WET util</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\sysdlg.h">
+      <Filter>WET util</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\sys.h">
+      <Filter>WET util</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\subclass.h">
+      <Filter>WET ctrls</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\hash_map.h">
+      <Filter>WET util</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\download.h">
+      <Filter>WET util</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\base_widget.h">
+      <Filter>WET ctrls</Filter>
+    </ClInclude>
+    <ClInclude Include="wet\base_widget_text.h">
+      <Filter>WET ctrls</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -167,79 +182,13 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="winutil\checkbox.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\combobox.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\datetime.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\file.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\file_ini.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\file_map.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\file_text.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\icon.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\internet.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\label.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\listview.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\menu.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\menu_recent.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\path.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\progressbar.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\resizer.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\statusbar.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\str.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\sys.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\taskbar_progress.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\textbox.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="winutil\xml.cpp">
-      <Filter>winutil</Filter>
-    </ClCompile>
-    <ClCompile Include="src\convert.cpp">
+    <ClCompile Include="src\Dlg_Main.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\DlgMain.cpp">
+    <ClCompile Include="src\Dlg_Runnin.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\DlgRunnin.cpp">
+    <ClCompile Include="src\Convert.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>

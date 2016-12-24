@@ -123,8 +123,8 @@ BEGIN
             VALUE "FileDescription", "FLAC/LAME graphical front end."
             VALUE "FileVersion", "1.1.5.0"
             VALUE "InternalName", "FlacLameFE"
-            VALUE "LegalCopyright", "Copyright (C) 2015"
-            VALUE "LegalTrademarks", "Rodrigo Cesar de Freitas Dias"
+            VALUE "LegalCopyright", "Copyright (C) 2013-2016"
+            VALUE "LegalTrademarks", "Rodrigo Cesar de Freitas Dias (TM)"
             VALUE "OriginalFilename", "FlacLame.exe"
             VALUE "ProductName", "FLAC/LAME graphical front end."
             VALUE "ProductVersion", "1.1.5.0"
@@ -146,31 +146,12 @@ MEN_MAIN MENU
 BEGIN
     POPUP ""
     BEGIN
-        MENUITEM "&Add files...\tShift+A",      MNU_ADDFILES
+        MENUITEM "&Ooen files...\tCtrl+O",      MNU_OPENFILES
         MENUITEM "&Remove selected\tDel",       MNU_REMSELECTED
         MENUITEM SEPARATOR
-        MENUITEM "A&bout...\tF1",               MNU_ABOUT
+        MENUITEM "&About...\tF1",               MNU_ABOUT
     END
 END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
-BEGIN
-    DLG_MAIN, DIALOG
-    BEGIN
-    END
-
-    DLG_RUNNIN, DIALOG
-    BEGIN
-    END
-END
-#endif    // APSTUDIO_INVOKED
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -196,8 +177,8 @@ END
 
 ACC_MAIN ACCELERATORS
 BEGIN
-    "A",            MNU_ADDFILES,           VIRTKEY, SHIFT, NOINVERT
-    VK_F1,          MNU_ABOUT,              VIRTKEY 
+    VK_F1,          MNU_ABOUT,              VIRTKEY, NOINVERT
+    "O",            MNU_OPENFILES,          VIRTKEY, CONTROL, NOINVERT
 END
 
 #endif    // English (United States) resources
