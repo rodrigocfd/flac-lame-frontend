@@ -1,11 +1,11 @@
 
 #include "Dlg_Runnin.h"
 #include "Convert.h"
-#include "../wet/str.h"
-#include "../wet/sys.h"
-#include "../wet/sysdlg.h"
+#include "../winlamb/str.h"
+#include "../winlamb/sys.h"
+#include "../winlamb/sysdlg.h"
 #include "../res/resource.h"
-using namespace wet;
+using namespace wl;
 using std::wstring;
 using std::vector;
 
@@ -20,90 +20,97 @@ Dlg_Runnin::Dlg_Runnin(
 	const file_ini&        ini,
 	const wstring&         destFolder
 )
-	: _taskBar(taskBar), _numThreads(numThreads), _targetType(targetType), _files(files),
-		_delSrc(delSrc), _isVbr(isVbr), _quality(quality), _ini(ini), _destFolder(destFolder),
-		_curFile(0), _filesDone(0)
+	: m_taskbarProgr(taskBar), m_numThreads(numThreads), m_targetType(targetType),
+		m_files(files), m_delSrc(delSrc), m_isVbr(isVbr), m_quality(quality), m_ini(ini),
+		m_destFolder(destFolder), m_curFile(0), m_filesDone(0)
 {
 	setup.dialogId = DLG_RUNNIN;
-}
 
-INT_PTR Dlg_Runnin::proc(params p)
-{
-	if (p.message == WM_INITDIALOG) {
-		_lbl.be(this, LBL_STATUS);
-		_prog.be(this, PRO_STATUS);
-	
-		_prog.set_range(0, _files.size());
-		_taskBar.set_pos(0);
-		_lbl.set_text( str::format(L"0 of %d files finished...", _files.size()) ); // initial text
-		_time0.set_now(); // start timer
+	on_message(WM_INITDIALOG, [&](params&)
+	{
+		m_lbl.be(hwnd(), LBL_STATUS);
+		m_prog.be(hwnd(), PRO_STATUS);
+
+		m_prog.set_range(0, m_files.size());
+		m_taskbarProgr.set_pos(0);
+		m_lbl.set_text( str::format(L"0 of %d files finished...", m_files.size()) ); // initial text
+		m_time0.set_now(); // start timer
 		enable_x_button(false);
-	
+
 		// Proceed to the file conversion straight away.
-		int nFiles = static_cast<int>(_files.size());
-		int batchSz = (_numThreads < nFiles) ? _numThreads : nFiles; // limit parallel processing
+		int nFiles = static_cast<int>(m_files.size());
+		int batchSz = (m_numThreads < nFiles) ? m_numThreads : nFiles; // limit parallel processing
 		for (int i = 0; i < batchSz; ++i) {
 			sys::thread([&]() {
-				_process_next_file();
+				process_next_file();
 			});
 		}
 
 		center_on_parent();
 		return TRUE;
-	}
-	return def_proc(p);
+	});
 }
 
-void Dlg_Runnin::_process_next_file()
+void Dlg_Runnin::process_next_file()
 {
-	int index = _curFile++;
-	if (index >= static_cast<int>(_files.size())) return;
+	int index = m_curFile++;
+	if (index >= static_cast<int>(m_files.size())) return;
 
-	const wstring& file = _files[index];
+	const wstring& file = m_files[index];
 	bool good = true;
 	wstring err;
 
-	switch (_targetType) {
+	switch (m_targetType) {
 	case target::MP3:
-		good = Convert::to_mp3(_ini, file, _destFolder, _delSrc, _quality, _isVbr, &err);
+		good = Convert::to_mp3(m_ini, file, m_destFolder, m_delSrc, m_quality, m_isVbr, &err);
 		break;
 	case target::FLAC:
-		good = Convert::to_flac(_ini, file, _destFolder, _delSrc, _quality, &err);
+		good = Convert::to_flac(m_ini, file, m_destFolder, m_delSrc, m_quality, &err);
 		break;
 	case target::WAV:
-		good = Convert::to_wav(_ini, file, _destFolder, _delSrc, &err);
+		good = Convert::to_wav(m_ini, file, m_destFolder, m_delSrc, &err);
 	}
 
 	if (!good) {
-		_curFile = static_cast<int>(_files.size()); // error, so avoid further processing
+		m_curFile = static_cast<int>(m_files.size()); // error, so avoid further processing
 		ui_thread([&]() {
-			sysdlg::msgbox(this, L"Conversion failed",
+			sysdlg::msgbox(hwnd(), L"Conversion failed",
 				str::format(L"File #%d:\n%s\n%s", index, file.c_str(), err.c_str()),
 				MB_ICONERROR);
-			_taskBar.clear();
+			m_taskbarProgr.clear();
 			EndDialog(hwnd(), IDCANCEL);
 		});
 	} else {
-		++_filesDone;
+		++m_filesDone;
 		ui_thread([&]() {
-			_prog.set_pos(_filesDone);
-			_taskBar.set_pos(_filesDone, _files.size());
-			_lbl.set_text( str::format(L"%d of %d files finished...",
-				_filesDone, _files.size()) );
+			m_prog.set_pos(m_filesDone);
+			m_taskbarProgr.set_pos(m_filesDone, m_files.size());
+			m_lbl.set_text( str::format(L"%d of %d files finished...",
+				m_filesDone, m_files.size()) );
 		});
-			
-		if (_filesDone < static_cast<int>(_files.size())) { // more files to come
-			_process_next_file();
+
+		if (m_filesDone < static_cast<int>(m_files.size())) { // more files to come
+			process_next_file();
 		} else { // finished all processing
 			ui_thread([&]() {
 				datetime fin;
-				sysdlg::msgbox(this, L"Conversion finished",
+				sysdlg::msgbox(hwnd(), L"Conversion finished",
 					str::format(L"%d files processed in %.2f seconds.",
-						_files.size(), static_cast<double>(fin.minus(_time0)) / 1000),
+						m_files.size(), static_cast<double>(fin.minus(m_time0)) / 1000),
 					MB_ICONINFORMATION);
-				_taskBar.clear();
+				m_taskbarProgr.clear();
 				EndDialog(hwnd(), IDOK);
 			});
 		}
+	}
+}
+
+void Dlg_Runnin::enable_x_button(bool enable) const
+{
+	// Enable/disable the X button to close the window; has no effect on Alt+F4.
+	HMENU hMenu = GetSystemMenu(hwnd(), FALSE);
+	if (hMenu) {
+		UINT dwExtra = enable ? MF_ENABLED : (MF_DISABLED | MF_GRAYED);
+		EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | dwExtra);
 	}
 }

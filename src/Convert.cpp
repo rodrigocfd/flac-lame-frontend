@@ -1,10 +1,10 @@
 
 #include "Convert.h"
-#include "../wet/file.h"
-#include "../wet/path.h"
-#include "../wet/str.h"
-#include "../wet/sys.h"
-using namespace wet;
+#include "../winlamb/file.h"
+#include "../winlamb/path.h"
+#include "../winlamb/str.h"
+#include "../winlamb/sys.h"
+using namespace wl;
 using std::wstring;
 
 bool Convert::paths_are_valid(const file_ini& ini, wstring* pErr)
@@ -69,7 +69,7 @@ bool Convert::to_wav(const file_ini& ini, wstring src, wstring dest, bool delSrc
 	if (pErr) pErr->clear();
 	return true;
 }
-	
+
 bool Convert::to_flac(const file_ini& ini, wstring src, wstring dest, bool delSrc,
 	const wstring& quality, wstring* pErr)
 {
@@ -120,7 +120,7 @@ bool Convert::to_flac(const file_ini& ini, wstring src, wstring dest, bool delSr
 	if (pErr) pErr->clear();
 	return true;
 }
-	
+
 bool Convert::to_mp3(const file_ini& ini, wstring src, wstring dest, bool delSrc,
 	const wstring& quality, bool isVbr, wstring *pErr)
 {

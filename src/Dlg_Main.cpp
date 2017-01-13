@@ -2,15 +2,14 @@
 #include "Dlg_Main.h"
 #include "Dlg_Runnin.h"
 #include "Convert.h"
-#include "../wet/drop_files.h"
-#include "../wet/file.h"
-#include "../wet/menu.h"
-#include "../wet/path.h"
-#include "../wet/str.h"
-#include "../wet/sys.h"
-#include "../wet/sysdlg.h"
+#include "../winlamb/file.h"
+#include "../winlamb/menu.h"
+#include "../winlamb/path.h"
+#include "../winlamb/str.h"
+#include "../winlamb/sys.h"
+#include "../winlamb/sysdlg.h"
 #include "../res/resource.h"
-using namespace wet;
+using namespace wl;
 using std::vector;
 using std::wstring;
 
@@ -21,23 +20,19 @@ Dlg_Main::Dlg_Main()
 	setup.dialogId = DLG_MAIN;
 	setup.iconId = ICO_MAIN;
 	setup.accelTableId = ACC_MAIN;
-}
 
-INT_PTR Dlg_Main::proc(params p)
-{
-	switch (p.message) {
-	case WM_INITDIALOG: return [&](params p)
+	on_message(WM_INITDIALOG, [&](params&)
 	{
-		if (!_preliminar_checks()) {
+		if (!preliminar_checks()) {
 			SendMessage(hwnd(), WM_CLOSE, 0, 0); // halt program
 			return TRUE;
 		}
 
-		_taskBar.init(this);
-		_txtDest.be(this, TXT_DEST);
+		m_taskbarProg.init(hwnd());
+		m_txtDest.be(hwnd(), TXT_DEST);
 
 		// Main listview initialization.
-		_lstFiles.be(this, LST_FILES)
+		m_lstFiles.be(hwnd(), LST_FILES)
 			.set_context_menu(MEN_MAIN)
 			.column_add(L"File", 300)
 			.column_fit(0)
@@ -46,284 +41,272 @@ INT_PTR Dlg_Main::proc(params p)
 			.icon_push(L"wav"); // icons of the 3 filetypes we use
 
 		// Initializing comboboxes.
-		_cmbCbr.be(this, CMB_CBR)
+		m_cmbCbr.be(hwnd(), CMB_CBR)
 			.item_add(L"32 kbps|40 kbps|48 kbps|56 kbps|64 kbps|80 kbps|96 kbps|"
 				L"112 kbps|128 kbps; default|160 kbps|192 kbps|224 kbps|256 kbps|320 kbps")
 			.item_set_selected(8);
 
-		_cmbVbr.be(this, CMB_VBR)
+		m_cmbVbr.be(hwnd(), CMB_VBR)
 			.item_add(L"0 (~245 kbps)|1 (~225 kbps)|2 (~190 kbps)|3 (~175 kbps)|"
 				L"4 (~165 kbps); default|5 (~130 kbps)|6 (~115 kbps)|7 (~100 kbps)|"
 				L"8 (~85 kbps)|9 (~65 kbps)")
 			.item_set_selected(4);
 
-		_cmbFlac.be(this, CMB_FLAC)
+		m_cmbFlac.be(hwnd(), CMB_FLAC)
 			.item_add(L"1|2|3|4|5|6|7|8")
 			.item_set_selected(7);
 
-		_cmbNumThreads.be(this, CMB_NUMTHREADS)
+		m_cmbNumThreads.be(hwnd(), CMB_NUMTHREADS)
 			.item_add(L"1|2|4|8");
 
-		SYSTEM_INFO si = { 0 };
-		GetSystemInfo(&si);
-		switch (si.dwNumberOfProcessors) {
-			case 1:  _cmbNumThreads.item_set_selected(0); break;
-			case 2:  _cmbNumThreads.item_set_selected(1); break;
-			case 4:  _cmbNumThreads.item_set_selected(2); break;
-			case 8:  _cmbNumThreads.item_set_selected(3); break;
-			default: _cmbNumThreads.item_set_selected(0);
+		switch (num_processors()) {
+			case 1:  m_cmbNumThreads.item_set_selected(0); break;
+			case 2:  m_cmbNumThreads.item_set_selected(1); break;
+			case 4:  m_cmbNumThreads.item_set_selected(2); break;
+			case 8:  m_cmbNumThreads.item_set_selected(3); break;
+			default: m_cmbNumThreads.item_set_selected(0);
 		}
 
 		// Initializing radio buttons.
-		_radMp3   .be(this, RAD_MP3).set_check_and_trigger(true);
-		_radMp3Cbr.be(this, RAD_CBR);
-		_radMp3Vbr.be(this, RAD_VBR).set_check_and_trigger(true);
-		_radFlac  .be(this, RAD_FLAC);
-		_radWav   .be(this, RAD_WAV);
+		m_radMp3   .be(hwnd(), RAD_MP3).set_check_and_trigger(true);
+		m_radMp3Cbr.be(hwnd(), RAD_CBR);
+		m_radMp3Vbr.be(hwnd(), RAD_VBR).set_check_and_trigger(true);
+		m_radFlac  .be(hwnd(), RAD_FLAC);
+		m_radWav   .be(hwnd(), RAD_WAV);
 
-		_chkDelSrc.be(this, CHK_DELSRC);
+		m_chkDelSrc.be(hwnd(), CHK_DELSRC);
 
 		// Layout control when resizing.
-		_resizer.add(this, LST_FILES, resizer::go::RESIZE, resizer::go::RESIZE)
-			.add(this, TXT_DEST, resizer::go::RESIZE, resizer::go::REPOS)
-			.add(this, { LBL_DEST, FRA_CONV, RAD_MP3, RAD_FLAC, RAD_WAV, RAD_CBR, RAD_VBR, LBL_LEVEL,
+		m_resz.add(hwnd(), LST_FILES, resizer::go::RESIZE, resizer::go::RESIZE)
+			.add(hwnd(), TXT_DEST, resizer::go::RESIZE, resizer::go::REPOS)
+			.add(hwnd(), { LBL_DEST, FRA_CONV, RAD_MP3, RAD_FLAC, RAD_WAV, RAD_CBR, RAD_VBR, LBL_LEVEL,
 				CMB_CBR, CMB_VBR, CMB_FLAC, CHK_DELSRC, LBL_NUMTHREADS, CMB_NUMTHREADS },
 				resizer::go::NOTHING, resizer::go::REPOS)
-			.add(this, { BTN_DEST, BTN_RUN }, resizer::go::REPOS, resizer::go::REPOS);
+			.add(hwnd(), { BTN_DEST, BTN_RUN }, resizer::go::REPOS, resizer::go::REPOS);
 
 		return TRUE;
-	}(p);
+	});
 
-	case WM_SIZE: return [&](params::size p)
+	on_message(WM_SIZE, [&](params& p)
 	{
-		_resizer.arrange(p);
-		_lstFiles.column_fit(0);
+		m_resz.arrange(p);
+		m_lstFiles.column_fit(0);
 		return TRUE;
-	}(p);
+	});
 
-	case WM_DROPFILES: return [&](params::dropfiles p)
+	on_message(WM_DROPFILES, [&](wm::dropfiles p)
 	{
-		vector<wstring> files = p.drop().files();
+		vector<wstring> files = p.files();
+
 		for (const wstring& drop : files) {
 			if (file::is_dir(drop)) { // if a directory, add all files inside of it
 				for (const wstring& f : file::list_dir(drop.c_str(), L"*.mp3")) {
-					_file_to_list(f);
+					file_to_list(f);
 				}
 				for (const wstring& f : file::list_dir(drop.c_str(), L"*.flac")) {
-					_file_to_list(f);
+					file_to_list(f);
 				}
 				for (const wstring& f : file::list_dir(drop.c_str(), L"*.wav")) {
-					_file_to_list(f);
+					file_to_list(f);
 				}
 			} else {
-				_file_to_list(drop); // add single file
+				file_to_list(drop); // add single file
 			}
 		}
-		_update_counter( _lstFiles.items.count() );
+
+		update_counter( m_lstFiles.items.count() );
 		return TRUE;
-	}(p);
+	});
 
-	case WM_INITMENUPOPUP: return [&](params::initmenupopup p)->INT_PTR
+	on_message(WM_INITMENUPOPUP, [&](wm::initmenupopup p)
 	{
-		if (p.menup().get_command_id(0) == MNU_OPENFILES) {
-			p.menup().enable_item(MNU_REMSELECTED, _lstFiles.items.count_selected() > 0);
+		menu m = p.hmenu();
+		if (m.get_command_id(0) == MNU_OPENFILES) {
+			m.enable_item(MNU_REMSELECTED, m_lstFiles.items.count_selected() > 0);
 			return TRUE;
 		}
-		return def_proc(p);
-	}(p);
+		return FALSE;
+	});
 
-	case WM_COMMAND: return [&](params::command p)->INT_PTR
+	on_command(MNU_ABOUT, [&](params&)
 	{
-		switch (p.control_id()) {
-		case MNU_ABOUT: return [&](params::command p)
-		{
-			sysdlg::msgbox(this, L"About",
-				L"FLAC/LAME graphical front-end.", MB_ICONINFORMATION);
-			return TRUE;
-		}(p);
+		sysdlg::msgbox(hwnd(), L"About",
+			L"FLAC/LAME graphical front-end.", MB_ICONINFORMATION);
+		return TRUE;
+	});
 
-		case MNU_OPENFILES: return [&](params::command p)
-		{
-			vector<wstring> files;
-			if (sysdlg::open_file(this,
-				L"Supported audio files (*.mp3, *.flac, *.wav)|*.mp3;*.flac;*.wav|"
-				L"MP3 audio files (*.mp3)|*.mp3|"
-				L"FLAC audio files (*.flac)|*.flac|"
-				L"WAV audio files (*.wav)|*.wav",
-				files))
-			{
-				for (const wstring& file : files) {
-					_file_to_list(file);
-				}
-				_update_counter( _lstFiles.items.count() );
-			}
-			return TRUE;
-		}(p);
-
-		case MNU_REMSELECTED: return [&](params::command p)
-		{
-			_lstFiles.items.remove_selected();
-			_update_counter( _lstFiles.items.count() );
-			return TRUE;
-		}(p);
-
-		case IDCANCEL: return [&](params::command p)
-		{
-			if (!_lstFiles.items.count() || IsWindowEnabled(GetDlgItem(hwnd(), BTN_RUN))) {
-				SendMessage(hwnd(), WM_CLOSE, 0, 0); // close on ESC only if not processing
-			}
-			return TRUE;
-		}(p);
-
-		case BTN_DEST: return [&](params::command p)
-		{
-			wstring folder;
-			if (sysdlg::choose_folder(this, folder)) {
-				_txtDest.set_text(folder)
-					.selection_set_all()
-					.focus();
-			}
-			return TRUE;
-		}(p);
-
-		case RAD_MP3:
-		case RAD_FLAC:
-		case RAD_WAV: return [&](params::command p)
-		{
-			_radMp3Cbr.enable(_radMp3.is_checked());
-			_cmbCbr.enable(_radMp3.is_checked() && _radMp3Cbr.is_checked());
-
-			_radMp3Vbr.enable(_radMp3.is_checked());
-			_cmbVbr.enable(_radMp3.is_checked() && _radMp3Vbr.is_checked());
-
-			EnableWindow(GetDlgItem(hwnd(), LBL_LEVEL), _radFlac.is_checked());
-			_cmbFlac.enable(_radFlac.is_checked());
-			return TRUE;
-		}(p);
-
-		case RAD_CBR:
-		case RAD_VBR: return [&](params::command p)
-		{
-			_cmbCbr.enable(_radMp3Cbr.is_checked());
-			_cmbVbr.enable(_radMp3Vbr.is_checked());
-			return TRUE;
-		}(p);
-
-		case BTN_RUN: return [&](params::command p)
-		{
-			vector<wstring> files;
-			if (!_dest_folder_is_ok() || !_files_exist(files)) {
-				return TRUE;
-			}
-
-			// Retrieve settings.
-			bool delSrc = _chkDelSrc.is_checked();
-			bool isVbr = _radMp3Vbr.is_checked();
-			int numThreads = std::stoi(_cmbNumThreads.item_get_selected_text());
-		
-			wstring quality;
-			if (_radMp3.is_checked()) {
-				combo& cmbQuality = (isVbr ? _cmbVbr : _cmbCbr);
-				quality = cmbQuality.item_get_selected_text();
-				quality.resize(quality.find_first_of(L' ')); // first characters of chosen option are the quality setting itself
-			} else if (_radFlac.is_checked()) {
-				quality = _cmbFlac.item_get_selected_text(); // text is quality setting itself
-			}
-
-			// Which format are we converting to?
-			Dlg_Runnin::target targetType = Dlg_Runnin::target::NONE;
-		
-			if (_radMp3.is_checked())       targetType = Dlg_Runnin::target::MP3;
-			else if (_radFlac.is_checked()) targetType = Dlg_Runnin::target::FLAC;
-			else if (_radWav.is_checked())  targetType = Dlg_Runnin::target::WAV;
-
-			// Finally invoke dialog.
-			Dlg_Runnin rd(_taskBar, numThreads, targetType,
-				files, delSrc, isVbr, quality, _ini,
-				_txtDest.get_text());
-			rd.show(this);
-			return TRUE;
-		}(p);
-		}
-		return def_proc(p);
-	}(p);
-
-	case WM_NOTIFY: return [&](params::notify p)->INT_PTR
+	on_command(MNU_OPENFILES, [&](params&)
 	{
-		switch (p.nmhdr().idFrom) {
-		case LST_FILES:
-			switch (p.nmhdr().code) {
-			case LVN_INSERTITEM: return [&](params::notify p)
-			{
-				return _update_counter(_lstFiles.items.count()); // new item inserted
-			}(p);
-
-			case LVN_DELETEITEM: return [&](params::notify p)
-			{
-				return _update_counter(_lstFiles.items.count() - 1); // item about to be deleted
-			}(p);
-
-			case LVN_DELETEALLITEMS: return [&](params::notify p)
-			{
-				return _update_counter(0); // all items about to be deleted
-			}(p);
-
-			case LVN_KEYDOWN:
-				switch (p.nmlvkeydown().wVKey) {
-				case VK_DELETE: return [&](params::notify p)
-				{
-					SendMessage(hwnd(), WM_COMMAND, MAKEWPARAM(MNU_REMSELECTED, 0), 0);
-					return TRUE;
-				}(p);
-				}
+		vector<wstring> files;
+		if (sysdlg::open_file(hwnd(),
+			L"Supported audio files (*.mp3, *.flac, *.wav)|*.mp3;*.flac;*.wav|"
+			L"MP3 audio files (*.mp3)|*.mp3|"
+			L"FLAC audio files (*.flac)|*.flac|"
+			L"WAV audio files (*.wav)|*.wav",
+			files))
+		{
+			for (const wstring& file : files) {
+				file_to_list(file);
 			}
+			update_counter( m_lstFiles.items.count() );
 		}
-		return def_proc(p);
-	}(p);
-	}
-	return def_proc(p);
+		return TRUE;
+	});
+
+	on_command(MNU_REMSELECTED, [&](params&)
+	{
+		m_lstFiles.items.remove_selected();
+		update_counter( m_lstFiles.items.count() );
+		return TRUE;
+	});
+
+	on_command(IDCANCEL, [&](params&)
+	{
+		if (!m_lstFiles.items.count() || IsWindowEnabled(GetDlgItem(hwnd(), BTN_RUN))) {
+			SendMessage(hwnd(), WM_CLOSE, 0, 0); // close on ESC only if not processing
+		}
+		return TRUE;
+	});
+
+	on_command(BTN_DEST, [&](params&)
+	{
+		wstring folder;
+		if (sysdlg::choose_folder(hwnd(), folder)) {
+			m_txtDest.set_text(folder)
+				.selection_set_all()
+				.focus();
+		}
+		return TRUE;
+	});
+
+	on_command({RAD_MP3, RAD_FLAC, RAD_WAV}, [&](params&)
+	{
+		m_radMp3Cbr.enable(m_radMp3.is_checked());
+		m_cmbCbr.enable(m_radMp3.is_checked() && m_radMp3Cbr.is_checked());
+
+		m_radMp3Vbr.enable(m_radMp3.is_checked());
+		m_cmbVbr.enable(m_radMp3.is_checked() && m_radMp3Vbr.is_checked());
+
+		EnableWindow(GetDlgItem(hwnd(), LBL_LEVEL), m_radFlac.is_checked());
+		m_cmbFlac.enable(m_radFlac.is_checked());
+		return TRUE;
+	});
+
+	on_command({RAD_CBR, RAD_VBR}, [&](params&)
+	{
+		m_cmbCbr.enable(m_radMp3Cbr.is_checked());
+		m_cmbVbr.enable(m_radMp3Vbr.is_checked());
+		return TRUE;
+	});
+
+	on_command(BTN_RUN, [&](params&)
+	{
+		vector<wstring> files;
+		if (!dest_folder_is_ok() || !files_exist(files)) {
+			return TRUE;
+		}
+
+		// Retrieve settings.
+		bool delSrc = m_chkDelSrc.is_checked();
+		bool isVbr = m_radMp3Vbr.is_checked();
+		int numThreads = std::stoi(m_cmbNumThreads.item_get_selected_text());
+
+		wstring quality;
+		if (m_radMp3.is_checked()) {
+			combo& cmbQuality = (isVbr ? m_cmbVbr : m_cmbCbr);
+			quality = cmbQuality.item_get_selected_text();
+			quality.resize(quality.find_first_of(L' ')); // first characters of chosen option are the quality setting itself
+		} else if (m_radFlac.is_checked()) {
+			quality = m_cmbFlac.item_get_selected_text(); // text is quality setting itself
+		}
+
+		// Which format are we converting to?
+		Dlg_Runnin::target targetType = Dlg_Runnin::target::NONE;
+
+		if (m_radMp3.is_checked())       targetType = Dlg_Runnin::target::MP3;
+		else if (m_radFlac.is_checked()) targetType = Dlg_Runnin::target::FLAC;
+		else if (m_radWav.is_checked())  targetType = Dlg_Runnin::target::WAV;
+
+		// Finally invoke dialog.
+		Dlg_Runnin rd(m_taskbarProg, numThreads, targetType,
+			files, delSrc, isVbr, quality, m_iniFile,
+			m_txtDest.get_text());
+		rd.show(hwnd());
+		return TRUE;
+	});
+
+	on_notify(LST_FILES, LVN_INSERTITEM, [&](params&)
+	{
+		return update_counter(m_lstFiles.items.count()); // new item inserted
+	});
+
+	on_notify(LST_FILES, LVN_DELETEITEM, [&](params&)
+	{
+		return update_counter(m_lstFiles.items.count() - 1); // item about to be deleted
+	});
+
+	on_notify(LST_FILES, LVN_DELETEALLITEMS, [&](params&)
+	{
+		return update_counter(0); // all items about to be deleted
+	});
+
+	on_notify(LST_FILES, LVN_KEYDOWN, [&](listview::notif::keydown p)
+	{
+		if (p->wVKey == VK_DELETE) {
+			SendMessage(hwnd(), WM_COMMAND, MAKEWPARAM(MNU_REMSELECTED, 0), 0);
+			return TRUE;
+		}
+		return FALSE;
+	});
 }
 
-bool Dlg_Main::_preliminar_checks()
+bool Dlg_Main::preliminar_checks()
 {
 	// Validate and load INI file.
 	wstring iniPath = path::exe_path().append(L"\\FlacLameFE.ini");
 	if (!file::exists(iniPath)) {
-		sysdlg::msgbox(this, L"Fail",
+		sysdlg::msgbox(hwnd(), L"Fail",
 			str::format(L"File not found:\n%s", iniPath.c_str()),
 			MB_ICONERROR);
 		return false;
 	}
 
 	wstring err;
-	if (!_ini.load_from_file(iniPath, &err)) {
-		sysdlg::msgbox(this, L"Fail",
+	if (!m_iniFile.load_from_file(iniPath, &err)) {
+		sysdlg::msgbox(hwnd(), L"Fail",
 			str::format(L"Failed to load:\n%s\n%s", iniPath.c_str(), err.c_str()),
 			MB_ICONERROR);
 		return false;
 	}
 
 	// Validate tools.
-	if (!Convert::paths_are_valid(_ini, &err)) {
-		sysdlg::msgbox(this, L"Fail", err, MB_ICONERROR);
+	if (!Convert::paths_are_valid(m_iniFile, &err)) {
+		sysdlg::msgbox(hwnd(), L"Fail", err, MB_ICONERROR);
 		return false;
 	}
 
 	return true;
 }
 
-bool Dlg_Main::_dest_folder_is_ok()
+DWORD Dlg_Main::num_processors() const
 {
-	wstring destFolder = _txtDest.get_text();
+	SYSTEM_INFO si = { 0 };
+	GetSystemInfo(&si);
+	return si.dwNumberOfProcessors;
+}
+
+bool Dlg_Main::dest_folder_is_ok()
+{
+	wstring destFolder = m_txtDest.get_text();
 	if (!destFolder.empty()) {
 		if (!file::exists(destFolder)) {
-			int q = sysdlg::msgbox(this, L"Create directory",
+			int q = sysdlg::msgbox(hwnd(), L"Create directory",
 				str::format(L"The following directory:\n%s\ndoes not exist. Create it?", destFolder.c_str()),
 				MB_ICONQUESTION | MB_YESNO);
 			if (q == IDYES) {
 				wstring err;
 				if (!file::create_dir(destFolder, &err)) {
-					sysdlg::msgbox(this, L"Fail",
+					sysdlg::msgbox(hwnd(), L"Fail",
 						str::format(L"The directory failed to be created:\n%s\n%s", destFolder.c_str(), err.c_str()),
 						MB_ICONERROR);
 					return false; // halt
@@ -332,7 +315,7 @@ bool Dlg_Main::_dest_folder_is_ok()
 				return false; // halt
 			}
 		} else if (!file::is_dir(destFolder)) {
-			sysdlg::msgbox(this, L"Fail",
+			sysdlg::msgbox(hwnd(), L"Fail",
 				str::format(L"The following path is not a directory:\n%s", destFolder.c_str()),
 				MB_ICONERROR);
 			return false; // halt
@@ -341,14 +324,14 @@ bool Dlg_Main::_dest_folder_is_ok()
 	return true;
 }
 
-bool Dlg_Main::_files_exist(vector<wstring>& files)
+bool Dlg_Main::files_exist(vector<wstring>& files)
 {
-	vector<listview::item> allItems = _lstFiles.items.get_all();
+	vector<listview::item> allItems = m_lstFiles.items.get_all();
 	files = listview::get_all_text(allItems, 0);
 
 	for (const wstring& f : files) { // each filepath
 		if (!file::exists(f)) {
-			sysdlg::msgbox(this, L"Fail",
+			sysdlg::msgbox(hwnd(), L"Fail",
 				str::format(L"Process aborted, file does not exist:\n%s", f.c_str()),
 				MB_ICONERROR);
 			return false; // halt
@@ -357,7 +340,7 @@ bool Dlg_Main::_files_exist(vector<wstring>& files)
 	return true;
 }
 
-LRESULT Dlg_Main::_update_counter(size_t newCount)
+INT_PTR Dlg_Main::update_counter(size_t newCount)
 {
 	// Update counter on Run button.
 	wstring caption = newCount ?
@@ -368,7 +351,7 @@ LRESULT Dlg_Main::_update_counter(size_t newCount)
 	return 0;
 };
 
-void Dlg_Main::_file_to_list(const wstring& file)
+void Dlg_Main::file_to_list(const wstring& file)
 {
 	int iType = -1;
 	if (path::has_extension(file, L".mp3"))       iType = 0;
@@ -378,7 +361,7 @@ void Dlg_Main::_file_to_list(const wstring& file)
 	if (iType == -1) {
 		return; // bypass file if unaccepted format
 	}
-	if (!_lstFiles.items.exists(file)) {
-		_lstFiles.items.add(file, iType); // add only if not present yet
+	if (!m_lstFiles.items.exists(file)) {
+		m_lstFiles.items.add(file, iType); // add only if not present yet
 	}
 }

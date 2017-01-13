@@ -1,33 +1,33 @@
 
 #pragma once
-#include "../wet/dialog_main.h"
-#include "../wet/checkbox.h"
-#include "../wet/combo.h"
-#include "../wet/file_ini.h"
-#include "../wet/listview.h"
-#include "../wet/resizer.h"
-#include "../wet/progress_taskbar.h"
-#include "../wet/textbox.h"
+#include "../winlamb/dialog_main.h"
+#include "../winlamb/checkbox.h"
+#include "../winlamb/combo.h"
+#include "../winlamb/file_ini.h"
+#include "../winlamb/listview.h"
+#include "../winlamb/resizer.h"
+#include "../winlamb/progress_taskbar.h"
+#include "../winlamb/textbox.h"
 
-class Dlg_Main final : public wet::dialog_main {
+class Dlg_Main final : public wl::dialog_main {
 private:
-	wet::file_ini         _ini;
-	wet::progress_taskbar _taskBar;
-	wet::resizer          _resizer;
-	wet::listview         _lstFiles;
-	wet::textbox          _txtDest;
-	wet::combo            _cmbCbr, _cmbVbr, _cmbFlac, _cmbNumThreads;
-	wet::checkbox         _radMp3, _radMp3Cbr, _radMp3Vbr, _radFlac, _radWav;
-	wet::checkbox         _chkDelSrc;
+	wl::file_ini         m_iniFile;
+	wl::progress_taskbar m_taskbarProg;
+	wl::resizer          m_resz;
+	wl::listview         m_lstFiles;
+	wl::textbox          m_txtDest;
+	wl::combo            m_cmbCbr, m_cmbVbr, m_cmbFlac, m_cmbNumThreads;
+	wl::checkbox         m_radMp3, m_radMp3Cbr, m_radMp3Vbr, m_radFlac, m_radWav;
+	wl::checkbox         m_chkDelSrc;
 
 public:
 	Dlg_Main();
 
 private:
-	INT_PTR  proc(wet::params p) override;
-	bool    _preliminar_checks();
-	bool    _dest_folder_is_ok();
-	bool    _files_exist(std::vector<std::wstring>& files);
-	LRESULT _update_counter(size_t newCount);
-	void    _file_to_list(const std::wstring& file);
+	bool    preliminar_checks();
+	DWORD   num_processors() const;
+	bool    dest_folder_is_ok();
+	bool    files_exist(std::vector<std::wstring>& files);
+	INT_PTR update_counter(size_t newCount);
+	void    file_to_list(const std::wstring& file);
 };
