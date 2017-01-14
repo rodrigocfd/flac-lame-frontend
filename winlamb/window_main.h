@@ -9,8 +9,9 @@
 #include "base_loop.h"
 #include "base_run.h"
 #include "base_wheel.h"
-#include "plus_on.h"
-#include "plus_text.h"
+#include "i_hwnd.h"
+#include "i_inventory.h"
+#include "i_text.h"
 
 namespace wl {
 
@@ -20,7 +21,11 @@ struct setup_window_main final : public setup_window {
 };
 
 
-class window_main : protected plus_on, protected plus_text<window_main> {
+class window_main :
+	public    i_hwnd,
+	protected i_inventory,
+	protected i_text<window_main>
+{
 protected:
 	setup_window_main setup;
 private:
@@ -28,7 +33,7 @@ private:
 
 public:
 	window_main() :
-		plus_on(_window.inventory), plus_text(this), _window(setup)
+		i_hwnd(_window.wnd()), i_inventory(_window.inventory), i_text(this), _window(setup)
 	{
 		this->on_message(WM_NCDESTROY, [](const params& p)->LRESULT {
 			PostQuitMessage(0);
@@ -47,8 +52,6 @@ public:
 		// WS_MINIMIZEBOX adds minimize button
 		// WS_EX_ACCEPTFILES accepts dropped files (extended style, add on exStyle)
 	}
-
-	HWND hwnd() const { return this->_window.wnd.hwnd(); }
 
 	int run(HINSTANCE hInst, int cmdShow) {
 		InitCommonControls();

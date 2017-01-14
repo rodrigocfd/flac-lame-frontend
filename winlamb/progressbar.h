@@ -6,23 +6,27 @@
 
 #pragma once
 #include "base_native_control.h"
-#include "plus_control.h"
+#include "i_control.h"
+#include "i_hwnd.h"
+#include <CommCtrl.h>
 
 namespace wl {
 
-class progressbar final : public plus_control<progressbar> {
+class progressbar final :
+	public i_hwnd,
+	public i_control<progressbar>
+{
 private:
 	base_native_control _control;
 
 public:
-	progressbar() : plus_control(this) { }
+	progressbar() : i_hwnd(_control.wnd()), i_control(this) { }
 
-	HWND         hwnd() const                    { return this->_control.hwnd(); }
-	progressbar& be(HWND hWnd)                   { this->_control.be(hWnd); return *this; }
-	progressbar& be(HWND hParent, int controlId) { this->_control.be(hParent, controlId); return *this; }
+	progressbar& be(const i_hwnd* ctrl)                  { this->_control.be(ctrl); return *this; }
+	progressbar& be(const i_hwnd* parent, int controlId) { this->_control.be(parent, controlId); return *this; }
 
-	progressbar& create(HWND hParent, int controlId, const wchar_t* caption, POINT pos, SIZE size) {
-		this->_control.create(hParent, controlId, nullptr, pos, size, PROGRESS_CLASS);
+	progressbar& create(const i_hwnd* parent, int controlId, const wchar_t* caption, POINT pos, SIZE size) {
+		this->_control.create(parent, controlId, nullptr, pos, size, PROGRESS_CLASS);
 		return *this;
 	}
 

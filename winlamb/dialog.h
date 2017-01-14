@@ -52,7 +52,7 @@ public:
 		if (msg == WM_INITDIALOG) {
 			pSelf = reinterpret_cast<dialog*>(lp);
 			SetWindowLongPtrW(hDlg, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pSelf));
-			font::set_ui_on_children(hDlg); // if user creates controls manually, font must be set manually on them
+			font::set_ui_inventory_children(hDlg); // if user creates controls manually, font must be set manually on them
 			pSelf->_wnd = hDlg; // store HWND
 		} else {
 			pSelf = reinterpret_cast<dialog*>(GetWindowLongPtrW(hDlg, GWLP_USERDATA));

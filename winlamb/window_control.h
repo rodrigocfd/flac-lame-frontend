@@ -7,15 +7,20 @@
 #pragma once
 #include "window.h"
 #include "base_user_control.h"
-#include "plus_control.h"
-#include "plus_on.h"
+#include "i_control.h"
+#include "i_hwnd.h"
+#include "i_inventory.h"
 
 namespace wl {
 
 struct setup_window_control final : public setup_window { };
 
 
-class window_control : public plus_on, public plus_control<window_control> {
+class window_control :
+	public i_hwnd,
+	public i_inventory,
+	public i_control<window_control>
+{
 protected:
 	setup_window_control setup;
 private:
@@ -24,7 +29,7 @@ private:
 
 public:
 	window_control() :
-		plus_on(_window.inventory), plus_control(this),
+		i_hwnd(_window.wnd()), i_inventory(_window.inventory), i_control(this),
 		_window(setup), _control(_window.wnd(), _window.inventory, 0)
 	{
 		this->setup.wndClassEx.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
@@ -38,13 +43,11 @@ public:
 		// WS_EX_CLIENTEDGE adds border (extended style, add on exStyle)
 	}
 
-	HWND hwnd() const { return this->_window.wnd().hwnd(); }
-
-	bool create(HWND hParent, int controlId, POINT position, SIZE size) {
+	bool create(const i_hwnd* parent, int controlId, POINT position, SIZE size) {
 		this->setup.position = position;
 		this->setup.size = size;
 		this->setup.menu = reinterpret_cast<HMENU>(static_cast<INT_PTR>(controlId));
-		return this->_window.register_create(hParent);
+		return this->_window.register_create(parent->hwnd());
 	}
 
 protected:

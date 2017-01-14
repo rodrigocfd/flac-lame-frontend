@@ -5,14 +5,14 @@
  */
 
 #pragma once
-#include "base_wnd.h"
+#include "i_hwnd.h"
 #include <ShObjIdl.h>
 
 namespace wl {
 
 class progress_taskbar final {
 private:
-	HWND _hWnd;
+	HWND           _hWnd;
 	ITaskbarList3* _bar;
 
 public:
@@ -27,20 +27,16 @@ public:
 		}
 	}
 
-	progress_taskbar& init(HWND hWnd) {
+	progress_taskbar& init(const i_hwnd* owner) {
 		if (this->_bar) {
 			OutputDebugStringW(L"ERROR: progress_taskbar already created.\n");
 		} else {
-			this->_hWnd = hWnd;
+			this->_hWnd = owner->hwnd();
 			CoInitialize(nullptr);
 			CoCreateInstance(CLSID_TaskbarList, nullptr, CLSCTX_INPROC_SERVER,
 				IID_ITaskbarList3, reinterpret_cast<LPVOID*>(&this->_bar));
 		}
 		return *this;
-	}
-
-	progress_taskbar& init(const base_wnd* wnd) {
-		return this->init(wnd->hwnd());
 	}
 
 	progress_taskbar& set_pos(size_t percent, size_t total) {

@@ -32,74 +32,11 @@
     <ClInclude Include="src\Dlg_Main.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\base_inventory.h">
-      <Filter>WinLamb\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\base_loop.h">
-      <Filter>WinLamb\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\base_native_control.h">
-      <Filter>WinLamb\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\base_run.h">
-      <Filter>WinLamb\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\base_threaded.h">
-      <Filter>WinLamb\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\base_user_control.h">
-      <Filter>WinLamb\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\base_wheel.h">
-      <Filter>WinLamb\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\base_wnd.h">
-      <Filter>WinLamb\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\checkbox.h">
-      <Filter>WinLamb\More</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\com_ptr.h">
-      <Filter>WinLamb\More</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\combo.h">
-      <Filter>WinLamb\More</Filter>
-    </ClInclude>
     <ClInclude Include="winlamb\datetime.h">
       <Filter>WinLamb\More</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\device_context.h">
       <Filter>WinLamb\More</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\dialog.h">
-      <Filter>WinLamb\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\dialog_control.h">
-      <Filter>WinLamb\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\dialog_main.h">
-      <Filter>WinLamb\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\dialog_modal.h">
-      <Filter>WinLamb\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\plus_on.h">
-      <Filter>WinLamb\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\plus_text.h">
-      <Filter>WinLamb\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\window.h">
-      <Filter>WinLamb\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\window_control.h">
-      <Filter>WinLamb\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\window_main.h">
-      <Filter>WinLamb\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\params.h">
-      <Filter>WinLamb\Core</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\download.h">
       <Filter>WinLamb\More</Filter>
@@ -143,9 +80,6 @@
     <ClInclude Include="winlamb\resizer.h">
       <Filter>WinLamb\More</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\plus_control.h">
-      <Filter>WinLamb\Core</Filter>
-    </ClInclude>
     <ClInclude Include="winlamb\statusbar.h">
       <Filter>WinLamb\More</Filter>
     </ClInclude>
@@ -167,7 +101,76 @@
     <ClInclude Include="winlamb\zip.h">
       <Filter>WinLamb\More</Filter>
     </ClInclude>
+    <ClInclude Include="winlamb\checkbox.h">
+      <Filter>WinLamb\More</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\com_ptr.h">
+      <Filter>WinLamb\More</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\combo.h">
+      <Filter>WinLamb\More</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\base_inventory.h">
+      <Filter>WinLamb\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\base_loop.h">
+      <Filter>WinLamb\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\base_native_control.h">
+      <Filter>WinLamb\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\base_run.h">
+      <Filter>WinLamb\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\base_threaded.h">
+      <Filter>WinLamb\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\base_user_control.h">
+      <Filter>WinLamb\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\base_wheel.h">
+      <Filter>WinLamb\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\base_wnd.h">
+      <Filter>WinLamb\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\dialog.h">
+      <Filter>WinLamb\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\dialog_control.h">
+      <Filter>WinLamb\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\dialog_main.h">
+      <Filter>WinLamb\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\dialog_modal.h">
+      <Filter>WinLamb\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\i_control.h">
+      <Filter>WinLamb\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\i_hwnd.h">
+      <Filter>WinLamb\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\i_inventory.h">
+      <Filter>WinLamb\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\i_text.h">
+      <Filter>WinLamb\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\params.h">
+      <Filter>WinLamb\Core</Filter>
+    </ClInclude>
     <ClInclude Include="winlamb\subclass.h">
+      <Filter>WinLamb\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\window.h">
+      <Filter>WinLamb\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\window_control.h">
+      <Filter>WinLamb\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\window_main.h">
       <Filter>WinLamb\Core</Filter>
     </ClInclude>
   </ItemGroup>

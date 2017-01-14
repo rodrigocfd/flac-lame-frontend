@@ -28,11 +28,11 @@ Dlg_Main::Dlg_Main()
 			return TRUE;
 		}
 
-		m_taskbarProg.init(hwnd());
-		m_txtDest.be(hwnd(), TXT_DEST);
+		m_taskbarProg.init(this);
+		m_txtDest.be(this, TXT_DEST);
 
 		// Main listview initialization.
-		m_lstFiles.be(hwnd(), LST_FILES)
+		m_lstFiles.be(this, LST_FILES)
 			.set_context_menu(MEN_MAIN)
 			.column_add(L"File", 300)
 			.column_fit(0)
@@ -41,22 +41,22 @@ Dlg_Main::Dlg_Main()
 			.icon_push(L"wav"); // icons of the 3 filetypes we use
 
 		// Initializing comboboxes.
-		m_cmbCbr.be(hwnd(), CMB_CBR)
+		m_cmbCbr.be(this, CMB_CBR)
 			.item_add(L"32 kbps|40 kbps|48 kbps|56 kbps|64 kbps|80 kbps|96 kbps|"
 				L"112 kbps|128 kbps; default|160 kbps|192 kbps|224 kbps|256 kbps|320 kbps")
 			.item_set_selected(8);
 
-		m_cmbVbr.be(hwnd(), CMB_VBR)
+		m_cmbVbr.be(this, CMB_VBR)
 			.item_add(L"0 (~245 kbps)|1 (~225 kbps)|2 (~190 kbps)|3 (~175 kbps)|"
 				L"4 (~165 kbps); default|5 (~130 kbps)|6 (~115 kbps)|7 (~100 kbps)|"
 				L"8 (~85 kbps)|9 (~65 kbps)")
 			.item_set_selected(4);
 
-		m_cmbFlac.be(hwnd(), CMB_FLAC)
+		m_cmbFlac.be(this, CMB_FLAC)
 			.item_add(L"1|2|3|4|5|6|7|8")
 			.item_set_selected(7);
 
-		m_cmbNumThreads.be(hwnd(), CMB_NUMTHREADS)
+		m_cmbNumThreads.be(this, CMB_NUMTHREADS)
 			.item_add(L"1|2|4|8");
 
 		switch (num_processors()) {
@@ -68,21 +68,21 @@ Dlg_Main::Dlg_Main()
 		}
 
 		// Initializing radio buttons.
-		m_radMp3   .be(hwnd(), RAD_MP3).set_check_and_trigger(true);
-		m_radMp3Cbr.be(hwnd(), RAD_CBR);
-		m_radMp3Vbr.be(hwnd(), RAD_VBR).set_check_and_trigger(true);
-		m_radFlac  .be(hwnd(), RAD_FLAC);
-		m_radWav   .be(hwnd(), RAD_WAV);
+		m_radMp3   .be(this, RAD_MP3).set_check_and_trigger(true);
+		m_radMp3Cbr.be(this, RAD_CBR);
+		m_radMp3Vbr.be(this, RAD_VBR).set_check_and_trigger(true);
+		m_radFlac  .be(this, RAD_FLAC);
+		m_radWav   .be(this, RAD_WAV);
 
-		m_chkDelSrc.be(hwnd(), CHK_DELSRC);
+		m_chkDelSrc.be(this, CHK_DELSRC);
 
 		// Layout control when resizing.
-		m_resz.add(hwnd(), LST_FILES, resizer::go::RESIZE, resizer::go::RESIZE)
-			.add(hwnd(), TXT_DEST, resizer::go::RESIZE, resizer::go::REPOS)
-			.add(hwnd(), { LBL_DEST, FRA_CONV, RAD_MP3, RAD_FLAC, RAD_WAV, RAD_CBR, RAD_VBR, LBL_LEVEL,
+		m_resz.add(this, LST_FILES, resizer::go::RESIZE, resizer::go::RESIZE)
+			.add(this, TXT_DEST, resizer::go::RESIZE, resizer::go::REPOS)
+			.add(this, { LBL_DEST, FRA_CONV, RAD_MP3, RAD_FLAC, RAD_WAV, RAD_CBR, RAD_VBR, LBL_LEVEL,
 				CMB_CBR, CMB_VBR, CMB_FLAC, CHK_DELSRC, LBL_NUMTHREADS, CMB_NUMTHREADS },
 				resizer::go::NOTHING, resizer::go::REPOS)
-			.add(hwnd(), { BTN_DEST, BTN_RUN }, resizer::go::REPOS, resizer::go::REPOS);
+			.add(this, { BTN_DEST, BTN_RUN }, resizer::go::REPOS, resizer::go::REPOS);
 
 		return TRUE;
 	});
@@ -130,7 +130,7 @@ Dlg_Main::Dlg_Main()
 
 	on_command(MNU_ABOUT, [&](params&)
 	{
-		sysdlg::msgbox(hwnd(), L"About",
+		sysdlg::msgbox(this, L"About",
 			L"FLAC/LAME graphical front-end.", MB_ICONINFORMATION);
 		return TRUE;
 	});
@@ -138,7 +138,7 @@ Dlg_Main::Dlg_Main()
 	on_command(MNU_OPENFILES, [&](params&)
 	{
 		vector<wstring> files;
-		if (sysdlg::open_file(hwnd(),
+		if (sysdlg::open_file(this,
 			L"Supported audio files (*.mp3, *.flac, *.wav)|*.mp3;*.flac;*.wav|"
 			L"MP3 audio files (*.mp3)|*.mp3|"
 			L"FLAC audio files (*.flac)|*.flac|"
@@ -171,7 +171,7 @@ Dlg_Main::Dlg_Main()
 	on_command(BTN_DEST, [&](params&)
 	{
 		wstring folder;
-		if (sysdlg::choose_folder(hwnd(), folder)) {
+		if (sysdlg::choose_folder(this, folder)) {
 			m_txtDest.set_text(folder)
 				.selection_set_all()
 				.focus();
@@ -231,7 +231,7 @@ Dlg_Main::Dlg_Main()
 		Dlg_Runnin rd(m_taskbarProg, numThreads, targetType,
 			files, delSrc, isVbr, quality, m_iniFile,
 			m_txtDest.get_text());
-		rd.show(hwnd());
+		rd.show(this);
 		return TRUE;
 	});
 
@@ -265,7 +265,7 @@ bool Dlg_Main::preliminar_checks()
 	// Validate and load INI file.
 	wstring iniPath = path::exe_path().append(L"\\FlacLameFE.ini");
 	if (!file::exists(iniPath)) {
-		sysdlg::msgbox(hwnd(), L"Fail",
+		sysdlg::msgbox(this, L"Fail",
 			str::format(L"File not found:\n%s", iniPath.c_str()),
 			MB_ICONERROR);
 		return false;
@@ -273,7 +273,7 @@ bool Dlg_Main::preliminar_checks()
 
 	wstring err;
 	if (!m_iniFile.load_from_file(iniPath, &err)) {
-		sysdlg::msgbox(hwnd(), L"Fail",
+		sysdlg::msgbox(this, L"Fail",
 			str::format(L"Failed to load:\n%s\n%s", iniPath.c_str(), err.c_str()),
 			MB_ICONERROR);
 		return false;
@@ -281,7 +281,7 @@ bool Dlg_Main::preliminar_checks()
 
 	// Validate tools.
 	if (!Convert::paths_are_valid(m_iniFile, &err)) {
-		sysdlg::msgbox(hwnd(), L"Fail", err, MB_ICONERROR);
+		sysdlg::msgbox(this, L"Fail", err, MB_ICONERROR);
 		return false;
 	}
 
@@ -300,13 +300,13 @@ bool Dlg_Main::dest_folder_is_ok()
 	wstring destFolder = m_txtDest.get_text();
 	if (!destFolder.empty()) {
 		if (!file::exists(destFolder)) {
-			int q = sysdlg::msgbox(hwnd(), L"Create directory",
+			int q = sysdlg::msgbox(this, L"Create directory",
 				str::format(L"The following directory:\n%s\ndoes not exist. Create it?", destFolder.c_str()),
 				MB_ICONQUESTION | MB_YESNO);
 			if (q == IDYES) {
 				wstring err;
 				if (!file::create_dir(destFolder, &err)) {
-					sysdlg::msgbox(hwnd(), L"Fail",
+					sysdlg::msgbox(this, L"Fail",
 						str::format(L"The directory failed to be created:\n%s\n%s", destFolder.c_str(), err.c_str()),
 						MB_ICONERROR);
 					return false; // halt
@@ -315,7 +315,7 @@ bool Dlg_Main::dest_folder_is_ok()
 				return false; // halt
 			}
 		} else if (!file::is_dir(destFolder)) {
-			sysdlg::msgbox(hwnd(), L"Fail",
+			sysdlg::msgbox(this, L"Fail",
 				str::format(L"The following path is not a directory:\n%s", destFolder.c_str()),
 				MB_ICONERROR);
 			return false; // halt
@@ -331,7 +331,7 @@ bool Dlg_Main::files_exist(vector<wstring>& files)
 
 	for (const wstring& f : files) { // each filepath
 		if (!file::exists(f)) {
-			sysdlg::msgbox(hwnd(), L"Fail",
+			sysdlg::msgbox(this, L"Fail",
 				str::format(L"Process aborted, file does not exist:\n%s", f.c_str()),
 				MB_ICONERROR);
 			return false; // halt

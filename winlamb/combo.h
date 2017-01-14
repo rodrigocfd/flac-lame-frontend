@@ -7,23 +7,26 @@
 #pragma once
 #include "str.h"
 #include "base_native_control.h"
-#include "plus_control.h"
+#include "i_control.h"
+#include "i_hwnd.h"
 
 namespace wl {
 
-class combo final : public plus_control<combo> {
+class combo final :
+	public i_hwnd,
+	public i_control<combo>
+{
 private:
 	base_native_control _control;
 
 public:
-	combo() : plus_control(this) { }
+	combo() : i_hwnd(_control.wnd()), i_control(this) { }
 
-	HWND   hwnd() const                    { return this->_control.hwnd(); }
-	combo& be(HWND hWnd)                   { this->_control.be(hWnd); return *this; }
-	combo& be(HWND hParent, int controlId) { this->_control.be(hParent, controlId); return *this; }
+	combo& be(const i_hwnd* ctrl)                  { this->_control.be(ctrl); return *this; }
+	combo& be(const i_hwnd* parent, int controlId) { this->_control.be(parent, controlId); return *this; }
 
-	combo& create(HWND hParent, int controlId, POINT pos, LONG width, bool sorted) {
-		this->_control.create(hParent, controlId, nullptr,
+	combo& create(const i_hwnd* parent, int controlId, POINT pos, LONG width, bool sorted) {
+		this->_control.create(parent, controlId, nullptr,
 			pos, {width,0}, L"combobox",
 			WS_CHILD | WS_VISIBLE | WS_TABSTOP | CBS_DROPDOWNLIST | (sorted ? CBS_SORT : 0), 0);
 		return *this;

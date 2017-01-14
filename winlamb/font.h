@@ -69,7 +69,7 @@ public:
 		return this->create(ncm.lfMenuFont); // Tahoma/Segoe
 	}
 
-	static void set_ui_on_children(HWND hParent) {
+	static void set_ui_inventory_children(HWND hParent) {
 		static font oneFont; // keep one single font instance for all windows
 		if (!oneFont._hFont) oneFont.create_ui();
 

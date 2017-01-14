@@ -6,6 +6,7 @@
 
 #pragma once
 #include <vector>
+#include "i_hwnd.h"
 #include "params.h"
 
 namespace wl {
@@ -30,26 +31,18 @@ private:
 	SIZE _szOrig;
 
 public:
-	resizer& add(HWND hChild, go modeHorz, go modeVert) {
-		return this->_add_one(hChild, modeHorz, modeVert);
+	resizer& add(const i_hwnd& ctrl, go modeHorz, go modeVert) {
+		return this->_add_one(ctrl.hwnd(), modeHorz, modeVert);
 	}
 
-	resizer& add(std::initializer_list<HWND> hChildren, go modeHorz, go modeVert) {
-		this->_ctrls.reserve(this->_ctrls.size() + hChildren.size());
-		for (HWND hChild : hChildren) {
-			this->_add_one(hChild, modeHorz, modeVert);
-		}
-		return *this;
+	resizer& add(const i_hwnd* parent, int controlId, go modeHorz, go modeVert) {
+		return this->_add_one(GetDlgItem(parent->hwnd(), controlId), modeHorz, modeVert);
 	}
 
-	resizer& add(HWND hParent, int controlId, go modeHorz, go modeVert) {
-		return this->_add_one(GetDlgItem(hParent, controlId), modeHorz, modeVert);
-	}
-
-	resizer& add(HWND hParent, std::initializer_list<int> controlIds, go modeHorz, go modeVert) {
+	resizer& add(const i_hwnd* parent, std::initializer_list<int> controlIds, go modeHorz, go modeVert) {
 		this->_ctrls.reserve(this->_ctrls.size() + controlIds.size());
 		for (int ctrlId : controlIds) {
-			this->_add_one(GetDlgItem(hParent, ctrlId), modeHorz, modeVert);
+			this->_add_one(GetDlgItem(parent->hwnd(), ctrlId), modeHorz, modeVert);
 		}
 		return *this;
 	}

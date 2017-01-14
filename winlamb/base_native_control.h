@@ -6,6 +6,7 @@
 
 #pragma once
 #include "base_wnd.h"
+#include "i_hwnd.h"
 
 namespace wl {
 
@@ -14,33 +15,31 @@ private:
 	base_wnd _wnd;
 
 public:
-	HWND      hwnd() const      { return this->_wnd.hwnd(); }
-	HINSTANCE hinstance() const { return this->_wnd.hinstance(); }
+	const base_wnd& wnd() const { return this->_wnd; }
 
-	void be(HWND hWnd) {
-		this->_wnd = hWnd;
+	void be(const i_hwnd* ctrl) {
+		this->_wnd = ctrl->hwnd();
 	}
 
-	void be(HWND hParent, int controlId) {
-		this->be(GetDlgItem(hParent, controlId));
+	void be(const i_hwnd* parent, int controlId) {
+		this->_wnd = GetDlgItem(parent->hwnd(), controlId);
 	}
 
-	bool create(HWND hParent, int controlId, const wchar_t* caption,
+	bool create(const i_hwnd* parent, int controlId, const wchar_t* caption,
 		POINT pos, SIZE size, const wchar_t* className,
 		DWORD styles = (WS_CHILD | WS_VISIBLE), DWORD exStyles = 0)
 	{
-		if (this->hwnd()) {
+		if (this->_wnd.hwnd()) {
 			OutputDebugStringW(L"ERROR: native control already created.\n");
 			return false;
 		}
 
 		this->_wnd = CreateWindowExW(exStyles, className, caption, styles,
-			pos.x, pos.y, size.cx, size.cy, hParent,
+			pos.x, pos.y, size.cx, size.cy, parent->hwnd(),
 			reinterpret_cast<HMENU>(static_cast<UINT_PTR>(controlId)),
-			reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(hParent, GWLP_HINSTANCE)),
-			nullptr);
+			parent->hinstance(), nullptr);
 
-		return this->hwnd() != nullptr;
+		return this->_wnd.hwnd() != nullptr;
 	}
 };
 

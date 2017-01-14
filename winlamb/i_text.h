@@ -11,12 +11,13 @@
 namespace wl {
 
 template<typename objT>
-class plus_text {
+class i_text {
 private:
 	objT& _obj;
-public:
-	plus_text(objT* obj) : _obj(*obj) { }
+protected:
+	i_text(objT* obj) : _obj(*obj) { }
 
+public:
 	objT& set_text(const wchar_t* text) const {
 		SetWindowTextW(this->_obj.hwnd(), text);
 		return this->_obj;

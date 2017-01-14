@@ -10,12 +10,13 @@
 namespace wl {
 
 template<typename objT>
-class plus_control {
+class i_control {
 private:
 	objT& _obj;
-public:
-	plus_control(objT* obj) : _obj(*obj) { }
+protected:
+	i_control(objT* obj) : _obj(*obj) { }
 
+public:
 	int control_id() const {
 		return GetDlgCtrlID(this->_obj.hwnd());
 	}

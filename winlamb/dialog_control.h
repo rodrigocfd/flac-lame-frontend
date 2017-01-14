@@ -7,14 +7,20 @@
 #pragma once
 #include "dialog.h"
 #include "base_user_control.h"
-#include "plus_on.h"
+#include "i_control.h"
+#include "i_hwnd.h"
+#include "i_inventory.h"
 
 namespace wl {
 
 struct setup_dialog_control final : public setup_dialog { };
 
 
-class dialog_control : public plus_on {
+class dialog_control :
+	public i_hwnd,
+	public i_inventory,
+	public i_control<dialog_control>
+{
 protected:
 	setup_dialog_control setup;
 private:
@@ -23,12 +29,10 @@ private:
 
 public:
 	dialog_control() :
-		plus_on(_dialog.inventory), _dialog(setup),
+		i_hwnd(_dialog.wnd()), i_inventory(_dialog.inventory), i_control(this), _dialog(setup),
 		_control(_dialog.wnd(), _dialog.inventory, TRUE) { }
 
-	HWND hwnd() const { return this->_dialog.wnd().hwnd(); }
-
-	bool create(HWND hParent, int controlId, POINT position, SIZE size) {
+	bool create(const i_hwnd* parent, int controlId, POINT position, SIZE size) {
 		// Dialog styles to be set on the resource editor:
 		// - Border: none
 		// - Control: true
@@ -39,9 +43,8 @@ public:
 		if (!this->_dialog.basic_initial_checks()) return false;
 
 		if (!CreateDialogParamW(
-			reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(hParent, GWLP_HINSTANCE)),
-			MAKEINTRESOURCE(this->setup.dialogId),
-			hParent, dialog::dialog_proc,
+			parent->hinstance(), MAKEINTRESOURCE(this->setup.dialogId),
+			parent->hwnd(), dialog::dialog_proc,
 			reinterpret_cast<LPARAM>(&this->_dialog) ))
 		{
 			OutputDebugStringW(L"ERROR: control dialog not created, CreateDialogParam failed.\n");

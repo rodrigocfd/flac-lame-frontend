@@ -6,6 +6,7 @@
 
 #pragma once
 #include <algorithm>
+#include "i_hwnd.h"
 #include "str.h"
 #include <Shlobj.h>
 
@@ -16,9 +17,9 @@ protected:
 	sysdlg() = default;
 
 public:
-	static int msgbox(HWND hParent, std::wstring title, std::wstring text, UINT uType = 0) {
-		if (hParent) { // the hook is set to center the message box window on parent
-			_hWndParent.val = hParent;
+	static int msgbox(const i_hwnd* parent, std::wstring title, std::wstring text, UINT uType = 0) {
+		if (parent->hwnd()) { // the hook is set to center the message box window on parent
+			_hWndParent.val = parent->hwnd();
 			_hHookMsgBox.val = SetWindowsHookExW(WH_CBT, [](int code, WPARAM wp, LPARAM lp)->LRESULT {
 				// http://www.codeguru.com/cpp/w-p/win32/messagebox/print.php/c4541
 				if (code == HCBT_ACTIVATE) {
@@ -54,16 +55,16 @@ public:
 				return CallNextHookEx(nullptr, code, wp, lp);
 			}, nullptr, GetCurrentThreadId());
 		}
-		return MessageBoxW(hParent, text.c_str(), title.c_str(), uType);
+		return MessageBoxW(parent->hwnd(), text.c_str(), title.c_str(), uType);
 	}
 
-	static bool open_file(HWND hWnd, const wchar_t* filterWithPipes, std::wstring& buf) {
+	static bool open_file(const i_hwnd* parent, const wchar_t* filterWithPipes, std::wstring& buf) {
 		OPENFILENAME         ofn = { 0 };
 		wchar_t              tmpBuf[MAX_PATH] = { L'\0' };
 		std::vector<wchar_t> zfilter = _format_file_filter(filterWithPipes);
 
 		ofn.lStructSize = sizeof(ofn);
-		ofn.hwndOwner   = hWnd;
+		ofn.hwndOwner   = parent->hwnd();
 		ofn.lpstrFilter = &zfilter[0];
 		ofn.lpstrFile   = tmpBuf;
 		ofn.nMaxFile    = ARRAYSIZE(tmpBuf);
@@ -74,14 +75,14 @@ public:
 		return ret;
 	}
 
-	static bool open_file(HWND hWnd, const wchar_t* filterWithPipes, std::vector<std::wstring>& arrBuf) {
+	static bool open_file(const i_hwnd* parent, const wchar_t* filterWithPipes, std::vector<std::wstring>& arrBuf) {
 		OPENFILENAME         ofn = { 0 };
 		std::vector<wchar_t> multiBuf(65536, L'\0'); // http://www.askjf.com/?q=2179s http://www.askjf.com/?q=2181s
 		std::vector<wchar_t> zfilter = _format_file_filter(filterWithPipes);
 		arrBuf.clear();
 
 		ofn.lStructSize = sizeof(ofn);
-		ofn.hwndOwner   = hWnd;
+		ofn.hwndOwner   = parent->hwnd();
 		ofn.lpstrFilter = &zfilter[0];
 		ofn.lpstrFile   = &multiBuf[0];
 		ofn.nMaxFile    = static_cast<DWORD>(multiBuf.size()); // including terminating null
@@ -121,7 +122,7 @@ public:
 		return false;
 	}
 	
-	static bool save_file(HWND hWnd, const wchar_t* filterWithPipes, std::wstring& buf, const wchar_t* defFile) {
+	static bool save_file(const i_hwnd* parent, const wchar_t* filterWithPipes, std::wstring& buf, const wchar_t* defFile) {
 		OPENFILENAME         ofn = { 0 };
 		wchar_t              tmpBuf[MAX_PATH] = { L'\0' };
 		std::vector<wchar_t> zfilter = _format_file_filter(filterWithPipes);
@@ -129,7 +130,7 @@ public:
 		if (defFile) lstrcpyW(tmpBuf, defFile);
 
 		ofn.lStructSize = sizeof(ofn);
-		ofn.hwndOwner   = hWnd;
+		ofn.hwndOwner   = parent->hwnd();
 		ofn.lpstrFilter = &zfilter[0];
 		ofn.lpstrFile   = tmpBuf;
 		ofn.nMaxFile    = ARRAYSIZE(tmpBuf);
@@ -141,13 +142,13 @@ public:
 		return ret;
 	}
 
-	static bool choose_folder(HWND hWnd, std::wstring& buf) {
+	static bool choose_folder(const i_hwnd* parent, std::wstring& buf) {
 		CoInitialize(nullptr);
 		//LPITEMIDLIST pidlRoot = 0;
 		//if (defFolder) SHParseDisplayName(defFolder, nullptr, &pidlRoot, 0, nullptr);
 
 		BROWSEINFOW bi = { 0 };
-		bi.hwndOwner = hWnd;
+		bi.hwndOwner = parent->hwnd();
 		bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
 
 		PIDLIST_ABSOLUTE pidl = SHBrowseForFolderW(&bi);

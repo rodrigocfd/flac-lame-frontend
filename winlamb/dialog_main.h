@@ -8,8 +8,9 @@
 #include "dialog.h"
 #include "base_loop.h"
 #include "base_run.h"
-#include "plus_on.h"
-#include "plus_text.h"
+#include "i_hwnd.h"
+#include "i_inventory.h"
+#include "i_text.h"
 
 namespace wl {
 
@@ -20,7 +21,11 @@ struct setup_dialog_main final : public setup_dialog {
 };
 
 
-class dialog_main : protected plus_on, protected plus_text<dialog_main> {
+class dialog_main :
+	public    i_hwnd,
+	protected i_inventory,
+	protected i_text<dialog_main>
+{
 protected:
 	setup_dialog_main setup;
 private:
@@ -28,7 +33,7 @@ private:
 
 public:
 	dialog_main() :
-		plus_on(_dialog.inventory), plus_text(this), _dialog(setup)
+		i_hwnd(_dialog.wnd()), i_inventory(_dialog.inventory), i_text(this), _dialog(setup)
 	{
 		this->on_message(WM_CLOSE, [&](const params& p)->INT_PTR {
 			DestroyWindow(this->hwnd());
@@ -39,8 +44,6 @@ public:
 			return TRUE;
 		});
 	}
-
-	HWND hwnd() const { return this->_dialog.wnd().hwnd(); }
 
 	int run(HINSTANCE hInst, int cmdShow) {
 		InitCommonControls();

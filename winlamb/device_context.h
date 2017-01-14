@@ -7,7 +7,7 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "base_wnd.h"
+#include "i_hwnd.h"
 
 namespace wl {
 
@@ -86,7 +86,9 @@ protected:
 	HDC  _hDC;
 	SIZE _sz;
 public:
-	explicit device_context(HWND hWnd, HDC hDC = nullptr) : _hWnd(hWnd), _hDC(hDC) {
+	explicit device_context(const i_hwnd* wnd, HDC hDC = nullptr)
+		: _hWnd(wnd->hwnd()), _hDC(hDC)
+	{
 		RECT rcClient = { 0 };
 		GetClientRect(this->_hWnd, &rcClient); // let's keep available width & height
 		this->_sz.cx = rcClient.right;
@@ -255,8 +257,8 @@ public:
 		EndPaint(this->device_context::_hWnd, &this->_ps);
 	}
 	
-	explicit device_context_simple(HWND hWnd) :
-		device_context(hWnd, BeginPaint(hWnd, &this->_ps)) { }
+	explicit device_context_simple(const i_hwnd* wnd) :
+		device_context(wnd, BeginPaint(wnd->hwnd(), &this->_ps)) { }
 };
 
 
@@ -277,7 +279,7 @@ public:
 		// ~device_context_simple() kicks in
 	}
 
-	explicit device_context_buffered(HWND hWnd) : device_context_simple(hWnd) {
+	explicit device_context_buffered(const i_hwnd* wnd) : device_context_simple(wnd) {
 		this->device_context::_hDC = CreateCompatibleDC(this->device_context_simple::_ps.hdc); // overwrite our painting HDC
 		this->_hBmp = CreateCompatibleBitmap(this->device_context_simple::_ps.hdc,
 			this->device_context::_sz.cx, this->device_context::_sz.cy);

@@ -6,14 +6,18 @@
 
 #pragma once
 #include "base_native_control.h"
-#include "plus_control.h"
+#include "i_control.h"
+#include "i_hwnd.h"
 #include "subclass.h"
 #include "icon.h"
 #include "menu.h"
 
 namespace wl {
 
-class listview final : public plus_control<listview> {
+class listview final :
+	public i_hwnd,
+	public i_control<listview>
+{
 public:
 	struct notif final {
 		NFYDEC(begindrag, NMLISTVIEW)
@@ -364,7 +368,7 @@ public:
 
 	~listview() { this->_contextMenu.destroy(); }
 
-	listview() : plus_control(this), items(this) {
+	listview() : i_hwnd(_control.wnd()), i_control(this), items(this) {
 		this->_subclass.on_message(WM_GETDLGCODE, [&](params& p)->LRESULT {
 			bool hasCtrl = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
 			BYTE vkey = static_cast<BYTE>(p.wParam);
@@ -393,12 +397,11 @@ public:
 		});
 	}
 
-	HWND      hwnd() const                    { return this->_control.hwnd(); }
-	listview& be(HWND hWnd)                   { this->_control.be(hWnd); return this->_subc(); }
-	listview& be(HWND hParent, int controlId) { this->_control.be(hParent, controlId); return this->_subc(); }
+	listview& be(const i_hwnd* ctrl)                  { this->_control.be(ctrl); return this->_subc(); }
+	listview& be(const i_hwnd* parent, int controlId) { this->_control.be(parent, controlId); return this->_subc(); }
 
-	listview& create(HWND hParent, int controlId, POINT pos, SIZE size, view viewType = view::DETAILS) {
-		this->_control.create(hParent, controlId, nullptr, pos, size, WC_LISTVIEW,
+	listview& create(const i_hwnd* parent, int controlId, POINT pos, SIZE size, view viewType = view::DETAILS) {
+		this->_control.create(parent, controlId, nullptr, pos, size, WC_LISTVIEW,
 			WS_CHILD | WS_VISIBLE | WS_TABSTOP | static_cast<DWORD>(viewType),
 			WS_EX_CLIENTEDGE); // for children, WS_BORDER gives old, flat drawing; always use WS_EX_CLIENTEDGE
 		return this->_subc();
@@ -408,7 +411,7 @@ public:
 		if (this->_contextMenu.hmenu()) {
 			OutputDebugStringW(L"ERROR: listview context menu already assigned.\n");
 		} else {
-			this->_contextMenu.load_resource(contextMenuId, 0, this->_control.hinstance());
+			this->_contextMenu.load_resource(contextMenuId, 0, this->hinstance());
 		}
 		return *this;
 	}
@@ -436,7 +439,7 @@ public:
 	listview& icon_push(int iconId) {
 		HIMAGELIST hImg = this->_proceed_imagelist();
 		icon resIco;
-		resIco.load_resource(iconId, 16, this->_control.hinstance());
+		resIco.load_resource(iconId, 16, this->hinstance());
 		ImageList_AddIcon(hImg, resIco.hicon());
 		resIco.destroy();
 		return *this;

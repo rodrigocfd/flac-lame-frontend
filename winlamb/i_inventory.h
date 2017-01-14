@@ -9,13 +9,13 @@
 
 namespace wl {
 
-class plus_on {
+class i_inventory {
 private:
 	base_inventory& _inventory;
+protected:
+	i_inventory(base_inventory& inventory) : _inventory(inventory) { }
 
 public:
-	plus_on(base_inventory& inventory) : _inventory(inventory) { }
-
 	void on_message(UINT msg, base_inventory::funcT func) {
 		this->_inventory.add_message(msg, std::move(func));
 	}

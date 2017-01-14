@@ -7,12 +7,13 @@
 #pragma once
 #include <vector>
 #include "base_native_control.h"
+#include "i_hwnd.h"
 #include "params.h"
 #include <CommCtrl.h>
 
 namespace wl {
 
-class statusbar final {
+class statusbar final : public i_hwnd {
 public:
 	struct notif final {
 		NFYDEC(simplemodechange, NMHDR)
@@ -35,17 +36,17 @@ private:
 	std::vector<int>    _rightEdges;
 
 public:
-	HWND hwnd() const { return this->_control.hwnd(); }
+	statusbar() : i_hwnd(_control.wnd()) { }
 
-	statusbar& create(HWND hParent) {
+	statusbar& create(const i_hwnd* parent) {
 		if (this->hwnd()) {
 			OutputDebugStringW(L"ERROR: statusbar already created.\n");
 		} else {
-			DWORD parentStyle = static_cast<DWORD>(GetWindowLongPtrW(hParent, GWL_STYLE));
+			DWORD parentStyle = static_cast<DWORD>(GetWindowLongPtrW(parent->hwnd(), GWL_STYLE));
 			bool isStretch = (parentStyle & WS_MAXIMIZEBOX) != 0 ||
 				(parentStyle & WS_SIZEBOX) != 0;
 
-			this->_control.create(hParent, 0, nullptr, {0,0}, {0,0}, STATUSCLASSNAME,
+			this->_control.create(parent, 0, nullptr, {0,0}, {0,0}, STATUSCLASSNAME,
 				(WS_CHILD | WS_VISIBLE) | (isStretch ? SBARS_SIZEGRIP : 0), 0);
 		}
 		return *this;

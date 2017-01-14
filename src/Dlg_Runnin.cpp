@@ -28,8 +28,8 @@ Dlg_Runnin::Dlg_Runnin(
 
 	on_message(WM_INITDIALOG, [&](params&)
 	{
-		m_lbl.be(hwnd(), LBL_STATUS);
-		m_prog.be(hwnd(), PRO_STATUS);
+		m_lbl.be(this, LBL_STATUS);
+		m_prog.be(this, PRO_STATUS);
 
 		m_prog.set_range(0, m_files.size());
 		m_taskbarProgr.set_pos(0);
@@ -74,7 +74,7 @@ void Dlg_Runnin::process_next_file()
 	if (!good) {
 		m_curFile = static_cast<int>(m_files.size()); // error, so avoid further processing
 		ui_thread([&]() {
-			sysdlg::msgbox(hwnd(), L"Conversion failed",
+			sysdlg::msgbox(this, L"Conversion failed",
 				str::format(L"File #%d:\n%s\n%s", index, file.c_str(), err.c_str()),
 				MB_ICONERROR);
 			m_taskbarProgr.clear();
@@ -94,7 +94,7 @@ void Dlg_Runnin::process_next_file()
 		} else { // finished all processing
 			ui_thread([&]() {
 				datetime fin;
-				sysdlg::msgbox(hwnd(), L"Conversion finished",
+				sysdlg::msgbox(this, L"Conversion finished",
 					str::format(L"%d files processed in %.2f seconds.",
 						m_files.size(), static_cast<double>(fin.minus(m_time0)) / 1000),
 					MB_ICONINFORMATION);

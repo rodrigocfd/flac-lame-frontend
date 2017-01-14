@@ -6,12 +6,12 @@
 
 #pragma once
 #include "base_wnd.h"
-#include "plus_on.h"
+#include "i_inventory.h"
 #include <CommCtrl.h>
 
 namespace wl {
 
-class subclass final : public plus_on {
+class subclass final : public i_inventory {
 public:
 	using funcT = std::function<LRESULT(params)>;
 
@@ -23,7 +23,7 @@ private:
 public:
 	~subclass() { this->remove_subclass(); }
 
-	subclass() : plus_on(_inventory) { }
+	subclass() : i_inventory(_inventory) { }
 
 	void remove_subclass() {
 		if (this->_wnd.hwnd()) {

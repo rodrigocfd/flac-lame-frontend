@@ -6,12 +6,17 @@
 
 #pragma once
 #include "base_native_control.h"
-#include "plus_control.h"
-#include "plus_text.h"
+#include "i_control.h"
+#include "i_hwnd.h"
+#include "i_text.h"
 
 namespace wl {
 
-class textbox final : public plus_control<textbox>, public plus_text<textbox> {
+class textbox final :
+	public i_hwnd,
+	public i_control<textbox>,
+	public i_text<textbox>
+{
 public:
 	struct selection final {
 		int start;
@@ -22,22 +27,21 @@ private:
 	base_native_control _control;
 
 public:
-	textbox() : plus_control(this), plus_text(this) { }
+	textbox() : i_hwnd(_control.wnd()), i_control(this), i_text(this) { }
 
-	HWND     hwnd() const                    { return this->_control.hwnd(); }
-	textbox& be(HWND hWnd)                   { this->_control.be(hWnd); return *this; }
-	textbox& be(HWND hParent, int controlId) { this->_control.be(hParent, controlId); return *this; }
+	textbox& be(const i_hwnd* ctrl)                  { this->_control.be(ctrl); return *this; }
+	textbox& be(const i_hwnd* parent, int controlId) { this->_control.be(parent, controlId); return *this; }
 
-	textbox& create(HWND hParent, int controlId, POINT pos, LONG width) {
-		return this->_raw_create(hParent, controlId, pos, {width,21}, ES_AUTOHSCROLL);
+	textbox& create(const i_hwnd* parent, int controlId, POINT pos, LONG width) {
+		return this->_raw_create(parent, controlId, pos, {width,21}, ES_AUTOHSCROLL);
 	}
 
-	textbox& create_password(HWND hParent, int id, POINT pos, LONG width) {
-		return this->_raw_create(hParent, id, pos, {width,21}, ES_AUTOHSCROLL | ES_PASSWORD);
+	textbox& create_password(const i_hwnd* parent, int id, POINT pos, LONG width) {
+		return this->_raw_create(parent, id, pos, {width,21}, ES_AUTOHSCROLL | ES_PASSWORD);
 	}
 
-	textbox& create_multi_line(HWND hParent, int controlId, POINT pos, SIZE size) {
-		return this->_raw_create(hParent, controlId, pos, size, ES_MULTILINE | ES_WANTRETURN);
+	textbox& create_multi_line(const i_hwnd* parent, int controlId, POINT pos, SIZE size) {
+		return this->_raw_create(parent, controlId, pos, size, ES_MULTILINE | ES_WANTRETURN);
 	}
 
 	textbox& textbox::selection_set(selection selec) {
@@ -67,8 +71,8 @@ public:
 	}
 
 private:
-	textbox& _raw_create(HWND hParent, int controlId, POINT pos, SIZE size, DWORD extraStyles) {
-		this->_control.create(hParent, controlId, nullptr,
+	textbox& _raw_create(const i_hwnd* parent, int controlId, POINT pos, SIZE size, DWORD extraStyles) {
+		this->_control.create(parent, controlId, nullptr,
 			pos, size, L"Edit",
 			WS_CHILD | WS_VISIBLE | extraStyles,
 			WS_EX_CLIENTEDGE);
