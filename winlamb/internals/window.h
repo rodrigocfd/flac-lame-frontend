@@ -5,10 +5,11 @@
  */
 
 #pragma once
-#include "base_inventory.h"
-#include "base_threaded.h"
+#include "inventory.h"
+#include "threaded.h"
 
 namespace wl {
+namespace internals {
 
 struct setup_window {
 	WNDCLASSEX     wndClassEx;
@@ -22,18 +23,16 @@ struct setup_window {
 };
 
 
+template<typename setupT>
 class window final {
 private:
 	base_wnd _wnd;
 public:
-	base_inventory inventory;
-	base_threaded threaded;
-private:
-	setup_window& _setup;
+	inventory inventoryMsg;
+	threaded  threader;
+	setupT    setup;
 
-public:
-	window(setup_window& setup) :
-		threaded(_wnd, inventory, 0), _setup(setup) { }
+	window() : threader(_wnd, inventoryMsg, 0) { }
 
 	const base_wnd& wnd() const { return this->_wnd; }
 
@@ -42,19 +41,19 @@ public:
 		if (!hParent && !hInst) return false;
 		if (!hInst) hInst = reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(hParent, GWLP_HINSTANCE));
 
-		this->_setup.wndClassEx.cbSize = sizeof(WNDCLASSEX); // make sure of these
-		this->_setup.wndClassEx.lpfnWndProc = _window_proc;
-		this->_setup.wndClassEx.hInstance = hInst;
+		this->setup.wndClassEx.cbSize = sizeof(WNDCLASSEX); // make sure of these
+		this->setup.wndClassEx.lpfnWndProc = _window_proc;
+		this->setup.wndClassEx.hInstance = hInst;
 
-		ATOM atom = this->_register_class(hInst);
+		ATOM atom = _register_class(hInst);
 		if (!atom) return false;
 
-		bool created = CreateWindowExW(this->_setup.exStyle, MAKEINTATOM(atom),
-			this->_setup.title, this->_setup.style,
-			this->_setup.position.x, this->_setup.position.y,
-			this->_setup.size.cx, this->_setup.size.cy,
-			hParent, this->_setup.menu, hInst,
-			static_cast<LPVOID>(this)) != nullptr; // _hWnd member is set on first message processing
+		bool created = CreateWindowExW(this->setup.exStyle, MAKEINTATOM(atom),
+			this->setup.title, this->setup.style,
+			this->setup.position.x, this->setup.position.y,
+			this->setup.size.cx, this->setup.size.cy,
+			hParent, this->setup.menu, hInst,
+			static_cast<LPVOID>(this)) != nullptr;
 
 		if (!created) OutputDebugStringW(L"ERROR: CreateWindowEx failed.\n");
 		return created;
@@ -66,7 +65,7 @@ private:
 			OutputDebugStringW(L"ERROR: tried to create window twice.\n");
 			return false;
 		}
-		if (!this->_setup.wndClassEx.lpszClassName) {
+		if (!this->setup.wndClassEx.lpszClassName) {
 			OutputDebugStringW(L"ERROR: window not created, no class name given.\n");
 			return false;
 		}
@@ -74,12 +73,12 @@ private:
 	}
 
 	ATOM _register_class(HINSTANCE hInst) {
-		ATOM atom = RegisterClassExW(&this->_setup.wndClassEx);
+		ATOM atom = RegisterClassExW(&setup.wndClassEx);
 		if (!atom) {
 			if (GetLastError() == ERROR_CLASS_ALREADY_EXISTS) {
 				atom = static_cast<ATOM>(GetClassInfoExW(hInst,
-					this->_setup.wndClassEx.lpszClassName,
-					&this->_setup.wndClassEx)); // https://blogs.msdn.microsoft.com/oldnewthing/20041011-00/?p=37603
+					this->setup.wndClassEx.lpszClassName,
+					&this->setup.wndClassEx)); // https://blogs.msdn.microsoft.com/oldnewthing/20041011-00/?p=37603
 			} else {
 				OutputDebugStringW(L"ERROR: window not created, failed to register class ATOM.\n");
 				return 0;
@@ -110,7 +109,7 @@ private:
 
 		if (pSelf) {
 			params p = {msg, wp, lp};
-			base_inventory::funcT* pFunc = pSelf->inventory.find_func(p);
+			inventory::funcT* pFunc = pSelf->inventoryMsg.find_func(p);
 			if (pFunc) {
 				LRESULT ret = (*pFunc)(p);
 				cleanupIfDestroyed();
@@ -123,4 +122,5 @@ private:
 	}
 };
 
+}//namespace internals
 }//namespace wl

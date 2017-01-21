@@ -5,12 +5,13 @@
  */
 
 #pragma once
-#include "base_inventory.h"
-#include "base_threaded.h"
-#include "base_wheel.h"
-#include "font.h"
+#include "inventory.h"
+#include "threaded.h"
+#include "wheel_hover.h"
+#include "../font.h"
 
 namespace wl {
+namespace internals {
 
 struct setup_dialog {
 	int dialogId;
@@ -18,18 +19,16 @@ struct setup_dialog {
 };
 
 
+template<typename setupT>
 class dialog final {
 private:
 	base_wnd _wnd;
 public:
-	base_inventory inventory;
-	base_threaded threaded;
-private:
-	setup_dialog& _setup;
+	inventory inventoryMsg;
+	threaded  threader;
+	setupT    setup;
 
-public:
-	dialog(setup_dialog& setup) :
-		threaded(_wnd, inventory, TRUE), _setup(setup) { }
+	dialog() : threader(_wnd, inventoryMsg, TRUE) { }
 
 	const base_wnd& wnd() const { return this->_wnd; }
 
@@ -38,7 +37,7 @@ public:
 			OutputDebugStringW(L"ERROR: tried to create dialog twice.\n");
 			return false;
 		}
-		if (!this->_setup.dialogId) {
+		if (!this->setup.dialogId) {
 			OutputDebugStringW(L"ERROR: dialog not created, no resource ID given.\n");
 			return false;
 		}
@@ -52,7 +51,7 @@ public:
 		if (msg == WM_INITDIALOG) {
 			pSelf = reinterpret_cast<dialog*>(lp);
 			SetWindowLongPtrW(hDlg, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pSelf));
-			font::set_ui_inventory_children(hDlg); // if user creates controls manually, font must be set manually on them
+			font::set_ui_on_children(hDlg); // if user creates controls manually, font must be set manually on them
 			pSelf->_wnd = hDlg; // store HWND
 		} else {
 			pSelf = reinterpret_cast<dialog*>(GetWindowLongPtrW(hDlg, GWLP_USERDATA));
@@ -60,12 +59,12 @@ public:
 
 		if (pSelf) {
 			params p = {msg, wp, lp};
-			base_inventory::funcT* pFunc = pSelf->inventory.find_func(p);
+			inventory::funcT* pFunc = pSelf->inventoryMsg.find_func(p);
 			if (pFunc) ret = (*pFunc)(p);
 		}
 
 		if (msg == WM_INITDIALOG) {
-			base_wheel::apply_behavior(hDlg);
+			wheel_hover::apply_behavior(hDlg);
 		} else if (msg == WM_NCDESTROY) { // cleanup
 			SetWindowLongPtrW(hDlg, GWLP_USERDATA, 0);
 			if (pSelf) {
@@ -77,4 +76,5 @@ public:
 	}
 };
 
+}//namespace internals
 }//namespace wl

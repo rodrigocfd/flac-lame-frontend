@@ -7,21 +7,22 @@
 #pragma once
 #include <functional>
 #include <vector>
-#include "params.h"
+#include "../params.h"
 
 namespace wl {
+namespace internals {
 
-class base_inventory final {
+class inventory final {
 public:
 	using funcT = std::function<LONG_PTR(params&)>; // works for both LRESULT and LONG_PTR
 
 private:
 	template<typename idT>
 	class _depot final {
-    private:
-        std::vector<std::pair<idT, funcT>> _msgUnits;
-    public:
-        _depot() {
+	private:
+		std::vector<std::pair<idT, funcT>> _msgUnits;
+	public:
+		_depot() {
 			this->_msgUnits.reserve(21); // arbitrary, to save realloc time
 			this->_msgUnits.emplace_back(); // 1st element is sentinel room
 		}
@@ -31,7 +32,7 @@ private:
 			return &this->_msgUnits.back().second;
 		}
 
-        funcT* find(idT id) {
+		funcT* find(idT id) {
 			this->_msgUnits[0].first = id; // sentinel for reverse linear search
 			std::pair<idT, funcT>* revRunner = &this->_msgUnits.back();
 			while (revRunner->first != id) --revRunner;
@@ -110,7 +111,7 @@ public:
 		this->_notifies.add({id.first, id.second}, std::move(func));
 	}
 
-    void add_notify(std::initializer_list<std::pair<UINT_PTR, UINT>> ids, funcT func) {
+	void add_notify(std::initializer_list<std::pair<UINT_PTR, UINT>> ids, funcT func) {
 		const std::pair<UINT_PTR, UINT>* pIds = ids.begin();
 		funcT* pFirstFunc = this->_notifies.add(pIds[0], std::move(func));
 		for (size_t i = 1; i < ids.size(); ++i) {
@@ -123,4 +124,5 @@ public:
 	}
 };
 
+}//namespace internals
 }//namespace wl

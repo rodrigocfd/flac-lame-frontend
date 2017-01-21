@@ -5,19 +5,22 @@
  */
 
 #pragma once
-#include "base_wnd.h"
+#include "internals/base_wnd.h"
 
 namespace wl {
 
 class i_hwnd {
 private:
-	const base_wnd& _wnd;
+	const internals::base_wnd& _wnd;
 protected:
-	i_hwnd(const base_wnd& w) : _wnd(w) { }
+	i_hwnd(const internals::base_wnd& w) : _wnd(w) { }
 
 public:
-	HWND      hwnd() const      { return this->_wnd.hwnd(); }
-	HINSTANCE hinstance() const { return this->_wnd.hinstance(); }
+	HWND hwnd() const { return this->_wnd.hwnd(); }
+
+	HINSTANCE hinstance() const {
+		return reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(this->_wnd.hwnd(), GWLP_HINSTANCE));
+	}
 };
 
 }//namespace wl

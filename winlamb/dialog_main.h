@@ -5,41 +5,49 @@
  */
 
 #pragma once
-#include "dialog.h"
-#include "base_loop.h"
-#include "base_run.h"
+#include "internals/dialog.h"
+#include "internals/i_inventory.h"
+#include "internals/i_text.h"
+#include "internals/i_threaded.h"
+#include "internals/loop.h"
+#include "internals/run.h"
 #include "i_hwnd.h"
-#include "i_inventory.h"
-#include "i_text.h"
 
 namespace wl {
 
+namespace internals {
 struct setup_dialog_main final : public setup_dialog {
 	int iconId;
 	int accelTableId;
 	setup_dialog_main() : iconId(0), accelTableId(0) { }
 };
+}//namespace internals
 
 
 class dialog_main :
 	public    i_hwnd,
-	protected i_inventory,
-	protected i_text<dialog_main>
+	protected internals::i_inventory,
+	protected internals::i_text<dialog_main>,
+	protected internals::i_threaded
 {
-protected:
-	setup_dialog_main setup;
 private:
-	dialog _dialog;
+	internals::dialog<internals::setup_dialog_main> _dialog;
+protected:
+	internals::setup_dialog_main& setup;
 
 public:
 	dialog_main() :
-		i_hwnd(_dialog.wnd()), i_inventory(_dialog.inventory), i_text(this), _dialog(setup)
+		i_hwnd(_dialog.wnd()),
+		i_inventory(_dialog.inventoryMsg),
+		i_text(this),
+		i_threaded(_dialog.threader),
+		setup(_dialog.setup)
 	{
-		this->on_message(WM_CLOSE, [&](const params& p)->INT_PTR {
+		this->on_message(WM_CLOSE, [&](const params&)->INT_PTR {
 			DestroyWindow(this->hwnd());
 			return TRUE;
 		});
-		this->on_message(WM_NCDESTROY, [](const params& p)->INT_PTR {
+		this->on_message(WM_NCDESTROY, [](const params&)->INT_PTR {
 			PostQuitMessage(0);
 			return TRUE;
 		});
@@ -50,7 +58,7 @@ public:
 		if (!this->_dialog.basic_initial_checks()) return -1;
 
 		HWND hwndRet = CreateDialogParamW(hInst, MAKEINTRESOURCE(this->setup.dialogId),
-			nullptr, dialog::dialog_proc,
+			nullptr, internals::dialog<internals::setup_dialog_main>::dialog_proc,
 			reinterpret_cast<LPARAM>(&this->_dialog));
 		if (!hwndRet) {
 			OutputDebugStringW(L"ERROR: main dialog not created, CreateDialogParam failed.\n");
@@ -64,12 +72,7 @@ public:
 
 		this->_set_icon(hInst);
 		ShowWindow(this->hwnd(), cmdShow);
-		return base_loop::msg_loop(this->hwnd(), hAccel); // this can be used as program return value
-	}
-
-protected:
-	void ui_thread(base_threaded::funcT func) const {
-		this->_dialog.threaded.ui_thread(std::move(func));
+		return internals::loop::msg_loop(this->hwnd(), hAccel); // this can be used as program return value
 	}
 
 private:

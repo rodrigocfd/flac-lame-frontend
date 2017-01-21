@@ -5,37 +5,45 @@
  */
 
 #pragma once
-#include "window.h"
-#include "base_loop.h"
-#include "base_run.h"
-#include "base_wheel.h"
+#include "internals/i_inventory.h"
+#include "internals/i_text.h"
+#include "internals/i_threaded.h"
+#include "internals/loop.h"
+#include "internals/run.h"
+#include "internals/wheel_hover.h"
+#include "internals/window.h"
 #include "i_hwnd.h"
-#include "i_inventory.h"
-#include "i_text.h"
 
 namespace wl {
 
+namespace internals {
 struct setup_window_main final : public setup_window {
 	HACCEL accelTable;
 	setup_window_main() : accelTable(nullptr) { }
 };
+}//namespace internals
 
 
 class window_main :
 	public    i_hwnd,
-	protected i_inventory,
-	protected i_text<window_main>
+	protected internals::i_inventory,
+	protected internals::i_text<window_main>,
+	protected internals::i_threaded
 {
-protected:
-	setup_window_main setup;
 private:
-	window _window;
+	internals::window<internals::setup_window_main> _window;
+protected:
+	internals::setup_window_main& setup;
 
 public:
 	window_main() :
-		i_hwnd(_window.wnd()), i_inventory(_window.inventory), i_text(this), _window(setup)
+		i_hwnd(_window.wnd()),
+		i_inventory(_window.inventoryMsg),
+		i_text(this),
+		i_threaded(_window.threader),
+		setup(_window.setup)
 	{
-		this->on_message(WM_NCDESTROY, [](const params& p)->LRESULT {
+		this->on_message(WM_NCDESTROY, [](const params&)->LRESULT {
 			PostQuitMessage(0);
 			return 0;
 		});
@@ -59,13 +67,8 @@ public:
 
 		ShowWindow(this->hwnd(), cmdShow);
 		UpdateWindow(this->hwnd());
-		base_wheel::apply_behavior(this->hwnd());
-		return base_loop::msg_loop(this->hwnd(), this->setup.accelTable); // this can be used as program return value
-	}
-
-protected:
-	void ui_thread(base_threaded::funcT func) const {
-		this->_window.threaded.ui_thread(std::move(func));
+		internals::wheel_hover::apply_behavior(this->hwnd());
+		return internals::loop::msg_loop(this->hwnd(), this->setup.accelTable); // this can be used as program return value
 	}
 };
 

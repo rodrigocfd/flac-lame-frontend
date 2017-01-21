@@ -14,23 +14,14 @@ private:
 	SYSTEMTIME _st;
 
 public:
-	datetime()                              { this->set_now(); }
-	explicit datetime(LONGLONG ms)          { this->set_from_ms(ms); }
-	explicit datetime(const SYSTEMTIME& st) { this->set_from_systemtime(st); }
-	explicit datetime(const FILETIME& ft)   { this->set_from_filetime(ft); }
-	const SYSTEMTIME& systemtime() const    { return this->_st; }
+	datetime()                     { this->set_now(); }
+	datetime(LONGLONG ms)          { this->operator=(ms); }
+	datetime(const SYSTEMTIME& st) { this->operator=(st); }
+	datetime(const FILETIME& ft)   { this->operator=(ft); }
 
-	datetime& set_now() {
-		SYSTEMTIME st1 = { 0 };
-		GetSystemTime(&st1);
+	const SYSTEMTIME& systemtime() const { return this->_st; }
 
-		TIME_ZONE_INFORMATION tzi = { 0 };
-		GetTimeZoneInformation(&tzi);
-		SystemTimeToTzSpecificLocalTime(&tzi, &st1, &this->_st);
-		return *this;
-	}
-
-	datetime& set_from_ms(LONGLONG ms) {
+	datetime& operator=(LONGLONG ms) {
 		SecureZeroMemory(&this->_st, sizeof(SYSTEMTIME));
 
 		this->_st.wMilliseconds = ms % 1000;
@@ -44,12 +35,12 @@ public:
 		return *this;
 	}
 
-	datetime& set_from_systemtime(const SYSTEMTIME& st) {
+	datetime& operator=(const SYSTEMTIME& st) {
 		memcpy(&this->_st, &st, sizeof(SYSTEMTIME));
 		return *this;
 	}
 
-	datetime& set_from_filetime(const FILETIME& ft) {
+	datetime& operator=(const FILETIME& ft) {
 		SYSTEMTIME st1 = { 0 };
 		FileTimeToSystemTime(&ft, &st1);
 
@@ -57,6 +48,16 @@ public:
 		GetTimeZoneInformation(&tzi);
 		SystemTimeToTzSpecificLocalTime(&tzi, &st1, &this->_st);
 
+		return *this;
+	}
+
+	datetime& set_now() {
+		SYSTEMTIME st1 = { 0 };
+		GetSystemTime(&st1);
+
+		TIME_ZONE_INFORMATION tzi = { 0 };
+		GetTimeZoneInformation(&tzi);
+		SystemTimeToTzSpecificLocalTime(&tzi, &st1, &this->_st);
 		return *this;
 	}
 

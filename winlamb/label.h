@@ -5,20 +5,20 @@
  */
 
 #pragma once
-#include "base_native_control.h"
-#include "i_control.h"
+#include "internals/i_control.h"
+#include "internals/i_text.h"
+#include "internals/native_control.h"
 #include "i_hwnd.h"
-#include "i_text.h"
 
 namespace wl {
 
 class label final :
 	public i_hwnd,
-	public i_control<label>,
-	public i_text<label>
+	public internals::i_control<label>,
+	public internals::i_text<label>
 {
 private:
-	base_native_control _control;
+	internals::native_control _control;
 
 public:
 	label() : i_hwnd(_control.wnd()), i_control(this), i_text(this) { }

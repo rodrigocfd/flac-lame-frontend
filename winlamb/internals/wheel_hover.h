@@ -9,10 +9,11 @@
 #include <CommCtrl.h>
 
 namespace wl {
+namespace internals {
 
-class base_wheel final {
+class wheel_hover final {
 protected:
-	base_wheel() = default;
+	wheel_hover() = default;
 
 public:
 	static void apply_behavior(HWND hParent) {
@@ -52,4 +53,5 @@ private:
 	}
 };
 
+}//namespace internals
 }//namespace wl

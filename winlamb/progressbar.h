@@ -5,8 +5,8 @@
  */
 
 #pragma once
-#include "base_native_control.h"
-#include "i_control.h"
+#include "internals/i_control.h"
+#include "internals/native_control.h"
 #include "i_hwnd.h"
 #include <CommCtrl.h>
 
@@ -14,10 +14,10 @@ namespace wl {
 
 class progressbar final :
 	public i_hwnd,
-	public i_control<progressbar>
+	public internals::i_control<progressbar>
 {
 private:
-	base_native_control _control;
+	internals::native_control _control;
 
 public:
 	progressbar() : i_hwnd(_control.wnd()), i_control(this) { }

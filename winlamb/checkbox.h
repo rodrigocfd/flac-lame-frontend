@@ -5,20 +5,20 @@
  */
 
 #pragma once
-#include "base_native_control.h"
-#include "i_control.h"
+#include "internals/i_control.h"
+#include "internals/i_text.h"
+#include "internals/native_control.h"
 #include "i_hwnd.h"
-#include "i_text.h"
 
 namespace wl {
 
 class checkbox final :
 	public i_hwnd,
-	public i_control<checkbox>,
-	public i_text<checkbox>
+	public internals::i_control<checkbox>,
+	public internals::i_text<checkbox>
 {
 private:
-	base_native_control _control;
+	internals::native_control _control;
 
 public:
 	checkbox() : i_hwnd(_control.wnd()), i_control(this), i_text(this) { }

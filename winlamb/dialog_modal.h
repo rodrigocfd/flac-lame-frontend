@@ -5,31 +5,39 @@
  */
 
 #pragma once
-#include "dialog.h"
+#include "internals/dialog.h"
+#include "internals/i_inventory.h"
+#include "internals/i_text.h"
+#include "internals/i_threaded.h"
 #include "i_hwnd.h"
-#include "i_inventory.h"
-#include "i_text.h"
 
 namespace wl {
 
+namespace internals {
 struct setup_dialog_modal final : public setup_dialog { };
+}//namespace internals
 
 
 class dialog_modal :
 	public    i_hwnd,
-	protected i_inventory,
-	protected i_text<dialog_modal>
+	protected internals::i_inventory,
+	protected internals::i_text<dialog_modal>,
+	protected internals::i_threaded
 {
-protected:
-	setup_dialog_modal setup;
 private:
-	dialog _dialog;
+	internals::dialog<internals::setup_dialog_modal> _dialog;
+protected:
+	internals::setup_dialog_modal& setup;
 
 public:
 	dialog_modal() :
-		i_hwnd(_dialog.wnd()), i_inventory(_dialog.inventory), i_text(this), _dialog(setup)
+		i_hwnd(_dialog.wnd()),
+		i_inventory(_dialog.inventoryMsg),
+		i_text(this),
+		i_threaded(_dialog.threader),
+		setup(_dialog.setup)
 	{
-		this->on_message(WM_CLOSE, [&](const params& p)->INT_PTR {
+		this->on_message(WM_CLOSE, [&](const params&)->INT_PTR {
 			EndDialog(this->hwnd(), IDOK);
 			return TRUE;
 		});
@@ -39,13 +47,8 @@ public:
 		if (!this->_dialog.basic_initial_checks()) return -1;
 		return static_cast<int>(DialogBoxParamW(
 			parent->hinstance(), MAKEINTRESOURCE(this->setup.dialogId),
-			parent->hwnd(), dialog::dialog_proc,
+			parent->hwnd(), internals::dialog<internals::setup_dialog_modal>::dialog_proc,
 			reinterpret_cast<LPARAM>(&this->_dialog)) );
-	}
-
-protected:
-	void ui_thread(base_threaded::funcT func) const {
-		this->_dialog.threaded.ui_thread(std::move(func));
 	}
 
 	void center_on_parent() const {

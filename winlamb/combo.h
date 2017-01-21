@@ -5,19 +5,19 @@
  */
 
 #pragma once
-#include "str.h"
-#include "base_native_control.h"
-#include "i_control.h"
+#include "internals/i_control.h"
+#include "internals/native_control.h"
 #include "i_hwnd.h"
+#include "str.h"
 
 namespace wl {
 
 class combo final :
 	public i_hwnd,
-	public i_control<combo>
+	public internals::i_control<combo>
 {
 private:
-	base_native_control _control;
+	internals::native_control _control;
 
 public:
 	combo() : i_hwnd(_control.wnd()), i_control(this) { }
@@ -62,10 +62,13 @@ public:
 	}
 
 	std::wstring item_get_text(size_t index) const {
-		size_t txtLen = SendMessageW(this->hwnd(), CB_GETLBTEXTLEN, index, 0);
-		std::wstring buf(txtLen + 1, L'\0');
-		SendMessageW(this->hwnd(), CB_GETLBTEXT, index, reinterpret_cast<LPARAM>(&buf[0]));
-		buf.resize(txtLen);
+		std::wstring buf;
+		size_t len = SendMessageW(this->hwnd(), CB_GETLBTEXTLEN, index, 0);
+		if (len) {
+			buf.resize(len, L'\0');
+			SendMessageW(this->hwnd(), CB_GETLBTEXT, index, reinterpret_cast<LPARAM>(&buf[0]));
+			buf.resize(len);
+		}
 		return buf;
 	}
 

@@ -5,12 +5,13 @@
  */
 
 #pragma once
-#include "base_inventory.h"
+#include "inventory.h"
 #include "base_wnd.h"
 
 namespace wl {
+namespace internals {
 
-class base_threaded final {
+class threaded final {
 public:
 	using funcT = std::function<void()>;
 	static const UINT WM_THREAD_MESSAGE = WM_APP + 0x3FFF;
@@ -23,10 +24,10 @@ private:
 	LONG_PTR _processedVal;
 
 public:
-	base_threaded(const base_wnd& w, base_inventory& inventory, LONG_PTR processedVal) :
+	threaded(const base_wnd& w, inventory& theInventory, LONG_PTR processedVal) :
 		_wnd(w), _processedVal(processedVal)
 	{
-		inventory.add_message(WM_THREAD_MESSAGE, [&](const params& p)->LONG_PTR {
+		theInventory.add_message(WM_THREAD_MESSAGE, [&](const params& p)->LONG_PTR {
 			this->_process_threaded(p);
 			return this->_processedVal;
 		});
@@ -48,4 +49,5 @@ private:
 	}
 };
 
+}//namespace internals
 }//namespace wl

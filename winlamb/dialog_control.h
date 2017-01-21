@@ -5,32 +5,40 @@
  */
 
 #pragma once
-#include "dialog.h"
-#include "base_user_control.h"
-#include "i_control.h"
+#include "internals/dialog.h"
+#include "internals/i_control.h"
+#include "internals/i_inventory.h"
+#include "internals/i_threaded.h"
+#include "internals/user_control.h"
 #include "i_hwnd.h"
-#include "i_inventory.h"
 
 namespace wl {
 
+namespace internals {
 struct setup_dialog_control final : public setup_dialog { };
+}//namespace internals
 
 
 class dialog_control :
-	public i_hwnd,
-	public i_inventory,
-	public i_control<dialog_control>
+	public    i_hwnd,
+	public    internals::i_inventory,
+	public    internals::i_control<dialog_control>,
+	protected internals::i_threaded
 {
-protected:
-	setup_dialog_control setup;
 private:
-	dialog _dialog;
-	base_user_control _control;
+	internals::dialog<internals::setup_dialog_control> _dialog;
+	internals::user_control _control;
+protected:
+	internals::setup_dialog_control& setup;
 
 public:
 	dialog_control() :
-		i_hwnd(_dialog.wnd()), i_inventory(_dialog.inventory), i_control(this), _dialog(setup),
-		_control(_dialog.wnd(), _dialog.inventory, TRUE) { }
+		i_hwnd(_dialog.wnd()),
+		i_inventory(_dialog.inventoryMsg),
+		i_control(this),
+		i_threaded(_dialog.threader),
+		setup(_dialog.setup),
+		_control(_dialog.wnd(), _dialog.inventoryMsg, TRUE) { }
 
 	bool create(const i_hwnd* parent, int controlId, POINT position, SIZE size) {
 		// Dialog styles to be set on the resource editor:
@@ -43,8 +51,8 @@ public:
 		if (!this->_dialog.basic_initial_checks()) return false;
 
 		if (!CreateDialogParamW(
-			parent->hinstance(), MAKEINTRESOURCE(this->setup.dialogId),
-			parent->hwnd(), dialog::dialog_proc,
+			parent->hinstance(), MAKEINTRESOURCE(setup.dialogId),
+			parent->hwnd(), internals::dialog<internals::setup_dialog_control>::dialog_proc,
 			reinterpret_cast<LPARAM>(&this->_dialog) ))
 		{
 			OutputDebugStringW(L"ERROR: control dialog not created, CreateDialogParam failed.\n");
@@ -57,11 +65,6 @@ public:
 			position.x, position.y,
 			size.cx, size.cy, SWP_NOZORDER);
 		return true;
-	}
-
-protected:
-	void ui_thread(base_threaded::funcT func) const {
-		this->_dialog.threaded.ui_thread(std::move(func));
 	}
 
 private:

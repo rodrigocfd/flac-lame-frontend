@@ -5,20 +5,20 @@
  */
 
 #pragma once
-#include "base_wnd.h"
-#include "i_inventory.h"
+#include "internals/base_wnd.h"
+#include "internals/i_inventory.h"
 #include <CommCtrl.h>
 
 namespace wl {
 
-class subclass final : public i_inventory {
+class subclass final : public internals::i_inventory {
 public:
 	using funcT = std::function<LRESULT(params)>;
 
 private:
-	base_wnd _wnd;
-	base_inventory _inventory;
-	UINT _subclassId;
+	internals::base_wnd  _wnd;
+	internals::inventory _inventory;
+	UINT                 _subclassId;
 
 public:
 	~subclass() { this->remove_subclass(); }
@@ -47,7 +47,7 @@ private:
 		subclass* pSelf = reinterpret_cast<subclass*>(refData);
 		if (pSelf && pSelf->_wnd.hwnd()) {
 			params p = {msg, wp, lp};
-			base_inventory::funcT* func = pSelf->_inventory.find_func(p);
+			internals::inventory::funcT* func = pSelf->_inventory.find_func(p);
 			if (func) {
 				LRESULT ret = (*func)(p);
 				if (msg == WM_NCDESTROY) {

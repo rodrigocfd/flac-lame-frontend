@@ -8,6 +8,7 @@
 #include <Windows.h>
 
 namespace wl {
+namespace internals {
 
 template<typename objT>
 class i_control {
@@ -40,4 +41,5 @@ public:
 	}
 };
 
+}//namespace internals
 }//namespace wl

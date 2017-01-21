@@ -8,6 +8,7 @@
 #include <Windows.h>
 
 namespace wl {
+namespace internals {
 
 class base_wnd {
 private:
@@ -20,8 +21,8 @@ public:
 	base_wnd& operator=(HWND h)            { this->_hWnd = h; return *this; }
 	base_wnd& operator=(const base_wnd& w) { this->_hWnd = w._hWnd; return *this; }
 
-	HWND      hwnd() const      { return this->_hWnd; }
-	HINSTANCE hinstance() const { return reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(this->_hWnd, GWLP_HINSTANCE)); }
+	HWND hwnd() const { return this->_hWnd; }
 };
 
+}//namespace internals
 }//namespace wl

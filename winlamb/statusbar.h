@@ -6,7 +6,7 @@
 
 #pragma once
 #include <vector>
-#include "base_native_control.h"
+#include "internals/native_control.h"
 #include "i_hwnd.h"
 #include "params.h"
 #include <CommCtrl.h>
@@ -31,9 +31,9 @@ private:
 		UINT resizeWeight;
 	};
 
-	base_native_control _control;
-	std::vector<_part>  _parts;
-	std::vector<int>    _rightEdges;
+	internals::native_control _control;
+	std::vector<_part> _parts;
+	std::vector<int> _rightEdges;
 
 public:
 	statusbar() : i_hwnd(_control.wnd()) { }
@@ -116,10 +116,13 @@ public:
 	}
 
 	std::wstring get_text(size_t iPart) const {
-		int len = LOWORD(SendMessageW(this->hwnd(), SB_GETTEXTLENGTH, iPart, 0)) + 1;
-		std::wstring buf(len, L'\0');
-		SendMessageW(this->hwnd(), SB_GETTEXT, iPart, reinterpret_cast<LPARAM>(&buf[0]));
-		buf.resize(len);
+		std::wstring buf;
+		int len = LOWORD(SendMessageW(this->hwnd(), SB_GETTEXTLENGTH, iPart, 0));
+		if (len) {
+			buf.resize(len + 1, L'\0');
+			SendMessageW(this->hwnd(), SB_GETTEXT, iPart, reinterpret_cast<LPARAM>(&buf[0]));
+			buf.resize(len);
+		}
 		return buf;
 	}
 

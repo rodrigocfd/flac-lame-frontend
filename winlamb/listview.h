@@ -5,8 +5,8 @@
  */
 
 #pragma once
-#include "base_native_control.h"
-#include "i_control.h"
+#include "internals/i_control.h"
+#include "internals/native_control.h"
 #include "i_hwnd.h"
 #include "subclass.h"
 #include "icon.h"
@@ -16,7 +16,7 @@ namespace wl {
 
 class listview final :
 	public i_hwnd,
-	public i_control<listview>
+	public internals::i_control<listview>
 {
 public:
 	struct notif final {
@@ -360,7 +360,7 @@ public:
 	};
 
 private:
-	base_native_control _control;
+	internals::native_control _control;
 	subclass _subclass;
 	menu _contextMenu;
 public:

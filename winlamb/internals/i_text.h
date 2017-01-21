@@ -9,6 +9,7 @@
 #include <Windows.h>
 
 namespace wl {
+namespace internals {
 
 template<typename objT>
 class i_text {
@@ -28,12 +29,16 @@ public:
 	}
 
 	std::wstring get_text() const {
-		int txtLen = GetWindowTextLengthW(this->_obj.hwnd());
-		std::wstring buf(txtLen + 1, L'\0');
-		GetWindowTextW(this->_obj.hwnd(), &buf[0], txtLen + 1);
-		buf.resize(txtLen);
+		std::wstring buf;
+		int len = GetWindowTextLengthW(this->_obj.hwnd());
+		if (len) {
+			buf.resize(len + 1, L'\0');
+			GetWindowTextW(this->_obj.hwnd(), &buf[0], len + 1);
+			buf.resize(len);
+		}
 		return buf;
 	}
 };
 
+}//namespace internals
 }//namespace wl

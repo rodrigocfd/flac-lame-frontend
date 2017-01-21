@@ -5,17 +5,17 @@
  */
 
 #pragma once
-#include "base_native_control.h"
-#include "i_control.h"
+#include "internals/i_control.h"
+#include "internals/i_text.h"
+#include "internals/native_control.h"
 #include "i_hwnd.h"
-#include "i_text.h"
 
 namespace wl {
 
 class textbox final :
 	public i_hwnd,
-	public i_control<textbox>,
-	public i_text<textbox>
+	public internals::i_control<textbox>,
+	public internals::i_text<textbox>
 {
 public:
 	struct selection final {
@@ -24,7 +24,7 @@ public:
 	};
 
 private:
-	base_native_control _control;
+	internals::native_control _control;
 
 public:
 	textbox() : i_hwnd(_control.wnd()), i_control(this), i_text(this) { }

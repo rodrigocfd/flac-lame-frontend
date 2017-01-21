@@ -8,10 +8,11 @@
 #include <Windows.h>
 
 namespace wl {
+namespace internals {
 
-class base_loop final {
+class loop final {
 protected:
-	base_loop() = default;
+	loop() = default;
 
 public:
 	static int msg_loop(HWND hWnd, HACCEL hAccel = nullptr) {
@@ -28,4 +29,5 @@ public:
 	}
 };
 
+}//namespace internals
 }//namespace wl

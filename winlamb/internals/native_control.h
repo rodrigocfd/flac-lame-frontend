@@ -6,11 +6,12 @@
 
 #pragma once
 #include "base_wnd.h"
-#include "i_hwnd.h"
+#include "../i_hwnd.h"
 
 namespace wl {
+namespace internals {
 
-class base_native_control final {
+class native_control final {
 private:
 	base_wnd _wnd;
 
@@ -43,4 +44,5 @@ public:
 	}
 };
 
+}//namespace internals
 }//namespace wl

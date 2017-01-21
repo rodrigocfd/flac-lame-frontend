@@ -5,24 +5,25 @@
  */
 
 #pragma once
-#include "base_inventory.h"
+#include "inventory.h"
 #include "base_wnd.h"
 #include <VsStyle.h>
 #include <Uxtheme.h>
 #pragma comment(lib, "UxTheme.lib")
 
 namespace wl {
+namespace internals {
 
-class base_user_control final {
+class user_control final {
 private:
 	const base_wnd& _wnd;
 	LONG_PTR _processedVal;
 
 public:
-	base_user_control(const base_wnd& w, base_inventory& inventory, LONG_PTR processedVal) :
+	user_control(const base_wnd& w, inventory& theInventory, LONG_PTR processedVal) :
 		_wnd(w), _processedVal(processedVal)
 	{
-		inventory.add_message(WM_NCPAINT, [&](const params& p)->LONG_PTR {
+		theInventory.add_message(WM_NCPAINT, [&](const params& p)->LONG_PTR {
 			this->_paint_themed_borders(p);
 			return this->_processedVal;
 		});
@@ -61,4 +62,5 @@ private:
 	}
 };
 
+}//namespace internals
 }//namespace wl
