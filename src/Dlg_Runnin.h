@@ -15,28 +15,28 @@ private:
 	wl::progress_taskbar&            m_taskbarProgr;
 	wl::label                        m_lbl;
 	wl::progressbar                  m_prog;
-	int                              m_numThreads;
+	size_t                           m_numThreads;
 	target                           m_targetType;
 	const std::vector<std::wstring>& m_files;
 	bool                             m_delSrc;
 	bool                             m_isVbr;
-	const std::wstring&              m_quality;
+	std::wstring                     m_quality;
 	const wl::file_ini&              m_ini;
-	const std::wstring&              m_destFolder;
-	int                              m_curFile, m_filesDone;
+	std::wstring                     m_destFolder;
+	size_t                           m_curFile, m_filesDone;
 	wl::datetime                     m_time0;
 
 public:
 	Dlg_Runnin(
 		wl::progress_taskbar&            taskBar,
-		int                              numThreads,
+		size_t                           numThreads,
 		target                           targetType,
 		const std::vector<std::wstring>& files,
 		bool                             delSrc,
 		bool                             isVbr,
-		const std::wstring&              quality,
+		std::wstring                     quality,
 		const wl::file_ini&              ini,
-		const std::wstring&              destFolder
+		std::wstring                     destFolder
 	);
 
 private:

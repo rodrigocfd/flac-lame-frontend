@@ -11,14 +11,14 @@ using std::vector;
 
 Dlg_Runnin::Dlg_Runnin(
 	progress_taskbar&      taskBar,
-	int                    numThreads,
+	size_t                 numThreads,
 	target                 targetType,
 	const vector<wstring>& files,
 	bool                   delSrc,
 	bool                   isVbr,
-	const wstring&         quality,
+	wstring                quality,
 	const file_ini&        ini,
-	const wstring&         destFolder
+	wstring                destFolder
 )
 	: m_taskbarProgr(taskBar), m_numThreads(numThreads), m_targetType(targetType),
 		m_files(files), m_delSrc(delSrc), m_isVbr(isVbr), m_quality(quality), m_ini(ini),
@@ -33,14 +33,15 @@ Dlg_Runnin::Dlg_Runnin(
 
 		m_prog.set_range(0, m_files.size());
 		m_taskbarProgr.set_pos(0);
-		m_lbl.set_text( str::format(L"0 of %d files finished...", m_files.size()) ); // initial text
+		m_lbl.set_text( str::format(L"0 of %u files finished...", m_files.size()) ); // initial text
 		m_time0.set_now(); // start timer
 		enable_x_button(false);
 
 		// Proceed to the file conversion straight away.
-		int nFiles = static_cast<int>(m_files.size());
-		int batchSz = (m_numThreads < nFiles) ? m_numThreads : nFiles; // limit parallel processing
-		for (int i = 0; i < batchSz; ++i) {
+		size_t batchSz = (m_numThreads < m_files.size()) ?
+			m_numThreads : m_files.size(); // limit parallel processing
+
+		for (size_t i = 0; i < batchSz; ++i) {
 			sys::thread([&]() {
 				process_next_file();
 			});
@@ -53,10 +54,10 @@ Dlg_Runnin::Dlg_Runnin(
 
 void Dlg_Runnin::process_next_file()
 {
-	int index = m_curFile++;
-	if (index >= static_cast<int>(m_files.size())) return;
+	size_t curIndex = m_curFile++;
+	if (curIndex >= m_files.size()) return;
 
-	const wstring& file = m_files[index];
+	const wstring& file = m_files[curIndex];
 	bool good = true;
 	wstring err;
 
@@ -72,10 +73,10 @@ void Dlg_Runnin::process_next_file()
 	}
 
 	if (!good) {
-		m_curFile = static_cast<int>(m_files.size()); // error, so avoid further processing
+		m_curFile = m_files.size(); // error, so avoid further processing
 		ui_thread([&]() {
 			sysdlg::msgbox(this, L"Conversion failed",
-				str::format(L"File #%d:\n%s\n%s", index, file.c_str(), err.c_str()),
+				str::format(L"File #%u:\n%s\n%s", curIndex, file.c_str(), err.c_str()),
 				MB_ICONERROR);
 			m_taskbarProgr.clear();
 			EndDialog(hwnd(), IDCANCEL);
@@ -85,17 +86,17 @@ void Dlg_Runnin::process_next_file()
 		ui_thread([&]() {
 			m_prog.set_pos(m_filesDone);
 			m_taskbarProgr.set_pos(m_filesDone, m_files.size());
-			m_lbl.set_text( str::format(L"%d of %d files finished...",
+			m_lbl.set_text( str::format(L"%u of %u files finished...",
 				m_filesDone, m_files.size()) );
 		});
 
-		if (m_filesDone < static_cast<int>(m_files.size())) { // more files to come
+		if (m_filesDone < m_files.size()) { // more files to come
 			process_next_file();
 		} else { // finished all processing
 			ui_thread([&]() {
 				datetime fin;
 				sysdlg::msgbox(this, L"Conversion finished",
-					str::format(L"%d files processed in %.2f seconds.",
+					str::format(L"%u files processed in %.2f seconds.",
 						m_files.size(), static_cast<double>(fin.minus(m_time0)) / 1000),
 					MB_ICONINFORMATION);
 				m_taskbarProgr.clear();

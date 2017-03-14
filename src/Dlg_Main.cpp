@@ -128,8 +128,10 @@ Dlg_Main::Dlg_Main()
 
 	on_command(MNU_ABOUT, [&](params&)
 	{
-		sysdlg::msgbox(this, L"About",
-			L"FLAC/LAME graphical front-end.", MB_ICONINFORMATION);
+		sysdlg::msgbox(this, L"About v1.1.6",
+			L"FLAC/LAME graphical front-end.\n"
+			L"Rodrigo César de Freitas Dias.",
+			MB_ICONINFORMATION);
 		return TRUE;
 	});
 
@@ -207,7 +209,7 @@ Dlg_Main::Dlg_Main()
 		// Retrieve settings.
 		bool delSrc = m_chkDelSrc.is_checked();
 		bool isVbr = m_radMp3Vbr.is_checked();
-		int numThreads = std::stoi(m_cmbNumThreads.item_get_selected_text());
+		size_t numThreads = std::stoul(m_cmbNumThreads.item_get_selected_text());
 
 		wstring quality;
 		if (m_radMp3.is_checked()) {
