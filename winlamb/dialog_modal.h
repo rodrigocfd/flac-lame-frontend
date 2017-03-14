@@ -5,52 +5,46 @@
  */
 
 #pragma once
-#include "internals/dialog.h"
-#include "internals/i_inventory.h"
-#include "internals/i_text.h"
-#include "internals/i_threaded.h"
-#include "i_hwnd.h"
+#include "base_dialog.h"
+#include "base_text.h"
+
+/**
+ *                              +--------------------- msgs_[any] <-------------------------+
+ *             +-- base_msgs <--+                                                           |
+ *             |                +-- base_threaded <--+                                      +-- [user]
+ * base_wnd <--+                                     +-- base_dialog <--+                   |
+ *             +------------ base_wheel <------------+                  +-- dialog_modal <--+
+ *             |                                                        |
+ *             +--------------------- base_text <-----------------------+
+ */
 
 namespace wl {
 
-namespace internals {
-struct setup_dialog_modal final : public setup_dialog { };
-}//namespace internals
-
-
+// Inherit from this class to have a modal dialog popup.
 class dialog_modal :
-	public    i_hwnd,
-	protected internals::i_inventory,
-	protected internals::i_text<dialog_modal>,
-	protected internals::i_threaded
+	public    base::dialog,
+	protected base::text<dialog_modal>
 {
-private:
-	internals::dialog<internals::setup_dialog_modal> _dialog;
 protected:
-	internals::setup_dialog_modal& setup;
+	base::dialog::setup_vars setup;
 
-public:
-	dialog_modal() :
-		i_hwnd(_dialog.wnd()),
-		i_inventory(_dialog.inventoryMsg),
-		i_text(this),
-		i_threaded(_dialog.threader),
-		setup(_dialog.setup)
-	{
+	dialog_modal(size_t msgsReserve = 0) : dialog(msgsReserve + 1) {
 		this->on_message(WM_CLOSE, [&](const params&)->INT_PTR {
 			EndDialog(this->hwnd(), IDOK);
 			return TRUE;
 		});
 	}
 
-	int show(const i_hwnd* parent) {
-		if (!this->_dialog.basic_initial_checks()) return -1;
+public:
+	int show(const base::wnd* parent) {
+		if (!this->dialog::_basic_initial_checks(this->setup)) return -1;
 		return static_cast<int>(DialogBoxParamW(
-			parent->hinstance(), MAKEINTRESOURCE(this->setup.dialogId),
-			parent->hwnd(), internals::dialog<internals::setup_dialog_modal>::dialog_proc,
-			reinterpret_cast<LPARAM>(&this->_dialog)) );
+			reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(parent->hwnd(), GWLP_HINSTANCE)),
+			MAKEINTRESOURCE(this->setup.dialogId), parent->hwnd(), base::dialog::_dialog_proc,
+			reinterpret_cast<LPARAM>(this)) );
 	}
 
+protected:
 	void center_on_parent() const {
 		RECT rc = { 0 }, rcParent = { 0 };
 		GetWindowRect(this->hwnd(), &rc);

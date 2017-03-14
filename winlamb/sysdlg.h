@@ -6,18 +6,21 @@
 
 #pragma once
 #include <algorithm>
-#include "i_hwnd.h"
+#include "base_wnd.h"
 #include "str.h"
 #include <Shlobj.h>
 
 namespace wl {
 
+// Utilities to wrap system dialogs calls.
 class sysdlg final {
 protected:
 	sysdlg() = default;
 
 public:
-	static int msgbox(const i_hwnd* parent, std::wstring title, std::wstring text, UINT uType = 0) {
+	static int msgbox(const base::wnd* parent, std::wstring title,
+		std::wstring text, UINT uType = 0)
+	{
 		if (parent->hwnd()) { // the hook is set to center the message box window on parent
 			_hWndParent.val = parent->hwnd();
 			_hHookMsgBox.val = SetWindowsHookExW(WH_CBT, [](int code, WPARAM wp, LPARAM lp)->LRESULT {
@@ -58,7 +61,9 @@ public:
 		return MessageBoxW(parent->hwnd(), text.c_str(), title.c_str(), uType);
 	}
 
-	static bool open_file(const i_hwnd* parent, const wchar_t* filterWithPipes, std::wstring& buf) {
+	static bool open_file(const base::wnd* parent, const wchar_t* filterWithPipes,
+		std::wstring& buf)
+	{
 		OPENFILENAME         ofn = { 0 };
 		wchar_t              tmpBuf[MAX_PATH] = { L'\0' };
 		std::vector<wchar_t> zfilter = _format_file_filter(filterWithPipes);
@@ -75,7 +80,9 @@ public:
 		return ret;
 	}
 
-	static bool open_file(const i_hwnd* parent, const wchar_t* filterWithPipes, std::vector<std::wstring>& arrBuf) {
+	static bool open_file(const base::wnd* parent, const wchar_t* filterWithPipes,
+		std::vector<std::wstring>& arrBuf)
+	{
 		OPENFILENAME         ofn = { 0 };
 		std::vector<wchar_t> multiBuf(65536, L'\0'); // http://www.askjf.com/?q=2179s http://www.askjf.com/?q=2181s
 		std::vector<wchar_t> zfilter = _format_file_filter(filterWithPipes);
@@ -122,7 +129,9 @@ public:
 		return false;
 	}
 	
-	static bool save_file(const i_hwnd* parent, const wchar_t* filterWithPipes, std::wstring& buf, const wchar_t* defFile) {
+	static bool save_file(const base::wnd* parent, const wchar_t* filterWithPipes,
+		std::wstring& buf, const wchar_t* defFile)
+	{
 		OPENFILENAME         ofn = { 0 };
 		wchar_t              tmpBuf[MAX_PATH] = { L'\0' };
 		std::vector<wchar_t> zfilter = _format_file_filter(filterWithPipes);
@@ -142,7 +151,7 @@ public:
 		return ret;
 	}
 
-	static bool choose_folder(const i_hwnd* parent, std::wstring& buf) {
+	static bool choose_folder(const base::wnd* parent, std::wstring& buf) {
 		CoInitialize(nullptr);
 		//LPITEMIDLIST pidlRoot = 0;
 		//if (defFolder) SHParseDisplayName(defFolder, nullptr, &pidlRoot, 0, nullptr);

@@ -14,6 +14,7 @@
 
 namespace wl {
 
+// XML wrapper class to MSXML2 Windows library.
 class xml final {
 public:
 	class node final {

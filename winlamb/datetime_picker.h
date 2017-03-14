@@ -5,19 +5,18 @@
  */
 
 #pragma once
-#include "internals/i_control.h"
-#include "internals/native_control.h"
-#include "i_hwnd.h"
+#include "base_native_control.h"
 #include "params.h"
 #include "datetime.h"
-#include <CommCtrl.h>
+
+/**
+ * base_wnd <-- base_native_control <-- datetime_picker
+ */
 
 namespace wl {
 
-class datetime_picker final :
-	public i_hwnd,
-	public internals::i_control<datetime_picker>
-{
+// Wrapper to datetime picker control from Common Controls library.
+class datetime_picker final : public base::native_control {
 public:
 	struct notif final {
 		NFYDEC(closeup, NMHDR)
@@ -33,17 +32,24 @@ public:
 		notif() = default;
 	};
 
-private:
-	internals::native_control _control;
+	datetime_picker& assign(const base::wnd* parent, int controlId) {
+		this->native_control::assign(parent, controlId);
+		return *this;
+	}
 
-public:
-	datetime_picker() : i_hwnd(_control.wnd()), i_control(this) { }
+	datetime_picker& create(const base::wnd* parent, int controlId, POINT pos, LONG width) {
+		this->native_control::create(parent, controlId,
+			nullptr, pos, {width,21}, DATETIMEPICK_CLASS);
+		return *this;
+	}
 
-	datetime_picker& be(const i_hwnd* ctrl)                  { this->_control.be(ctrl); return *this; }
-	datetime_picker& be(const i_hwnd* parent, int controlId) { this->_control.be(parent, controlId); return *this; }
+	datetime_picker& focus() {
+		SetFocus(this->hwnd());
+		return *this;
+	}
 
-	datetime_picker& create(const i_hwnd* parent, int controlId, POINT pos, LONG width) {
-		this->_control.create(parent, controlId, nullptr, pos, {width,21}, DATETIMEPICK_CLASS);
+	datetime_picker& enable(bool doEnable) {
+		EnableWindow(this->hwnd(), doEnable);
 		return *this;
 	}
 

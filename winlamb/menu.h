@@ -10,7 +10,8 @@
 
 namespace wl {
 
-class menu {
+// Wrapper to HMENU.
+class menu final {
 protected:
 	HMENU _hMenu;
 
@@ -18,8 +19,7 @@ public:
 	menu()              : _hMenu(nullptr) { }
 	menu(HMENU hMenu)   : _hMenu(hMenu) { }
 	menu(const menu& m) : _hMenu(m._hMenu) { }
-	menu(menu&& m)      : menu() { operator=(std::move(m)); }
-	
+
 	menu& operator=(HMENU hMenu) {
 		this->_hMenu = hMenu;
 		return *this;
@@ -30,15 +30,7 @@ public:
 		return *this;
 	}
 
-	menu& operator=(menu&& m) {
-		this->_hMenu = m._hMenu;
-		m._hMenu = nullptr;
-		return *this;
-	}
-	
-	HMENU hmenu() const {
-		return this->_hMenu;
-	}
+	HMENU hmenu() const { return this->_hMenu; }
 
 	void destroy() {
 		if (this->_hMenu) {
@@ -53,8 +45,8 @@ public:
 		this->_hMenu = LoadMenuW(hInst, MAKEINTRESOURCE(resourceId));
 		return *this;
 	}
-	
-	menu& load_resource(int resourceId, size_t subMenuIndex, HINSTANCE hInst) {
+
+	menu& load_resource_submenu(int resourceId, size_t subMenuIndex, HINSTANCE hInst = nullptr) {
 		this->load_resource(resourceId, hInst);
 		this->_hMenu = GetSubMenu(this->_hMenu, static_cast<int>(subMenuIndex));
 		return *this;
@@ -152,7 +144,7 @@ public:
 		} else { // just append
 			AppendMenuW(this->_hMenu, MF_STRING | MF_POPUP,
 				reinterpret_cast<UINT_PTR>(sub._hMenu), caption);
-		}		
+		}
 		return sub; // return new submenu, so it can be edited
 	}
 

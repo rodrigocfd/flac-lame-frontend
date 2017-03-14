@@ -12,6 +12,7 @@
 
 namespace wl {
 
+// Utilities to Windows system operations.
 class sys final {
 protected:
 	sys() = default;
@@ -21,7 +22,7 @@ public:
 	static bool has_shift() { return (GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0; }
 
 	static void thread(std::function<void()> func) {
-		// Cheap alternative to std::thread([](){}).detach().
+		// Cheap alternative to std::thread([](){ ... }).detach().
 		struct cb_pack final { std::function<void()> func; };
 		cb_pack* pack = new cb_pack{ std::move(func) };
 

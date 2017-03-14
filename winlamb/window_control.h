@@ -5,40 +5,29 @@
  */
 
 #pragma once
-#include "internals/i_control.h"
-#include "internals/i_inventory.h"
-#include "internals/i_threaded.h"
-#include "internals/user_control.h"
-#include "internals/window.h"
-#include "i_hwnd.h"
+#include "base_window.h"
+#include "base_user_control.h"
+
+/**
+ *                           +---------------------- msgs_[any] <-----------------------+
+ *                           |                                                          +-- [user]
+ * base_wnd <-- base_msgs <--+-- base_threaded <-- base_window <--+                     |
+ *                           |                                    +-- window_control <--+
+ *                           +------- base_user_control <---------+
+ */
 
 namespace wl {
 
-namespace internals {
-struct setup_window_control final : public setup_window { };
-}//namespace internals
-
-
+// Inherit from this class to have an user-custom window control.
 class window_control :
-	public    i_hwnd,
-	public    internals::i_inventory,
-	public    internals::i_control<window_control>,
-	protected internals::i_threaded
+	public base::window,
+	public base::user_control
 {
-private:
-	internals::window<internals::setup_window_control> _window;
-	internals::user_control _control;
 protected:
-	internals::setup_window_control& setup;
+	base::window::setup_vars setup;
 
-public:
-	window_control() :
-		i_hwnd(_window.wnd()),
-		i_inventory(_window.inventoryMsg),
-		i_control(this),
-		i_threaded(_window.threader),
-		setup(_window.setup),
-		_control(_window.wnd(), _window.inventoryMsg, 0)
+	window_control(size_t msgsReserve = 0) :
+		window(msgsReserve), user_control(0)
 	{
 		this->setup.wndClassEx.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
 		this->setup.wndClassEx.style = CS_DBLCLKS;
@@ -51,11 +40,12 @@ public:
 		// WS_EX_CLIENTEDGE adds border (extended style, add on exStyle)
 	}
 
-	bool create(const i_hwnd* parent, int controlId, POINT position, SIZE size) {
+public:
+	bool create(const base::wnd* parent, int controlId, POINT position, SIZE size) {
 		this->setup.position = position;
 		this->setup.size = size;
 		this->setup.menu = reinterpret_cast<HMENU>(static_cast<INT_PTR>(controlId));
-		return this->_window.register_create(parent->hwnd());
+		return this->window::_register_create(this->setup, parent->hwnd());
 	}
 };
 

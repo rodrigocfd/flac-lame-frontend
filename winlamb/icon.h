@@ -10,6 +10,7 @@
 
 namespace wl {
 
+// Wrapper to HICON.
 class icon final {
 private:
 	HICON _hIcon;
@@ -49,22 +50,28 @@ public:
 		return *this;
 	}
 
-	icon& load_resource(int iconId, int size, HINSTANCE hInst = nullptr) {
-		// The size should be 16, 32, 48 or any other size the icon eventually has.
+	icon& load_resource(int iconId, BYTE widthOrHeight, HINSTANCE hInst = nullptr) {
+		// The widthOrHeight should be 16, 32, 48 or any other size the icon eventually has.
 		this->destroy();
 		this->_hIcon = static_cast<HICON>(LoadImageW(hInst ? hInst : GetModuleHandleW(nullptr),
-			MAKEINTRESOURCE(iconId), IMAGE_ICON, size, size, LR_DEFAULTCOLOR));
+			MAKEINTRESOURCE(iconId), IMAGE_ICON,
+			static_cast<int>(widthOrHeight), static_cast<int>(widthOrHeight),
+			LR_DEFAULTCOLOR));
 		return *this;
 	}
 
-	void icon_to_label(HWND hStatic, int idIconRes, BYTE size) const {
+	icon& load_resource(int iconId, BYTE widthOrHeight, HWND hParent) {
+		// The widthOrHeight should be 16, 32, 48 or any other size the icon eventually has.
+		return this->load_resource(iconId, widthOrHeight,
+			reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(hParent, GWLP_HINSTANCE)));
+	}
+
+	icon& icon_to_label(HWND hStatic, int idIconRes, BYTE widthOrHeight) {
 		// Loads an icon resource into a static control placed on a dialog.
 		// On the resource editor, change "Type" property to "Icon".
-		// The size should be 16, 32, 48 or any other size the icon eventually has.
-		SendMessageW(hStatic, STM_SETIMAGE, IMAGE_ICON,
-			reinterpret_cast<LPARAM>(static_cast<HICON>(LoadImageW(
-				reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(GetParent(hStatic), GWLP_HINSTANCE)),
-				MAKEINTRESOURCE(idIconRes), IMAGE_ICON, size, size, LR_DEFAULTCOLOR))));
+		// The widthOrHeight should be 16, 32, 48 or any other size the icon eventually has.
+		SendMessageW(hStatic, STM_SETIMAGE, IMAGE_ICON, reinterpret_cast<LPARAM>(this->_hIcon));
+		return *this;
 	}
 };
 

@@ -11,6 +11,7 @@
 
 namespace wl {
 
+// Utilities to string operations with std::wstring.
 class str final {
 protected:
 	str() = default;

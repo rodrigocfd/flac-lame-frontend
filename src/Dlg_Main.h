@@ -1,6 +1,9 @@
 
 #pragma once
 #include "../winlamb/dialog_main.h"
+#include "../winlamb/msg_command.h"
+#include "../winlamb/msg_notify.h"
+#include "../winlamb/msg_initmenupopup.h"
 #include "../winlamb/checkbox.h"
 #include "../winlamb/combo.h"
 #include "../winlamb/file_ini.h"
@@ -9,7 +12,12 @@
 #include "../winlamb/progress_taskbar.h"
 #include "../winlamb/textbox.h"
 
-class Dlg_Main final : public wl::dialog_main {
+class Dlg_Main final :
+	public    wl::dialog_main,
+	protected wl::msg_command,
+	protected wl::msg_notify,
+	protected wl::msg_initmenupopup
+{
 private:
 	wl::file_ini         m_iniFile;
 	wl::progress_taskbar m_taskbarProg;

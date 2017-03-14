@@ -5,32 +5,43 @@
  */
 
 #pragma once
-#include "internals/i_control.h"
-#include "internals/i_text.h"
-#include "internals/native_control.h"
-#include "i_hwnd.h"
+#include "base_native_control.h"
+#include "base_text.h"
+
+/**
+ *             +-- base_native_control <--+
+ * base_wnd <--+                          +-- checkbox
+ *             +------- base_text <-------+
+ */
 
 namespace wl {
 
+// Wrapper to checkbox control.
 class checkbox final :
-	public i_hwnd,
-	public internals::i_control<checkbox>,
-	public internals::i_text<checkbox>
+	public base::native_control,
+	public base::text<checkbox>
 {
-private:
-	internals::native_control _control;
-
 public:
-	checkbox() : i_hwnd(_control.wnd()), i_control(this), i_text(this) { }
+	checkbox& assign(const base::wnd* parent, int controlId) {
+		this->native_control::assign(parent, controlId);
+		return *this;
+	}
 
-	checkbox& be(const i_hwnd* ctrl)                  { this->_control.be(ctrl); return *this; }
-	checkbox& be(const i_hwnd* parent, int controlId) { this->_control.be(parent, controlId); return *this; }
-
-	checkbox& create(const i_hwnd* parent, int controlId, const wchar_t* caption, POINT pos, SIZE size) {
-		this->_control.create(parent, controlId, caption, pos, size,
+	checkbox& create(const base::wnd* parent, int controlId, const wchar_t* caption, POINT pos, SIZE size) {
+		this->native_control::create(parent, controlId, caption, pos, size,
 			L"Button", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX);
 		return *this;
 	}
+	checkbox& focus() {
+		SetFocus(this->hwnd());
+		return *this;
+	}
+
+	checkbox& enable(bool doEnable) {
+		EnableWindow(this->hwnd(), doEnable);
+		return *this;
+	}
+
 
 	bool is_checked() const {
 		return SendMessageW(this->hwnd(), BM_GETCHECK, 0, 0) == BST_CHECKED;

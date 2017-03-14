@@ -5,19 +5,19 @@
  */
 
 #pragma once
-#include "internals/i_control.h"
-#include "internals/native_control.h"
-#include "i_hwnd.h"
+#include "base_native_control.h"
 #include "subclass.h"
 #include "icon.h"
 #include "menu.h"
 
+/**
+ * base_wnd <-- base_native_control <-- listview
+ */
+
 namespace wl {
 
-class listview final :
-	public i_hwnd,
-	public internals::i_control<listview>
-{
+// Wrapper to listview control from Common Controls library.
+class listview final : public base::native_control {
 public:
 	struct notif final {
 		NFYDEC(begindrag, NMLISTVIEW)
@@ -360,7 +360,6 @@ public:
 	};
 
 private:
-	internals::native_control _control;
 	subclass _subclass;
 	menu _contextMenu;
 public:
@@ -368,7 +367,7 @@ public:
 
 	~listview() { this->_contextMenu.destroy(); }
 
-	listview() : i_hwnd(_control.wnd()), i_control(this), items(this) {
+	listview() : _subclass(2), items(this) {
 		this->_subclass.on_message(WM_GETDLGCODE, [&](params& p)->LRESULT {
 			bool hasCtrl = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
 			BYTE vkey = static_cast<BYTE>(p.wParam);
@@ -397,21 +396,34 @@ public:
 		});
 	}
 
-	listview& be(const i_hwnd* ctrl)                  { this->_control.be(ctrl); return this->_subc(); }
-	listview& be(const i_hwnd* parent, int controlId) { this->_control.be(parent, controlId); return this->_subc(); }
+	listview& assign(const base::wnd* parent, int controlId) {
+		this->native_control::assign(parent, controlId);
+		return this->_install_subclass();
+	}
 
-	listview& create(const i_hwnd* parent, int controlId, POINT pos, SIZE size, view viewType = view::DETAILS) {
-		this->_control.create(parent, controlId, nullptr, pos, size, WC_LISTVIEW,
+	listview& create(const base::wnd* parent, int controlId, POINT pos, SIZE size, view viewType = view::DETAILS) {
+		this->native_control::create(parent, controlId, nullptr, pos, size, WC_LISTVIEW,
 			WS_CHILD | WS_VISIBLE | WS_TABSTOP | static_cast<DWORD>(viewType),
 			WS_EX_CLIENTEDGE); // for children, WS_BORDER gives old, flat drawing; always use WS_EX_CLIENTEDGE
-		return this->_subc();
+		return this->_install_subclass();
+	}
+
+	listview& focus() {
+		SetFocus(this->hwnd());
+		return *this;
+	}
+
+	listview& enable(bool doEnable) {
+		EnableWindow(this->hwnd(), doEnable);
+		return *this;
 	}
 
 	listview& set_context_menu(int contextMenuId) {
 		if (this->_contextMenu.hmenu()) {
 			OutputDebugStringW(L"ERROR: listview context menu already assigned.\n");
 		} else {
-			this->_contextMenu.load_resource(contextMenuId, 0, this->hinstance());
+			this->_contextMenu.load_resource_submenu(contextMenuId, 0,
+				reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(this->hwnd(), GWLP_HINSTANCE)));
 		}
 		return *this;
 	}
@@ -439,7 +451,8 @@ public:
 	listview& icon_push(int iconId) {
 		HIMAGELIST hImg = this->_proceed_imagelist();
 		icon resIco;
-		resIco.load_resource(iconId, 16, this->hinstance());
+		resIco.load_resource(iconId, 16,
+			reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(this->hwnd(), GWLP_HINSTANCE)));
 		ImageList_AddIcon(hImg, resIco.hicon());
 		resIco.destroy();
 		return *this;
@@ -514,7 +527,7 @@ private:
 		return hImg; // return handle to current imagelist
 	}
 
-	listview& _subc() {
+	listview& _install_subclass() {
 		this->_subclass.install_subclass(this->hwnd());
 		return *this;
 	}
@@ -545,7 +558,7 @@ private:
 			} else if (!hasCtrl && !hasShift) {
 				ListView_SetItemState(this->hwnd(), -1, 0, LVIS_SELECTED); // unselect all
 			}
-			this->focus(); // because a right-click won't set the focus by default
+			SetFocus(this->hwnd()); // because a right-click won't set the focus by default
 		} else { // usually fired with the context menu keyboard key
 			int itemFocused = ListView_GetNextItem(this->hwnd(), -1, LVNI_FOCUSED);
 			if (itemFocused != -1 && ListView_IsItemVisible(this->hwnd(), itemFocused)) { // item focused and visible

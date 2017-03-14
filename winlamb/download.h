@@ -7,12 +7,13 @@
 #pragma once
 #include <Windows.h>
 #include <winhttp.h>
-#include "hash_map.h"
+#include "dictionary.h"
 #include "str.h"
 #pragma comment(lib, "Winhttp.lib")
 
 namespace wl {
 
+// Wrapper to manage Internet downloads.
 class download final {
 public:
 	class session final {
@@ -115,7 +116,7 @@ private:
 	std::wstring              _url, _verb, _referrer;
 	std::vector<BYTE>         _buffer;
 	std::vector<std::wstring> _requestHeaders;
-	hash_map<std::wstring>    _responseHeaders;
+	dictionary_str_str        _responseHeaders;
 
 public:
 	~download() { this->abort(); }
@@ -201,7 +202,7 @@ public:
 
 	const std::vector<BYTE>&         get_buffer() const           { return this->_buffer; }
 	const std::vector<std::wstring>& get_request_headers() const  { return this->_requestHeaders; }
-	const hash_map<std::wstring>&    get_response_headers() const { return this->_responseHeaders; }
+	const dictionary_str_str&        get_response_headers() const { return this->_responseHeaders; }
 
 private:
 	bool _init_handles(std::wstring* pErr = nullptr) {

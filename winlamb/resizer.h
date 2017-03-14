@@ -6,11 +6,12 @@
 
 #pragma once
 #include <vector>
-#include "i_hwnd.h"
+#include "base_wnd.h"
 #include "params.h"
 
 namespace wl {
 
+// Allows the resizing of multiple controls when the parent window is resized.
 class resizer final {
 public:
 	enum class go {
@@ -31,15 +32,23 @@ private:
 	SIZE _szOrig;
 
 public:
-	resizer& add(const i_hwnd& ctrl, go modeHorz, go modeVert) {
+	resizer& add(const base::wnd& ctrl, go modeHorz, go modeVert) {
 		return this->_add_one(ctrl.hwnd(), modeHorz, modeVert);
 	}
 
-	resizer& add(const i_hwnd* parent, int controlId, go modeHorz, go modeVert) {
+	resizer& add(std::initializer_list<const base::wnd*> ctrls, go modeHorz, go modeVert) {
+		this->_ctrls.reserve(this->_ctrls.size() + ctrls.size());
+		for (const base::wnd* pCtrl : ctrls) {
+			this->_add_one(pCtrl->hwnd(), modeHorz, modeVert);
+		}
+		return *this;
+	}
+
+	resizer& add(const base::wnd* parent, int controlId, go modeHorz, go modeVert) {
 		return this->_add_one(GetDlgItem(parent->hwnd(), controlId), modeHorz, modeVert);
 	}
 
-	resizer& add(const i_hwnd* parent, std::initializer_list<int> controlIds, go modeHorz, go modeVert) {
+	resizer& add(const base::wnd* parent, std::initializer_list<int> controlIds, go modeHorz, go modeVert) {
 		this->_ctrls.reserve(this->_ctrls.size() + controlIds.size());
 		for (int ctrlId : controlIds) {
 			this->_add_one(GetDlgItem(parent->hwnd(), ctrlId), modeHorz, modeVert);

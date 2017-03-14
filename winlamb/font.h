@@ -10,6 +10,7 @@
 
 namespace wl {
 
+// Wrapper to HFONT.
 class font final {
 private:
 	HFONT _hFont;

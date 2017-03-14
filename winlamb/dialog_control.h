@@ -5,42 +5,34 @@
  */
 
 #pragma once
-#include "internals/dialog.h"
-#include "internals/i_control.h"
-#include "internals/i_inventory.h"
-#include "internals/i_threaded.h"
-#include "internals/user_control.h"
-#include "i_hwnd.h"
+#include "base_dialog.h"
+#include "base_user_control.h"
+
+/**
+ *                              +------------------------- msgs_[any] <-------------------------+
+ *                              |                                                               +-- [user]
+ *             +-- base_msgs <--+--------- base_user_control <------------+                     |
+ *             |                |                                         +-- dialog_control <--+
+ * base_wnd <--+                +-- base_threaded <----+                  |
+ *             |                                       +-- base_dialog <--+
+ *             +------------- base_wheel <-------------+
+ */
 
 namespace wl {
 
-namespace internals {
-struct setup_dialog_control final : public setup_dialog { };
-}//namespace internals
-
-
+// Inherit from this class to have a dialog to be used as a control within a parent window.
 class dialog_control :
-	public    i_hwnd,
-	public    internals::i_inventory,
-	public    internals::i_control<dialog_control>,
-	protected internals::i_threaded
+	public base::dialog,
+	public base::user_control
 {
-private:
-	internals::dialog<internals::setup_dialog_control> _dialog;
-	internals::user_control _control;
 protected:
-	internals::setup_dialog_control& setup;
+	base::dialog::setup_vars setup;
+
+	dialog_control(size_t msgsReserve = 0) :
+		dialog(msgsReserve), user_control(TRUE) { }
 
 public:
-	dialog_control() :
-		i_hwnd(_dialog.wnd()),
-		i_inventory(_dialog.inventoryMsg),
-		i_control(this),
-		i_threaded(_dialog.threader),
-		setup(_dialog.setup),
-		_control(_dialog.wnd(), _dialog.inventoryMsg, TRUE) { }
-
-	bool create(const i_hwnd* parent, int controlId, POINT position, SIZE size) {
+	bool create(const base::wnd* parent, int controlId, POINT position, SIZE size) {
 		// Dialog styles to be set on the resource editor:
 		// - Border: none
 		// - Control: true
@@ -48,12 +40,12 @@ public:
 		// - Visible: true (otherwise will start invisible)
 		// - Client Edge: true (if you want a border, will add WS_EX_CLIENTEDGE)
 
-		if (!this->_dialog.basic_initial_checks()) return false;
+		if (!this->dialog::_basic_initial_checks(this->setup)) return false;
 
 		if (!CreateDialogParamW(
-			parent->hinstance(), MAKEINTRESOURCE(setup.dialogId),
-			parent->hwnd(), internals::dialog<internals::setup_dialog_control>::dialog_proc,
-			reinterpret_cast<LPARAM>(&this->_dialog) ))
+			reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(parent->hwnd(), GWLP_HINSTANCE)),
+			MAKEINTRESOURCE(setup.dialogId), parent->hwnd(), base::dialog::_dialog_proc,
+			reinterpret_cast<LPARAM>(this) ))
 		{
 			OutputDebugStringW(L"ERROR: control dialog not created, CreateDialogParam failed.\n");
 			return false;

@@ -9,6 +9,7 @@
 
 namespace wl {
 
+// Wrapper to SYSTEMTIME structure.
 class datetime final {
 private:
 	SYSTEMTIME _st;
@@ -67,7 +68,7 @@ public:
 		_st_to_li(this->_st, date);
 		adjust.QuadPart = 11644473600000 * 10000; // 100-nanoseconds = milliseconds * 10000
 		date.QuadPart -= adjust.QuadPart; // removes the diff between 1970 and 1601
-										  //return date.QuadPart / 10000000; // converts back from 100-nanoseconds to seconds
+											//return date.QuadPart / 10000000; // converts back from 100-nanoseconds to seconds
 		return date.QuadPart / 10000; // to milliseconds; to printf use %I64u
 	}
 

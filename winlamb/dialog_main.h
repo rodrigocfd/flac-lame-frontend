@@ -5,44 +5,42 @@
  */
 
 #pragma once
-#include "internals/dialog.h"
-#include "internals/i_inventory.h"
-#include "internals/i_text.h"
-#include "internals/i_threaded.h"
-#include "internals/loop.h"
-#include "internals/run.h"
-#include "i_hwnd.h"
+#include "base_dialog.h"
+#include "base_loop.h"
+#include "base_text.h"
+#include "run.h"
+
+/**
+ *                              +--------------------- msgs_[any] <------------------------+
+ *             +-- base_msgs <--+                                                          |
+ *             |                +-- base_threaded <--+                                     |
+ *             |                                     +-- base_dialog <--+                  +-- [user]
+ *             +------------ base_wheel <------------+                  |                  |
+ * base_wnd <--+                                                        |                  |
+ *             +--------------------- base_loop <-----------------------+-- dialog_main <--+
+ *             |                                                        |
+ *             +--------------------- base_text <-----------------------+
+ */
 
 namespace wl {
 
-namespace internals {
-struct setup_dialog_main final : public setup_dialog {
-	int iconId;
-	int accelTableId;
-	setup_dialog_main() : iconId(0), accelTableId(0) { }
-};
-}//namespace internals
-
-
+// Inherit from this class to have a dialog as the main window of your application.
 class dialog_main :
-	public    i_hwnd,
-	protected internals::i_inventory,
-	protected internals::i_text<dialog_main>,
-	protected internals::i_threaded
+	public    base::dialog,
+	protected base::loop,
+	protected base::text<dialog_main>
 {
-private:
-	internals::dialog<internals::setup_dialog_main> _dialog;
-protected:
-	internals::setup_dialog_main& setup;
-
 public:
-	dialog_main() :
-		i_hwnd(_dialog.wnd()),
-		i_inventory(_dialog.inventoryMsg),
-		i_text(this),
-		i_threaded(_dialog.threader),
-		setup(_dialog.setup)
-	{
+	struct setup_vars final : public base::dialog::setup_vars {
+		int iconId;
+		int accelTableId;
+		setup_vars() : iconId(0), accelTableId(0) { }
+	};
+
+protected:
+	setup_vars setup;
+
+	dialog_main(size_t msgsReserve = 0) : dialog(msgsReserve + 2) {
 		this->on_message(WM_CLOSE, [&](const params&)->INT_PTR {
 			DestroyWindow(this->hwnd());
 			return TRUE;
@@ -53,13 +51,13 @@ public:
 		});
 	}
 
+public:
 	int run(HINSTANCE hInst, int cmdShow) {
 		InitCommonControls();
-		if (!this->_dialog.basic_initial_checks()) return -1;
+		if (!this->dialog::_basic_initial_checks(this->setup)) return -1;
 
 		HWND hwndRet = CreateDialogParamW(hInst, MAKEINTRESOURCE(this->setup.dialogId),
-			nullptr, internals::dialog<internals::setup_dialog_main>::dialog_proc,
-			reinterpret_cast<LPARAM>(&this->_dialog));
+			nullptr, base::dialog::_dialog_proc, reinterpret_cast<LPARAM>(this));
 		if (!hwndRet) {
 			OutputDebugStringW(L"ERROR: main dialog not created, CreateDialogParam failed.\n");
 			return -1;
@@ -67,12 +65,12 @@ public:
 
 		HACCEL hAccel = nullptr;
 		if (this->setup.accelTableId) {
-			hAccel = LoadAccelerators(hInst, MAKEINTRESOURCE(this->setup.accelTableId));
+			hAccel = LoadAcceleratorsW(hInst, MAKEINTRESOURCE(this->setup.accelTableId));
 		}
 
 		this->_set_icon(hInst);
 		ShowWindow(this->hwnd(), cmdShow);
-		return internals::loop::msg_loop(this->hwnd(), hAccel); // this can be used as program return value
+		return this->loop::_msg_loop(hAccel); // this can be used as program return value
 	}
 
 private:

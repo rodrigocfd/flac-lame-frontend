@@ -6,20 +6,18 @@
 
 #pragma once
 #include "file_mapped.h"
-#include "hash_map.h"
+#include "dictionary.h"
 
 namespace wl {
 
+// Wrapper to an INI file.
 class file_ini final {
 public:
-	using sectionT = hash_map<std::wstring>;
-	using keyT = hash_map<std::wstring>::entry;
-
 private:
-	hash_map<hash_map<std::wstring>> _sections;
+	dictionary_str<dictionary_str_str> _sections;
 
 public:
-	const hash_map<hash_map<std::wstring>>& sections() const {
+	const dictionary_str<dictionary_str_str>& sections() const {
 		return this->_sections;
 	}
 
@@ -29,7 +27,7 @@ public:
 		
 		std::vector<std::wstring> lines = str::explode(content, L"\r\n");
 		std::wstring strBuf;
-		sectionT* pCurSection = nullptr;
+		dictionary_str_str* pCurSection = nullptr;
 
 		for (std::wstring& line : lines) {
 			str::trim(line);
@@ -44,12 +42,12 @@ public:
 					strBuf.clear();
 					strBuf.insert(0, &line[0], idxEq); // extract key name
 					str::trim(strBuf);
-					keyT& key = pCurSection->add(strBuf); // if already exists, will return existent
+					dictionary_str_str::entry& newEntry = pCurSection->add(strBuf); // if already exists, will return existent
 
 					strBuf.clear();
 					strBuf.insert(0, &line[idxEq + 1], line.length() - (idxEq + 1)); // extract value
 					str::trim(strBuf);
-					key.value = strBuf;
+					newEntry.value = strBuf;
 				}
 			}
 		}
@@ -66,49 +64,49 @@ public:
 		std::wstring out;
 		bool isFirst = true;
 
-		for (const hash_map<hash_map<std::wstring>>::entry& sec : this->_sections.entries()) {
+		for (const dictionary_str<dictionary_str_str>::entry& sec : this->_sections.entries()) {
 			if (isFirst) {
 				isFirst = false;
 			} else {
 				out.append(L"\r\n");
 			}
-			out.append(L"[").append(sec.name).append(L"]\r\n");
+			out.append(L"[").append(sec.key).append(L"]\r\n");
 
-			for (const keyT& key : sec.value.entries()) {
-				out.append(key.name).append(L"=")
-					.append(key.value).append(L"\r\n");
+			for (const dictionary_str_str::entry& entry : sec.value.entries()) {
+				out.append(entry.key).append(L"=")
+					.append(entry.value).append(L"\r\n");
 			}
 		}
 		return out;
 	}
 
-	bool has_section(const std::wstring& section) const {
-		return this->_sections.has(section);
+	bool has_section(const std::wstring& sectionName) const {
+		return this->_sections.has(sectionName);
 	}
 
-	sectionT* get_section(const std::wstring& section) {
-		hash_map<hash_map<std::wstring>>::entry* sec = this->_sections.get(section);
+	dictionary_str_str* get_section(const std::wstring& sectionName) {
+		dictionary_str<dictionary_str_str>::entry* sec = this->_sections.get(sectionName);
 		return sec ? &sec->value : nullptr;
 	}
 
-	const sectionT* get_section(const std::wstring& section) const {
-		const hash_map<hash_map<std::wstring>>::entry* sec = this->_sections.get(section);
+	const dictionary_str_str* get_section(const std::wstring& sectionName) const {
+		const dictionary_str<dictionary_str_str>::entry* sec = this->_sections.get(sectionName);
 		return sec ? &sec->value : nullptr;
 	}
 
-	bool has_key(const std::wstring& section, const std::wstring& key) const {
-		const sectionT* sec = this->get_section(section);
-		return sec ? sec->has(key) : false;
+	bool has_key(const std::wstring& sectionName, const std::wstring& keyName) const {
+		const dictionary_str_str* sec = this->get_section(sectionName);
+		return sec ? sec->has(keyName) : false;
 	}
 
-	std::wstring* val(const std::wstring& section, const std::wstring& key) {
-		sectionT* sec = this->get_section(section);
-		return sec ? sec->val(key) : nullptr;
+	std::wstring* val(const std::wstring& sectionName, const std::wstring& keyName) {
+		dictionary_str_str* sec = this->get_section(sectionName);
+		return sec ? sec->val(keyName) : nullptr;
 	}
 
-	const std::wstring* val(const std::wstring& section, const std::wstring& key) const {
-		const sectionT* sec = this->get_section(section);
-		return sec ? sec->val(key) : nullptr;
+	const std::wstring* val(const std::wstring& sectionName, const std::wstring& keyName) const {
+		const dictionary_str_str* sec = this->get_section(sectionName);
+		return sec ? sec->val(keyName) : nullptr;
 	}
 };
 

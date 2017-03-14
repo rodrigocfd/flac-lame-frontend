@@ -5,39 +5,44 @@
  */
 
 #pragma once
-#include "internals/base_wnd.h"
-#include "internals/i_inventory.h"
-#include <CommCtrl.h>
+#include "base_threaded.h"
+
+/**
+ *             +---------------- msgs_[any] <-----------------+
+ * base_wnd <--+                                              +-- [user]
+ *             +-- base_msgs <-- base_threaded <-- subclass --+
+ */
 
 namespace wl {
 
-class subclass final : public internals::i_inventory {
-public:
-	using funcT = std::function<LRESULT(params)>;
-
+// Manages window subclassing in a window.
+class subclass final : public base::threaded {
 private:
-	internals::base_wnd  _wnd;
-	internals::inventory _inventory;
-	UINT                 _subclassId;
-
+	UINT _subclassId;
 public:
 	~subclass() { this->remove_subclass(); }
 
-	subclass() : i_inventory(_inventory) { }
+	explicit subclass(size_t msgsReserve = 0) : threaded(0L, msgsReserve) {
+		this->msgs::_defProc = [&](const params& p)->LRESULT { // overwrite default procedure
+			return DefSubclassProc(this->hwnd(), p.message, p.wParam, p.lParam);
+		};
+	}
 
 	void remove_subclass() {
-		if (this->_wnd.hwnd()) {
-			RemoveWindowSubclass(this->_wnd.hwnd(), _proc, this->_subclassId);
-			this->_wnd = nullptr;
+		if (this->hwnd()) {
+			RemoveWindowSubclass(this->hwnd(), _proc, this->_subclassId);
+			this->wnd::_hWnd = nullptr;
 		}
 	}
 
 	void install_subclass(HWND hWnd) {
 		this->remove_subclass();
-		this->_wnd = hWnd;
-		this->_subclassId = _next_id();
-		SetWindowSubclass(this->_wnd.hwnd(), _proc, this->_subclassId,
-			reinterpret_cast<DWORD_PTR>(this));
+		this->wnd::_hWnd = hWnd;
+		if (hWnd) {
+			this->_subclassId = _next_id();
+			SetWindowSubclass(this->hwnd(), _proc, this->_subclassId,
+				reinterpret_cast<DWORD_PTR>(this));
+		}
 	}
 
 private:
@@ -45,11 +50,10 @@ private:
 		UINT_PTR idSubclass, DWORD_PTR refData)
 	{
 		subclass* pSelf = reinterpret_cast<subclass*>(refData);
-		if (pSelf && pSelf->_wnd.hwnd()) {
-			params p = {msg, wp, lp};
-			internals::inventory::funcT* func = pSelf->_inventory.find_func(p);
-			if (func) {
-				LRESULT ret = (*func)(p);
+		if (pSelf && pSelf->hwnd()) {
+			funcT* pFunc = pSelf->_msgInventory.find(msg);
+			if (pFunc) {
+				LRESULT ret = (*pFunc)(params{msg, wp, lp});
 				if (msg == WM_NCDESTROY) {
 					pSelf->remove_subclass();
 				}

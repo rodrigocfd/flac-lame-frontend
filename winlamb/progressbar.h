@@ -5,32 +5,30 @@
  */
 
 #pragma once
-#include "internals/i_control.h"
-#include "internals/native_control.h"
-#include "i_hwnd.h"
+#include "base_native_control.h"
+#include "str.h"
 #include <CommCtrl.h>
+
+/**
+ * base_wnd <-- base_native_control <-- progressbar
+ */
 
 namespace wl {
 
-class progressbar final :
-	public i_hwnd,
-	public internals::i_control<progressbar>
-{
-private:
-	internals::native_control _control;
-
+// Wrapper to progressbar control from Common Controls library.
+class progressbar final : public base::native_control {
 public:
-	progressbar() : i_hwnd(_control.wnd()), i_control(this) { }
-
-	progressbar& be(const i_hwnd* ctrl)                  { this->_control.be(ctrl); return *this; }
-	progressbar& be(const i_hwnd* parent, int controlId) { this->_control.be(parent, controlId); return *this; }
-
-	progressbar& create(const i_hwnd* parent, int controlId, const wchar_t* caption, POINT pos, SIZE size) {
-		this->_control.create(parent, controlId, nullptr, pos, size, PROGRESS_CLASS);
+	progressbar& assign(const base::wnd* parent, int controlId) {
+		this->native_control::assign(parent, controlId);
 		return *this;
 	}
 
-    progressbar& set_range(int minVal, int maxVal) {
+	progressbar& create(const base::wnd* parent, int controlId, const wchar_t* caption, POINT pos, SIZE size) {
+		this->native_control::create(parent, controlId, nullptr, pos, size, PROGRESS_CLASS);
+		return *this;
+	}
+
+	progressbar& set_range(int minVal, int maxVal) {
 		SendMessageW(this->hwnd(), PBM_SETRANGE, 0, MAKELPARAM(minVal, maxVal));
 		return *this;
 	}

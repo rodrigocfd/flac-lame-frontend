@@ -5,30 +5,37 @@
  */
 
 #pragma once
-#include "internals/i_control.h"
-#include "internals/native_control.h"
-#include "i_hwnd.h"
+#include "base_native_control.h"
 #include "str.h"
+
+/**
+ * base_wnd <-- base_native_control <-- combo
+ */
 
 namespace wl {
 
-class combo final :
-	public i_hwnd,
-	public internals::i_control<combo>
-{
-private:
-	internals::native_control _control;
-
+// Wrapper to combo box (dropdown) control.
+class combo final : public base::native_control {
 public:
-	combo() : i_hwnd(_control.wnd()), i_control(this) { }
+	combo& assign(const base::wnd* parent, int controlId) {
+		this->native_control::assign(parent, controlId);
+		return *this;
+	}
 
-	combo& be(const i_hwnd* ctrl)                  { this->_control.be(ctrl); return *this; }
-	combo& be(const i_hwnd* parent, int controlId) { this->_control.be(parent, controlId); return *this; }
-
-	combo& create(const i_hwnd* parent, int controlId, POINT pos, LONG width, bool sorted) {
-		this->_control.create(parent, controlId, nullptr,
+	combo& create(const base::wnd* parent, int controlId, POINT pos, LONG width, bool sorted) {
+		this->native_control::create(parent, controlId, nullptr,
 			pos, {width,0}, L"combobox",
 			WS_CHILD | WS_VISIBLE | WS_TABSTOP | CBS_DROPDOWNLIST | (sorted ? CBS_SORT : 0), 0);
+		return *this;
+	}
+
+	combo& focus() {
+		SetFocus(this->hwnd());
+		return *this;
+	}
+
+	combo& enable(bool doEnable) {
+		EnableWindow(this->hwnd(), doEnable);
 		return *this;
 	}
 

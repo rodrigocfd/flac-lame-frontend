@@ -7,10 +7,11 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "i_hwnd.h"
+#include "base_wnd.h"
 
 namespace wl {
 
+// Wrapper to HDC.
 class device_context {
 public:
 	class pen final {
@@ -86,14 +87,17 @@ protected:
 	HDC  _hDC;
 	SIZE _sz;
 public:
-	explicit device_context(const i_hwnd* wnd, HDC hDC = nullptr)
-		: _hWnd(wnd->hwnd()), _hDC(hDC)
+	explicit device_context(HWND hWnd, HDC hDC = nullptr)
+		: _hWnd(hWnd), _hDC(hDC)
 	{
 		RECT rcClient = { 0 };
-		GetClientRect(this->_hWnd, &rcClient); // let's keep available width & height
+		GetClientRect(hWnd, &rcClient); // let's keep available width & height
 		this->_sz.cx = rcClient.right;
 		this->_sz.cy = rcClient.bottom;
 	}
+
+	explicit device_context(const base::wnd* wnd, HDC hDC = nullptr)
+		: device_context(wnd->hwnd(), hDC) { }
 
 	HDC     hdc() const                { return this->_hDC; }
 	HWND    hwnd() const               { return this->_hWnd; }
@@ -248,7 +252,7 @@ public:
 };
 
 
-// For within WM_PAINT, uses BeginPaint/EndPaint.
+// Wrapper to HDC within WM_PAINT, uses BeginPaint/EndPaint.
 class device_context_simple : public device_context {
 protected:
 	PAINTSTRUCT _ps;
@@ -257,13 +261,12 @@ public:
 		EndPaint(this->device_context::_hWnd, &this->_ps);
 	}
 	
-	explicit device_context_simple(const i_hwnd* wnd) :
+	explicit device_context_simple(const base::wnd* wnd) :
 		device_context(wnd, BeginPaint(wnd->hwnd(), &this->_ps)) { }
 };
 
 
-// For within WM_PAINT, uses BeginPaint/EndPaint with double-buffer.
-// You must return zero on WM_ERASEBKGND message.
+// Wrapper to HDC within WM_PAINT, uses BeginPaint/EndPaint with double-buffer.
 class device_context_buffered final : public device_context_simple {
 private:
 	HBITMAP _hBmp, _hBmpOld;
@@ -279,7 +282,9 @@ public:
 		// ~device_context_simple() kicks in
 	}
 
-	explicit device_context_buffered(const i_hwnd* wnd) : device_context_simple(wnd) {
+	explicit device_context_buffered(const base::wnd* wnd) : device_context_simple(wnd) {
+		// In order to make the double-buffer work, you must
+		// return zero on WM_ERASEBKGND message handling.
 		this->device_context::_hDC = CreateCompatibleDC(this->device_context_simple::_ps.hdc); // overwrite our painting HDC
 		this->_hBmp = CreateCompatibleBitmap(this->device_context_simple::_ps.hdc,
 			this->device_context::_sz.cx, this->device_context::_sz.cy);

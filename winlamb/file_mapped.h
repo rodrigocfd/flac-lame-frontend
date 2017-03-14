@@ -9,6 +9,7 @@
 
 namespace wl {
 
+// Wrapper to a memory-mapped file.
 class file_mapped final {
 private:
 	file   _file;

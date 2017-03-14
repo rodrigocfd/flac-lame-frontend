@@ -10,6 +10,7 @@
 
 namespace wl {
 
+// Utilities to file path operations with std::wstring.
 class path final {
 protected:
 	path() = default;
@@ -40,8 +41,7 @@ public:
 		return has_extension(filePath, extension.c_str());
 	}
 
-	static bool has_extension(const std::wstring& filePath, std::initializer_list<const wchar_t*> extensions)
-	{
+	static bool has_extension(const std::wstring& filePath, std::initializer_list<const wchar_t*> extensions) {
 		for (const wchar_t* ext : extensions) {
 			if (has_extension(filePath, ext)) {
 				return true;
@@ -50,8 +50,7 @@ public:
 		return false;
 	}
 
-	static std::wstring& change_extension(std::wstring& filePath, const wchar_t* newExtension)
-	{
+	static std::wstring& change_extension(std::wstring& filePath, const wchar_t* newExtension) {
 		size_t dotIdx = filePath.find_last_of(L'.');
 		if (dotIdx != std::wstring::npos) {
 			filePath.resize(dotIdx + 1); // truncate after the dot

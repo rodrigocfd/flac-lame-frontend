@@ -9,10 +9,10 @@
 
 namespace wl {
 
+// Wrapper to a HANDLE of a file.
 class file final {
 public:
 	enum class access { READONLY, READWRITE };
-
 private:
 	HANDLE _hFile;
 	access _access;

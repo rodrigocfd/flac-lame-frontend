@@ -5,44 +5,43 @@
  */
 
 #pragma once
-#include "internals/i_inventory.h"
-#include "internals/i_text.h"
-#include "internals/i_threaded.h"
-#include "internals/loop.h"
-#include "internals/run.h"
-#include "internals/wheel_hover.h"
-#include "internals/window.h"
-#include "i_hwnd.h"
+#include "base_window.h"
+#include "base_loop.h"
+#include "base_text.h"
+#include "base_wheel.h"
+#include "run.h"
+
+/**
+ *                              +--------------------- msgs_[any] <---------------------+
+ *             +-- base_msgs <--+                                                       |
+ *             |                +-- base_threaded <-- base_window <--+                  +-- [user]
+ * base_wnd <--+                                                     |                  |
+ *             +------------------ base_loop <-----------------------+                  |
+ *             |                                                     +-- window_main <--+
+ *             +------------------ base_wheel <----------------------+
+ *             |                                                     |
+ *             +------------------ base_text <-----------------------+
+ */
 
 namespace wl {
 
-namespace internals {
-struct setup_window_main final : public setup_window {
-	HACCEL accelTable;
-	setup_window_main() : accelTable(nullptr) { }
-};
-}//namespace internals
-
-
+// Inherit from this class to have the main window of your application.
 class window_main :
-	public    i_hwnd,
-	protected internals::i_inventory,
-	protected internals::i_text<window_main>,
-	protected internals::i_threaded
+	public    base::window,
+	protected base::loop,
+	protected base::wheel,
+	protected base::text<window_main>
 {
-private:
-	internals::window<internals::setup_window_main> _window;
-protected:
-	internals::setup_window_main& setup;
-
 public:
-	window_main() :
-		i_hwnd(_window.wnd()),
-		i_inventory(_window.inventoryMsg),
-		i_text(this),
-		i_threaded(_window.threader),
-		setup(_window.setup)
-	{
+	struct setup_vars final : public base::window::setup_vars {
+		HACCEL accelTable;
+		setup_vars() : accelTable(nullptr) { }
+	};
+
+protected:
+	setup_vars setup;
+
+	window_main(size_t msgsReserve = 0) : window(msgsReserve + 1) {
 		this->on_message(WM_NCDESTROY, [](const params&)->LRESULT {
 			PostQuitMessage(0);
 			return 0;
@@ -61,14 +60,15 @@ public:
 		// WS_EX_ACCEPTFILES accepts dropped files (extended style, add on exStyle)
 	}
 
+public:
 	int run(HINSTANCE hInst, int cmdShow) {
 		InitCommonControls();
-		if (!this->_window.register_create(nullptr, hInst)) return -1;
+		if (!this->window::_register_create(this->setup, nullptr, hInst)) return -1;
 
 		ShowWindow(this->hwnd(), cmdShow);
 		UpdateWindow(this->hwnd());
-		internals::wheel_hover::apply_behavior(this->hwnd());
-		return internals::loop::msg_loop(this->hwnd(), this->setup.accelTable); // this can be used as program return value
+		this->wheel::_apply_wheel_hover_behavior();
+		return this->loop::_msg_loop(this->setup.accelTable); // this can be used as program return value
 	}
 };
 

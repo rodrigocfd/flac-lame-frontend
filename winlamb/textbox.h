@@ -5,17 +5,21 @@
  */
 
 #pragma once
-#include "internals/i_control.h"
-#include "internals/i_text.h"
-#include "internals/native_control.h"
-#include "i_hwnd.h"
+#include "base_native_control.h"
+#include "base_text.h"
+
+/**
+ *             +-- base_native_control <--+
+ * base_wnd <--+                          +-- textbox
+ *             +------- base_text <-------+
+ */
 
 namespace wl {
 
+// Wrapper to textbox (editbox) control.
 class textbox final :
-	public i_hwnd,
-	public internals::i_control<textbox>,
-	public internals::i_text<textbox>
+	public base::native_control,
+	public base::text<textbox>
 {
 public:
 	struct selection final {
@@ -23,25 +27,31 @@ public:
 		int len;
 	};
 
-private:
-	internals::native_control _control;
+	textbox& assign(const base::wnd* parent, int controlId) {
+		this->native_control::assign(parent, controlId);
+		return *this;
+	}
 
-public:
-	textbox() : i_hwnd(_control.wnd()), i_control(this), i_text(this) { }
-
-	textbox& be(const i_hwnd* ctrl)                  { this->_control.be(ctrl); return *this; }
-	textbox& be(const i_hwnd* parent, int controlId) { this->_control.be(parent, controlId); return *this; }
-
-	textbox& create(const i_hwnd* parent, int controlId, POINT pos, LONG width) {
+	textbox& create(const base::wnd* parent, int controlId, POINT pos, LONG width) {
 		return this->_raw_create(parent, controlId, pos, {width,21}, ES_AUTOHSCROLL);
 	}
 
-	textbox& create_password(const i_hwnd* parent, int id, POINT pos, LONG width) {
+	textbox& create_password(const base::wnd* parent, int id, POINT pos, LONG width) {
 		return this->_raw_create(parent, id, pos, {width,21}, ES_AUTOHSCROLL | ES_PASSWORD);
 	}
 
-	textbox& create_multi_line(const i_hwnd* parent, int controlId, POINT pos, SIZE size) {
+	textbox& create_multi_line(const base::wnd* parent, int controlId, POINT pos, SIZE size) {
 		return this->_raw_create(parent, controlId, pos, size, ES_MULTILINE | ES_WANTRETURN);
+	}
+
+	textbox& focus() {
+		SetFocus(this->hwnd());
+		return *this;
+	}
+
+	textbox& enable(bool doEnable) {
+		EnableWindow(this->hwnd(), doEnable);
+		return *this;
 	}
 
 	textbox& textbox::selection_set(selection selec) {
@@ -57,7 +67,7 @@ public:
 		int p0 = 0, p1 = 0;
 		SendMessageW(this->hwnd(), EM_GETSEL,
 			reinterpret_cast<WPARAM>(&p0), reinterpret_cast<LPARAM>(&p1));
-		return { p0, p1 - p0 }; // start, length
+		return {p0, p1 - p0}; // start, length
 	}
 
 	textbox& selection_replace(const wchar_t* t) {
@@ -71,11 +81,9 @@ public:
 	}
 
 private:
-	textbox& _raw_create(const i_hwnd* parent, int controlId, POINT pos, SIZE size, DWORD extraStyles) {
-		this->_control.create(parent, controlId, nullptr,
-			pos, size, L"Edit",
-			WS_CHILD | WS_VISIBLE | extraStyles,
-			WS_EX_CLIENTEDGE);
+	textbox& _raw_create(const base::wnd* parent, int controlId, POINT pos, SIZE size, DWORD extraStyles) {
+		this->native_control::create(parent, controlId, nullptr, pos, size,
+			L"Edit", WS_CHILD | WS_VISIBLE | extraStyles, WS_EX_CLIENTEDGE);
 		return *this;
 	}
 };

@@ -28,8 +28,8 @@ Dlg_Runnin::Dlg_Runnin(
 
 	on_message(WM_INITDIALOG, [&](params&)
 	{
-		m_lbl.be(this, LBL_STATUS);
-		m_prog.be(this, PRO_STATUS);
+		m_lbl.assign(this, LBL_STATUS);
+		m_prog.assign(this, PRO_STATUS);
 
 		m_prog.set_range(0, m_files.size());
 		m_taskbarProgr.set_pos(0);

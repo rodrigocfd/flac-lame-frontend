@@ -10,6 +10,7 @@
 
 namespace wl {
 
+// Wrapper to a COM pointer.
 template<typename ptrT>
 class com_ptr final {
 private:
@@ -33,22 +34,28 @@ public:
 		}
 	}
 
-	bool co_create_instance(REFCLSID rclsid) {
+	bool co_create_instance(REFCLSID clsid_something) {
 		return this->_ptr ? false :
-			SUCCEEDED(CoCreateInstance(rclsid, nullptr,
+			SUCCEEDED(CoCreateInstance(clsid_something, nullptr,
 				CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&this->_ptr)));
 	}
 
-	bool co_create_instance(REFCLSID rclsid, REFIID riid) {
+	bool co_create_instance(REFCLSID clsid_something, REFIID iid_something) {
 		return this->_ptr ? false :
-			SUCCEEDED(CoCreateInstance(rclsid, nullptr,
-				CLSCTX_INPROC_SERVER, riid, reinterpret_cast<void**>(&this->_ptr)));
+			SUCCEEDED(CoCreateInstance(clsid_something, nullptr,
+				CLSCTX_INPROC_SERVER, iid_something, reinterpret_cast<void**>(&this->_ptr)));
 	}
 
 	template<typename COM_INTERFACE>
-	bool query_interface(REFIID riid, COM_INTERFACE** comPtr) {
+	bool query_interface(REFIID iid_something, COM_INTERFACE** targetComPtr) {
 		return !this->_ptr ? false :
-			SUCCEEDED(this->_ptr->QueryInterface(riid, reinterpret_cast<void**>(comPtr)));
+			SUCCEEDED(this->_ptr->QueryInterface(iid_something, reinterpret_cast<void**>(targetComPtr)));
+	}
+
+	template<typename COM_INTERFACE>
+	bool query_interface(REFIID iid_something, com_ptr<COM_INTERFACE>& targetComPtr) {
+		return !this->_ptr ? false :
+			SUCCEEDED(this->_ptr->QueryInterface(iid_something, reinterpret_cast<void**>(&targetComPtr)));
 	}
 
 	bool   empty() const   { return this->_ptr == nullptr; }

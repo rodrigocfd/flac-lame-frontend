@@ -5,29 +5,35 @@
  */
 
 #pragma once
-#include "internals/i_control.h"
-#include "internals/i_text.h"
-#include "internals/native_control.h"
-#include "i_hwnd.h"
+#include "base_native_control.h"
+#include "base_text.h"
+
+/**
+ *             +-- base_native_control <--+
+ * base_wnd <--+                          +-- label
+ *             +------- base_text <-------+
+ */
 
 namespace wl {
 
+// Wrapper to label (static) control.
 class label final :
-	public i_hwnd,
-	public internals::i_control<label>,
-	public internals::i_text<label>
+	public base::native_control,
+	public base::text<label>
 {
-private:
-	internals::native_control _control;
-
 public:
-	label() : i_hwnd(_control.wnd()), i_control(this), i_text(this) { }
+	label& assign(const base::wnd* parent, int controlId) {
+		this->native_control::assign(parent, controlId);
+		return *this;
+	}
 
-	label& be(const i_hwnd* ctrl)                  { this->_control.be(ctrl); return *this; }
-	label& be(const i_hwnd* parent, int controlId) { this->_control.be(parent, controlId); return *this; }
+	label& create(const base::wnd* parent, int controlId, const wchar_t* caption, POINT pos, SIZE size) {
+		this->native_control::create(parent, controlId, caption, pos, size, L"Static");
+		return *this;
+	}
 
-	label& create(const i_hwnd* parent, int controlId, const wchar_t* caption, POINT pos, SIZE size) {
-		this->_control.create(parent, controlId, caption, pos, size, L"Static");
+	label& enable(bool doEnable) {
+		EnableWindow(this->hwnd(), doEnable);
 		return *this;
 	}
 };

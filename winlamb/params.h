@@ -5,11 +5,14 @@
  */
 
 #pragma once
+#include <string>
+#include <vector>
 #include <Windows.h>
 #include <CommCtrl.h>
 
 namespace wl {
 
+// Simple struct with message, WPARAM and LPARAM.
 struct params {
 	UINT   message;
 	WPARAM wParam;
@@ -171,7 +174,7 @@ struct wm final {
 			std::vector<std::wstring> files(this->count()); // alloc return vector
 			for (size_t i = 0; i < files.size(); ++i) {
 				files[i].resize(DragQueryFileW(this->hdrop(),
-					static_cast<UINT>(i), nullptr, 0) + 1, TEXT('\0')); // alloc path string
+					static_cast<UINT>(i), nullptr, 0) + 1, L'\0'); // alloc path string
 				DragQueryFileW(this->hdrop(), static_cast<UINT>(i), &files[i][0],
 					static_cast<UINT>(files[i].size()));
 				files[i].resize(files[i].size() - 1); // trim null

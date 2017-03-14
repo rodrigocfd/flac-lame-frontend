@@ -10,6 +10,7 @@
 
 namespace wl {
 
+// Utilities to work with zipped files.
 class zip final {
 protected:
 	zip() = default;

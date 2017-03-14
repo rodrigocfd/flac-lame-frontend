@@ -6,14 +6,17 @@
 
 #pragma once
 #include <vector>
-#include "internals/native_control.h"
-#include "i_hwnd.h"
+#include "base_native_control.h"
 #include "params.h"
-#include <CommCtrl.h>
+
+/**
+ * base_wnd <-- base_native_control <-- statusbar
+ */
 
 namespace wl {
 
-class statusbar final : public i_hwnd {
+// Wrapper to status control from Common Controls library.
+class statusbar final : public base::native_control {
 public:
 	struct notif final {
 		NFYDEC(simplemodechange, NMHDR)
@@ -31,14 +34,11 @@ private:
 		UINT resizeWeight;
 	};
 
-	internals::native_control _control;
 	std::vector<_part> _parts;
 	std::vector<int> _rightEdges;
 
 public:
-	statusbar() : i_hwnd(_control.wnd()) { }
-
-	statusbar& create(const i_hwnd* parent) {
+	statusbar& create(const base::wnd* parent) {
 		if (this->hwnd()) {
 			OutputDebugStringW(L"ERROR: statusbar already created.\n");
 		} else {
@@ -46,7 +46,7 @@ public:
 			bool isStretch = (parentStyle & WS_MAXIMIZEBOX) != 0 ||
 				(parentStyle & WS_SIZEBOX) != 0;
 
-			this->_control.create(parent, 0, nullptr, {0,0}, {0,0}, STATUSCLASSNAME,
+			this->native_control::create(parent, 0, nullptr, {0,0}, {0,0}, STATUSCLASSNAME,
 				(WS_CHILD | WS_VISIBLE) | (isStretch ? SBARS_SIZEGRIP : 0), 0);
 		}
 		return *this;

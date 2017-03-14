@@ -16,6 +16,7 @@ using std::wstring;
 RUN(Dlg_Main);
 
 Dlg_Main::Dlg_Main()
+	: dialog_main(10), msg_command(20), msg_notify(10)
 {
 	setup.dialogId = DLG_MAIN;
 	setup.iconId = ICO_MAIN;
@@ -29,10 +30,10 @@ Dlg_Main::Dlg_Main()
 		}
 
 		m_taskbarProg.init(this);
-		m_txtDest.be(this, TXT_DEST);
+		m_txtDest.assign(this, TXT_DEST);
 
 		// Main listview initialization.
-		m_lstFiles.be(this, LST_FILES)
+		m_lstFiles.assign(this, LST_FILES)
 			.set_context_menu(MEN_MAIN)
 			.column_add(L"File", 300)
 			.column_fit(0)
@@ -41,22 +42,22 @@ Dlg_Main::Dlg_Main()
 			.icon_push(L"wav"); // icons of the 3 filetypes we use
 
 		// Initializing comboboxes.
-		m_cmbCbr.be(this, CMB_CBR)
+		m_cmbCbr.assign(this, CMB_CBR)
 			.item_add(L"32 kbps|40 kbps|48 kbps|56 kbps|64 kbps|80 kbps|96 kbps|"
 				L"112 kbps|128 kbps; default|160 kbps|192 kbps|224 kbps|256 kbps|320 kbps")
 			.item_set_selected(8);
 
-		m_cmbVbr.be(this, CMB_VBR)
+		m_cmbVbr.assign(this, CMB_VBR)
 			.item_add(L"0 (~245 kbps)|1 (~225 kbps)|2 (~190 kbps)|3 (~175 kbps)|"
 				L"4 (~165 kbps); default|5 (~130 kbps)|6 (~115 kbps)|7 (~100 kbps)|"
 				L"8 (~85 kbps)|9 (~65 kbps)")
 			.item_set_selected(4);
 
-		m_cmbFlac.be(this, CMB_FLAC)
+		m_cmbFlac.assign(this, CMB_FLAC)
 			.item_add(L"1|2|3|4|5|6|7|8")
 			.item_set_selected(7);
 
-		m_cmbNumThreads.be(this, CMB_NUMTHREADS)
+		m_cmbNumThreads.assign(this, CMB_NUMTHREADS)
 			.item_add(L"1|2|4|8");
 
 		switch (num_processors()) {
@@ -68,13 +69,13 @@ Dlg_Main::Dlg_Main()
 		}
 
 		// Initializing radio buttons.
-		m_radMp3   .be(this, RAD_MP3).set_check_and_trigger(true);
-		m_radMp3Cbr.be(this, RAD_CBR);
-		m_radMp3Vbr.be(this, RAD_VBR).set_check_and_trigger(true);
-		m_radFlac  .be(this, RAD_FLAC);
-		m_radWav   .be(this, RAD_WAV);
+		m_radMp3   .assign(this, RAD_MP3).set_check_and_trigger(true);
+		m_radMp3Cbr.assign(this, RAD_CBR);
+		m_radMp3Vbr.assign(this, RAD_VBR).set_check_and_trigger(true);
+		m_radFlac  .assign(this, RAD_FLAC);
+		m_radWav   .assign(this, RAD_WAV);
 
-		m_chkDelSrc.be(this, CHK_DELSRC);
+		m_chkDelSrc.assign(this, CHK_DELSRC);
 
 		// Layout control when resizing.
 		m_resz.add(this, LST_FILES, resizer::go::RESIZE, resizer::go::RESIZE)
@@ -118,14 +119,11 @@ Dlg_Main::Dlg_Main()
 		return TRUE;
 	});
 
-	on_message(WM_INITMENUPOPUP, [&](wm::initmenupopup p)
+	on_initmenupopup(MNU_OPENFILES, [&](wm::initmenupopup p)
 	{
 		menu m = p.hmenu();
-		if (m.get_command_id(0) == MNU_OPENFILES) {
-			m.enable_item(MNU_REMSELECTED, m_lstFiles.items.count_selected() > 0);
-			return TRUE;
-		}
-		return FALSE;
+		m.enable_item(MNU_REMSELECTED, m_lstFiles.items.count_selected() > 0);
+		return TRUE;
 	});
 
 	on_command(MNU_ABOUT, [&](params&)

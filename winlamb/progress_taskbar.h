@@ -5,36 +5,36 @@
  */
 
 #pragma once
-#include "i_hwnd.h"
+#include "base_wnd.h"
+#include "com_ptr.h"
 #include <ShObjIdl.h>
 
 namespace wl {
 
+// Allows to show a progress bar in the taskbar button of the window, in green, yellow and red.
 class progress_taskbar final {
 private:
-	HWND           _hWnd;
-	ITaskbarList3* _bar;
+	HWND _hWnd;
+	com_ptr<ITaskbarList3> _bar;
 
 public:
-	progress_taskbar() : _bar(nullptr) { }
 	progress_taskbar& operator=(const progress_taskbar&) = delete;
 	progress_taskbar& operator=(progress_taskbar&&) = delete;
 
 	~progress_taskbar() {
 		if (this->_bar) {
-			this->_bar->Release();
+			this->_bar.release();
 			CoUninitialize();
 		}
 	}
 
-	progress_taskbar& init(const i_hwnd* owner) {
-		if (this->_bar) {
+	progress_taskbar& init(const base::wnd* owner) {
+		if (!this->_bar.empty()) {
 			OutputDebugStringW(L"ERROR: progress_taskbar already created.\n");
 		} else {
 			this->_hWnd = owner->hwnd();
 			CoInitialize(nullptr);
-			CoCreateInstance(CLSID_TaskbarList, nullptr, CLSCTX_INPROC_SERVER,
-				IID_ITaskbarList3, reinterpret_cast<LPVOID*>(&this->_bar));
+			this->_bar.co_create_instance(CLSID_TaskbarList);
 		}
 		return *this;
 	}
