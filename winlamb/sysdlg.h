@@ -12,7 +12,7 @@
 
 namespace wl {
 
-// Utilities to wrap system dialogs calls.
+// Wrappers system dialogs calls.
 class sysdlg final {
 protected:
 	sysdlg() = default;

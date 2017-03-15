@@ -7,7 +7,7 @@
 #pragma once
 #include "base_native_control.h"
 #include "subclass.h"
-#include "icon.h"
+#include "image_list.h"
 #include "menu.h"
 
 /**
@@ -246,7 +246,7 @@ public:
 			lvi.pszText = const_cast<wchar_t*>(caption);
 			lvi.iImage = imagelistIconIndex;
 
-			return item(ListView_InsertItem(this->_list->hwnd(), &lvi), this->_list); // return index of newly inserted item
+			return item(ListView_InsertItem(this->_list->hwnd(), &lvi), this->_list); // return newly inserted item
 		}
 
 		item add(const std::wstring& caption, int imagelistIconIndex = -1, size_t positionIndex = item::npos) {
@@ -360,8 +360,9 @@ public:
 	};
 
 private:
-	subclass _subclass;
-	menu _contextMenu;
+	subclass   _subclass;
+	menu       _contextMenu;
+	image_list _imgList16;
 public:
 	collection items;
 
@@ -449,24 +450,17 @@ public:
 	}
 
 	listview& icon_push(int iconId) {
-		HIMAGELIST hImg = this->_proceed_imagelist();
-		icon resIco;
-		resIco.load_resource(iconId, 16,
-			reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(this->hwnd(), GWLP_HINSTANCE)));
-		ImageList_AddIcon(hImg, resIco.hicon());
-		resIco.destroy();
+		if (this->_create_image_list()) {
+			this->_imgList16.load_from_resource(iconId, GetParent(this->hwnd()));
+		}
 		return *this;
 	}
 
 	listview& icon_push(const wchar_t* fileExtension) {
-		HIMAGELIST hImg = this->_proceed_imagelist();
-		if (hImg) {
-			icon expIcon;
-			expIcon.get_from_explorer(fileExtension);
-			ImageList_AddIcon(hImg, expIcon.hicon()); // append a clone of icon handle to imagelist
-			expIcon.destroy();
+		if (this->_create_image_list()) {
+			this->_imgList16.load_from_shell(fileExtension);
 		}
-		return *this; // return the index of the new icon
+		return *this;
 	}
 
 	size_t column_count() const {
@@ -511,20 +505,19 @@ public:
 	}
 
 private:
-	HIMAGELIST _proceed_imagelist() {
+	bool _create_image_list() {
 		// Imagelist is destroyed automatically:
 		// http://www.catch22.net/tuts/sysimgq
 		// http://www.autohotkey.com/docs/commands/ListView.htm
-		HIMAGELIST hImg = ListView_GetImageList(this->hwnd(), LVSIL_SMALL); // current imagelist
-		if (!hImg) {
-			hImg = ImageList_Create(16, 16, ILC_COLOR32, 1, 1); // create a 16x16 imagelist
-			if (!hImg) {
-				OutputDebugStringW(L"ERROR: listview ImageList_Create failed.\n");
-				return nullptr;
+		if (!this->_imgList16.himagelist()) {
+			if (!this->_imgList16.create({16, 16})) {
+				OutputDebugStringW(L"ERROR: failed to create 16x16 image list.\n");
+				return false;
 			}
-			ListView_SetImageList(this->hwnd(), hImg, LVSIL_SMALL); // associate imagelist to listview control
+			ListView_SetImageList(this->hwnd(),
+				this->_imgList16.himagelist(), LVSIL_SMALL); // associate imagelist to listview control
 		}
-		return hImg; // return handle to current imagelist
+		return true;
 	}
 
 	listview& _install_subclass() {

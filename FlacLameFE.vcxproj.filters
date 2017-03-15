@@ -26,6 +26,9 @@
     <ClInclude Include="src\Dlg_Main.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="winlamb\base_user_control.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
     <ClInclude Include="winlamb\base_wheel.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
@@ -86,6 +89,9 @@
     <ClInclude Include="winlamb\icon.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
+    <ClInclude Include="winlamb\image_list.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
     <ClInclude Include="winlamb\label.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
@@ -128,9 +134,6 @@
     <ClInclude Include="winlamb\resizer.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\run.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
     <ClInclude Include="winlamb\statusbar.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
@@ -147,6 +150,9 @@
       <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\textbox.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\treeview.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\window_control.h">
@@ -176,13 +182,13 @@
     <ClInclude Include="winlamb\base_native_control.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
+    <ClInclude Include="winlamb\base_run.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
     <ClInclude Include="winlamb\base_text.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\base_threaded.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\base_user_control.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
   </ItemGroup>

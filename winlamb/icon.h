@@ -35,7 +35,7 @@ public:
 		return *this;
 	}
 
-	icon& get_from_explorer(const wchar_t* fileExtension) {
+	icon& load_from_shell(const wchar_t* fileExtension) {
 		this->destroy();
 		wchar_t extens[10] = { L'\0' };
 		lstrcpyW(extens, L"*.");
@@ -50,26 +50,23 @@ public:
 		return *this;
 	}
 
-	icon& load_resource(int iconId, BYTE widthOrHeight, HINSTANCE hInst = nullptr) {
-		// The widthOrHeight should be 16, 32, 48 or any other size the icon eventually has.
+	icon& load_from_resource(int iconId, SIZE resolution, HINSTANCE hInst = nullptr) {
 		this->destroy();
 		this->_hIcon = static_cast<HICON>(LoadImageW(hInst ? hInst : GetModuleHandleW(nullptr),
 			MAKEINTRESOURCE(iconId), IMAGE_ICON,
-			static_cast<int>(widthOrHeight), static_cast<int>(widthOrHeight),
+			static_cast<int>(resolution.cx), static_cast<int>(resolution.cy),
 			LR_DEFAULTCOLOR));
 		return *this;
 	}
 
-	icon& load_resource(int iconId, BYTE widthOrHeight, HWND hParent) {
-		// The widthOrHeight should be 16, 32, 48 or any other size the icon eventually has.
-		return this->load_resource(iconId, widthOrHeight,
+	icon& load_from_resource(int iconId, SIZE resolution, HWND hParent) {
+		return this->load_from_resource(iconId, resolution,
 			reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(hParent, GWLP_HINSTANCE)));
 	}
 
-	icon& icon_to_label(HWND hStatic, int idIconRes, BYTE widthOrHeight) {
-		// Loads an icon resource into a static control placed on a dialog.
+	icon& icon_to_label(HWND hStatic) {
+		// Loads an icon into a static control; the icon can be safely destroyed then.
 		// On the resource editor, change "Type" property to "Icon".
-		// The widthOrHeight should be 16, 32, 48 or any other size the icon eventually has.
 		SendMessageW(hStatic, STM_SETIMAGE, IMAGE_ICON, reinterpret_cast<LPARAM>(this->_hIcon));
 		return *this;
 	}
