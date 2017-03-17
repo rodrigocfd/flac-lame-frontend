@@ -6,6 +6,7 @@
 
 #pragma once
 #include "base_native_control.h"
+#include "base_styles.h"
 #include "str.h"
 
 /**
@@ -17,6 +18,19 @@ namespace wl {
 // Wrapper to combo box (dropdown) control.
 class combo final : public base::native_control {
 public:
+	class styler : public base::styles<combo> {
+	public:
+		styler(combo* pCombo) : styles(pCombo) { }
+
+		combo& sort(bool doSet) {
+			return this->styles::set_style(doSet, CBS_SORT);
+		}
+	};
+
+	styler style;
+
+	combo() : style(this) { }
+
 	combo& assign(const base::wnd* parent, int controlId) {
 		this->native_control::assign(parent, controlId);
 		return *this;

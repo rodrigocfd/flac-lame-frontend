@@ -6,6 +6,7 @@
 
 #pragma once
 #include "base_native_control.h"
+#include "base_styles.h"
 #include "params.h"
 #include "datetime.h"
 
@@ -31,6 +32,19 @@ public:
 	protected:
 		notif() = default;
 	};
+
+	class styler final : public base::styles<datetime_picker> {
+	public:
+		explicit styler(datetime_picker* pDtp) : styles(pDtp) { }
+
+		datetime_picker& up_down_control(bool doSet) {
+			return this->styles::set_style(doSet, DTS_UPDOWN);
+		}
+	};
+
+	styler style;
+
+	datetime_picker() : style(this) { }
 
 	datetime_picker& assign(const base::wnd* parent, int controlId) {
 		this->native_control::assign(parent, controlId);

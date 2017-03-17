@@ -162,6 +162,7 @@
     <ClInclude Include="winlamb\base_msgs.h" />
     <ClInclude Include="winlamb\base_native_control.h" />
     <ClInclude Include="winlamb\base_run.h" />
+    <ClInclude Include="winlamb\base_styles.h" />
     <ClInclude Include="winlamb\base_text.h" />
     <ClInclude Include="winlamb\base_threaded.h" />
     <ClInclude Include="winlamb\base_user_control.h" />

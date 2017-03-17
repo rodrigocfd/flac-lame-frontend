@@ -6,6 +6,7 @@
 
 #pragma once
 #include "base_native_control.h"
+#include "base_styles.h"
 #include "subclass.h"
 #include "image_list.h"
 
@@ -150,6 +151,30 @@ public:
 		}
 	};
 
+	class styler final : public base::styles<treeview> {
+	public:
+		explicit styler(treeview* pTree) : styles(pTree) { }
+
+		treeview& always_show_sel(bool doSet) {
+			return this->styles::set_style(doSet, TVS_SHOWSELALWAYS);
+		}
+
+		treeview& lines_and_buttons(bool doSet) {
+			return this->styles::set_style(doSet,
+				TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS);
+		}
+
+		treeview& single_expand(bool doSet) {
+			return this->styles::set_style(doSet, TVS_SINGLEEXPAND);
+		}
+
+		treeview& double_buffer(bool doSet) {
+			TreeView_SetExtendedStyle(this->target().hwnd(),
+				doSet ? TVS_EX_DOUBLEBUFFER : 0, TVS_EX_DOUBLEBUFFER);
+			return this->target();
+		}
+	};
+
 private:
 	class _root final {
 	private:
@@ -187,9 +212,10 @@ private:
 	};
 
 public:
-	_root items;
+	_root  items;
+	styler style;
 
-	treeview() : items(this) { }
+	treeview() : items(this), style(this) { }
 
 	treeview& assign(const base::wnd* parent, int controlId) {
 		this->native_control::assign(parent, controlId);
@@ -210,17 +236,6 @@ public:
 
 	treeview& enable(bool doEnable) {
 		EnableWindow(this->hwnd(), doEnable);
-		return *this;
-	}
-
-	treeview& set_lines_and_buttons(bool showLinesAndButtons) {
-		LONG_PTR style = GetWindowLongPtrW(this->hwnd(), GWL_STYLE);
-		if (showLinesAndButtons) {
-			style |= (TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS);
-		} else {
-			style &= ~(TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS);
-		}
-		SetWindowLongPtrW(this->hwnd(), GWL_STYLE, style);
 		return *this;
 	}
 };

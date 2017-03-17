@@ -6,6 +6,7 @@
 
 #pragma once
 #include "base_native_control.h"
+#include "base_styles.h"
 #include "base_text.h"
 
 /**
@@ -22,6 +23,15 @@ class checkbox final :
 	public base::text<checkbox>
 {
 public:
+	class styler : public base::styles<checkbox> {
+	public:
+		styler(checkbox* pCheckbox) : styles(pCheckbox) { }
+	};
+
+	styler style;
+
+	checkbox() : style(this) { }
+
 	checkbox& assign(const base::wnd* parent, int controlId) {
 		this->native_control::assign(parent, controlId);
 		return *this;
@@ -32,6 +42,7 @@ public:
 			L"Button", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX);
 		return *this;
 	}
+
 	checkbox& focus() {
 		SetFocus(this->hwnd());
 		return *this;
@@ -41,7 +52,6 @@ public:
 		EnableWindow(this->hwnd(), doEnable);
 		return *this;
 	}
-
 
 	bool is_checked() const {
 		return SendMessageW(this->hwnd(), BM_GETCHECK, 0, 0) == BST_CHECKED;

@@ -7,6 +7,7 @@
 #pragma once
 #include <vector>
 #include "base_native_control.h"
+#include "base_styles.h"
 #include "params.h"
 
 /**
@@ -27,6 +28,19 @@ public:
 	protected:
 		notif() = default;
 	};
+	
+	class styler final : public base::styles<statusbar> {
+	public:
+		explicit styler(statusbar* pSb) : styles(pSb) { }
+
+		statusbar& size_grip(bool doSet) {
+			return this->styles::set_style(doSet, SBARS_SIZEGRIP);
+		}
+
+		statusbar& tooltips(bool doSet) {
+			return this->styles::set_style(doSet, SBARS_TOOLTIPS);
+		}
+	};
 
 private:
 	struct _part final {
@@ -38,6 +52,10 @@ private:
 	std::vector<int> _rightEdges;
 
 public:
+	styler style;
+
+	statusbar() : style(this) { }
+
 	statusbar& create(const base::wnd* parent) {
 		if (this->hwnd()) {
 			OutputDebugStringW(L"ERROR: statusbar already created.\n");

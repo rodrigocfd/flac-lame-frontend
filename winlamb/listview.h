@@ -6,6 +6,7 @@
 
 #pragma once
 #include "base_native_control.h"
+#include "base_styles.h"
 #include "subclass.h"
 #include "image_list.h"
 #include "menu.h"
@@ -351,6 +352,57 @@ public:
 		}
 	};
 
+	class styler final : public base::styles<listview> {
+	public:
+		explicit styler(listview* pList) : styles(pList) { }
+
+		listview& always_show_sel(bool doSet) {
+			return this->styles::set_style(doSet, LVS_SHOWSELALWAYS);
+		}
+
+		listview& edit_labels(bool doSet) {
+			return this->styles::set_style(doSet, LVS_EDITLABELS);
+		}
+
+		listview& multiple_sel(bool doSet) {
+			return this->styles::set_style(!doSet, LVS_SINGLESEL);
+		}
+
+		listview& show_headers(bool doSet) {
+			return this->styles::set_style(doSet, LVS_NOCOLUMNHEADER);
+		}
+
+		listview& checkboxes(bool doSet) {
+			ListView_SetExtendedListViewStyleEx(this->target().hwnd(), LVS_EX_CHECKBOXES,
+				doSet ? LVS_EX_CHECKBOXES : 0);
+			return this->target();
+		}
+
+		listview& double_buffer(bool doSet) {
+			ListView_SetExtendedListViewStyleEx(this->target().hwnd(), LVS_EX_DOUBLEBUFFER,
+				doSet ? LVS_EX_DOUBLEBUFFER : 0);
+			return this->target();
+		}
+
+		listview& full_row_select(bool doSet) {
+			ListView_SetExtendedListViewStyleEx(this->target().hwnd(), LVS_EX_FULLROWSELECT,
+				doSet ? LVS_EX_FULLROWSELECT : 0);
+			return this->target();
+		}
+
+		listview& grid_lines(bool doSet) {
+			ListView_SetExtendedListViewStyleEx(this->target().hwnd(), LVS_EX_GRIDLINES,
+				doSet ? LVS_EX_GRIDLINES : 0);
+			return this->target();
+		}
+
+		listview& reorder_header(bool doSet) {
+			ListView_SetExtendedListViewStyleEx(this->target().hwnd(), LVS_EX_HEADERDRAGDROP,
+				doSet ? LVS_EX_HEADERDRAGDROP : 0);
+			return this->target();
+		}
+	};
+
 	enum class view : WORD {
 		DETAILS   = LV_VIEW_DETAILS,
 		ICON      = LV_VIEW_ICON,
@@ -365,10 +417,11 @@ private:
 	image_list _imgList16;
 public:
 	collection items;
+	styler     style;
 
 	~listview() { this->_contextMenu.destroy(); }
 
-	listview() : _subclass(2), items(this) {
+	listview() : _subclass(2), items(this), style(this) {
 		this->_subclass.on_message(WM_GETDLGCODE, [&](params& p)->LRESULT {
 			bool hasCtrl = (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
 			BYTE vkey = static_cast<BYTE>(p.wParam);
@@ -426,11 +479,6 @@ public:
 			this->_contextMenu.load_resource_submenu(contextMenuId, 0,
 				reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(this->hwnd(), GWLP_HINSTANCE)));
 		}
-		return *this;
-	}
-
-	listview& set_full_row_select() {
-		ListView_SetExtendedListViewStyle(this->hwnd(), LVS_EX_FULLROWSELECT);
 		return *this;
 	}
 

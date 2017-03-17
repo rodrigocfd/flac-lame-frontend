@@ -6,6 +6,7 @@
 
 #pragma once
 #include "base_native_control.h"
+#include "base_styles.h"
 #include "base_text.h"
 
 /**
@@ -26,6 +27,19 @@ public:
 		int start;
 		int len;
 	};
+
+	class styler : public base::styles<textbox> {
+	public:
+		styler(textbox* pTextbox) : styles(pTextbox) { }
+
+		textbox& password(bool doSet) {
+			return this->styles::set_style(doSet, ES_PASSWORD);
+		}
+	};
+
+	styler style;
+
+	textbox() : style(this) { }
 
 	textbox& assign(const base::wnd* parent, int controlId) {
 		this->native_control::assign(parent, controlId);

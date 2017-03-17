@@ -6,6 +6,7 @@
 
 #pragma once
 #include "base_native_control.h"
+#include "base_styles.h"
 #include "base_text.h"
 
 /**
@@ -22,6 +23,15 @@ class label final :
 	public base::text<label>
 {
 public:
+	class styler : public base::styles<label> {
+	public:
+		styler(label* pLabel) : styles(pLabel) { }
+	};
+
+	styler style;
+
+	label() : style(this) { }
+
 	label& assign(const base::wnd* parent, int controlId) {
 		this->native_control::assign(parent, controlId);
 		return *this;

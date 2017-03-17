@@ -26,6 +26,9 @@
     <ClInclude Include="src\Dlg_Main.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="winlamb\base_threaded.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
     <ClInclude Include="winlamb\base_user_control.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
@@ -188,7 +191,7 @@
     <ClInclude Include="winlamb\base_text.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\base_threaded.h">
+    <ClInclude Include="winlamb\base_styles.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
   </ItemGroup>

@@ -6,6 +6,7 @@
 
 #pragma once
 #include "base_native_control.h"
+#include "base_styles.h"
 #include "str.h"
 #include <CommCtrl.h>
 
@@ -18,6 +19,23 @@ namespace wl {
 // Wrapper to progressbar control from Common Controls library.
 class progressbar final : public base::native_control {
 public:
+	class styler : public base::styles<progressbar> {
+	public:
+		styler(progressbar* pPb) : styles(pPb) { }
+
+		progressbar& vertical(bool doSet) {
+			return this->styles::set_style(doSet, PBS_VERTICAL);
+		}
+
+		progressbar& smooth_reverse(bool doSet) {
+			return this->styles::set_style(doSet, PBS_SMOOTHREVERSE);
+		}
+	};
+
+	styler style;
+
+	progressbar() : style(this) { }
+
 	progressbar& assign(const base::wnd* parent, int controlId) {
 		this->native_control::assign(parent, controlId);
 		return *this;
@@ -47,15 +65,12 @@ public:
 
 	progressbar& set_waiting(bool isWaiting) {
 		if (isWaiting) {
-			SetWindowLongPtrW(this->hwnd(), GWL_STYLE, // set this on resource editor won't work
-				GetWindowLongPtrW(this->hwnd(), GWL_STYLE) | PBS_MARQUEE);
+			this->style.set_style(true, PBS_MARQUEE); // set this on resource editor won't work
 		}
 		SendMessageW(this->hwnd(), PBM_SETMARQUEE, static_cast<WPARAM>(isWaiting), 0);
 
-		// http://stackoverflow.com/a/23689663
-		if (!isWaiting) {
-			SetWindowLongPtrW(this->hwnd(), GWL_STYLE,
-				GetWindowLongPtrW(this->hwnd(), GWL_STYLE) & ~PBS_MARQUEE);
+		if (!isWaiting) { // http://stackoverflow.com/a/23689663
+			this->style.set_style(false, PBS_MARQUEE);
 		}
 		return *this;
 	}
