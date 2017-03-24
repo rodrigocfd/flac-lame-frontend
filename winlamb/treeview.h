@@ -28,7 +28,7 @@ public:
 		NFYDEC(endlabeledit, NMTVDISPINFO)
 		NFYDEC(getdispinfo, NMTVDISPINFO)
 		NFYDEC(getinfotip, NMTVGETINFOTIP)
-		NFYDEC(itemchange, NMTVITEMCHANGE)
+		NFYDEC(itemchanged, NMTVITEMCHANGE)
 		NFYDEC(itemchanging, NMTVITEMCHANGE)
 		NFYDEC(itemexpanded, NMTREEVIEW)
 		NFYDEC(itemexpanding, NMTREEVIEW)
@@ -86,23 +86,22 @@ public:
 			return item(TreeView_GetNextSibling(this->_tree->hwnd(), this->_hTreeItem), this->_tree);
 		}
 
-		item add_child(const wchar_t* text) {
-			TVINSERTSTRUCT tvi = { 0 };
-			tvi.hParent = this->_hTreeItem;
-			tvi.hInsertAfter = TVI_LAST;
-			tvi.itemex.mask = TVIF_TEXT;
-			tvi.itemex.pszText = const_cast<wchar_t*>(text);
-
-			return item(TreeView_InsertItem(this->_tree->hwnd(), &tvi), this->_tree); // return newly added item
+		item add_child(const wchar_t* caption, int imagelistIconIndex = -1) {
+			return this->_tree->_add_item(this->_hTreeItem, caption, imagelistIconIndex);
 		}
 
-		item add_child(const std::wstring& text) {
-			return this->add_child(text.c_str());
+		item add_child(const std::wstring& caption, int imagelistIconIndex = -1) {
+			return this->add_child(caption.c_str(), imagelistIconIndex);
 		}
 
 		item& set_select() {
 			TreeView_SelectItem(this->_tree->hwnd(), this->_hTreeItem);
 			return *this;
+		}
+
+		bool is_expanded() const {
+			return (TreeView_GetItemState(this->_tree->hwnd(), this->_hTreeItem, TVIS_EXPANDED) &
+				TVIS_EXPANDED) != 0;
 		}
 
 		std::wstring get_text() const {
@@ -149,6 +148,26 @@ public:
 			TreeView_SetItem(this->_tree->hwnd(), &tvi);
 			return *this;
 		}
+
+		int get_icon_index() const {
+			TVITEMEX tvi = { 0 };
+			tvi.hItem = this->_hTreeItem;
+			tvi.mask = TVIF_IMAGE;
+
+			TreeView_GetItem(this->_tree->hwnd(), &tvi);
+			return tvi.iImage; // return index of icon within imagelist
+		}
+
+		item& set_icon_index(int imagelistIconIndex) {
+			TVITEMEX tvi = { 0 };
+			tvi.hItem = this->_hTreeItem;
+			tvi.mask = LVIF_IMAGE | TVIF_SELECTEDIMAGE;
+			tvi.iImage = imagelistIconIndex;
+			tvi.iSelectedImage = imagelistIconIndex;
+
+			TreeView_SetItem(this->_tree->hwnd(), &tvi);
+			return *this;
+		}
 	};
 
 	class styler final : public base::styles<treeview> {
@@ -186,6 +205,10 @@ private:
 			return item(TreeView_GetRoot(this->_tree->hwnd()), this->_tree);
 		}
 
+		item get_selected() const {
+			return item(TreeView_GetSelection(this->_tree->hwnd()), this->_tree);
+		}
+
 		std::vector<item> get_roots() const {
 			std::vector<item> roots;
 			item curIt = this->get_first_root();
@@ -196,24 +219,23 @@ private:
 			return roots;
 		}
 
-		item add_root(const wchar_t* caption) {
-			TVINSERTSTRUCT tvi = { 0 };
-			tvi.hParent = TVI_ROOT;
-			tvi.hInsertAfter = TVI_LAST;
-			tvi.itemex.mask = TVIF_TEXT;
-			tvi.itemex.pszText = const_cast<wchar_t*>(caption);
-
-			return item(TreeView_InsertItem(this->_tree->hwnd(), &tvi), this->_tree); // return newly added item
+		item add_root(const wchar_t* caption, int imagelistIconIndex = -1) {
+			return this->_tree->_add_item(TVI_ROOT, caption, imagelistIconIndex);
 		}
 
-		item add_root(const std::wstring& caption) {
-			return this->add_root(caption.c_str());
+		item add_root(const std::wstring& caption, int imagelistIconIndex = -1) {
+			return this->add_root(caption.c_str(), imagelistIconIndex);
 		}
 	};
 
+	image_list _imgList16;
 public:
 	_root  items;
 	styler style;
+
+	~treeview() {
+		this->_imgList16.destroy();
+	}
 
 	treeview() : items(this), style(this) { }
 
@@ -237,6 +259,45 @@ public:
 	treeview& enable(bool doEnable) {
 		EnableWindow(this->hwnd(), doEnable);
 		return *this;
+	}
+
+	treeview& icon_push(int iconId) {
+		if (this->_create_image_list()) {
+			this->_imgList16.load_from_resource(iconId, GetParent(this->hwnd()));
+		}
+		return *this;
+	}
+
+	treeview& icon_push(const wchar_t* fileExtension) {
+		if (this->_create_image_list()) {
+			this->_imgList16.load_from_shell(fileExtension);
+		}
+		return *this;
+	}
+
+private:
+	bool _create_image_list() {
+		if (!this->_imgList16.himagelist()) {
+			if (!this->_imgList16.create({16, 16})) {
+				OutputDebugStringW(L"ERROR: failed to create 16x16 treeview image list.\n");
+				return false;
+			}
+			TreeView_SetImageList(this->hwnd(),
+				this->_imgList16.himagelist(), TVSIL_NORMAL); // associate imagelist to treeview control
+		}
+		return true;
+	}
+
+	item _add_item(HTREEITEM parent, const wchar_t* caption, int imagelistIconIndex) {
+		TVINSERTSTRUCT tvi = { 0 };
+		tvi.hParent = parent;
+		tvi.hInsertAfter = TVI_LAST;
+		tvi.itemex.mask = TVIF_TEXT | (imagelistIconIndex == -1 ? 0 : (TVIF_IMAGE | TVIF_SELECTEDIMAGE));
+		tvi.itemex.pszText = const_cast<wchar_t*>(caption);
+		tvi.itemex.iImage = imagelistIconIndex;
+		tvi.itemex.iSelectedImage = imagelistIconIndex;
+
+		return item(TreeView_InsertItem(this->hwnd(), &tvi), this); // return newly added item
 	}
 };
 

@@ -6,7 +6,6 @@
 
 #pragma once
 #include "str.h"
-#include <Shlobj.h>
 
 namespace wl {
 
@@ -82,26 +81,6 @@ public:
 			ret.erase(0, found + 1);
 		}
 		return ret;
-	}
-
-	static std::wstring exe_path() {
-		wchar_t buf[MAX_PATH] = { L'\0' };
-		GetModuleFileNameW(nullptr, buf, ARRAYSIZE(buf)); // full path name
-		std::wstring ret = buf;
-		ret.resize(ret.find_last_of(L'\\')); // truncate removing EXE filename and trailing backslash
-#ifdef _DEBUG
-		ret.resize(ret.find_last_of(L'\\')); // bypass "Debug" folder, remove trailing backslash too
-#ifdef _WIN64
-		ret.resize(ret.find_last_of(L'\\')); // bypass "x64" folder, remove trailing backslash again
-#endif
-#endif
-		return ret;
-	}
-
-	static std::wstring desktop_path() {
-		wchar_t buf[MAX_PATH] = { L'\0' };
-		SHGetFolderPathW(nullptr, CSIDL_DESKTOPDIRECTORY, nullptr, 0, buf); // won't have trailing backslash
-		return buf;
 	}
 };
 

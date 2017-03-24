@@ -706,7 +706,7 @@ protected:
 #define NFYDEC(fname, sname) \
 	struct fname : public params { \
 		fname(const params& p) : params(p) { } \
-		sname* operator->() { return reinterpret_cast<sname*>(this->lParam); } \
+		sname& hdr() const { return *reinterpret_cast<sname*>(this->lParam); } \
 	};
 
 }//namespace wl

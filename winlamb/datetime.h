@@ -95,6 +95,29 @@ public:
 	datetime& add_hour(LONGLONG h)  { return this->add_min(h * 60); }
 	datetime& add_day(LONGLONG d)   { return this->add_hour(d * 24); }
 
+	const wchar_t* name_month() const {
+		wchar_t* months[] = { L"January", L"February", L"March", L"April", L"May", L"June",
+			L"July", L"August", L"September", L"October", L"November", L"December" };
+		return months[this->_st.wMonth - 1];
+	}
+
+	const wchar_t* name_month_short() const {
+		wchar_t* months[] = { L"Jan", L"Feb", L"Mar", L"Apr", L"May", L"Jun",
+			L"Jul", L"Aug", L"Sep", L"Oct", L"Nov", L"Dec" };
+		return months[this->_st.wMonth - 1];
+	}
+
+	const wchar_t* name_weekday() const {
+		wchar_t* weekday[] = { L"Sunday", L"Monday", L"Tuesday", L"Wednesday",
+			L"Thursday", L"Friday", L"Saturday" };
+		return weekday[this->_st.wDayOfWeek];
+	}
+
+	const wchar_t* name_weekday_short() const {
+		wchar_t* weekday[] = { L"Sun", L"Mon", L"Tue", L"Wed", L"Thu", L"Fri", L"Sat" };
+		return weekday[this->_st.wDayOfWeek];
+	}
+
 private:
 	static void _st_to_li(const SYSTEMTIME& st, LARGE_INTEGER& li) {
 		FILETIME ft = { 0 };

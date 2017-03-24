@@ -30,6 +30,14 @@ namespace base {
 			return this->_change_style_flags(true, addStyle, styleFlags);
 		}
 
+		bool has_style(DWORD styleFlags) const {
+			return (GetWindowLongPtrW(this->_wnd.hwnd(), GWL_STYLE) & styleFlags) != 0;
+		}
+
+		bool has_style_ex(DWORD styleFlags) const {
+			return (GetWindowLongPtrW(this->_wnd.hwnd(), GWL_EXSTYLE) & styleFlags) != 0;
+		}
+
 	private:
 		wndT& _change_style_flags(bool isEx, bool addStyle, DWORD styleFlags) {
 			LONG_PTR curFlags = GetWindowLongPtrW(this->_wnd.hwnd(), isEx ? GWL_EXSTYLE : GWL_STYLE);

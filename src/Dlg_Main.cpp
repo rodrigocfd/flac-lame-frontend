@@ -37,9 +37,9 @@ Dlg_Main::Dlg_Main()
 			.set_context_menu(MEN_MAIN)
 			.column_add(L"File", 300)
 			.column_fit(0)
-			.icon_push(L"mp3")
-			.icon_push(L"flac")
-			.icon_push(L"wav"); // icons of the 3 filetypes we use
+			.icon_16_push(L"mp3")
+			.icon_16_push(L"flac")
+			.icon_16_push(L"wav"); // icons of the 3 filetypes we use
 
 		// Initializing comboboxes.
 		m_cmbCbr.assign(this, CMB_CBR)
@@ -252,7 +252,7 @@ Dlg_Main::Dlg_Main()
 
 	on_notify(LST_FILES, LVN_KEYDOWN, [&](listview::notif::keydown p)
 	{
-		if (p->wVKey == VK_DELETE) {
+		if (p.hdr().wVKey == VK_DELETE) {
 			SendMessage(hwnd(), WM_COMMAND, MAKEWPARAM(MNU_REMSELECTED, 0), 0);
 			return TRUE;
 		}
@@ -263,7 +263,7 @@ Dlg_Main::Dlg_Main()
 bool Dlg_Main::preliminar_checks()
 {
 	// Validate and load INI file.
-	wstring iniPath = path::exe_path().append(L"\\FlacLameFE.ini");
+	wstring iniPath = sys::get_exe_path().append(L"\\FlacLameFE.ini");
 	if (!file::exists(iniPath)) {
 		sysdlg::msgbox(this, L"Fail",
 			str::format(L"File not found:\n%s", iniPath.c_str()),

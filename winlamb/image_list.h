@@ -80,10 +80,13 @@ public:
 
 	image_list& load_from_shell(const wchar_t* fileExtension) {
 		if (this->_hImgList) {
-			icon tmpIco;
-			tmpIco.load_from_shell(fileExtension);
-			this->load(tmpIco);
-			tmpIco.destroy();
+			icon::res iRes = icon::resolution_resolve_type(this->resolution());
+			if (iRes != icon::res::OTHER) { // system shell allowed resolutions only
+				icon tmpIco;
+				tmpIco.load_from_shell(fileExtension, iRes);
+				this->load(tmpIco);
+				tmpIco.destroy();			
+			}
 		}
 		return *this;
 	}

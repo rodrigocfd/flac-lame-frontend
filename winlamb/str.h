@@ -461,7 +461,7 @@ public:
 					(data[i] == 0xC2 && (data[i+1] >= 0xA1 && data[i+1] <= 0xBF)) || // http://www.utf8-chartable.de
 					(data[i] == 0xC3 && (data[i+1] >= 0x80 && data[i+1] <= 0xBF)) ))
 				{
-					return { encoding::UTF8, 0 }; // UTF-8 without no BOM
+					return { encoding::UTF8, 0 }; // UTF-8 without BOM
 				}
 			}
 		}

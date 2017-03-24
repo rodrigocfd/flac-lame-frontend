@@ -8,11 +8,12 @@
 #include <functional>
 #include <Windows.h>
 #include <process.h>
+#include <Shlobj.h>
 #include "str.h"
 
 namespace wl {
 
-// Utilities to Windows system operations.
+// Windows system utilities.
 class sys final {
 protected:
 	sys() = default;
@@ -67,6 +68,34 @@ public:
 	static DWORD open_file_shell(std::wstring file) {
 		return static_cast<DWORD>(reinterpret_cast<INT_PTR>(
 			ShellExecuteW(nullptr, L"open", file.c_str(), nullptr, nullptr, SW_SHOWNORMAL) ));
+	}
+
+	static std::wstring get_desktop_path() {
+		wchar_t buf[MAX_PATH] = { L'\0' };
+		SHGetFolderPathW(nullptr, CSIDL_DESKTOPDIRECTORY, nullptr, 0, buf); // won't have trailing backslash
+		return buf;
+	}
+
+	static std::wstring get_temp_path() {
+		wchar_t buf[MAX_PATH + 1] = { L'\0' };
+		GetTempPathW(ARRAYSIZE(buf), buf);
+		std::wstring ret = buf;
+		if (ret.back() == L'\\') ret.resize(ret.length() - 1); // remove trailing backslash, if any
+		return ret;
+	}
+
+	static std::wstring get_exe_path() {
+		wchar_t buf[MAX_PATH + 1] = { L'\0' };
+		GetModuleFileNameW(nullptr, buf, ARRAYSIZE(buf)); // full path name
+		std::wstring ret = buf;
+		ret.resize(ret.find_last_of(L'\\')); // truncate removing EXE filename and trailing backslash
+#ifdef _DEBUG
+		ret.resize(ret.find_last_of(L'\\')); // bypass "Debug" folder, remove trailing backslash too
+#ifdef _WIN64
+		ret.resize(ret.find_last_of(L'\\')); // bypass "x64" folder, remove trailing backslash again
+#endif
+#endif
+		return ret;
 	}
 };
 

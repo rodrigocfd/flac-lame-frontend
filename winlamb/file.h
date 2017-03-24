@@ -5,6 +5,7 @@
  */
 
 #pragma once
+#include "datetime.h"
 #include "path.h"
 
 namespace wl {
@@ -35,8 +36,8 @@ public:
 		return *this;
 	}
 
-	HANDLE hfile() const      { return this->_hFile; }
-	access get_access() const { return this->_access; }
+	HANDLE hfile() const       { return this->_hFile; }
+	access access_type() const { return this->_access; }
 
 	void close() {
 		if (this->_hFile) {
@@ -186,6 +187,23 @@ public:
 		return this->write(&data[0], data.size(), pErr);
 	}
 
+	bool get_times(datetime* creation, datetime* lastAccess, datetime* lastWrite) const {
+		if (!this->_hFile) return false;
+
+		FILETIME ftCreation = { 0 },
+			ftLastAccess = { 0 },
+			ftLastWrite = { 0 };
+		if (!GetFileTime(this->_hFile,
+			creation ? &ftCreation : nullptr,
+			lastAccess ? &ftLastAccess : nullptr,
+			lastWrite ? &ftLastWrite : nullptr)) return false;
+
+		if (creation) *creation = ftCreation;
+		if (lastAccess) *lastAccess = ftLastAccess;
+		if (lastWrite) *lastWrite = ftLastWrite;
+		return true;
+	}
+
 private:
 	bool _raw_open(const std::wstring& filePath, DWORD desiredAccess, DWORD shareMode,
 		DWORD creationDisposition, std::wstring* pErr = nullptr)
@@ -262,9 +280,17 @@ public:
 		return is_dir(thePath.c_str());
 	}
 	
+	static bool is_hidden(const wchar_t* thePath) {
+		return (GetFileAttributesW(thePath) & FILE_ATTRIBUTE_HIDDEN) != 0;
+	}
+
+	static bool is_hidden(const std::wstring& thePath) {
+		return is_hidden(thePath.c_str());
+	}
+
 	static bool del(const std::wstring& fileOrFolder, std::wstring* pErr = nullptr) {
 		if (is_dir(fileOrFolder)) {
-			// http://stackoverflow.com/questions/1468774/why-am-i-having-problems-recursively-deleting-directories
+			// http://stackoverflow.com/q/1468774/6923555
 			wchar_t szDir[MAX_PATH + 1] = { L'\0' }; // +1 for the double null terminate
 			lstrcpyW(szDir, fileOrFolder.c_str());
 

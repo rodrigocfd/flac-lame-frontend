@@ -32,10 +32,10 @@ public:
 		return *this;
 	}
 
-	file::access get_access() const { return this->_file.get_access(); }
-	size_t       size()             { return this->_file.size(); }
-	BYTE*        p_mem() const      { return reinterpret_cast<BYTE*>(this->_pMem); }
-	BYTE*        p_past_mem()       { return p_mem() + this->size(); }
+	file::access access_type() const { return this->_file.access_type(); }
+	size_t       size()              { return this->_file.size(); }
+	BYTE*        p_mem() const       { return reinterpret_cast<BYTE*>(this->_pMem); }
+	BYTE*        p_past_mem()        { return p_mem() + this->size(); }
 
 	void close() {
 		if (this->_pMem) {

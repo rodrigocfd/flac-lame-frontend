@@ -39,11 +39,11 @@ namespace base {
 		void add(std::initializer_list<idT> ids, funcT func) {
 			const idT* pIds = ids.begin();
 			this->add(pIds[0], std::move(func)); // store user func once
-			funcT* pFirstFunc = &this->_msgUnits.back().second;
+			size_t funcIdx = this->_msgUnits.size() - 1;
 			for (size_t i = 1; i < ids.size(); ++i) {
 				if (pIds[i] != pIds[0]) { // avoid overwriting
-					this->add(pIds[i], [pFirstFunc](params& p)->LONG_PTR {
-						return (*pFirstFunc)(p); // store light wrapper to 1st func
+					this->add(pIds[i], [this, funcIdx](params& p)->LONG_PTR {
+						return this->_msgUnits[funcIdx].second(p); // store light wrapper to 1st func
 					});
 				}
 			}

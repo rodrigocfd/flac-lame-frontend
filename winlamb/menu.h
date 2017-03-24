@@ -46,10 +46,20 @@ public:
 		return *this;
 	}
 
+	menu& load_resource(int resourceId, HWND hOwner) {
+		return this->load_resource(resourceId,
+			reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(hOwner, GWLP_HINSTANCE)));
+	}
+
 	menu& load_resource_submenu(int resourceId, size_t subMenuIndex, HINSTANCE hInst = nullptr) {
 		this->load_resource(resourceId, hInst);
 		this->_hMenu = GetSubMenu(this->_hMenu, static_cast<int>(subMenuIndex));
 		return *this;
+	}
+
+	menu& load_resource_submenu(int resourceId, size_t subMenuIndex, HWND hOwner) {
+		return this->load_resource_submenu(resourceId, subMenuIndex,
+			reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(hOwner, GWLP_HINSTANCE)));
 	}
 
 	menu get_submenu(size_t pos) const {

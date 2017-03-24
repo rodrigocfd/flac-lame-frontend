@@ -9,6 +9,7 @@
 #include "base_native_control.h"
 #include "base_styles.h"
 #include "params.h"
+#include "icon.h"
 
 /**
  * base_wnd <-- base_native_control <-- statusbar
@@ -145,8 +146,13 @@ public:
 	}
 
 	statusbar& set_icon(HICON hIcon, size_t iPart) {
+		// Pass nullptr to clear icon.
 		SendMessageW(this->hwnd(), SB_SETICON, iPart, reinterpret_cast<LPARAM>(hIcon));
 		return *this;
+	}
+
+	statusbar& set_icon(const wl::icon& ico, size_t iPart) {
+		return this->set_icon(ico.hicon(), iPart);
 	}
 
 private:

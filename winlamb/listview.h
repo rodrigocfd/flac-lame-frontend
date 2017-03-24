@@ -414,7 +414,7 @@ public:
 private:
 	subclass   _subclass;
 	menu       _contextMenu;
-	image_list _imgList16;
+	image_list _imgList16, _imgList32;
 public:
 	collection items;
 	styler     style;
@@ -477,7 +477,7 @@ public:
 			OutputDebugStringW(L"ERROR: listview context menu already assigned.\n");
 		} else {
 			this->_contextMenu.load_resource_submenu(contextMenuId, 0,
-				reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(this->hwnd(), GWLP_HINSTANCE)));
+				GetParent(this->hwnd()));
 		}
 		return *this;
 	}
@@ -497,18 +497,42 @@ public:
 		return static_cast<view>(ListView_GetView(this->hwnd()));
 	}
 
-	listview& icon_push(int iconId) {
-		if (this->_create_image_list()) {
+	listview& icon_16_push(int iconId) {
+		if (this->_create_image_list(true, false)) {
 			this->_imgList16.load_from_resource(iconId, GetParent(this->hwnd()));
 		}
 		return *this;
 	}
 
-	listview& icon_push(const wchar_t* fileExtension) {
-		if (this->_create_image_list()) {
+	listview& icon_16_push(const wchar_t* fileExtension) {
+		if (this->_create_image_list(true, false)) {
 			this->_imgList16.load_from_shell(fileExtension);
 		}
 		return *this;
+	}
+
+	listview& icon_32_push(int iconId) {
+		if (this->_create_image_list(false, true)) {
+			this->_imgList32.load_from_resource(iconId, GetParent(this->hwnd()));
+		}
+		return *this;
+	}
+
+	listview& icon_32_push(const wchar_t* fileExtension) {
+		if (this->_create_image_list(false, true)) {
+			this->_imgList32.load_from_shell(fileExtension);
+		}
+		return *this;
+	}
+
+	listview& icon_16_32_push(int iconId) {
+		return this->icon_16_push(iconId)
+			.icon_32_push(iconId);
+	}
+
+	listview& icon_16_32_push(const wchar_t* fileExtension) {
+		return this->icon_16_push(fileExtension)
+			.icon_32_push(fileExtension);
 	}
 
 	size_t column_count() const {
@@ -553,17 +577,25 @@ public:
 	}
 
 private:
-	bool _create_image_list() {
-		// Imagelist is destroyed automatically:
+	bool _create_image_list(bool il16, bool il32) {
+		// Imagelists are destroyed automatically:
 		// http://www.catch22.net/tuts/sysimgq
 		// http://www.autohotkey.com/docs/commands/ListView.htm
-		if (!this->_imgList16.himagelist()) {
+		if (il16 && !this->_imgList16.himagelist()) {
 			if (!this->_imgList16.create({16, 16})) {
-				OutputDebugStringW(L"ERROR: failed to create 16x16 image list.\n");
+				OutputDebugStringW(L"ERROR: failed to create 16x16 listview image list.\n");
 				return false;
 			}
 			ListView_SetImageList(this->hwnd(),
 				this->_imgList16.himagelist(), LVSIL_SMALL); // associate imagelist to listview control
+		}
+		if (il32 && !this->_imgList32.himagelist()) {
+			if (!this->_imgList32.create({32, 32})) {
+				OutputDebugStringW(L"ERROR: failed to create 32x32 listview image list.\n");
+				return false;
+			}
+			ListView_SetImageList(this->hwnd(),
+				this->_imgList32.himagelist(), LVSIL_NORMAL);
 		}
 		return true;
 	}
