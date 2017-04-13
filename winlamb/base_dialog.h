@@ -25,7 +25,7 @@ class dialog_control;
 namespace base {
 
 	class dialog :
-		public    threaded,
+		public    threaded<TRUE>,
 		protected wheel
 	{
 	public:
@@ -46,8 +46,8 @@ namespace base {
 		}
 
 	protected:
-		dialog(size_t msgsReserve) : threaded(TRUE, msgsReserve) {
-			this->msgs::_defProc = [](const params&)->INT_PTR { // overwrite default procedure
+		explicit dialog(size_t msgsReserve) : threaded(msgsReserve) {
+			this->msgs::_defProc = [](const params&)->INT_PTR { // set default procedure
 				return FALSE;
 			};
 		}
@@ -79,7 +79,7 @@ namespace base {
 			}
 
 			if (pSelf) {
-				funcT* pFunc = pSelf->msgs::_msgInventory.find(msg);
+				msgs::funcT* pFunc = pSelf->msgs::_msgInventory.find(msg);
 				if (pFunc) ret = (*pFunc)(params{msg, wp, lp});
 			}
 

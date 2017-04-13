@@ -8,18 +8,22 @@
 #include "base_wnd.h"
 #include <CommCtrl.h>
 
+/**
+ * base_wnd <-- base_wheel
+ */
+
 namespace wl {
 
 class window_main;
 
 namespace base {
 
-	class dialog;
+	class dialog;	
 
 	class wheel : virtual public wnd {
 	protected:
-		friend window_main;
 		friend dialog;
+		friend window_main;
 
 		wheel() = default;
 	private:

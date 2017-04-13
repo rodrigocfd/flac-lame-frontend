@@ -23,16 +23,15 @@ namespace wl {
 // Inherit from this class to have a dialog to be used as a control within a parent window.
 class dialog_control :
 	public base::dialog,
-	public base::user_control
+	public base::user_control<TRUE>
 {
 protected:
 	base::dialog::setup_vars setup;
 
-	dialog_control(size_t msgsReserve = 0) :
-		dialog(msgsReserve), user_control(TRUE) { }
+	explicit dialog_control(size_t msgsReserve = 0) : dialog(msgsReserve) { }
 
 public:
-	bool create(const base::wnd* parent, int controlId, POINT position, SIZE size) {
+	bool create(HWND hParent, int controlId, POINT position, SIZE size) {
 		// Dialog styles to be set on the resource editor:
 		// - Border: none
 		// - Control: true
@@ -43,8 +42,8 @@ public:
 		if (!this->dialog::_basic_initial_checks(this->setup)) return false;
 
 		if (!CreateDialogParamW(
-			reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(parent->hwnd(), GWLP_HINSTANCE)),
-			MAKEINTRESOURCE(setup.dialogId), parent->hwnd(), base::dialog::_dialog_proc,
+			reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(hParent, GWLP_HINSTANCE)),
+			MAKEINTRESOURCEW(setup.dialogId), hParent, base::dialog::_dialog_proc,
 			reinterpret_cast<LPARAM>(this) ))
 		{
 			OutputDebugStringW(L"ERROR: control dialog not created, CreateDialogParam failed.\n");
@@ -57,6 +56,10 @@ public:
 			position.x, position.y,
 			size.cx, size.cy, SWP_NOZORDER);
 		return true;
+	}
+
+	bool create(const base::wnd* parent, int controlId, POINT position, SIZE size) {
+		return this->create(parent->hwnd(), controlId, position, size);
 	}
 
 private:

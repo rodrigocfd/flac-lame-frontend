@@ -21,7 +21,7 @@ private:
 	base::inventory<BYTE> _kuInventory;
 
 protected:
-	msg_keyup(size_t msgsReserve = 0) : _kuInventory(msgsReserve) {
+	explicit msg_keyup(size_t msgsReserve = 0) : _kuInventory(msgsReserve) {
 		this->on_message(WM_KEYUP, [&](params& p)->LONG_PTR {
 			funcT* pFunc = this->_kuInventory.find(static_cast<BYTE>(p.wParam));
 			return pFunc ? (*pFunc)(p) : this->default_proc(p);

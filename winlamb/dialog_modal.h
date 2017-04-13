@@ -28,7 +28,7 @@ class dialog_modal :
 protected:
 	base::dialog::setup_vars setup;
 
-	dialog_modal(size_t msgsReserve = 0) : dialog(msgsReserve + 1) {
+	explicit dialog_modal(size_t msgsReserve = 0) : dialog(msgsReserve + 1) {
 		this->on_message(WM_CLOSE, [&](const params&)->INT_PTR {
 			EndDialog(this->hwnd(), IDOK);
 			return TRUE;
@@ -36,12 +36,16 @@ protected:
 	}
 
 public:
-	int show(const base::wnd* parent) {
+	int show(HWND hParent) {
 		if (!this->dialog::_basic_initial_checks(this->setup)) return -1;
 		return static_cast<int>(DialogBoxParamW(
-			reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(parent->hwnd(), GWLP_HINSTANCE)),
-			MAKEINTRESOURCE(this->setup.dialogId), parent->hwnd(), base::dialog::_dialog_proc,
+			reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(hParent, GWLP_HINSTANCE)),
+			MAKEINTRESOURCEW(this->setup.dialogId), hParent, base::dialog::_dialog_proc,
 			reinterpret_cast<LPARAM>(this)) );
+	}
+
+	int show(const base::wnd* parent) {
+		return this->show(parent->hwnd());
 	}
 
 protected:

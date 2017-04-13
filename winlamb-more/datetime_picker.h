@@ -1,38 +1,24 @@
 /**
- * Part of WinLamb - Win32 API Lambda Library
+ * Part of WinLamb - Win32 API Lambda Library - More
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/winlamb
+ * @see https://github.com/rodrigocfd/winlamb-more
  */
 
 #pragma once
-#include "base_native_control.h"
+#include "../winlamb/native_control.h"
 #include "base_styles.h"
-#include "params.h"
 #include "datetime.h"
+#include <CommCtrl.h>
 
 /**
- * base_wnd <-- base_native_control <-- datetime_picker
+ * base_wnd <-- native_control <-- datetime_picker
  */
 
 namespace wl {
 
 // Wrapper to datetime picker control from Common Controls library.
-class datetime_picker final : public base::native_control {
+class datetime_picker final : public native_control {
 public:
-	struct notif final {
-		NFYDEC(closeup, NMHDR)
-		NFYDEC(datetimechange, NMDATETIMECHANGE)
-		NFYDEC(dropdown, NMHDR)
-		NFYDEC(format, NMDATETIMEFORMAT)
-		NFYDEC(formatquery, NMDATETIMEFORMATQUERY)
-		NFYDEC(userstring, NMDATETIMESTRING)
-		NFYDEC(wmkeydown, NMDATETIMEWMKEYDOWN)
-		NFYDEC(killfocus, NMHDR)
-		NFYDEC(setfocus, NMHDR)
-	protected:
-		notif() = default;
-	};
-
 	class styler final : public base::styles<datetime_picker> {
 	public:
 		explicit styler(datetime_picker* pDtp) : styles(pDtp) { }
@@ -46,15 +32,23 @@ public:
 
 	datetime_picker() : style(this) { }
 
+	datetime_picker& assign(HWND hParent, int controlId) {
+		this->native_control::assign(hParent, controlId);
+		return *this;
+	}
+
 	datetime_picker& assign(const base::wnd* parent, int controlId) {
-		this->native_control::assign(parent, controlId);
+		return this->assign(parent->hwnd(), controlId);
+	}
+
+	datetime_picker& create(HWND hParent, int controlId, POINT pos, LONG width) {
+		this->native_control::create(hParent, controlId,
+			nullptr, pos, {width,21}, DATETIMEPICK_CLASS);
 		return *this;
 	}
 
 	datetime_picker& create(const base::wnd* parent, int controlId, POINT pos, LONG width) {
-		this->native_control::create(parent, controlId,
-			nullptr, pos, {width,21}, DATETIMEPICK_CLASS);
-		return *this;
+		return this->create(parent->hwnd(), controlId, pos, width);
 	}
 
 	datetime_picker& focus() {

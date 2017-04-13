@@ -41,12 +41,7 @@ public:
 protected:
 	setup_vars setup;
 
-	window_main(size_t msgsReserve = 0) : window(msgsReserve + 1) {
-		this->on_message(WM_NCDESTROY, [](const params&)->LRESULT {
-			PostQuitMessage(0);
-			return 0;
-		});
-
+	explicit window_main(size_t msgsReserve = 0) : window(msgsReserve + 1) {
 		this->setup.wndClassEx.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
 		this->setup.wndClassEx.style = CS_DBLCLKS;
 		this->setup.position = { CW_USEDEFAULT, CW_USEDEFAULT };
@@ -58,6 +53,11 @@ protected:
 		// WS_MAXIMIZEBOX adds maximize button
 		// WS_MINIMIZEBOX adds minimize button
 		// WS_EX_ACCEPTFILES accepts dropped files (extended style, add on exStyle)
+
+		this->on_message(WM_NCDESTROY, [](const params&)->LRESULT {
+			PostQuitMessage(0);
+			return 0;
+		});
 	}
 
 public:

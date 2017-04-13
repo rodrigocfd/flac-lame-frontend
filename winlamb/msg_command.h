@@ -21,7 +21,7 @@ private:
 	base::inventory<WORD> _cmdInventory;
 
 protected:
-	msg_command(size_t msgsReserve = 0) : _cmdInventory(msgsReserve) {
+	explicit msg_command(size_t msgsReserve = 0) : _cmdInventory(msgsReserve) {
 		this->on_message(WM_COMMAND, [&](params& p)->LONG_PTR {
 			funcT* pFunc = this->_cmdInventory.find(LOWORD(p.wParam));
 			return pFunc ? (*pFunc)(p) : this->default_proc(p);

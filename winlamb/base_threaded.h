@@ -14,28 +14,28 @@
 namespace wl {
 namespace base {
 
+	template<LONG_PTR processed_valT>
 	class threaded : virtual public msgs {
 	public:
-		using threadT = std::function<void()>;
+		using thread_funcT = std::function<void()>;
 	private:
 		struct _callback_pack final {
-			threadT func;
+			thread_funcT func;
 		};
 
 		static const UINT WM_THREAD_MESSAGE = WM_APP + 0x3FFF;
-		LONG_PTR _processedVal;
 
 	protected:
-		threaded(LONG_PTR processedVal, size_t msgsReserve) : _processedVal(processedVal) {
+		explicit threaded(size_t msgsReserve) {
 			this->msgs::_msgInventory.reserve(msgsReserve + 1);
 
 			this->on_message(WM_THREAD_MESSAGE, [&](const params& p)->LONG_PTR {
 				this->_process_threaded(p);
-				return this->_processedVal;
+				return processed_valT;
 			});
 		}
 
-		void ui_thread(threadT func) const {
+		void ui_thread(thread_funcT func) const {
 			// This method is analog to SendMessage (synchronous), but intended to be called from another
 			// thread, so a callback function can, tunelled by wndproc, run in the original thread of the
 			// window, thus allowing GUI updates. This avoids the user to deal with a custom WM_ message.

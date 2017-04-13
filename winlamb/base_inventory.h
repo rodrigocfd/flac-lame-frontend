@@ -6,6 +6,7 @@
 
 #pragma once
 #include <functional>
+#include <vector>
 #include "params.h"
 
 namespace wl {

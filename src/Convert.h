@@ -1,7 +1,6 @@
 
 #pragma once
-#include <string>
-#include "../winlamb/file_ini.h"
+#include "../winlamb-more/file_ini.h"
 
 struct Convert final {
 protected:

@@ -1,7 +1,7 @@
 /**
- * Part of WinLamb - Win32 API Lambda Library
+ * Part of WinLamb - Win32 API Lambda Library - More
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/winlamb
+ * @see https://github.com/rodrigocfd/winlamb-more
  */
 
 #pragma once
@@ -42,7 +42,7 @@ public:
 	menu& load_resource(int resourceId, HINSTANCE hInst = nullptr) {
 		this->destroy();
 		if (!hInst) hInst = GetModuleHandleW(nullptr);
-		this->_hMenu = LoadMenuW(hInst, MAKEINTRESOURCE(resourceId));
+		this->_hMenu = LoadMenuW(hInst, MAKEINTRESOURCEW(resourceId));
 		return *this;
 	}
 

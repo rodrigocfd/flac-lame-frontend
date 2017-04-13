@@ -21,7 +21,7 @@ private:
 	base::inventory<BYTE> _kdInventory;
 
 protected:
-	msg_keydown(size_t msgsReserve = 0) : _kdInventory(msgsReserve) {
+	explicit msg_keydown(size_t msgsReserve = 0) : _kdInventory(msgsReserve) {
 		this->on_message(WM_KEYDOWN, [&](params& p)->LONG_PTR {
 			funcT* pFunc = this->_kdInventory.find(static_cast<BYTE>(p.wParam));
 			return pFunc ? (*pFunc)(p) : this->default_proc(p);

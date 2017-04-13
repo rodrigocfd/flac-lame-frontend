@@ -1,13 +1,13 @@
 /**
- * Part of WinLamb - Win32 API Lambda Library
+ * Part of WinLamb - Win32 API Lambda Library - More
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/winlamb
+ * @see https://github.com/rodrigocfd/winlamb-more
  */
 
 #pragma once
 #include <string>
 #include <vector>
-#include "base_wnd.h"
+#include "../winlamb/base_wnd.h"
 
 namespace wl {
 
@@ -260,9 +260,12 @@ public:
 	~device_context_simple() {
 		EndPaint(this->device_context::_hWnd, &this->_ps);
 	}
+
+	explicit device_context_simple(HWND hWnd) :
+		device_context(hWnd, BeginPaint(hWnd, &this->_ps)) { }
 	
-	explicit device_context_simple(const base::wnd* wnd) :
-		device_context(wnd, BeginPaint(wnd->hwnd(), &this->_ps)) { }
+	explicit device_context_simple(const base::wnd* wnd)
+		: device_context_simple(wnd->hwnd()) { }
 };
 
 
@@ -282,7 +285,7 @@ public:
 		// ~device_context_simple() kicks in
 	}
 
-	explicit device_context_buffered(const base::wnd* wnd) : device_context_simple(wnd) {
+	explicit device_context_buffered(HWND hWnd) : device_context_simple(hWnd) {
 		// In order to make the double-buffer work, you must
 		// return zero on WM_ERASEBKGND message handling.
 		this->device_context::_hDC = CreateCompatibleDC(this->device_context_simple::_ps.hdc); // overwrite our painting HDC
@@ -295,6 +298,9 @@ public:
 		FillRect(this->device_context::_hDC, &rcClient,
 			reinterpret_cast<HBRUSH>(GetClassLongPtrW(this->device_context::_hWnd, GCLP_HBRBACKGROUND)) );
 	}
+
+	explicit device_context_buffered(const base::wnd* wnd)
+		: device_context_buffered(wnd->hwnd()) { }
 };
 
 }//namespace wl

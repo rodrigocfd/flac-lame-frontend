@@ -1,25 +1,25 @@
 /**
- * Part of WinLamb - Win32 API Lambda Library
+ * Part of WinLamb - Win32 API Lambda Library - More
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/winlamb
+ * @see https://github.com/rodrigocfd/winlamb-more
  */
 
 #pragma once
-#include "base_native_control.h"
+#include "../winlamb/native_control.h"
+#include "../winlamb/base_text.h"
 #include "base_styles.h"
-#include "base_text.h"
 
 /**
- *             +-- base_native_control <--+
- * base_wnd <--+                          +-- textbox
- *             +------- base_text <-------+
+ *             +-- native_control <--+
+ * base_wnd <--+                     +-- textbox
+ *             +---- base_text <-----+
  */
 
 namespace wl {
 
 // Wrapper to textbox (editbox) control.
 class textbox final :
-	public base::native_control,
+	public native_control,
 	public base::text<textbox>
 {
 public:
@@ -41,21 +41,37 @@ public:
 
 	textbox() : style(this) { }
 
-	textbox& assign(const base::wnd* parent, int controlId) {
-		this->native_control::assign(parent, controlId);
+	textbox& assign(HWND hParent, int controlId) {
+		this->native_control::assign(hParent, controlId);
 		return *this;
 	}
 
+	textbox& assign(const base::wnd* parent, int controlId) {
+		return this->assign(parent->hwnd(), controlId);
+	}
+
+	textbox& create(HWND hParent, int controlId, POINT pos, LONG width) {
+		return this->_raw_create(hParent, controlId, pos, {width,21}, ES_AUTOHSCROLL);
+	}
+
 	textbox& create(const base::wnd* parent, int controlId, POINT pos, LONG width) {
-		return this->_raw_create(parent, controlId, pos, {width,21}, ES_AUTOHSCROLL);
+		return this->create(parent->hwnd(), controlId, pos, width);
+	}
+
+	textbox& create_password(HWND hParent, int id, POINT pos, LONG width) {
+		return this->_raw_create(hParent, id, pos, {width,21}, ES_AUTOHSCROLL | ES_PASSWORD);
 	}
 
 	textbox& create_password(const base::wnd* parent, int id, POINT pos, LONG width) {
-		return this->_raw_create(parent, id, pos, {width,21}, ES_AUTOHSCROLL | ES_PASSWORD);
+		return this->create_password(parent->hwnd(), id, pos, width);
+	}
+
+	textbox& create_multi_line(HWND hParent, int controlId, POINT pos, SIZE size) {
+		return this->_raw_create(hParent, controlId, pos, size, ES_MULTILINE | ES_WANTRETURN);
 	}
 
 	textbox& create_multi_line(const base::wnd* parent, int controlId, POINT pos, SIZE size) {
-		return this->_raw_create(parent, controlId, pos, size, ES_MULTILINE | ES_WANTRETURN);
+		return this->create_multi_line(parent->hwnd(), controlId, pos, size);
 	}
 
 	textbox& focus() {
@@ -95,8 +111,8 @@ public:
 	}
 
 private:
-	textbox& _raw_create(const base::wnd* parent, int controlId, POINT pos, SIZE size, DWORD extraStyles) {
-		this->native_control::create(parent, controlId, nullptr, pos, size,
+	textbox& _raw_create(HWND hParent, int controlId, POINT pos, SIZE size, DWORD extraStyles) {
+		this->native_control::create(hParent, controlId, nullptr, pos, size,
 			L"Edit", WS_CHILD | WS_VISIBLE | extraStyles, WS_EX_CLIENTEDGE);
 		return *this;
 	}

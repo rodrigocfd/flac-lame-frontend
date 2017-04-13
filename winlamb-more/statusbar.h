@@ -1,35 +1,26 @@
 /**
- * Part of WinLamb - Win32 API Lambda Library
+ * Part of WinLamb - Win32 API Lambda Library - More
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/winlamb
+ * @see https://github.com/rodrigocfd/winlamb-more
  */
 
 #pragma once
 #include <vector>
-#include "base_native_control.h"
+#include "../winlamb/native_control.h"
+#include "../winlamb/params.h"
 #include "base_styles.h"
-#include "params.h"
 #include "icon.h"
+#include <CommCtrl.h>
 
 /**
- * base_wnd <-- base_native_control <-- statusbar
+ * base_wnd <-- native_control <-- statusbar
  */
 
 namespace wl {
 
 // Wrapper to status control from Common Controls library.
-class statusbar final : public base::native_control {
+class statusbar final : public native_control {
 public:
-	struct notif final {
-		NFYDEC(simplemodechange, NMHDR)
-		NFYDEC(click, NMMOUSE)
-		NFYDEC(dblclk, NMMOUSE)
-		NFYDEC(rclick, NMMOUSE)
-		NFYDEC(rdblclk, NMMOUSE)
-	protected:
-		notif() = default;
-	};
-	
 	class styler final : public base::styles<statusbar> {
 	public:
 		explicit styler(statusbar* pSb) : styles(pSb) { }
@@ -57,18 +48,22 @@ public:
 
 	statusbar() : style(this) { }
 
-	statusbar& create(const base::wnd* parent) {
+	statusbar& create(HWND hParent) {
 		if (this->hwnd()) {
 			OutputDebugStringW(L"ERROR: statusbar already created.\n");
 		} else {
-			DWORD parentStyle = static_cast<DWORD>(GetWindowLongPtrW(parent->hwnd(), GWL_STYLE));
+			DWORD parentStyle = static_cast<DWORD>(GetWindowLongPtrW(hParent, GWL_STYLE));
 			bool isStretch = (parentStyle & WS_MAXIMIZEBOX) != 0 ||
 				(parentStyle & WS_SIZEBOX) != 0;
 
-			this->native_control::create(parent, 0, nullptr, {0,0}, {0,0}, STATUSCLASSNAME,
+			this->native_control::create(hParent, 0, nullptr, {0,0}, {0,0}, STATUSCLASSNAME,
 				(WS_CHILD | WS_VISIBLE) | (isStretch ? SBARS_SIZEGRIP : 0), 0);
 		}
 		return *this;
+	}
+
+	statusbar& create(const base::wnd* parent) {
+		return this->create(parent->hwnd());
 	}
 
 	void adjust(const params& p) {
@@ -151,7 +146,7 @@ public:
 		return *this;
 	}
 
-	statusbar& set_icon(const wl::icon& ico, size_t iPart) {
+	statusbar& set_icon(const icon& ico, size_t iPart) {
 		return this->set_icon(ico.hicon(), iPart);
 	}
 

@@ -27,7 +27,6 @@ namespace base {
 		friend window_main;
 
 		std::vector<HWND> _modelessChildren;
-
 	protected:
 		loop() = default;
 

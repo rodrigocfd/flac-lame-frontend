@@ -1,11 +1,11 @@
 /**
- * Part of WinLamb - Win32 API Lambda Library
+ * Part of WinLamb - Win32 API Lambda Library - More
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/winlamb
+ * @see https://github.com/rodrigocfd/winlamb-more
  */
 
 #pragma once
-#include "base_wnd.h"
+#include "../winlamb/base_wnd.h"
 #include "com_ptr.h"
 #include <ShObjIdl.h>
 
@@ -28,15 +28,19 @@ public:
 		}
 	}
 
-	progress_taskbar& init(const base::wnd* owner) {
+	progress_taskbar& init(HWND hOwner) {
 		if (!this->_bar.empty()) {
 			OutputDebugStringW(L"ERROR: progress_taskbar already created.\n");
 		} else {
-			this->_hWnd = owner->hwnd();
+			this->_hWnd = hOwner;
 			CoInitialize(nullptr);
 			this->_bar.co_create_instance(CLSID_TaskbarList);
 		}
 		return *this;
+	}
+
+	progress_taskbar& init(const base::wnd* owner) {
+		return this->init(owner->hwnd());
 	}
 
 	progress_taskbar& set_pos(size_t percent, size_t total) {

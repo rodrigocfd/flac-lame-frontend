@@ -2,12 +2,12 @@
 #include "Dlg_Main.h"
 #include "Dlg_Runnin.h"
 #include "Convert.h"
-#include "../winlamb/file.h"
-#include "../winlamb/menu.h"
-#include "../winlamb/path.h"
-#include "../winlamb/str.h"
-#include "../winlamb/sys.h"
-#include "../winlamb/sysdlg.h"
+#include "../winlamb-more/file.h"
+#include "../winlamb-more/menu.h"
+#include "../winlamb-more/path.h"
+#include "../winlamb-more/str.h"
+#include "../winlamb-more/sys.h"
+#include "../winlamb-more/sysdlg.h"
 #include "../res/resource.h"
 using namespace wl;
 using std::vector;
@@ -250,9 +250,9 @@ Dlg_Main::Dlg_Main()
 		return update_counter(0); // all items about to be deleted
 	});
 
-	on_notify(LST_FILES, LVN_KEYDOWN, [&](listview::notif::keydown p)
+	on_notify(LST_FILES, LVN_KEYDOWN, [&](wm::lvn_keydown p)
 	{
-		if (p.hdr().wVKey == VK_DELETE) {
+		if (p.data.wVKey == VK_DELETE) {
 			SendMessage(hwnd(), WM_COMMAND, MAKEWPARAM(MNU_REMSELECTED, 0), 0);
 			return TRUE;
 		}

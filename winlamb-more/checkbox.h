@@ -1,25 +1,25 @@
 /**
- * Part of WinLamb - Win32 API Lambda Library
+ * Part of WinLamb - Win32 API Lambda Library - More
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/winlamb
+ * @see https://github.com/rodrigocfd/winlamb-more
  */
 
 #pragma once
-#include "base_native_control.h"
+#include "../winlamb/native_control.h"
+#include "../winlamb/base_text.h"
 #include "base_styles.h"
-#include "base_text.h"
 
 /**
- *             +-- base_native_control <--+
- * base_wnd <--+                          +-- checkbox
- *             +------- base_text <-------+
+ *             +-- native_control <--+
+ * base_wnd <--+                     +-- checkbox
+ *             +---- base_text <-----+
  */
 
 namespace wl {
 
 // Wrapper to checkbox control.
 class checkbox final :
-	public base::native_control,
+	public native_control,
 	public base::text<checkbox>
 {
 public:
@@ -32,15 +32,27 @@ public:
 
 	checkbox() : style(this) { }
 
-	checkbox& assign(const base::wnd* parent, int controlId) {
-		this->native_control::assign(parent, controlId);
+	checkbox& assign(HWND hParent, int controlId) {
+		this->native_control::assign(hParent, controlId);
 		return *this;
 	}
 
-	checkbox& create(const base::wnd* parent, int controlId, const wchar_t* caption, POINT pos, SIZE size) {
-		this->native_control::create(parent, controlId, caption, pos, size,
+	checkbox& assign(const base::wnd* parent, int controlId) {
+		return this->assign(parent->hwnd(), controlId);
+	}
+
+	checkbox& create(HWND hParent, int controlId,
+		const wchar_t* caption, POINT pos, SIZE size)
+	{
+		this->native_control::create(hParent, controlId, caption, pos, size,
 			L"Button", WS_CHILD | WS_VISIBLE | WS_TABSTOP | BS_AUTOCHECKBOX);
 		return *this;
+	}
+
+	checkbox& create(const base::wnd* parent, int controlId,
+		const wchar_t* caption, POINT pos, SIZE size)
+	{
+		return this->create(parent->hwnd(), controlId, caption, pos, size);
 	}
 
 	checkbox& focus() {

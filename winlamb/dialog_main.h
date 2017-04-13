@@ -40,7 +40,7 @@ public:
 protected:
 	setup_vars setup;
 
-	dialog_main(size_t msgsReserve = 0) : dialog(msgsReserve + 2) {
+	explicit dialog_main(size_t msgsReserve = 0) : dialog(msgsReserve + 2) {
 		this->on_message(WM_CLOSE, [&](const params&)->INT_PTR {
 			DestroyWindow(this->hwnd());
 			return TRUE;
@@ -56,7 +56,7 @@ public:
 		InitCommonControls();
 		if (!this->dialog::_basic_initial_checks(this->setup)) return -1;
 
-		HWND hwndRet = CreateDialogParamW(hInst, MAKEINTRESOURCE(this->setup.dialogId),
+		HWND hwndRet = CreateDialogParamW(hInst, MAKEINTRESOURCEW(this->setup.dialogId),
 			nullptr, base::dialog::_dialog_proc, reinterpret_cast<LPARAM>(this));
 		if (!hwndRet) {
 			OutputDebugStringW(L"ERROR: main dialog not created, CreateDialogParam failed.\n");
@@ -65,7 +65,7 @@ public:
 
 		HACCEL hAccel = nullptr;
 		if (this->setup.accelTableId) {
-			hAccel = LoadAcceleratorsW(hInst, MAKEINTRESOURCE(this->setup.accelTableId));
+			hAccel = LoadAcceleratorsW(hInst, MAKEINTRESOURCEW(this->setup.accelTableId));
 		}
 
 		this->_set_icon(hInst);
@@ -77,12 +77,12 @@ private:
 	void _set_icon(HINSTANCE hInst) const {
 		if (this->setup.iconId) {
 			SendMessageW(this->hwnd(), WM_SETICON, ICON_SMALL,
-				reinterpret_cast<LPARAM>(reinterpret_cast<HICON>(LoadImage(hInst,
-					MAKEINTRESOURCE(this->setup.iconId),
+				reinterpret_cast<LPARAM>(reinterpret_cast<HICON>(LoadImageW(hInst,
+					MAKEINTRESOURCEW(this->setup.iconId),
 					IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR))));
 			SendMessageW(this->hwnd(), WM_SETICON, ICON_BIG,
-				reinterpret_cast<LPARAM>(reinterpret_cast<HICON>(LoadImage(hInst,
-					MAKEINTRESOURCE(this->setup.iconId),
+				reinterpret_cast<LPARAM>(reinterpret_cast<HICON>(LoadImageW(hInst,
+					MAKEINTRESOURCEW(this->setup.iconId),
 					IMAGE_ICON, 32, 32, LR_DEFAULTCOLOR))));
 		}
 	}

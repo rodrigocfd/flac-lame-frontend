@@ -1,23 +1,23 @@
 /**
- * Part of WinLamb - Win32 API Lambda Library
+ * Part of WinLamb - Win32 API Lambda Library - More
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/winlamb
+ * @see https://github.com/rodrigocfd/winlamb-more
  */
 
 #pragma once
-#include "base_native_control.h"
+#include "../winlamb/native_control.h"
 #include "base_styles.h"
 #include "str.h"
 #include <CommCtrl.h>
 
 /**
- * base_wnd <-- base_native_control <-- progressbar
+ * base_wnd <-- native_control <-- progressbar
  */
 
 namespace wl {
 
 // Wrapper to progressbar control from Common Controls library.
-class progressbar final : public base::native_control {
+class progressbar final : public native_control {
 public:
 	class styler : public base::styles<progressbar> {
 	public:
@@ -36,14 +36,22 @@ public:
 
 	progressbar() : style(this) { }
 
+	progressbar& assign(HWND hParent, int controlId) {
+		this->native_control::assign(hParent, controlId);
+		return *this;
+	}
+
 	progressbar& assign(const base::wnd* parent, int controlId) {
-		this->native_control::assign(parent, controlId);
+		return this->assign(parent->hwnd(), controlId);
+	}
+
+	progressbar& create(HWND hParent, int controlId, const wchar_t* caption, POINT pos, SIZE size) {
+		this->native_control::create(hParent, controlId, nullptr, pos, size, PROGRESS_CLASS);
 		return *this;
 	}
 
 	progressbar& create(const base::wnd* parent, int controlId, const wchar_t* caption, POINT pos, SIZE size) {
-		this->native_control::create(parent, controlId, nullptr, pos, size, PROGRESS_CLASS);
-		return *this;
+		return this->create(parent->hwnd(), controlId, caption, pos, size);
 	}
 
 	progressbar& set_range(int minVal, int maxVal) {

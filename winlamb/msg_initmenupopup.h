@@ -21,7 +21,7 @@ private:
 	base::inventory<WORD> _impInventory;
 
 protected:
-	msg_initmenupopup(size_t msgsReserve = 0) : _impInventory(msgsReserve) {
+	explicit msg_initmenupopup(size_t msgsReserve = 0) : _impInventory(msgsReserve) {
 		this->on_message(WM_INITMENUPOPUP, [&](params& p)->LONG_PTR {
 			funcT* pFunc = this->_impInventory.find(
 				GetMenuItemID(reinterpret_cast<HMENU>(p.wParam), 0)); // ID of first menu item

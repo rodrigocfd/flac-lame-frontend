@@ -6,6 +6,7 @@
 
 #pragma once
 #include "base_threaded.h"
+#include <Commctrl.h>
 
 /**
  *             +---------------- msgs_[any] <-----------------+
@@ -15,15 +16,18 @@
 
 namespace wl {
 
-// Manages window subclassing in a window.
-class subclass final : public base::threaded {
+// Manages window subclassing for a window.
+class subclass : public base::threaded<0L> {
 private:
+	// To have a custom subclass which also handles WM_COMMAND:
+	// class custom_subclass_cmd : public subclass, public msg_command { };
+
 	UINT _subclassId;
 public:
 	~subclass() { this->remove_subclass(); }
 
-	explicit subclass(size_t msgsReserve = 0) : threaded(0L, msgsReserve) {
-		this->msgs::_defProc = [&](const params& p)->LRESULT { // overwrite default procedure
+	explicit subclass(size_t msgsReserve = 0) : threaded(msgsReserve) {
+		this->msgs::_defProc = [&](const params& p)->LRESULT { // set default procedure
 			return DefSubclassProc(this->hwnd(), p.message, p.wParam, p.lParam);
 		};
 	}
@@ -45,13 +49,17 @@ public:
 		}
 	}
 
+	LRESULT default_proc(params& p) {
+		return this->msgs::_defProc(p);
+	}
+
 private:
 	static LRESULT CALLBACK _proc(HWND hWnd, UINT msg, WPARAM wp, LPARAM lp,
 		UINT_PTR idSubclass, DWORD_PTR refData)
 	{
 		subclass* pSelf = reinterpret_cast<subclass*>(refData);
 		if (pSelf && pSelf->hwnd()) {
-			funcT* pFunc = pSelf->_msgInventory.find(msg);
+			funcT* pFunc = pSelf->msgs::_msgInventory.find(msg);
 			if (pFunc) {
 				LRESULT ret = (*pFunc)(params{msg, wp, lp});
 				if (msg == WM_NCDESTROY) {

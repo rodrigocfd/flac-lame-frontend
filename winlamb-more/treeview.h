@@ -1,55 +1,24 @@
 /**
- * Part of WinLamb - Win32 API Lambda Library
+ * Part of WinLamb - Win32 API Lambda Library - More
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/winlamb
+ * @see https://github.com/rodrigocfd/winlamb-more
  */
 
 #pragma once
-#include "base_native_control.h"
+#include "../winlamb/native_control.h"
+#include "../winlamb/subclass.h"
 #include "base_styles.h"
-#include "subclass.h"
 #include "image_list.h"
 
 /**
- * base_wnd <-- base_native_control <-- treeview
+ * base_wnd <-- native_control <-- treeview
  */
 
 namespace wl {
 
 // Wrapper to treeview control from Common Controls library.
-class treeview final : public base::native_control {
+class treeview final : public native_control {
 public:
-	struct notif final {
-		NFYDEC(asyncdraw, NMTVASYNCDRAW)
-		NFYDEC(begindrag, NMTREEVIEW)
-		NFYDEC(beginlabeledit, NMTVDISPINFO)
-		NFYDEC(beginrdrag, NMTREEVIEW)
-		NFYDEC(deleteitem, NMTREEVIEW)
-		NFYDEC(endlabeledit, NMTVDISPINFO)
-		NFYDEC(getdispinfo, NMTVDISPINFO)
-		NFYDEC(getinfotip, NMTVGETINFOTIP)
-		NFYDEC(itemchanged, NMTVITEMCHANGE)
-		NFYDEC(itemchanging, NMTVITEMCHANGE)
-		NFYDEC(itemexpanded, NMTREEVIEW)
-		NFYDEC(itemexpanding, NMTREEVIEW)
-		NFYDEC(keydown, NMTVKEYDOWN)
-		NFYDEC(selchanged, NMTREEVIEW)
-		NFYDEC(selchanging, NMTREEVIEW)
-		NFYDEC(setdispinfo, NMTVDISPINFO)
-		NFYDEC(singleexpand, NMTREEVIEW)
-		NFYDEC(click, NMHDR)
-		NFYDEC(customdraw, NMTVCUSTOMDRAW)
-		NFYDEC(dblclk, NMHDR)
-		NFYDEC(killfocus, NMHDR)
-		NFYDEC(rclick, NMHDR)
-		NFYDEC(rdblclk, NMHDR)
-		NFYDEC(return_, NMHDR)
-		NFYDEC(setcursor, NMMOUSE)
-		NFYDEC(setfocus, NMHDR)
-	protected:
-		notif() = default;
-	};
-
 	class item final {
 	private:
 		HTREEITEM _hTreeItem;
@@ -239,16 +208,24 @@ public:
 
 	treeview() : items(this), style(this) { }
 
+	treeview& assign(HWND hParent, int controlId) {
+		this->native_control::assign(hParent, controlId);
+		return *this;
+	}
+
 	treeview& assign(const base::wnd* parent, int controlId) {
-		this->native_control::assign(parent, controlId);
+		return this->assign(parent->hwnd(), controlId);
+	}
+
+	treeview& create(HWND hParent, int controlId, POINT pos, SIZE size) {
+		this->native_control::create(hParent, controlId, nullptr, pos, size, WC_TREEVIEW,
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP,
+			WS_EX_CLIENTEDGE); // for children, WS_BORDER gives old, flat drawing; always use WS_EX_CLIENTEDGE
 		return *this;
 	}
 
 	treeview& create(const base::wnd* parent, int controlId, POINT pos, SIZE size) {
-		this->native_control::create(parent, controlId, nullptr, pos, size, WC_TREEVIEW,
-			WS_CHILD | WS_VISIBLE | WS_TABSTOP,
-			WS_EX_CLIENTEDGE); // for children, WS_BORDER gives old, flat drawing; always use WS_EX_CLIENTEDGE
-		return *this;
+		return this->create(parent->hwnd(), controlId, pos, size);
 	}
 
 	treeview& focus() {

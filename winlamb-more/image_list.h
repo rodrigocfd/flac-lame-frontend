@@ -1,7 +1,7 @@
 /**
- * Part of WinLamb - Win32 API Lambda Library
+ * Part of WinLamb - Win32 API Lambda Library - More
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/winlamb
+ * @see https://github.com/rodrigocfd/winlamb-more
  */
 
 #pragma once
@@ -11,7 +11,7 @@
 namespace wl {
 
 // Wrapper to image list object from Common Controls library.
-class image_list {
+class image_list final {
 private:
 	HIMAGELIST _hImgList;
 

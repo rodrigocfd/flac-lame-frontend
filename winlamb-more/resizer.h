@@ -1,13 +1,13 @@
 /**
- * Part of WinLamb - Win32 API Lambda Library
+ * Part of WinLamb - Win32 API Lambda Library - More
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/winlamb
+ * @see https://github.com/rodrigocfd/winlamb-more
  */
 
 #pragma once
 #include <vector>
-#include "base_wnd.h"
-#include "params.h"
+#include "../winlamb/base_wnd.h"
+#include "../winlamb/params.h"
 
 namespace wl {
 
@@ -32,8 +32,20 @@ private:
 	SIZE _szOrig;
 
 public:
+	resizer& add(HWND hCtrl, go modeHorz, go modeVert) {
+		return this->_add_one(hCtrl, modeHorz, modeVert);
+	}
+
 	resizer& add(const base::wnd& ctrl, go modeHorz, go modeVert) {
-		return this->_add_one(ctrl.hwnd(), modeHorz, modeVert);
+		return this->add(ctrl.hwnd(), modeHorz, modeVert);
+	}
+
+	resizer& add(std::initializer_list<HWND> hCtrls, go modeHorz, go modeVert) {
+		this->_ctrls.reserve(this->_ctrls.size() + hCtrls.size());
+		for (const HWND hCtrl : hCtrls) {
+			this->_add_one(hCtrl, modeHorz, modeVert);
+		}
+		return *this;
 	}
 
 	resizer& add(std::initializer_list<const base::wnd*> ctrls, go modeHorz, go modeVert) {
@@ -44,8 +56,20 @@ public:
 		return *this;
 	}
 
+	resizer& add(HWND hParent, int controlId, go modeHorz, go modeVert) {
+		return this->add(GetDlgItem(hParent, controlId), modeHorz, modeVert);
+	}
+
 	resizer& add(const base::wnd* parent, int controlId, go modeHorz, go modeVert) {
-		return this->_add_one(GetDlgItem(parent->hwnd(), controlId), modeHorz, modeVert);
+		return this->add(parent->hwnd(), controlId, modeHorz, modeVert);
+	}
+
+	resizer& add(HWND hParent, std::initializer_list<int> controlIds, go modeHorz, go modeVert) {
+		this->_ctrls.reserve(this->_ctrls.size() + controlIds.size());
+		for (int ctrlId : controlIds) {
+			this->_add_one(GetDlgItem(hParent, ctrlId), modeHorz, modeVert);
+		}
+		return *this;
 	}
 
 	resizer& add(const base::wnd* parent, std::initializer_list<int> controlIds, go modeHorz, go modeVert) {

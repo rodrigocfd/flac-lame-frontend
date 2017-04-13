@@ -5,10 +5,7 @@
  */
 
 #pragma once
-#include <string>
-#include <vector>
 #include <Windows.h>
-#include <CommCtrl.h>
 
 namespace wl {
 
@@ -20,25 +17,18 @@ struct params {
 };
 
 
+namespace wm {
+
 #ifndef GET_X_LPARAM
 #define GET_X_LPARAM(lp) ((int)(short)LOWORD(lp)) // from windowsx.h
 #define GET_Y_LPARAM(lp) ((int)(short)HIWORD(lp))
 #endif
 
-#define EMPTYWM(sname) \
+#define WINLAMB_EMPTYWM(sname) \
 	struct sname final : public params { \
 		sname(const params& p) : params(p) { } \
 	}
 
-
-struct wm final {
-	struct command final : public params {
-		command(const params& p) : params(p) { }
-		WORD control_id() const          { return LOWORD(this->wParam); }
-		HWND control_hwnd() const        { return reinterpret_cast<HWND>(this->lParam); }
-		bool is_from_menu() const        { return HIWORD(this->wParam) == 0; }
-		bool is_from_accelerator() const { return HIWORD(this->wParam) == 1; }
-	};
 	struct activate final : public params {
 		activate(const params& p) : params(p) { }
 		bool is_being_activated() const           { return this->wParam != WA_INACTIVE; }
@@ -56,7 +46,7 @@ struct wm final {
 		UINT   szbuffer() const { return static_cast<UINT>(this->wParam); }
 		TCHAR* buffer() const   { return reinterpret_cast<TCHAR*>(this->lParam); }
 	};
-	EMPTYWM(cancelmodel);
+	WINLAMB_EMPTYWM(cancelmodel);
 	struct capturechanged final : public params {
 		capturechanged(const params& p) : params(p) { }
 		HWND window_gaining_mouse() const { return reinterpret_cast<HWND>(this->lParam); }
@@ -83,8 +73,15 @@ struct wm final {
 		WORD current_caret_pos() const { return HIWORD(this->wParam); }
 		HWND hlistbox() const          { return reinterpret_cast<HWND>(this->lParam); }
 	};
-	EMPTYWM(childactivate);
-	EMPTYWM(close);
+	WINLAMB_EMPTYWM(childactivate);
+	WINLAMB_EMPTYWM(close);
+	struct command final : public params {
+		command(const params& p) : params(p) { }
+		WORD control_id() const          { return LOWORD(this->wParam); }
+		HWND control_hwnd() const        { return reinterpret_cast<HWND>(this->lParam); }
+		bool is_from_menu() const        { return HIWORD(this->wParam) == 0; }
+		bool is_from_accelerator() const { return HIWORD(this->wParam) == 1; }
+	};
 	struct compacting final : public params {
 		compacting(const params& p) : params(p) { }
 		UINT cpu_time_ratio() const { return static_cast<UINT>(this->wParam); }
@@ -134,8 +131,8 @@ struct wm final {
 		WORD              control_id() const       { return static_cast<WORD>(this->wParam); }
 		DELETEITEMSTRUCT& deleteitemstruct() const { return *reinterpret_cast<DELETEITEMSTRUCT*>(this->lParam); }
 	};
-	EMPTYWM(destroy);
-	EMPTYWM(destroyclipboard);
+	WINLAMB_EMPTYWM(destroy);
+	WINLAMB_EMPTYWM(destroyclipboard);
 	struct devmodechange final : public params {
 		devmodechange(const params& p) : params(p) { }
 		const TCHAR* device_name() const { return reinterpret_cast<const TCHAR*>(this->lParam); }
@@ -159,7 +156,7 @@ struct wm final {
 		UINT bits_per_pixel() const { return static_cast<UINT>(this->wParam); }
 		SIZE sz() const             { return { LOWORD(this->lParam), HIWORD(this->lParam) }; }
 	};
-	EMPTYWM(drawclipboard);
+	WINLAMB_EMPTYWM(drawclipboard);
 	struct drawitem final : public params {
 		drawitem(const params& p) : params(p) { }
 		WORD            control_id() const     { return static_cast<WORD>(this->wParam); }
@@ -209,7 +206,7 @@ struct wm final {
 		entermenuloop(const params& p) : params(p) { }
 		bool uses_trackpopupmenu() const { return this->wParam != FALSE; }
 	};
-	EMPTYWM(entersizemove);
+	WINLAMB_EMPTYWM(entersizemove);
 	struct erasebkgnd final : public params {
 		erasebkgnd(const params& p) : params(p) { }
 		HDC hdc() const { return reinterpret_cast<HDC>(this->wParam); }
@@ -218,15 +215,15 @@ struct wm final {
 		exitmenuloop(const params& p) : params(p) { }
 		bool is_shortcut_menu() const { return this->wParam != FALSE; }
 	};
-	EMPTYWM(exitsizemove);
-	EMPTYWM(fontchange);
+	WINLAMB_EMPTYWM(exitsizemove);
+	WINLAMB_EMPTYWM(fontchange);
 	struct getdlgcode final : public params {
 		getdlgcode(const params& p) : params(p) { }
 		BYTE vkey_code() const { return static_cast<BYTE>(this->wParam); }
 		MSG& msg() const       { return *reinterpret_cast<MSG*>(this->lParam); }
 	};
-	EMPTYWM(getfont);
-	EMPTYWM(gethotkey);
+	WINLAMB_EMPTYWM(getfont);
+	WINLAMB_EMPTYWM(gethotkey);
 	struct geticon final : public params {
 		geticon(const params& p) : params(p) { }
 		bool is_big() const       { return this->wParam == ICON_BIG; }
@@ -243,7 +240,7 @@ struct wm final {
 		UINT   buffer_size() const { return static_cast<UINT>(this->wParam); }
 		TCHAR* buffer() const      { return reinterpret_cast<TCHAR*>(this->lParam); }
 	};
-	EMPTYWM(gettextlength);
+	WINLAMB_EMPTYWM(gettextlength);
 	struct help final : public params {
 		help(const params& p) : params(p) { }
 		HELPINFO& helpinfo() const { return *reinterpret_cast<HELPINFO*>(this->lParam); }
@@ -395,7 +392,7 @@ struct wm final {
 		short hit_test_code() const { return static_cast<short>(LOWORD(this->lParam)); }
 		WORD  mouse_msg_id() const  { return HIWORD(this->lParam); }
 	};
-	EMPTYWM(mouseleave);
+	WINLAMB_EMPTYWM(mouseleave);
 	struct mousewheel final : public params {
 		mousewheel(const params& p) : params(p) { }
 		short wheel_delta() const    { return GET_WHEEL_DELTA_WPARAM(this->wParam); }
@@ -431,7 +428,7 @@ struct wm final {
 		nccreate(const params& p) : params(p) { }
 		CREATESTRUCT& createstruct() const { return *reinterpret_cast<CREATESTRUCT*>(this->lParam); }
 	};
-	EMPTYWM(ncdestroy);
+	WINLAMB_EMPTYWM(ncdestroy);
 	struct nchittest final : public params {
 		nchittest(const params& p) : params(p) { }
 		POINT pos() const { return { GET_X_LPARAM(this->lParam), GET_Y_LPARAM(this->lParam) }; }
@@ -467,13 +464,17 @@ struct wm final {
 		BYTE         vkey_code() const   { return static_cast<BYTE>(this->wParam); }
 		MDINEXTMENU& mdinextmenu() const { return *reinterpret_cast<MDINEXTMENU*>(this->lParam); }
 	};
+	struct notify final : public params {
+		notify(const params& p) : params(p) { }
+		NMHDR& nmhdr() const { return *reinterpret_cast<NMHDR*>(this->lParam); }
+	};
 	struct notifyformat final : public params {
 		notifyformat(const params& p) : params(p) { }
 		HWND window_from() const           { return reinterpret_cast<HWND>(this->wParam); }
 		bool is_query_from_control() const { return this->lParam == NF_QUERY; }
 		bool is_requery_to_control() const { return this->lParam == NF_REQUERY; }
 	};
-	EMPTYWM(paint);
+	WINLAMB_EMPTYWM(paint);
 	struct paintclipboard final : public params {
 		paintclipboard(const params& p) : params(p) { }
 		HWND               clipboard_viewer() const { return reinterpret_cast<HWND>(this->wParam); }
@@ -514,7 +515,7 @@ struct wm final {
 		HDC  hdc() const   { return reinterpret_cast<HDC>(this->wParam); }
 		UINT flags() const { return static_cast<UINT>(this->lParam); }
 	};
-	EMPTYWM(querydragicon);
+	WINLAMB_EMPTYWM(querydragicon);
 	struct queryendsession final : public params {
 		queryendsession(const params& p) : params(p) { }
 		bool is_system_issue() const    { return (this->lParam & ENDSESSION_CLOSEAPP) != 0; }
@@ -522,8 +523,8 @@ struct wm final {
 		bool is_logoff() const          { return (this->lParam & ENDSESSION_LOGOFF) != 0; }
 		bool is_shutdown() const        { return this->lParam == 0; }
 	};
-	EMPTYWM(querynewpalette);
-	EMPTYWM(queryopen);
+	WINLAMB_EMPTYWM(querynewpalette);
+	WINLAMB_EMPTYWM(queryopen);
 
 #ifdef _RAS_H_ // Ras.h
 	struct rasdialevent final : public params {
@@ -533,7 +534,7 @@ struct wm final {
 	};
 #endif
 
-	EMPTYWM(renderallformats);
+	WINLAMB_EMPTYWM(renderallformats);
 	struct renderformat final : public params {
 		renderformat(const params& p) : params(p) { }
 		WORD clipboard_format() const { return static_cast<WORD>(this->wParam); }
@@ -672,7 +673,7 @@ struct wm final {
 		UINT action_id() const   { return static_cast<UINT>(this->wParam); }
 		long action_data() const { return static_cast<long>(this->lParam); }
 	};
-	EMPTYWM(timechange);
+	WINLAMB_EMPTYWM(timechange);
 	struct timer final : public params {
 		timer(const params& p) : params(p) { }
 		UINT_PTR  timer_id() const { return static_cast<UINT_PTR>(this->wParam); }
@@ -683,7 +684,7 @@ struct wm final {
 		HMENU hmenu() const   { return reinterpret_cast<HMENU>(this->wParam); }
 		WORD  menu_id() const { return HIWORD(this->lParam); }
 	};
-	EMPTYWM(userchanged);
+	WINLAMB_EMPTYWM(userchanged);
 	struct vkeytoitem final : public params {
 		vkeytoitem(const params& p) : params(p) { }
 		BYTE vkey_code() const         { return static_cast<BYTE>(LOWORD(this->wParam)); }
@@ -698,15 +699,6 @@ struct wm final {
 		windowposchanging(const params& p) : params(p) { }
 		WINDOWPOS& windowpos() const { return *reinterpret_cast<WINDOWPOS*>(this->lParam); }
 	};
-protected:
-	wm() = default;
-};
 
-
-#define NFYDEC(fname, sname) \
-	struct fname : public params { \
-		fname(const params& p) : params(p) { } \
-		sname& hdr() const { return *reinterpret_cast<sname*>(this->lParam); } \
-	};
-
+}//namespace wm
 }//namespace wl

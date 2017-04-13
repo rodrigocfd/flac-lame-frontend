@@ -1,12 +1,13 @@
 /**
- * Part of WinLamb - Win32 API Lambda Library
+ * Part of WinLamb - Win32 API Lambda Library - More
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/winlamb
+ * @see https://github.com/rodrigocfd/winlamb-more
  */
 
 #pragma once
 #include <utility>
 #include <Windows.h>
+#include <CommCtrl.h>
 #include <commoncontrols.h>
 
 namespace wl {
@@ -47,7 +48,7 @@ public:
 	icon& load_from_resource(int iconId, SIZE resolution, HINSTANCE hInst = nullptr) {
 		this->destroy();
 		this->_hIcon = static_cast<HICON>(LoadImageW(hInst ? hInst : GetModuleHandleW(nullptr),
-			MAKEINTRESOURCE(iconId), IMAGE_ICON,
+			MAKEINTRESOURCEW(iconId), IMAGE_ICON,
 			static_cast<int>(resolution.cx), static_cast<int>(resolution.cy),
 			LR_DEFAULTCOLOR));
 		return *this;

@@ -4,13 +4,13 @@
 #include "../winlamb/msg_command.h"
 #include "../winlamb/msg_notify.h"
 #include "../winlamb/msg_initmenupopup.h"
-#include "../winlamb/checkbox.h"
-#include "../winlamb/combo.h"
-#include "../winlamb/file_ini.h"
-#include "../winlamb/listview.h"
-#include "../winlamb/resizer.h"
-#include "../winlamb/progress_taskbar.h"
-#include "../winlamb/textbox.h"
+#include "../winlamb-more/checkbox.h"
+#include "../winlamb-more/combo.h"
+#include "../winlamb-more/file_ini.h"
+#include "../winlamb-more/listview.h"
+#include "../winlamb-more/resizer.h"
+#include "../winlamb-more/progress_taskbar.h"
+#include "../winlamb-more/textbox.h"
 
 class Dlg_Main final :
 	public    wl::dialog_main,

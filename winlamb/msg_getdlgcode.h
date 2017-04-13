@@ -21,7 +21,7 @@ private:
 	base::inventory<BYTE> _gdcInventory;
 
 protected:
-	msg_getdlgcode(size_t msgsReserve = 0) : _gdcInventory(msgsReserve) {
+	explicit msg_getdlgcode(size_t msgsReserve = 0) : _gdcInventory(msgsReserve) {
 		this->on_message(WM_GETDLGCODE, [&](params& p)->LONG_PTR {
 			funcT* pFunc = this->_gdcInventory.find(static_cast<BYTE>(p.wParam));
 			return pFunc ? (*pFunc)(p) : this->default_proc(p);

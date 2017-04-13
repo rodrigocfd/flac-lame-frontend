@@ -20,25 +20,26 @@ namespace base {
 
 	class dialog;
 	class window;
-	class threaded;
+	template<LONG_PTR processed_valT> class threaded;
 
 	class msgs : virtual public wnd {
 	public:
 		friend subclass;
 		friend dialog;
 		friend window;
-		friend threaded;
-
+		friend threaded<TRUE>;
+		friend threaded<0L>;
+		
 		using funcT = inventory<UINT>::funcT;
 	private:
-		funcT _defProc; // default return procedure, like DefWindowProc
+		funcT _defProc; // default return procedure, like "return DefWindowProc()"
 		inventory<UINT> _msgInventory;
 
 	protected:
 		msgs() = default;
 
 		LONG_PTR default_proc(params& p) {
-			return this->_defProc(p);
+			return this->_defProc(p); // executes the default procedure
 		}
 
 	public:

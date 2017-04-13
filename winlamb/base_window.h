@@ -18,7 +18,7 @@ class window_control;
 
 namespace base {
 
-	class window : public threaded {
+	class window : public threaded<0L> {
 	public:
 		friend window_main;
 		friend window_control;
@@ -41,8 +41,8 @@ namespace base {
 		}
 
 	protected:
-		window(size_t msgsReserve) : threaded(0L, msgsReserve) {
-			this->msgs::_defProc = [&](const params& p)->LRESULT { // overwrite default procedure
+		explicit window(size_t msgsReserve) : threaded(msgsReserve) {
+			this->msgs::_defProc = [&](const params& p)->LRESULT { // set default procedure
 				return DefWindowProcW(this->hwnd(), p.message, p.wParam, p.lParam);
 			};
 		}

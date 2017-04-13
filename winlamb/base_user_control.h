@@ -17,15 +17,13 @@
 namespace wl {
 namespace base {
 
+	template<LONG_PTR processed_valT>
 	class user_control : virtual public msgs {
-	private:
-		LONG_PTR _processedVal;
-
 	protected:
-		user_control(LONG_PTR processedVal) : _processedVal(processedVal) {
+		user_control() {
 			this->on_message(WM_NCPAINT, [&](const params& p)->LONG_PTR {
 				this->_paint_themed_borders(p);
-				return this->_processedVal;
+				return processed_valT;
 			});
 		}
 

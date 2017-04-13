@@ -31,7 +31,7 @@ private:
 protected:
 	base::dialog::setup_vars setup;
 
-	dialog_modeless(size_t msgsReserve = 0) : dialog(msgsReserve + 1) {
+	explicit dialog_modeless(size_t msgsReserve = 0) : dialog(msgsReserve + 2) {
 		this->on_message(WM_CLOSE, [&](const params&)->INT_PTR {
 			DestroyWindow(this->hwnd());
 			return TRUE;
@@ -49,7 +49,7 @@ public:
 		HINSTANCE hInst = reinterpret_cast<HINSTANCE>(
 			GetWindowLongPtrW(parent->hwnd(), GWLP_HINSTANCE));
 
-		if (!CreateDialogParamW(hInst, MAKEINTRESOURCE(this->setup.dialogId),
+		if (!CreateDialogParamW(hInst, MAKEINTRESOURCEW(this->setup.dialogId),
 			parent->hwnd(), base::dialog::_dialog_proc,
 			reinterpret_cast<LPARAM>(this)) )
 		{

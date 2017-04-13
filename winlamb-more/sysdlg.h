@@ -1,12 +1,12 @@
 /**
- * Part of WinLamb - Win32 API Lambda Library
+ * Part of WinLamb - Win32 API Lambda Library - More
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/winlamb
+ * @see https://github.com/rodrigocfd/winlamb-more
  */
 
 #pragma once
 #include <algorithm>
-#include "base_wnd.h"
+#include "../winlamb/base_wnd.h"
 #include "str.h"
 #include <Shlobj.h>
 
@@ -18,11 +18,11 @@ protected:
 	sysdlg() = default;
 
 public:
-	static int msgbox(const base::wnd* parent, std::wstring title,
+	static int msgbox(HWND hParent, std::wstring title,
 		std::wstring text, UINT uType = 0)
 	{
-		if (parent->hwnd()) { // the hook is set to center the message box window on parent
-			_hWndParent.val = parent->hwnd();
+		if (hParent) { // the hook is set to center the message box window on parent
+			_hWndParent.val = hParent;
 			_hHookMsgBox.val = SetWindowsHookExW(WH_CBT, [](int code, WPARAM wp, LPARAM lp)->LRESULT {
 				// http://www.codeguru.com/cpp/w-p/win32/messagebox/print.php/c4541
 				if (code == HCBT_ACTIVATE) {
@@ -34,7 +34,7 @@ public:
 						POINT pos = { 0 };
 						SystemParametersInfoW(SPI_GETWORKAREA, 0, static_cast<PVOID>(&rcScreen), 0); // size of desktop
 
-						// Adjusted x,y coordinates to message box window.
+																									 // Adjusted x,y coordinates to message box window.
 						pos.x = rcParent.left + (rcParent.right - rcParent.left) / 2 - (rcMsgbox.right - rcMsgbox.left) / 2;
 						pos.y = rcParent.top + (rcParent.bottom - rcParent.top) / 2 - (rcMsgbox.bottom - rcMsgbox.top) / 2;
 
@@ -58,10 +58,16 @@ public:
 				return CallNextHookEx(nullptr, code, wp, lp);
 			}, nullptr, GetCurrentThreadId());
 		}
-		return MessageBoxW(parent->hwnd(), text.c_str(), title.c_str(), uType);
+		return MessageBoxW(hParent, text.c_str(), title.c_str(), uType);
 	}
 
-	static bool open_file(const base::wnd* parent, const wchar_t* filterWithPipes,
+	static int msgbox(const base::wnd* parent, std::wstring title,
+		std::wstring text, UINT uType = 0)
+	{
+		return msgbox(parent->hwnd(), title, text, uType);
+	}
+
+	static bool open_file(HWND hParent, const wchar_t* filterWithPipes,
 		std::wstring& buf)
 	{
 		OPENFILENAME         ofn = { 0 };
@@ -69,7 +75,7 @@ public:
 		std::vector<wchar_t> zfilter = _format_file_filter(filterWithPipes);
 
 		ofn.lStructSize = sizeof(ofn);
-		ofn.hwndOwner   = parent->hwnd();
+		ofn.hwndOwner   = hParent;
 		ofn.lpstrFilter = &zfilter[0];
 		ofn.lpstrFile   = tmpBuf;
 		ofn.nMaxFile    = ARRAYSIZE(tmpBuf);
@@ -81,6 +87,12 @@ public:
 	}
 
 	static bool open_file(const base::wnd* parent, const wchar_t* filterWithPipes,
+		std::wstring& buf)
+	{
+		return open_file(parent->hwnd(), filterWithPipes, buf);
+	}
+
+	static bool open_file(HWND hParent, const wchar_t* filterWithPipes,
 		std::vector<std::wstring>& arrBuf)
 	{
 		OPENFILENAME         ofn = { 0 };
@@ -89,7 +101,7 @@ public:
 		arrBuf.clear();
 
 		ofn.lStructSize = sizeof(ofn);
-		ofn.hwndOwner   = parent->hwnd();
+		ofn.hwndOwner   = hParent;
 		ofn.lpstrFilter = &zfilter[0];
 		ofn.lpstrFile   = &multiBuf[0];
 		ofn.nMaxFile    = static_cast<DWORD>(multiBuf.size()); // including terminating null
@@ -128,8 +140,14 @@ public:
 			str::format(L"ERROR: GetOpenFileName failed with error %u.\n", errNo).c_str() );
 		return false;
 	}
+
+	static bool open_file(const base::wnd* parent, const wchar_t* filterWithPipes,
+		std::vector<std::wstring>& arrBuf)
+	{
+		return open_file(parent->hwnd(), filterWithPipes, arrBuf);
+	}
 	
-	static bool save_file(const base::wnd* parent, const wchar_t* filterWithPipes,
+	static bool save_file(HWND hParent, const wchar_t* filterWithPipes,
 		std::wstring& buf, const wchar_t* defFile)
 	{
 		OPENFILENAME         ofn = { 0 };
@@ -139,7 +157,7 @@ public:
 		if (defFile) lstrcpyW(tmpBuf, defFile);
 
 		ofn.lStructSize = sizeof(ofn);
-		ofn.hwndOwner   = parent->hwnd();
+		ofn.hwndOwner   = hParent;
 		ofn.lpstrFilter = &zfilter[0];
 		ofn.lpstrFile   = tmpBuf;
 		ofn.nMaxFile    = ARRAYSIZE(tmpBuf);
@@ -151,13 +169,19 @@ public:
 		return ret;
 	}
 
-	static bool choose_folder(const base::wnd* parent, std::wstring& buf) {
+	static bool save_file(const base::wnd* parent, const wchar_t* filterWithPipes,
+		std::wstring& buf, const wchar_t* defFile)
+	{
+		return save_file(parent->hwnd(), filterWithPipes, buf, defFile);
+	}
+
+	static bool choose_folder(HWND hParent, std::wstring& buf) {
 		CoInitialize(nullptr);
 		//LPITEMIDLIST pidlRoot = 0;
 		//if (defFolder) SHParseDisplayName(defFolder, nullptr, &pidlRoot, 0, nullptr);
 
 		BROWSEINFOW bi = { 0 };
-		bi.hwndOwner = parent->hwnd();
+		bi.hwndOwner = hParent;
 		bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
 
 		PIDLIST_ABSOLUTE pidl = SHBrowseForFolderW(&bi);
@@ -170,6 +194,10 @@ public:
 		CoUninitialize();
 		buf = tmpbuf;
 		return true;
+	}
+
+	static bool choose_folder(const base::wnd* parent, std::wstring& buf) {
+		return choose_folder(parent->hwnd(), buf);
 	}
 
 private:

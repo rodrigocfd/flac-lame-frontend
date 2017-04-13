@@ -1,67 +1,25 @@
 /**
- * Part of WinLamb - Win32 API Lambda Library
+ * Part of WinLamb - Win32 API Lambda Library - More
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/winlamb
+ * @see https://github.com/rodrigocfd/winlamb-more
  */
 
 #pragma once
-#include "base_native_control.h"
+#include "../winlamb/native_control.h"
+#include "../winlamb/subclass.h"
 #include "base_styles.h"
-#include "subclass.h"
 #include "image_list.h"
 #include "menu.h"
 
 /**
- * base_wnd <-- base_native_control <-- listview
+ * base_wnd <-- native_control <-- listview
  */
 
 namespace wl {
 
 // Wrapper to listview control from Common Controls library.
-class listview final : public base::native_control {
+class listview final : public native_control {
 public:
-	struct notif final {
-		NFYDEC(begindrag, NMLISTVIEW)
-		NFYDEC(beginlabeledit, NMLVDISPINFO)
-		NFYDEC(beginrdrag, NMLISTVIEW)
-		NFYDEC(beginscroll, NMLVSCROLL)
-		NFYDEC(columnclick, NMLISTVIEW)
-		NFYDEC(columndropdown, NMLISTVIEW)
-		NFYDEC(columnoverflowclick, NMLISTVIEW)
-		NFYDEC(deleteallitems, NMLISTVIEW)
-		NFYDEC(deleteitem, NMLISTVIEW)
-		NFYDEC(endlabeledit, NMLVDISPINFO)
-		NFYDEC(endscroll, NMLVSCROLL)
-		NFYDEC(getdispinfo, NMLVDISPINFO)
-		NFYDEC(getemptymarkup, NMLVEMPTYMARKUP)
-		NFYDEC(getinfotip, NMLVGETINFOTIP)
-		NFYDEC(hottrack, NMLISTVIEW)
-		NFYDEC(incrementalsearch, NMLVFINDITEM)
-		NFYDEC(insertitem, NMLISTVIEW)
-		NFYDEC(itemactivate, NMITEMACTIVATE)
-		NFYDEC(itemchanged, NMLISTVIEW)
-		NFYDEC(itemchanging, NMLISTVIEW)
-		NFYDEC(keydown, NMLVKEYDOWN)
-		NFYDEC(linkclick, NMLVLINK)
-		NFYDEC(marqueebegin, NMHDR)
-		NFYDEC(odcachehint, NMLVCACHEHINT)
-		NFYDEC(odfinditem, NMLVFINDITEM)
-		NFYDEC(odstatechanged, NMLVODSTATECHANGE)
-		NFYDEC(setdispinfo, NMLVDISPINFO)
-		NFYDEC(click, NMITEMACTIVATE)
-		NFYDEC(customdraw, NMLVCUSTOMDRAW)
-		NFYDEC(dblclk, NMITEMACTIVATE)
-		NFYDEC(hover, NMHDR)
-		NFYDEC(killfocus, NMHDR)
-		NFYDEC(rclick, NMITEMACTIVATE)
-		NFYDEC(rdblclk, NMITEMACTIVATE)
-		NFYDEC(releasedcapture, NMHDR)
-		NFYDEC(return_, NMHDR)
-		NFYDEC(setfocus, NMHDR)
-	protected:
-		notif() = default;
-	};
-
 	class item final {
 	private:
 		listview* _list;
@@ -450,16 +408,24 @@ public:
 		});
 	}
 
+	listview& assign(HWND hParent, int controlId) {
+		this->native_control::assign(hParent, controlId);
+		return this->_install_subclass();
+	}
+
 	listview& assign(const base::wnd* parent, int controlId) {
-		this->native_control::assign(parent, controlId);
+		return this->assign(parent->hwnd(), controlId);
+	}
+
+	listview& create(HWND hParent, int controlId, POINT pos, SIZE size, view viewType = view::DETAILS) {
+		this->native_control::create(hParent, controlId, nullptr, pos, size, WC_LISTVIEW,
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP | static_cast<DWORD>(viewType),
+			WS_EX_CLIENTEDGE); // for children, WS_BORDER gives old, flat drawing; always use WS_EX_CLIENTEDGE
 		return this->_install_subclass();
 	}
 
 	listview& create(const base::wnd* parent, int controlId, POINT pos, SIZE size, view viewType = view::DETAILS) {
-		this->native_control::create(parent, controlId, nullptr, pos, size, WC_LISTVIEW,
-			WS_CHILD | WS_VISIBLE | WS_TABSTOP | static_cast<DWORD>(viewType),
-			WS_EX_CLIENTEDGE); // for children, WS_BORDER gives old, flat drawing; always use WS_EX_CLIENTEDGE
-		return this->_install_subclass();
+		return this->create(parent->hwnd(), controlId, pos, size, viewType);
 	}
 
 	listview& focus() {

@@ -21,14 +21,12 @@ namespace wl {
 // Inherit from this class to have an user-custom window control.
 class window_control :
 	public base::window,
-	public base::user_control
+	public base::user_control<0L>
 {
 protected:
 	base::window::setup_vars setup;
 
-	window_control(size_t msgsReserve = 0) :
-		window(msgsReserve), user_control(0)
-	{
+	explicit window_control(size_t msgsReserve = 0) : window(msgsReserve) {
 		this->setup.wndClassEx.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_WINDOW + 1);
 		this->setup.wndClassEx.style = CS_DBLCLKS;
 		this->setup.style = CS_DBLCLKS | WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
@@ -41,11 +39,15 @@ protected:
 	}
 
 public:
-	bool create(const base::wnd* parent, int controlId, POINT position, SIZE size) {
+	bool create(HWND hParent, int controlId, POINT position, SIZE size) {
 		this->setup.position = position;
 		this->setup.size = size;
 		this->setup.menu = reinterpret_cast<HMENU>(static_cast<INT_PTR>(controlId));
-		return this->window::_register_create(this->setup, parent->hwnd());
+		return this->window::_register_create(this->setup, hParent);
+	}
+
+	bool create(const base::wnd* parent, int controlId, POINT position, SIZE size) {
+		return this->create(parent->hwnd(), controlId, position, size);
 	}
 };
 

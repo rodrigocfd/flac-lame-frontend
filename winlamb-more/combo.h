@@ -1,23 +1,25 @@
 /**
- * Part of WinLamb - Win32 API Lambda Library
+ * Part of WinLamb - Win32 API Lambda Library - More
  * @author Rodrigo Cesar de Freitas Dias
- * @see https://github.com/rodrigocfd/winlamb
+ * @see https://github.com/rodrigocfd/winlamb-more
  */
 
 #pragma once
-#include "base_native_control.h"
+#include "../winlamb/native_control.h"
 #include "base_styles.h"
 #include "str.h"
 
 /**
- * base_wnd <-- base_native_control <-- combo
+ * base_wnd <-- native_control <-- combo
  */
 
 namespace wl {
 
 // Wrapper to combo box (dropdown) control.
-class combo final : public base::native_control {
+class combo final : public native_control {
 public:
+	enum class sort { SORTED, UNSORTED };
+
 	class styler : public base::styles<combo> {
 	public:
 		styler(combo* pCombo) : styles(pCombo) { }
@@ -31,16 +33,25 @@ public:
 
 	combo() : style(this) { }
 
-	combo& assign(const base::wnd* parent, int controlId) {
-		this->native_control::assign(parent, controlId);
+	combo& assign(HWND hParent, int controlId) {
+		this->native_control::assign(hParent, controlId);
 		return *this;
 	}
 
-	combo& create(const base::wnd* parent, int controlId, POINT pos, LONG width, bool sorted) {
-		this->native_control::create(parent, controlId, nullptr,
+	combo& assign(const base::wnd* parent, int controlId) {
+		return this->assign(parent->hwnd(), controlId);
+	}
+
+	combo& create(HWND hParent, int controlId, POINT pos, LONG width, sort sortType) {
+		this->native_control::create(hParent, controlId, nullptr,
 			pos, {width,0}, L"combobox",
-			WS_CHILD | WS_VISIBLE | WS_TABSTOP | CBS_DROPDOWNLIST | (sorted ? CBS_SORT : 0), 0);
+			WS_CHILD | WS_VISIBLE | WS_TABSTOP | CBS_DROPDOWNLIST |
+			(sortType == sort::SORTED ? CBS_SORT : 0), 0);
 		return *this;
+	}
+
+	combo& create(const base::wnd* parent, int controlId, POINT pos, LONG width, sort sortType) {
+		return this->create(parent->hwnd(), controlId, pos, width, sortType);
 	}
 
 	combo& focus() {

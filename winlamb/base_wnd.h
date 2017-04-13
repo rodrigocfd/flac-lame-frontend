@@ -9,21 +9,21 @@
 
 namespace wl {
 
+class native_control;
 class subclass;
 
 namespace base {
 
 	class dialog;
 	class window;
-	class native_control;
 
 	class wnd {
 	private:
 		friend subclass;
+		friend native_control;
 		friend dialog;
 		friend window;
-		friend native_control;
-
+	
 		HWND _hWnd; // can be set only by friends
 	protected:
 		wnd() : _hWnd(nullptr) { }
