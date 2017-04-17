@@ -5,25 +5,24 @@
  */
 
 #pragma once
-#include "base_msgs.h"
+#include "base_inventory.h"
 #include <VsStyle.h>
 #include <Uxtheme.h>
 #pragma comment(lib, "UxTheme.lib")
 
 /**
- * base_wnd <-- base_msgs <-- base_user_control
+ * base_wnd <-- base_inventory <-- base_user_control
  */
 
 namespace wl {
 namespace base {
 
-	template<LONG_PTR processed_valT>
-	class user_control : virtual public msgs {
+	class user_control : virtual public inventory {
 	protected:
 		user_control() {
-			this->on_message(WM_NCPAINT, [&](const params& p)->LONG_PTR {
+			this->on_message(WM_NCPAINT, [&](params& p)->LONG_PTR {
 				this->_paint_themed_borders(p);
-				return processed_valT;
+				return this->inventory::_procHandled(p);
 			});
 		}
 

@@ -9,15 +9,15 @@
 #include <Commctrl.h>
 
 /**
- *             +---------------- msgs_[any] <-----------------+
- * base_wnd <--+                                              +-- [user]
- *             +-- base_msgs <-- base_threaded <-- subclass --+
+ *             +----------- base_msgs <-- msg_[any] <--------------+
+ * base_wnd <--+                                                   +-- [user]
+ *             +-- base_inventory <-- base_threaded <-- subclass --+
  */
 
 namespace wl {
 
 // Manages window subclassing for a window.
-class subclass : public base::threaded<0L> {
+class subclass : public base::threaded {
 private:
 	// To have a custom subclass which also handles WM_COMMAND:
 	// class custom_subclass_cmd : public subclass, public msg_command { };
@@ -27,7 +27,10 @@ public:
 	~subclass() { this->remove_subclass(); }
 
 	explicit subclass(size_t msgsReserve = 0) : threaded(msgsReserve) {
-		this->msgs::_defProc = [&](const params& p)->LRESULT { // set default procedure
+		this->inventory::_procHandled = [](const params&)->LRESULT {
+			return 0;
+		};
+		this->inventory::_procUnhandled = [&](const params& p)->LRESULT {
 			return DefSubclassProc(this->hwnd(), p.message, p.wParam, p.lParam);
 		};
 	}
@@ -35,22 +38,18 @@ public:
 	void remove_subclass() {
 		if (this->hwnd()) {
 			RemoveWindowSubclass(this->hwnd(), _proc, this->_subclassId);
-			this->wnd::_hWnd = nullptr;
+			this->wnd::_hWnd = nullptr; // clear HWND
 		}
 	}
 
 	void install_subclass(HWND hWnd) {
 		this->remove_subclass();
-		this->wnd::_hWnd = hWnd;
+		this->wnd::_hWnd = hWnd; // store HWND
 		if (hWnd) {
 			this->_subclassId = _next_id();
 			SetWindowSubclass(this->hwnd(), _proc, this->_subclassId,
 				reinterpret_cast<DWORD_PTR>(this));
 		}
-	}
-
-	LRESULT default_proc(params& p) {
-		return this->msgs::_defProc(p);
 	}
 
 private:
@@ -59,9 +58,9 @@ private:
 	{
 		subclass* pSelf = reinterpret_cast<subclass*>(refData);
 		if (pSelf && pSelf->hwnd()) {
-			funcT* pFunc = pSelf->msgs::_msgInventory.find(msg);
+			inventory::msg_funcT* pFunc = pSelf->inventory::_msgDepot.find(msg);
 			if (pFunc) {
-				LRESULT ret = (*pFunc)(params{msg, wp, lp});
+				LRESULT ret = (*pFunc)(params{msg, wp, lp}); // call user lambda
 				if (msg == WM_NCDESTROY) {
 					pSelf->remove_subclass();
 				}

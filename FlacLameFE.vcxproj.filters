@@ -29,9 +29,6 @@
     <ClInclude Include="src\Dlg_Main.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\base_run.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
     <ClInclude Include="winlamb\base_text.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
@@ -68,18 +65,6 @@
     <ClInclude Include="winlamb\msg_command.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\msg_getdlgcode.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\msg_initmenupopup.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\msg_keydown.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\msg_keyup.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
     <ClInclude Include="winlamb\msg_notify.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
@@ -98,6 +83,9 @@
     <ClInclude Include="winlamb\window_main.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
+    <ClInclude Include="winlamb\base_depot.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
     <ClInclude Include="winlamb\base_dialog.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
@@ -110,6 +98,21 @@
     <ClInclude Include="winlamb\base_msgs.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
+    <ClInclude Include="winlamb\base_run.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb-more\file.h">
+      <Filter>WinLamb More</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb-more\file_ini.h">
+      <Filter>WinLamb More</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb-more\file_mapped.h">
+      <Filter>WinLamb More</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb-more\icon.h">
+      <Filter>WinLamb More</Filter>
+    </ClInclude>
     <ClInclude Include="winlamb-more\image_list.h">
       <Filter>WinLamb More</Filter>
     </ClInclude>
@@ -120,6 +123,18 @@
       <Filter>WinLamb More</Filter>
     </ClInclude>
     <ClInclude Include="winlamb-more\menu.h">
+      <Filter>WinLamb More</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb-more\msg_getdlgcode.h">
+      <Filter>WinLamb More</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb-more\msg_initmenupopup.h">
+      <Filter>WinLamb More</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb-more\msg_keydown.h">
+      <Filter>WinLamb More</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb-more\msg_keyup.h">
       <Filter>WinLamb More</Filter>
     </ClInclude>
     <ClInclude Include="winlamb-more\path.h">
@@ -183,18 +198,6 @@
       <Filter>WinLamb More</Filter>
     </ClInclude>
     <ClInclude Include="winlamb-more\download.h">
-      <Filter>WinLamb More</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb-more\file.h">
-      <Filter>WinLamb More</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb-more\file_ini.h">
-      <Filter>WinLamb More</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb-more\file_mapped.h">
-      <Filter>WinLamb More</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb-more\icon.h">
       <Filter>WinLamb More</Filter>
     </ClInclude>
   </ItemGroup>

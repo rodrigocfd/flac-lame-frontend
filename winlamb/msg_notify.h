@@ -8,41 +8,41 @@
 #include "base_msgs.h"
 
 /**
- * base_wnd <-- base_msgs <-- msg_command
+ * base_wnd <-- base_inventory <-- base_msgs <-- msg_notify
  */
 
 namespace wl {
 
 // Adds on_notify() method to handle WM_NOTIFY messages.
-class msg_notify : virtual public base::msgs {
+class msg_notify : private base::msgs {
 public:
 	using idT = std::pair<UINT_PTR, UINT>;
-	using funcT = base::inventory<idT>::funcT;
+	using notify_funcT = base::depot<idT>::funcT;
 private:
-	base::inventory<idT> _nfyInventory;
+	base::depot<idT> _nfyDepot;
 
 protected:
-	explicit msg_notify(size_t msgsReserve = 0) : _nfyInventory(msgsReserve) {
+	explicit msg_notify(size_t msgsReserve = 0) : _nfyDepot(msgsReserve) {
 		this->on_message(WM_NOTIFY, [&](params& p)->LONG_PTR {
-			funcT* pFunc = this->_nfyInventory.find({
+			notify_funcT* pFunc = this->_nfyDepot.find({
 				reinterpret_cast<NMHDR*>(p.lParam)->idFrom,
 				reinterpret_cast<NMHDR*>(p.lParam)->code
 			});
-			return pFunc ? (*pFunc)(p) : this->default_proc(p);
+			return pFunc ? (*pFunc)(p) : this->msgs::_proc_unhandled(p);
 		});
 	}
 
 public:
-	void on_notify(idT idFromAndCode, funcT func) {
-		this->_nfyInventory.add(idFromAndCode, std::move(func));
+	void on_notify(idT idFromAndCode, notify_funcT func) {
+		this->_nfyDepot.add(idFromAndCode, std::move(func));
 	}
 
-	void on_notify(UINT_PTR idFrom, UINT code, funcT func) {
-		this->_nfyInventory.add({idFrom, code}, std::move(func));
+	void on_notify(UINT_PTR idFrom, UINT code, notify_funcT func) {
+		this->_nfyDepot.add({idFrom, code}, std::move(func));
 	}
 
-	void on_notify(std::initializer_list<idT> idFromAndCodes, funcT func) {
-		this->_nfyInventory.add(idFromAndCodes, std::move(func));
+	void on_notify(std::initializer_list<idT> idFromAndCodes, notify_funcT func) {
+		this->_nfyDepot.add(idFromAndCodes, std::move(func));
 	}
 };
 

@@ -173,6 +173,10 @@
     <ClInclude Include="winlamb-more\label.h" />
     <ClInclude Include="winlamb-more\listview.h" />
     <ClInclude Include="winlamb-more\menu.h" />
+    <ClInclude Include="winlamb-more\msg_getdlgcode.h" />
+    <ClInclude Include="winlamb-more\msg_initmenupopup.h" />
+    <ClInclude Include="winlamb-more\msg_keydown.h" />
+    <ClInclude Include="winlamb-more\msg_keyup.h" />
     <ClInclude Include="winlamb-more\path.h" />
     <ClInclude Include="winlamb-more\progressbar.h" />
     <ClInclude Include="winlamb-more\progress_taskbar.h" />
@@ -185,6 +189,7 @@
     <ClInclude Include="winlamb-more\treeview.h" />
     <ClInclude Include="winlamb-more\xml.h" />
     <ClInclude Include="winlamb-more\zip.h" />
+    <ClInclude Include="winlamb\base_depot.h" />
     <ClInclude Include="winlamb\base_dialog.h" />
     <ClInclude Include="winlamb\base_inventory.h" />
     <ClInclude Include="winlamb\base_loop.h" />
@@ -202,10 +207,6 @@
     <ClInclude Include="winlamb\dialog_modeless.h" />
     <ClInclude Include="winlamb\font.h" />
     <ClInclude Include="winlamb\msg_command.h" />
-    <ClInclude Include="winlamb\msg_getdlgcode.h" />
-    <ClInclude Include="winlamb\msg_initmenupopup.h" />
-    <ClInclude Include="winlamb\msg_keydown.h" />
-    <ClInclude Include="winlamb\msg_keyup.h" />
     <ClInclude Include="winlamb\msg_notify.h" />
     <ClInclude Include="winlamb\native_control.h" />
     <ClInclude Include="winlamb\params.h" />

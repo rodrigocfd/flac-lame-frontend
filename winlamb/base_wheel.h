@@ -18,7 +18,7 @@ class window_main;
 
 namespace base {
 
-	class dialog;	
+	class dialog;
 
 	class wheel : virtual public wnd {
 	protected:

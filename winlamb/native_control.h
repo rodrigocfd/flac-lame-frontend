@@ -16,9 +16,13 @@ namespace wl {
 // Generic class to any native Windows control.
 class native_control : virtual public base::wnd {
 public:
-	bool assign(HWND hParent, int controlId) {
-		this->wnd::_hWnd = GetDlgItem(hParent, controlId);
+	bool assign(HWND hCtrl) {
+		this->wnd::_hWnd = hCtrl;
 		return this->hwnd() != nullptr;
+	}
+
+	bool assign(HWND hParent, int controlId) {
+		return this->assign(GetDlgItem(hParent, controlId));
 	}
 
 	bool assign(const base::wnd* parent, int controlId) {

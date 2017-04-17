@@ -9,11 +9,11 @@
 #include "base_user_control.h"
 
 /**
- *                           +---------------------- msgs_[any] <-----------------------+
- *                           |                                                          +-- [user]
- * base_wnd <-- base_msgs <--+-- base_threaded <-- base_window <--+                     |
- *                           |                                    +-- window_control <--+
- *                           +------- base_user_control <---------+
+ *                                +--------------- base_msgs <-- msg_[any] <-----------------+
+ *                                |                                                          +-- [user]
+ * base_wnd <-- base_inventory <--+-- base_threaded <-- base_window <--+                     |
+ *                                |                                    +-- window_control <--+
+ *                                +------- base_user_control <---------+
  */
 
 namespace wl {
@@ -21,7 +21,7 @@ namespace wl {
 // Inherit from this class to have an user-custom window control.
 class window_control :
 	public base::window,
-	public base::user_control<0L>
+	public base::user_control
 {
 protected:
 	base::window::setup_vars setup;

@@ -3,7 +3,7 @@
 #include "../winlamb/dialog_main.h"
 #include "../winlamb/msg_command.h"
 #include "../winlamb/msg_notify.h"
-#include "../winlamb/msg_initmenupopup.h"
+#include "../winlamb-more/msg_initmenupopup.h"
 #include "../winlamb-more/checkbox.h"
 #include "../winlamb-more/combo.h"
 #include "../winlamb-more/file_ini.h"

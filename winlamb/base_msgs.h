@@ -5,50 +5,25 @@
  */
 
 #pragma once
-#include "base_wnd.h"
 #include "base_inventory.h"
 
 /**
- * base_wnd <-- base_msgs
+ * base_wnd <-- base_inventory <-- base_msgs
  */
 
 namespace wl {
-
-class subclass;
-
 namespace base {
 
-	class dialog;
-	class window;
-	template<LONG_PTR processed_valT> class threaded;
-
-	class msgs : virtual public wnd {
-	public:
-		friend subclass;
-		friend dialog;
-		friend window;
-		friend threaded<TRUE>;
-		friend threaded<0L>;
-		
-		using funcT = inventory<UINT>::funcT;
-	private:
-		funcT _defProc; // default return procedure, like "return DefWindowProc()"
-		inventory<UINT> _msgInventory;
-
+	class msgs : virtual public inventory {
 	protected:
 		msgs() = default;
 
-		LONG_PTR default_proc(params& p) {
-			return this->_defProc(p); // executes the default procedure
+		LONG_PTR _proc_handled(params& p) {
+			return this->inventory::_procHandled(p);
 		}
 
-	public:
-		void on_message(UINT msg, funcT func) {
-			this->_msgInventory.add(msg, std::move(func));
-		}
-
-		void on_message(std::initializer_list<UINT> msgs, funcT func) {
-			this->_msgInventory.add(msgs, std::move(func));
+		LONG_PTR _proc_unhandled(params& p) {
+			return this->inventory::_procUnhandled(p);
 		}
 	};
 

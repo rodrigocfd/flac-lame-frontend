@@ -10,9 +10,9 @@
 #include "font.h"
 
 /**
- *             +-- base_msgs <-- base_threaded <--+
- * base_wnd <--+                                  +-- base_dialog
- *             +---------- base_wheel <-----------+
+ *             +-- base_inventory <-- base_threaded <--+
+ * base_wnd <--+                                       +-- base_dialog
+ *             +------------- base_wheel <-------------+
  */
 
 namespace wl {
@@ -25,7 +25,7 @@ class dialog_control;
 namespace base {
 
 	class dialog :
-		public    threaded<TRUE>,
+		public    threaded,
 		protected wheel
 	{
 	public:
@@ -47,7 +47,10 @@ namespace base {
 
 	protected:
 		explicit dialog(size_t msgsReserve) : threaded(msgsReserve) {
-			this->msgs::_defProc = [](const params&)->INT_PTR { // set default procedure
+			this->inventory::_procHandled = [](const params&)->INT_PTR {
+				return TRUE;
+			};
+			this->inventory::_procUnhandled = [](const params&)->INT_PTR {
 				return FALSE;
 			};
 		}
@@ -79,8 +82,8 @@ namespace base {
 			}
 
 			if (pSelf) {
-				msgs::funcT* pFunc = pSelf->msgs::_msgInventory.find(msg);
-				if (pFunc) ret = (*pFunc)(params{msg, wp, lp});
+				inventory::msg_funcT* pFunc = pSelf->inventory::_msgDepot.find(msg);
+				if (pFunc) ret = (*pFunc)(params{msg, wp, lp}); // call user lambda
 			}
 
 			if (msg == WM_INITDIALOG) {
@@ -88,7 +91,7 @@ namespace base {
 			} else if (msg == WM_NCDESTROY) { // cleanup
 				SetWindowLongPtrW(hDlg, GWLP_USERDATA, 0);
 				if (pSelf) {
-					pSelf->wnd::_hWnd = nullptr;
+					pSelf->wnd::_hWnd = nullptr; // clear HWND
 				}
 			}
 

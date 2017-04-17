@@ -8,7 +8,7 @@
 #include "base_threaded.h"
 
 /**
- * base_wnd <-- base_msgs <-- base_threaded <-- base_window
+ * base_wnd <-- base_inventory <-- base_threaded <-- base_window
  */
 
 namespace wl {
@@ -18,7 +18,7 @@ class window_control;
 
 namespace base {
 
-	class window : public threaded<0L> {
+	class window : public threaded {
 	public:
 		friend window_main;
 		friend window_control;
@@ -42,7 +42,10 @@ namespace base {
 
 	protected:
 		explicit window(size_t msgsReserve) : threaded(msgsReserve) {
-			this->msgs::_defProc = [&](const params& p)->LRESULT { // set default procedure
+			this->inventory::_procHandled = [](const params&)->LRESULT {
+				return 0;
+			};
+			this->inventory::_procUnhandled = [&](const params& p)->LRESULT {
 				return DefWindowProcW(this->hwnd(), p.message, p.wParam, p.lParam);
 			};
 		}
@@ -113,16 +116,15 @@ namespace base {
 				if (msg == WM_NCDESTROY) {
 					SetWindowLongPtrW(hWnd, GWLP_USERDATA, 0);
 					if (pSelf) {
-						pSelf->wnd::_hWnd = nullptr;
+						pSelf->wnd::_hWnd = nullptr; // clear HWND
 					}
 				}
 			};
 
 			if (pSelf) {
-				params p = {msg, wp, lp};
-				funcT* pFunc = pSelf->msgs::_msgInventory.find(msg);
+				inventory::msg_funcT* pFunc = pSelf->inventory::_msgDepot.find(msg);
 				if (pFunc) {
-					LRESULT ret = (*pFunc)(p);
+					LRESULT ret = (*pFunc)(params{msg, wp, lp}); // call user lambda
 					cleanupIfDestroyed();
 					return ret;
 				}

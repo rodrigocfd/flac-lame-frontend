@@ -9,13 +9,13 @@
 #include "base_user_control.h"
 
 /**
- *                              +------------------------- msgs_[any] <-------------------------+
- *                              |                                                               +-- [user]
- *             +-- base_msgs <--+--------- base_user_control <------------+                     |
- *             |                |                                         +-- dialog_control <--+
- * base_wnd <--+                +-- base_threaded <----+                  |
- *             |                                       +-- base_dialog <--+
- *             +------------- base_wheel <-------------+
+ *                                   +------------------ base_msgs <-- msg_[any] <-------------------+
+ *                                   |                                                               +-- [user]
+ *             +-- base_inventory <--+--------- base_user_control <------------+                     |
+ *             |                     |                                         +-- dialog_control <--+
+ * base_wnd <--+                     +-- base_threaded <----+                  |
+ *             |                                            +-- base_dialog <--+
+ *             +--------------- base_wheel <----------------+
  */
 
 namespace wl {
@@ -23,7 +23,7 @@ namespace wl {
 // Inherit from this class to have a dialog to be used as a control within a parent window.
 class dialog_control :
 	public base::dialog,
-	public base::user_control<TRUE>
+	public base::user_control
 {
 protected:
 	base::dialog::setup_vars setup;

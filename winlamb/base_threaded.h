@@ -5,17 +5,16 @@
  */
 
 #pragma once
-#include "base_msgs.h"
+#include "base_inventory.h"
 
 /**
- * base_wnd <-- base_msgs <-- base_threaded
+ * base_wnd <-- base_inventory <-- base_threaded
  */
 
 namespace wl {
 namespace base {
 
-	template<LONG_PTR processed_valT>
-	class threaded : virtual public msgs {
+	class threaded : virtual public inventory {
 	public:
 		using thread_funcT = std::function<void()>;
 	private:
@@ -27,11 +26,11 @@ namespace base {
 
 	protected:
 		explicit threaded(size_t msgsReserve) {
-			this->msgs::_msgInventory.reserve(msgsReserve + 1);
+			this->inventory::_msgDepot.reserve(msgsReserve + 1);
 
-			this->on_message(WM_THREAD_MESSAGE, [&](const params& p)->LONG_PTR {
+			this->on_message(WM_THREAD_MESSAGE, [&](params& p)->LONG_PTR {
 				this->_process_threaded(p);
-				return processed_valT;
+				return this->inventory::_procHandled(p);
 			});
 		}
 

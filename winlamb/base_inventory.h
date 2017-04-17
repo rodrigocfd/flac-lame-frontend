@@ -5,57 +5,50 @@
  */
 
 #pragma once
-#include <functional>
-#include <vector>
-#include "params.h"
+#include "base_wnd.h"
+#include "base_depot.h"
+
+/**
+ * base_wnd <-- base_inventory
+ */
 
 namespace wl {
+
+class subclass;
+
 namespace base {
 
-	template<typename idT>
-	class inventory final {
+	class dialog;
+	class window;
+	class user_control;
+	class threaded;
+	class msgs;
+
+	class inventory : virtual public wnd {
 	public:
-		using funcT = std::function<LONG_PTR(params&)>; // works for both LRESULT and LONG_PTR
+		friend subclass;
+		friend dialog;
+		friend window;
+		friend user_control;
+		friend threaded;
+		friend msgs;
+
+		using msg_funcT = depot<UINT>::funcT;
 	private:
-		std::vector<std::pair<idT, funcT>> _msgUnits;
+		msg_funcT _procHandled; // the return when message is processed, like "return 0"
+		msg_funcT _procUnhandled; // the return when message isn't processed, like "return DefWindowProc()"
+		depot<UINT> _msgDepot;
+
+	protected:
+		inventory() = default;
 
 	public:
-		explicit inventory(size_t msgsReserve = 0) {
-			this->reserve(msgsReserve); // initial reserve is useful to save realloc time
-			this->_msgUnits.emplace_back(); // 1st element is sentinel room
+		void on_message(UINT msg, msg_funcT func) {
+			this->_msgDepot.add(msg, std::move(func));
 		}
 
-		bool empty() const {
-			return this->_msgUnits.size() == 1; // sentinel always present
-		}
-
-		void reserve(size_t msgsReserve) {
-			this->_msgUnits.reserve(msgsReserve + 1); // +1 because sentinel
-		}
-
-		void add(idT id, funcT func) {
-			this->_msgUnits.emplace_back(id, std::move(func)); // reverse search: messages can be overwritten
-		}
-
-		void add(std::initializer_list<idT> ids, funcT func) {
-			const idT* pIds = ids.begin();
-			this->add(pIds[0], std::move(func)); // store user func once
-			size_t funcIdx = this->_msgUnits.size() - 1;
-			for (size_t i = 1; i < ids.size(); ++i) {
-				if (pIds[i] != pIds[0]) { // avoid overwriting
-					this->add(pIds[i], [this, funcIdx](params& p)->LONG_PTR {
-						return this->_msgUnits[funcIdx].second(p); // store light wrapper to 1st func
-					});
-				}
-			}
-		}
-
-		funcT* find(idT id) {
-			this->_msgUnits[0].first = id; // sentinel for reverse linear search
-			std::pair<idT, funcT>* revRunner = &this->_msgUnits.back();
-			while (revRunner->first != id) --revRunner;
-			return revRunner == &this->_msgUnits[0] ?
-				nullptr : &revRunner->second;
+		void on_message(std::initializer_list<UINT> msgs, msg_funcT func) {
+			this->_msgDepot.add(msgs, std::move(func));
 		}
 	};
 
