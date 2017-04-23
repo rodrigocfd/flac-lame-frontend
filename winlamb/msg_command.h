@@ -28,7 +28,6 @@ protected:
 		});
 	}
 
-public:
 	void on_command(WORD cmd, command_funcT func) {
 		this->_cmdDepot.add(cmd, std::move(func));
 	}

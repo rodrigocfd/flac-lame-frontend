@@ -32,9 +32,6 @@
     <ClInclude Include="winlamb\base_text.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\base_threaded.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
     <ClInclude Include="winlamb\base_user_control.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
@@ -199,6 +196,9 @@
     </ClInclude>
     <ClInclude Include="winlamb-more\download.h">
       <Filter>WinLamb More</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\msg_ui_thread.h">
+      <Filter>WinLamb</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -17,7 +17,7 @@ protected:
 public:
 	static std::wstring& trim_backslash(std::wstring& filePath) {
 		while (filePath.back() == L'\\') {
-			filePath.resize(filePath.size() - 1);
+			filePath.resize(filePath.length() - 1);
 		}
 		return filePath;
 	}

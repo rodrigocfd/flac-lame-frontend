@@ -125,7 +125,7 @@ public:
 				arrBuf.resize(strs.size() - 1); // alloc return buffer
 
 				for (size_t i = 0; i < strs.size() - 1; ++i) {
-					arrBuf[i].reserve(basePath.size() + strs[i + 1].size() + 1); // room for backslash
+					arrBuf[i].reserve(basePath.length() + strs[i + 1].size() + 1); // room for backslash
 					arrBuf[i] = basePath;
 					arrBuf[i].append(L"\\").append(strs[i + 1]); // concat folder + file
 				}

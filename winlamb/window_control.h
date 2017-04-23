@@ -9,11 +9,11 @@
 #include "base_user_control.h"
 
 /**
- *                                +--------------- base_msgs <-- msg_[any] <-----------------+
- *                                |                                                          +-- [user]
- * base_wnd <-- base_inventory <--+-- base_threaded <-- base_window <--+                     |
- *                                |                                    +-- window_control <--+
- *                                +------- base_user_control <---------+
+ *                                +--------- base_msgs <-- msg_[any] <-----------+
+ *                                |                                              +-- [user]
+ * base_wnd <-- base_inventory <--+----- base_window <-----+                     |
+ *                                |                        +-- window_control <--+
+ *                                +-- base_user_control <--+
  */
 
 namespace wl {

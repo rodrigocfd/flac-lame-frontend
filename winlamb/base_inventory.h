@@ -21,7 +21,6 @@ namespace base {
 	class dialog;
 	class window;
 	class user_control;
-	class threaded;
 	class msgs;
 
 	class inventory : virtual public wnd {
@@ -30,7 +29,6 @@ namespace base {
 		friend dialog;
 		friend window;
 		friend user_control;
-		friend threaded;
 		friend msgs;
 
 		using msg_funcT = depot<UINT>::funcT;
@@ -42,7 +40,6 @@ namespace base {
 	protected:
 		inventory() = default;
 
-	public:
 		void on_message(UINT msg, msg_funcT func) {
 			this->_msgDepot.add(msg, std::move(func));
 		}

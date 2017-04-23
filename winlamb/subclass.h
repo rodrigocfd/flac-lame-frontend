@@ -5,28 +5,35 @@
  */
 
 #pragma once
-#include "base_threaded.h"
+#include "base_inventory.h"
 #include <Commctrl.h>
 
 /**
- *             +----------- base_msgs <-- msg_[any] <--------------+
- * base_wnd <--+                                                   +-- [user]
- *             +-- base_inventory <-- base_threaded <-- subclass --+
+ *             +--- base_msgs <-- msg_[any] <----+
+ * base_wnd <--+                                 +-- [user]
+ *             +-- base_inventory <-- subclass --+
  */
 
 namespace wl {
 
 // Manages window subclassing for a window.
-class subclass : public base::threaded {
+class subclass : virtual public base::inventory {
 private:
-	// To have a custom subclass which also handles WM_COMMAND:
-	// class custom_subclass_cmd : public subclass, public msg_command { };
+	// Example of a custom subclass which also handles WM_COMMAND:
+	// class custom_subclass_cmd : public subclass, public msg_command {
+	// public:
+	//   using msg_command::on_command;
+	// };
 
 	UINT _subclassId;
 public:
 	~subclass() { this->remove_subclass(); }
 
-	explicit subclass(size_t msgsReserve = 0) : threaded(msgsReserve) {
+	using inventory::on_message;
+
+	explicit subclass(size_t msgsReserve = 0) {
+		this->inventory::_msgDepot.reserve(msgsReserve);
+
 		this->inventory::_procHandled = [](const params&)->LRESULT {
 			return 0;
 		};
@@ -42,14 +49,26 @@ public:
 		}
 	}
 
-	void install_subclass(HWND hWnd) {
+	void install_subclass(HWND hCtrl) {
 		this->remove_subclass();
-		this->wnd::_hWnd = hWnd; // store HWND
-		if (hWnd) {
+		this->wnd::_hWnd = hCtrl; // store HWND
+		if (hCtrl) {
 			this->_subclassId = _next_id();
 			SetWindowSubclass(this->hwnd(), _proc, this->_subclassId,
 				reinterpret_cast<DWORD_PTR>(this));
 		}
+	}
+
+	void install_subclass(const base::wnd& ctrl) {
+		this->install_subclass(ctrl.hwnd());
+	}
+
+	void install_subclass(HWND hParent, int controlId) {
+		this->install_subclass(GetDlgItem(hParent, controlId));
+	}
+
+	void install_subclass(const base::wnd* parent, int controlId) {
+		this->install_subclass(GetDlgItem(parent->hwnd(), controlId));
 	}
 
 private:

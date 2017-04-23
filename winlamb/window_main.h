@@ -12,15 +12,15 @@
 #include "base_run.h"
 
 /**
- *                                   +-------------- base_msgs <-- msg_[any] <---------------+
- *             +-- base_inventory <--+                                                       |
- *             |                     +-- base_threaded <-- base_window <--+                  +-- [user]
- * base_wnd <--+                                                          |                  |
- *             +--------------------- base_loop <-------------------------+                  |
- *             |                                                          +-- window_main <--+
- *             +--------------------- base_wheel <------------------------+
- *             |                                                          |
- *             +--------------------- base_text <-------------------------+
+ *                                   +----- base_msgs <-- msg_[any] <------+
+ *             +-- base_inventory <--+                                     |
+ *             |                     +-- base_window <--+                  +-- [user]
+ *             |                                        |                  |
+ *             +-------------- base_loop <--------------+                  |
+ * base_wnd <--+                                        +-- window_main <--+
+ *             +-------------- base_wheel <-------------+
+ *             |                                        |
+ *             +-------------- base_text <--------------+
  */
 
 namespace wl {

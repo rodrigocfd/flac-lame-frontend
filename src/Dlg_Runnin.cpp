@@ -74,7 +74,7 @@ void Dlg_Runnin::process_next_file()
 
 	if (!good) {
 		m_curFile = m_files.size(); // error, so avoid further processing
-		ui_thread([&]() {
+		on_ui_thread([&]() {
 			sysdlg::msgbox(this, L"Conversion failed",
 				str::format(L"File #%u:\n%s\n%s", curIndex, file.c_str(), err.c_str()),
 				MB_ICONERROR);
@@ -83,7 +83,7 @@ void Dlg_Runnin::process_next_file()
 		});
 	} else {
 		++m_filesDone;
-		ui_thread([&]() {
+		on_ui_thread([&]() {
 			m_prog.set_pos(m_filesDone);
 			m_taskbarProgr.set_pos(m_filesDone, m_files.size());
 			m_lbl.set_text( str::format(L"%u of %u files finished...",
@@ -93,7 +93,7 @@ void Dlg_Runnin::process_next_file()
 		if (m_filesDone < m_files.size()) { // more files to come
 			process_next_file();
 		} else { // finished all processing
-			ui_thread([&]() {
+			on_ui_thread([&]() {
 				datetime fin;
 				sysdlg::msgbox(this, L"Conversion finished",
 					str::format(L"%u files processed in %.2f seconds.",

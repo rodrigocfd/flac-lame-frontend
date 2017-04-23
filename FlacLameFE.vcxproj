@@ -196,7 +196,6 @@
     <ClInclude Include="winlamb\base_msgs.h" />
     <ClInclude Include="winlamb\base_run.h" />
     <ClInclude Include="winlamb\base_text.h" />
-    <ClInclude Include="winlamb\base_threaded.h" />
     <ClInclude Include="winlamb\base_user_control.h" />
     <ClInclude Include="winlamb\base_wheel.h" />
     <ClInclude Include="winlamb\base_window.h" />
@@ -208,6 +207,7 @@
     <ClInclude Include="winlamb\font.h" />
     <ClInclude Include="winlamb\msg_command.h" />
     <ClInclude Include="winlamb\msg_notify.h" />
+    <ClInclude Include="winlamb\msg_ui_thread.h" />
     <ClInclude Include="winlamb\native_control.h" />
     <ClInclude Include="winlamb\params.h" />
     <ClInclude Include="winlamb\subclass.h" />

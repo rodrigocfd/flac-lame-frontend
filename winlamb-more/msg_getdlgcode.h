@@ -28,7 +28,6 @@ protected:
 		});
 	}
 
-public:
 	void on_getdlgcode(BYTE vkeyCode, getdlgcode_funcT func) {
 		this->_gdcDepot.add(vkeyCode, std::move(func));
 	}

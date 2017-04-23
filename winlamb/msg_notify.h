@@ -32,7 +32,6 @@ protected:
 		});
 	}
 
-public:
 	void on_notify(idT idFromAndCode, notify_funcT func) {
 		this->_nfyDepot.add(idFromAndCode, std::move(func));
 	}
@@ -50,11 +49,10 @@ public:
 namespace wm {
 
 #define WINLAMB_NOTIFYWM(sname, oname) \
-	struct sname final : public params { \
-		oname& data; \
-		sname(const params& p) : \
-			params(p), data(*reinterpret_cast<oname*>(this->lParam)) { } \
-	}
+	struct sname : public notify { \
+		sname(const params& p) : notify(p) { } \
+		oname& nmhdr() const { return *reinterpret_cast<oname*>(this->lParam); } \
+	};
 
 	WINLAMB_NOTIFYWM(cben_beginedit, NMHDR);
 	WINLAMB_NOTIFYWM(cben_deleteitem, NMCOMBOBOXEX);

@@ -43,7 +43,7 @@ public:
 		if (s.empty()) return s;
 		trim_nulls(s);
 
-		size_t len = s.size();
+		size_t len = s.length();
 		size_t iFirst = 0, iLast = len - 1; // bounds of trimmed string
 		bool onlySpaces = true; // our string has only spaces?
 
@@ -74,13 +74,13 @@ public:
 
 	static std::wstring upper(const std::wstring& s) {
 		std::wstring ret(s);
-		CharUpperBuffW(&ret[0], static_cast<DWORD>(ret.size()));
+		CharUpperBuffW(&ret[0], static_cast<DWORD>(ret.length()));
 		return ret;
 	}
 
 	static std::wstring lower(const std::wstring& s) {
 		std::wstring ret(s);
-		CharLowerBuffW(&ret[0], static_cast<DWORD>(ret.size()));
+		CharLowerBuffW(&ret[0], static_cast<DWORD>(ret.length()));
 		return ret;
 	}
 
@@ -113,7 +113,7 @@ public:
 		if (!_first_ends_begins_check(s, what, whatLen)) {
 			return false;
 		}
-		return !lstrcmpW(s.c_str() + s.size() - whatLen, what);
+		return !lstrcmpW(s.c_str() + s.length() - whatLen, what);
 	}
 
 	static bool ends_withi(const std::wstring& s, const wchar_t* what) {
@@ -121,7 +121,7 @@ public:
 		if (!_first_ends_begins_check(s, what, whatLen)) {
 			return false;
 		}
-		return !lstrcmpiW(s.c_str() + s.size() - whatLen, what);
+		return !lstrcmpiW(s.c_str() + s.length() - whatLen, what);
 	}
 
 	static bool begins_with(const std::wstring& s, const wchar_t* what) {
@@ -143,14 +143,14 @@ public:
 	static size_t findi(const std::wstring& s, const wchar_t* what, size_t offset = 0) {
 		std::wstring s2 = upper(s);
 		std::wstring what2(what);
-		CharUpperBuffW(&what2[0], static_cast<DWORD>(what2.size()));
+		CharUpperBuffW(&what2[0], static_cast<DWORD>(what2.length()));
 		return s2.find(what2, offset);
 	}
 
 	static size_t rfindi(const std::wstring& s, const wchar_t* what, size_t offset = 0) {
 		std::wstring s2 = upper(s);
 		std::wstring what2(what);
-		CharUpperBuffW(&what2[0], static_cast<DWORD>(what2.size()));
+		CharUpperBuffW(&what2[0], static_cast<DWORD>(what2.length()));
 		return s2.rfind(what2, offset);
 	}
 
@@ -167,7 +167,7 @@ public:
 
 		for (;;) {
 			found = haystack.find(needle, found);
-			output.insert(output.size(), haystack, base, found - base);
+			output.insert(output.length(), haystack, base, found - base);
 			if (found != std::wstring::npos) {
 				output.append(replacement);
 				base = found = found + needleLen;
@@ -181,7 +181,7 @@ public:
 	}
 
 	static std::wstring& replacei(std::wstring& haystack, const wchar_t* needle, const wchar_t* replacement) {
-		if (!haystack.size()) return haystack;
+		if (haystack.empty()) return haystack;
 
 		size_t needleLen = lstrlenW(needle);
 		if (!needleLen) return haystack;
@@ -196,7 +196,7 @@ public:
 
 		for (;;) {
 			found = haystackU.find(needleU, found);
-			output.insert(output.size(), haystack, base, found - base);
+			output.insert(output.length(), haystack, base, found - base);
 			if (found != std::wstring::npos) {
 				output.append(replacement);
 				base = found = found + needleLen;
@@ -313,7 +313,7 @@ public:
 		}
 
 		ret.emplace_back();
-		ret.back().insert(0, s, base, s.size() - base);
+		ret.back().insert(0, s, base, s.length() - base);
 		return ret;
 	}
 
@@ -473,7 +473,7 @@ public:
 	}
 
 	static const wchar_t* get_linebreak(const std::wstring& s) {
-		for (size_t i = 0; i < s.size() - 1; ++i) {
+		for (size_t i = 0; i < s.length() - 1; ++i) {
 			if (s[i] == L'\r') {
 				return s[i + 1] == L'\n' ? L"\r\n" : L"\r";
 			} else if (s[i] == L'\n') {
@@ -490,13 +490,13 @@ public:
 			int szBom = writeBom ? ARRAYSIZE(utf8bom) : 0;
 
 			int neededLen = WideCharToMultiByte(CP_UTF8, 0,
-				s.c_str(), static_cast<int>(s.size()),
+				s.c_str(), static_cast<int>(s.length()),
 				nullptr, 0, nullptr, 0);
 			ret.resize(neededLen + szBom);
 
 			if (writeBom) memcpy(&ret[0], utf8bom, szBom);
 			WideCharToMultiByte(CP_UTF8, 0,
-				s.c_str(), static_cast<int>(s.size()), 
+				s.c_str(), static_cast<int>(s.length()), 
 				reinterpret_cast<char*>(&ret[0 + szBom]),
 				neededLen, nullptr, nullptr);
 		}
@@ -542,7 +542,7 @@ private:
 		if (s.empty()) return false;
 
 		whatLen = lstrlenW(what);
-		if (!whatLen || whatLen > s.size()) {
+		if (!whatLen || whatLen > s.length()) {
 			return false;
 		}
 		return true;

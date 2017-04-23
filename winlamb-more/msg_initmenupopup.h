@@ -29,7 +29,6 @@ protected:
 		});
 	}
 
-public:
 	void on_initmenupopup(WORD firstMenuItemId, initmenupopup_funcT func) {
 		this->_impDepot.add(firstMenuItemId, std::move(func));
 	}

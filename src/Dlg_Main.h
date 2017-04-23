@@ -13,10 +13,10 @@
 #include "../winlamb-more/textbox.h"
 
 class Dlg_Main final :
-	public    wl::dialog_main,
-	protected wl::msg_command,
-	protected wl::msg_notify,
-	protected wl::msg_initmenupopup
+	public wl::dialog_main,
+	public wl::msg_command,
+	public wl::msg_notify,
+	public wl::msg_initmenupopup
 {
 private:
 	wl::file_ini         m_iniFile;

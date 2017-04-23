@@ -169,7 +169,7 @@ public:
 
 	device_context& text_out(int x, int y, const std::wstring& text, size_t numChars = std::wstring::npos) {
 		return this->text_out(x, y, text.c_str(),
-			(numChars == std::wstring::npos) ? text.size() : numChars);
+			(numChars == std::wstring::npos) ? text.length() : numChars);
 	}
 
 	device_context& draw_text(int x, int y, int cx, int cy, const wchar_t* text,
@@ -186,7 +186,7 @@ public:
 		UINT fmtFlags = 0, size_t numChars = std::wstring::npos)
 	{
 		return this->draw_text(x, y, cx, cy, text.c_str(), fmtFlags,
-			(numChars == std::wstring::npos) ? text.size() : numChars);
+			(numChars == std::wstring::npos) ? text.length() : numChars);
 	}
 
 	SIZE get_text_extent(const wchar_t* text, size_t numChars = std::wstring::npos) const {
@@ -199,7 +199,7 @@ public:
 
 	SIZE get_text_extent(const std::wstring& text, size_t numChars = std::wstring::npos) const {
 		return this->get_text_extent(text.c_str(),
-			(numChars == std::wstring::npos) ? text.size() : numChars);
+			(numChars == std::wstring::npos) ? text.length() : numChars);
 	}
 
 	device_context& fill_rect(int left, int top, int right, int bottom, HBRUSH hBrush) {

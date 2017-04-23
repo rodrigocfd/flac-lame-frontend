@@ -5,14 +5,14 @@
  */
 
 #pragma once
-#include "base_threaded.h"
+#include "base_inventory.h"
 #include "base_wheel.h"
 #include "font.h"
 
 /**
- *             +-- base_inventory <-- base_threaded <--+
- * base_wnd <--+                                       +-- base_dialog
- *             +------------- base_wheel <-------------+
+ *             +-- base_inventory <--+
+ * base_wnd <--+                     +-- base_dialog
+ *             +---- base_wheel <----+
  */
 
 namespace wl {
@@ -25,7 +25,7 @@ class dialog_control;
 namespace base {
 
 	class dialog :
-		public    threaded,
+		virtual public inventory,
 		protected wheel
 	{
 	public:
@@ -46,7 +46,9 @@ namespace base {
 		}
 
 	protected:
-		explicit dialog(size_t msgsReserve) : threaded(msgsReserve) {
+		explicit dialog(size_t msgsReserve) {
+			this->inventory::_msgDepot.reserve(msgsReserve);
+
 			this->inventory::_procHandled = [](const params&)->INT_PTR {
 				return TRUE;
 			};
@@ -74,11 +76,11 @@ namespace base {
 
 			if (msg == WM_INITDIALOG) {
 				pSelf = reinterpret_cast<dialog*>(lp);
-				SetWindowLongPtrW(hDlg, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pSelf));
+				SetWindowLongPtrW(hDlg, DWLP_USER, reinterpret_cast<LONG_PTR>(pSelf));
 				font::set_ui_on_children(hDlg); // if user creates controls manually, font must be set manually on them
 				pSelf->wnd::_hWnd = hDlg; // store HWND
 			} else {
-				pSelf = reinterpret_cast<dialog*>(GetWindowLongPtrW(hDlg, GWLP_USERDATA));
+				pSelf = reinterpret_cast<dialog*>(GetWindowLongPtrW(hDlg, DWLP_USER));
 			}
 
 			if (pSelf) {
@@ -89,7 +91,7 @@ namespace base {
 			if (msg == WM_INITDIALOG) {
 				pSelf->wheel::_apply_wheel_hover_behavior();
 			} else if (msg == WM_NCDESTROY) { // cleanup
-				SetWindowLongPtrW(hDlg, GWLP_USERDATA, 0);
+				SetWindowLongPtrW(hDlg, DWLP_USER, 0);
 				if (pSelf) {
 					pSelf->wnd::_hWnd = nullptr; // clear HWND
 				}

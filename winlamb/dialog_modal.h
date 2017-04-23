@@ -9,13 +9,12 @@
 #include "base_text.h"
 
 /**
- *                                   +--------------- base_msgs <-- msg_[any] <------------------+
- *             +-- base_inventory <--+                                                           |
- *             |                     +-- base_threaded <--+                                      +-- [user]
- * base_wnd <--+                                          +-- base_dialog <--+                   |
- *             +-------------- base_wheel <---------------+                  +-- dialog_modal <--+
- *             |                                                             |
- *             +------------------------ base_text <-------------------------+
+ *                                <-------- base_msgs <-- msg_[any] <-------+
+ *             +-- base_inventory <--+                                      |
+ *             |                     +-- base_dialog <--+                   +-- [user]
+ * base_wnd <--+---- base_wheel <----+                  |                   |
+ *             |                                        +-- dialog_modal <--+
+ *             +-------------- base_text <--------------+
  */
 
 namespace wl {

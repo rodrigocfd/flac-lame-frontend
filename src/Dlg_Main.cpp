@@ -252,7 +252,7 @@ Dlg_Main::Dlg_Main()
 
 	on_notify(LST_FILES, LVN_KEYDOWN, [&](wm::lvn_keydown p)
 	{
-		if (p.data.wVKey == VK_DELETE) {
+		if (p.nmhdr().wVKey == VK_DELETE) {
 			SendMessage(hwnd(), WM_COMMAND, MAKEWPARAM(MNU_REMSELECTED, 0), 0);
 			return TRUE;
 		}
@@ -326,8 +326,7 @@ bool Dlg_Main::dest_folder_is_ok()
 
 bool Dlg_Main::files_exist(vector<wstring>& files)
 {
-	vector<listview::item> allItems = m_lstFiles.items.get_all();
-	files = listview::get_all_text(allItems, 0);
+	files = m_lstFiles.items.get_texts(m_lstFiles.items.get_all(), 0);
 
 	for (const wstring& f : files) { // each filepath
 		if (!file::exists(f)) {

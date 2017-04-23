@@ -308,6 +308,15 @@ public:
 			int iFoc = ListView_GetNextItem(this->_list->hwnd(), -1, LVNI_FOCUSED);
 			return iFoc == -1 ? item::npos : iFoc;
 		}
+
+		std::vector<std::wstring> get_texts(const std::vector<item>& itemsToGet, size_t columnIndex = 0) const {
+			std::vector<std::wstring> texts;
+			texts.reserve(itemsToGet.size());
+			for (const item& oneItem : itemsToGet) {
+				texts.emplace_back(oneItem.get_text(columnIndex));
+			}
+			return texts;
+		}
 	};
 
 	class styler final : public base::styles<listview> {
@@ -533,15 +542,6 @@ public:
 		return *this;
 	}
 
-	static std::vector<std::wstring> get_all_text(std::vector<item> items, size_t columnIndex = 0) {
-		std::vector<std::wstring> texts;
-		texts.reserve(items.size());
-		for (item oneItem : items) {
-			texts.emplace_back(oneItem.get_text(columnIndex));
-		}
-		return texts;
-	}
-
 private:
 	bool _create_image_list(bool il16, bool il32) {
 		// Imagelists are destroyed automatically:
@@ -567,7 +567,7 @@ private:
 	}
 
 	listview& _install_subclass() {
-		this->_subclass.install_subclass(this->hwnd());
+		this->_subclass.install_subclass(*this);
 		return *this;
 	}
 

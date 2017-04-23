@@ -28,7 +28,6 @@ protected:
 		});
 	}
 
-public:
 	void on_keyup(BYTE vkeyCode, keyup_funcT func) {
 		this->_kuDepot.add(vkeyCode, std::move(func));
 	}

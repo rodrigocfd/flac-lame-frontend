@@ -5,10 +5,10 @@
  */
 
 #pragma once
-#include "base_threaded.h"
+#include "base_inventory.h"
 
 /**
- * base_wnd <-- base_inventory <-- base_threaded <-- base_window
+ * base_wnd <-- base_inventory <-- base_window
  */
 
 namespace wl {
@@ -18,7 +18,7 @@ class window_control;
 
 namespace base {
 
-	class window : public threaded {
+	class window : virtual public inventory {
 	public:
 		friend window_main;
 		friend window_control;
@@ -41,7 +41,9 @@ namespace base {
 		}
 
 	protected:
-		explicit window(size_t msgsReserve) : threaded(msgsReserve) {
+		explicit window(size_t msgsReserve) {
+			this->inventory::_msgDepot.reserve(msgsReserve);
+
 			this->inventory::_procHandled = [](const params&)->LRESULT {
 				return 0;
 			};

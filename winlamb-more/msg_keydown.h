@@ -28,7 +28,6 @@ protected:
 		});
 	}
 
-public:
 	void on_keydown(BYTE vkeyCode, keydown_funcT func) {
 		this->_kdDepot.add(vkeyCode, std::move(func));
 	}
