@@ -7,18 +7,15 @@
 #pragma once
 #include "base_dialog.h"
 #include "base_loop.h"
-#include "base_text.h"
 #include "base_run.h"
 
 /**
  *                                <-------- base_msgs <-- msg_[any] <------+
  *             +-- base_inventory <--+                                     |
  *             |                     +-- base_dialog <--+                  +-- [user]
- *             +---- base_wheel <----+                  |                  |
- * base_wnd <--+                                        +-- dialog_main <--+
+ * base_wnd <--+---- base_wheel <----+                  |                  |
+ *             |                                        +-- dialog_main <--+
  *             +-------------- base_loop <--------------+
- *             |                                        |
- *             +-------------- base_text <--------------+
  */
 
 namespace wl {
@@ -26,8 +23,7 @@ namespace wl {
 // Inherit from this class to have a dialog as the main window of your application.
 class dialog_main :
 	public    base::dialog,
-	protected base::loop,
-	protected base::text<dialog_main>
+	protected base::loop
 {
 public:
 	struct setup_vars final : public base::dialog::setup_vars {

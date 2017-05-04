@@ -7,24 +7,18 @@
 #pragma once
 #include "base_dialog.h"
 #include "base_loop.h"
-#include "base_text.h"
 
 /**
- *                                <---------- base_msgs <-- msg_[any] <--------+
- *             +-- base_inventory <--+                                         |
- *             |                     +-- base_dialog <--+                      +-- [user]
- * base_wnd <--+---- base_wheel <----+                  |                      |
- *             |                                        +-- dialog_modeless <--+
- *             +-------------- base_text <--------------+
+ *                                <-------- base_msgs <-- msg_[any] <-------+
+ *             +-- base_inventory <--+                                      +-- [user]
+ * base_wnd <--+                     +-- base_dialog <-- dialog_modeless <--+
+ *             +---- base_wheel <----+
  */
 
 namespace wl {
 
 // Inherit from this class to have a dialog modeless popup.
-class dialog_modeless :
-	public    base::dialog,
-	protected base::text<dialog_modeless>
-{
+class dialog_modeless : public base::dialog {
 private:
 	base::loop* _parent;
 protected:

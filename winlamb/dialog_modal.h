@@ -6,24 +6,18 @@
 
 #pragma once
 #include "base_dialog.h"
-#include "base_text.h"
 
 /**
- *                                <-------- base_msgs <-- msg_[any] <-------+
- *             +-- base_inventory <--+                                      |
- *             |                     +-- base_dialog <--+                   +-- [user]
- * base_wnd <--+---- base_wheel <----+                  |                   |
- *             |                                        +-- dialog_modal <--+
- *             +-------------- base_text <--------------+
+ *                                <------ base_msgs <-- msg_[any] <------+
+ *             +-- base_inventory <--+                                   +-- [user]
+ * base_wnd <--+                     +-- base_dialog <-- dialog_modal <--+
+ *             +---- base_wheel <----+
  */
 
 namespace wl {
 
 // Inherit from this class to have a modal dialog popup.
-class dialog_modal :
-	public    base::dialog,
-	protected base::text<dialog_modal>
-{
+class dialog_modal : public base::dialog {
 protected:
 	base::dialog::setup_vars setup;
 

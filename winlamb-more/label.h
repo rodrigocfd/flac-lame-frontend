@@ -6,13 +6,13 @@
 
 #pragma once
 #include "../winlamb/native_control.h"
-#include "../winlamb/base_text.h"
 #include "base_styles.h"
+#include "textable.h"
 
 /**
  *             +-- native_control <--+
  * base_wnd <--+                     +-- label
- *             +---- base_text <-----+
+ *             +----- textable <-----+
  */
 
 namespace wl {
@@ -20,7 +20,7 @@ namespace wl {
 // Wrapper to label (static) control.
 class label final :
 	public native_control,
-	public base::text<label>
+	public textable<label>
 {
 public:
 	class styler : public base::styles<label> {

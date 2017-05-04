@@ -53,9 +53,21 @@ public:
 	}
 
 	template<typename COM_INTERFACE>
+	bool query_interface(COM_INTERFACE** targetComPtr) {
+		return !this->_ptr ? false :
+			SUCCEEDED(this->_ptr->QueryInterface(IID_PPV_ARGS(targetComPtr)));
+	}
+
+	template<typename COM_INTERFACE>
 	bool query_interface(REFIID iid_something, com_ptr<COM_INTERFACE>& targetComPtr) {
 		return !this->_ptr ? false :
 			SUCCEEDED(this->_ptr->QueryInterface(iid_something, reinterpret_cast<void**>(&targetComPtr)));
+	}
+
+	template<typename COM_INTERFACE>
+	bool query_interface(com_ptr<COM_INTERFACE>& targetComPtr) {
+		return !this->_ptr ? false :
+			SUCCEEDED(this->_ptr->QueryInterface(IID_PPV_ARGS(&targetComPtr)));
 	}
 
 	bool   empty() const   { return this->_ptr == nullptr; }

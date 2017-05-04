@@ -7,7 +7,6 @@
 #pragma once
 #include "base_window.h"
 #include "base_loop.h"
-#include "base_text.h"
 #include "base_wheel.h"
 #include "base_run.h"
 
@@ -16,11 +15,9 @@
  *             +-- base_inventory <--+                                     |
  *             |                     +-- base_window <--+                  +-- [user]
  *             |                                        |                  |
- *             +-------------- base_loop <--------------+                  |
- * base_wnd <--+                                        +-- window_main <--+
+ * base_wnd <--+-------------- base_loop <--------------+                  |
+ *             |                                        +-- window_main <--+
  *             +-------------- base_wheel <-------------+
- *             |                                        |
- *             +-------------- base_text <--------------+
  */
 
 namespace wl {
@@ -29,8 +26,7 @@ namespace wl {
 class window_main :
 	public    base::window,
 	protected base::loop,
-	protected base::wheel,
-	protected base::text<window_main>
+	protected base::wheel
 {
 public:
 	struct setup_vars final : public base::window::setup_vars {

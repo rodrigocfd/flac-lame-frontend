@@ -6,13 +6,13 @@
 
 #pragma once
 #include "../winlamb/native_control.h"
-#include "../winlamb/base_text.h"
 #include "base_styles.h"
+#include "textable.h"
 
 /**
  *             +-- native_control <--+
  * base_wnd <--+                     +-- checkbox
- *             +---- base_text <-----+
+ *             +----- textable <-----+
  */
 
 namespace wl {
@@ -20,7 +20,7 @@ namespace wl {
 // Wrapper to checkbox control.
 class checkbox final :
 	public native_control,
-	public base::text<checkbox>
+	public textable<checkbox>
 {
 public:
 	class styler : public base::styles<checkbox> {
