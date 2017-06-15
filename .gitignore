@@ -1,13 +1,5 @@
 Debug/
 Release/
+.vs/
 *.aps
-*.db
 *.ffs_db
-*.ncb
-*.opensdf
-*.rar
-*.sdf
-*.suo
-*.user
-*.VC.opendb
-TODO.txt

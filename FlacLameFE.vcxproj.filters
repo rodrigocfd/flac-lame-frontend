@@ -1,36 +1,41 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="src">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
     <Filter Include="WinLamb">
-      <UniqueIdentifier>{3571999b-ae0b-47d6-bd07-0999b5e21974}</UniqueIdentifier>
+      <UniqueIdentifier>{18a2fd28-b9cb-4f2b-912e-3177292fca6e}</UniqueIdentifier>
     </Filter>
     <Filter Include="WinLamb More">
-      <UniqueIdentifier>{31dc345f-88ec-4d0a-b10d-48c5cb27fc38}</UniqueIdentifier>
+      <UniqueIdentifier>{11782803-9919-453b-94e1-053225d0d9d3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="res\resource.h">
-      <Filter>Resource Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Dlg_Runnin.h">
-      <Filter>src</Filter>
-    </ClInclude>
+    <ClCompile Include="src\Convert.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Dlg_Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Dlg_Runnin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="src\Convert.h">
-      <Filter>src</Filter>
+      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Dlg_Main.h">
-      <Filter>src</Filter>
+      <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\base_user_control.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="src\Dlg_Runnin.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\base_wheel.h">
       <Filter>WinLamb</Filter>
@@ -60,6 +65,9 @@
       <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\msg_notify.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\msg_ui_thread.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\native_control.h">
@@ -94,6 +102,18 @@
     </ClInclude>
     <ClInclude Include="winlamb\base_run.h">
       <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\base_user_control.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb-more\device_context.h">
+      <Filter>WinLamb More</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb-more\dictionary.h">
+      <Filter>WinLamb More</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb-more\download.h">
+      <Filter>WinLamb More</Filter>
     </ClInclude>
     <ClInclude Include="winlamb-more\file.h">
       <Filter>WinLamb More</Filter>
@@ -155,6 +175,9 @@
     <ClInclude Include="winlamb-more\sysdlg.h">
       <Filter>WinLamb More</Filter>
     </ClInclude>
+    <ClInclude Include="winlamb-more\textable.h">
+      <Filter>WinLamb More</Filter>
+    </ClInclude>
     <ClInclude Include="winlamb-more\textbox.h">
       <Filter>WinLamb More</Filter>
     </ClInclude>
@@ -185,41 +208,13 @@
     <ClInclude Include="winlamb-more\datetime_picker.h">
       <Filter>WinLamb More</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb-more\device_context.h">
-      <Filter>WinLamb More</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb-more\dictionary.h">
-      <Filter>WinLamb More</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb-more\download.h">
-      <Filter>WinLamb More</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\msg_ui_thread.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb-more\textable.h">
-      <Filter>WinLamb More</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="res\Ron Burgundy.ico">
+    <ClInclude Include="res\resource.h">
       <Filter>Resource Files</Filter>
-    </Image>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\FlacLameFE.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\Convert.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Dlg_Main.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Dlg_Runnin.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>
