@@ -110,20 +110,21 @@ public:
 	};
 
 private:
-	const session&            _session;
-	HINTERNET                 _hConnect, _hRequest;
-	int                       _contentLength, _totalDownloaded;
-	std::wstring              _url, _verb, _referrer;
-	std::vector<BYTE>         _buffer;
-	std::vector<std::wstring> _requestHeaders;
-	dictionary_str_str        _responseHeaders;
+	const session&     _session;
+	HINTERNET          _hConnect, _hRequest;
+	size_t             _contentLength, _totalGot;
+	std::wstring       _url, _verb, _referrer;
+	dictionary_str_str _requestHeaders;
+	dictionary_str_str _responseHeaders;
 
 public:
+	std::vector<BYTE> data;
+
 	~download() { this->abort(); }
 
-	download(const session& session, std::wstring url, std::wstring verb = L"GET") :
-		_session(session), _hConnect(nullptr), _hRequest(nullptr),
-		_contentLength(0), _totalDownloaded(0), _url(url), _verb(verb) { }
+	download(const session& sess, std::wstring url, std::wstring verb = L"GET")
+		: _session(sess), _hConnect(nullptr), _hRequest(nullptr),
+			_contentLength(0), _totalGot(0), _url(url), _verb(verb) { }
 
 	void abort() {
 		if (this->_hRequest) {
@@ -136,21 +137,18 @@ public:
 		}
 	}
 
-	download& add_request_header(const wchar_t* requestHeader) {
-		this->_requestHeaders.emplace_back(requestHeader);
+	download& add_request_header(const wchar_t* name, const wchar_t* value) {
+		this->_requestHeaders.add(name, value);
 		return *this;
 	}
 
-	download& add_request_header(std::initializer_list<const wchar_t*> requestHeaders) {
-		for (const wchar_t* rh : requestHeaders) {
-			this->add_request_header(rh);
-		}
+	download& set_referrer(const wchar_t* referrer) {
+		this->_referrer = referrer;
 		return *this;
 	}
 
 	download& set_referrer(const std::wstring& referrer) {
-		this->_referrer = referrer;
-		return *this;
+		return this->set_referrer(referrer.c_str());
 	}
 
 	bool start(std::wstring* pErr = nullptr) {
@@ -159,13 +157,29 @@ public:
 			return false;
 		}
 
+		this->_contentLength = this->_totalGot = 0;
+
 		if (!this->_init_handles(pErr) ||
 			!this->_contact_server(pErr) ||
 			!this->_parse_headers(pErr) ) return false;
 
-		this->_buffer.clear();
+		this->data.clear(); // prepare buffer to receive data
+		if (this->_contentLength) { // server informed content length?
+			this->data.reserve(this->_contentLength);
+		}
 		if (pErr) pErr->clear();
 		return true;
+	}
+
+	const dictionary_str_str& get_request_headers() const  { return this->_requestHeaders; }
+	const dictionary_str_str& get_response_headers() const { return this->_responseHeaders; }
+	size_t                    get_content_length() const   { return this->_contentLength; }
+	size_t                    get_total_downloaded() const { return this->_totalGot; }
+
+	float get_percent() const {
+		return this->_contentLength ?
+			(static_cast<float>(this->_totalGot) / this->_contentLength) * 100 :
+			0;
 	}
 
 	bool has_data(std::wstring* pErr = nullptr) {
@@ -175,34 +189,16 @@ public:
 			return false;
 		}
 		if (!incomingBytes) { // no more bytes to be downloaded
-			this->_buffer.clear();
 			this->abort();
 			if (pErr) pErr->clear();
 			return false;
 		}
-
-		this->_buffer.resize(incomingBytes); // overwrite buffer, user must collect it each iteration
 		if (!this->_receive_bytes(incomingBytes, pErr)) {
 			return false;
 		}
-		this->_totalDownloaded += incomingBytes;
-
 		if (pErr) pErr->clear();
 		return true; // more data to come, call again
 	}
-
-	int get_content_length() const   { return this->_contentLength; }
-	int get_total_downloaded() const { return this->_totalDownloaded; }
-
-	float get_percent() const {
-		return this->_contentLength ?
-			(static_cast<float>(this->_totalDownloaded) / this->_contentLength) * 100 :
-			0;
-	}
-
-	const std::vector<BYTE>&         get_buffer() const           { return this->_buffer; }
-	const std::vector<std::wstring>& get_request_headers() const  { return this->_requestHeaders; }
-	const dictionary_str_str&        get_response_headers() const { return this->_responseHeaders; }
 
 private:
 	bool _init_handles(std::wstring* pErr = nullptr) {
@@ -238,8 +234,14 @@ private:
 
 	bool _contact_server(std::wstring* pErr = nullptr) {
 		// Add the request headers to request handle.
-		for (std::wstring& rh : this->_requestHeaders) {
-			if (!WinHttpAddRequestHeaders(this->_hRequest, rh.c_str(), static_cast<ULONG>(-1L), WINHTTP_ADDREQ_FLAG_ADD)) {
+		std::wstring rhTmp;
+		rhTmp.reserve(20);
+		for (const dictionary_str_str::entry& rh : this->_requestHeaders.entries()) {
+			rhTmp = rh.key;
+			rhTmp += L": ";
+			rhTmp += rh.value;
+
+			if (!WinHttpAddRequestHeaders(this->_hRequest, rhTmp.c_str(), static_cast<ULONG>(-1L), WINHTTP_ADDREQ_FLAG_ADD)) {
 				DWORD dwErr = GetLastError();
 				this->abort();
 				if (pErr) *pErr = _format_error(dwErr, L"WinHttpAddRequestHeaders");
@@ -306,10 +308,8 @@ private:
 
 		// Retrieve content length, if informed by server.
 		std::wstring* contLen = this->_responseHeaders.val(L"Content-Length");
-		if (contLen) {
-			if (str::is_uint(*contLen)) { // yes, server informed content length
-				this->_contentLength = std::stoi(*contLen);
-			}
+		if (contLen && str::is_uint(*contLen)) { // yes, server informed content length
+			this->_contentLength = std::stoul(*contLen);
 		}
 
 		if (pErr) pErr->clear();
@@ -331,12 +331,19 @@ private:
 
 	bool _receive_bytes(UINT nBytesToRead, std::wstring* pErr = nullptr) {
 		DWORD dwRead = 0;
-		if (!WinHttpReadData(this->_hRequest, static_cast<void*>(&this->_buffer[0]), nBytesToRead, &dwRead)) {
+		this->data.resize(this->data.size() + nBytesToRead); // make room
+
+		if (!WinHttpReadData(this->_hRequest,
+			static_cast<void*>(&this->data[this->data.size() - nBytesToRead]), // append to user buffer
+			nBytesToRead, &dwRead) )
+		{
 			DWORD dwErr = GetLastError();
 			this->abort();
 			if (pErr) *pErr = _format_error(dwErr, L"WinHttpReadData");
 			return false;
 		}
+
+		this->_totalGot += nBytesToRead;
 		if (pErr) pErr->clear();
 		return true;
 	}
