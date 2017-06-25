@@ -217,6 +217,9 @@
   <ItemGroup>
     <ResourceCompile Include="res\FlacLameFE.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\Ron Burgundy.ico" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

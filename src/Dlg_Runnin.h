@@ -45,5 +45,4 @@ public:
 
 private:
 	void process_next_file();
-	void enable_x_button(bool enable) const;
 };

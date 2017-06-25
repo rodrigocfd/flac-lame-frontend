@@ -35,7 +35,6 @@ Dlg_Runnin::Dlg_Runnin(
 		m_taskbarProgr.set_pos(0);
 		m_lbl.set_text( str::format(L"0 of %u files finished...", m_files.size()) ); // initial text
 		m_time0.set_now(); // start timer
-		enable_x_button(false);
 
 		// Proceed to the file conversion straight away.
 		size_t batchSz = (m_numThreads < m_files.size()) ?
@@ -49,6 +48,11 @@ Dlg_Runnin::Dlg_Runnin(
 
 		center_on_parent();
 		return TRUE;
+	});
+
+	on_message(WM_CLOSE, [](params&)
+	{
+		return TRUE; // don't close the dialog, EndDialog() not called
 	});
 }
 
@@ -103,15 +107,5 @@ void Dlg_Runnin::process_next_file()
 				EndDialog(hwnd(), IDOK);
 			});
 		}
-	}
-}
-
-void Dlg_Runnin::enable_x_button(bool enable) const
-{
-	// Enable/disable the X button to close the window; has no effect on Alt+F4.
-	HMENU hMenu = GetSystemMenu(hwnd(), FALSE);
-	if (hMenu) {
-		UINT dwExtra = enable ? MF_ENABLED : (MF_DISABLED | MF_GRAYED);
-		EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | dwExtra);
 	}
 }
