@@ -1,10 +1,10 @@
 
 #include "Dlg_Runnin.h"
+#include <winlamb-more/str.h>
+#include <winlamb-more/sys.h>
+#include <winlamb-more/sysdlg.h>
 #include "Convert.h"
-#include "../winlamb-more/str.h"
-#include "../winlamb-more/sys.h"
-#include "../winlamb-more/sysdlg.h"
-#include "../res/resource.h"
+#include "res/resource.h"
 using namespace wl;
 using std::wstring;
 using std::vector;

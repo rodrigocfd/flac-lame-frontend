@@ -1,12 +1,12 @@
 
 #pragma once
-#include "../winlamb/dialog_modal.h"
-#include "../winlamb/msg_ui_thread.h"
-#include "../winlamb-more/datetime.h"
-#include "../winlamb-more/file_ini.h"
-#include "../winlamb-more/label.h"
-#include "../winlamb-more/progressbar.h"
-#include "../winlamb-more/progress_taskbar.h"
+#include <winlamb/dialog_modal.h>
+#include <winlamb/msg_ui_thread.h>
+#include <winlamb-more/datetime.h>
+#include <winlamb-more/file_ini.h>
+#include <winlamb-more/label.h>
+#include <winlamb-more/progressbar.h>
+#include <winlamb-more/progress_taskbar.h>
 
 class Dlg_Runnin final :
 	public wl::dialog_modal,

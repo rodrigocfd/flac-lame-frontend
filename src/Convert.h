@@ -1,6 +1,6 @@
 
 #pragma once
-#include "../winlamb-more/file_ini.h"
+#include <winlamb-more/file_ini.h>
 
 struct Convert final {
 protected:
@@ -34,6 +34,7 @@ public:
 		const std::wstring& quality,
 		bool                isVbr,
 		std::wstring*       pErr = nullptr);
+
 private:
 	static bool _check_dest_folder(
 		std::wstring&       dest,

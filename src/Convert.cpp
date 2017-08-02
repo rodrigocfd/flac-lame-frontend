@@ -1,9 +1,9 @@
 
 #include "Convert.h"
-#include "../winlamb-more/file.h"
-#include "../winlamb-more/path.h"
-#include "../winlamb-more/str.h"
-#include "../winlamb-more/sys.h"
+#include <winlamb-more/file.h>
+#include <winlamb-more/path.h>
+#include <winlamb-more/str.h>
+#include <winlamb-more/sys.h>
 using namespace wl;
 using std::wstring;
 
