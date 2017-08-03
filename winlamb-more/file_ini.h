@@ -12,7 +12,6 @@ namespace wl {
 
 // Wrapper to an INI file.
 class file_ini final {
-public:
 private:
 	dictionary_str<dictionary_str_str> _sections;
 
@@ -90,8 +89,7 @@ public:
 	}
 
 	const dictionary_str_str* get_section(const std::wstring& sectionName) const {
-		const dictionary_str<dictionary_str_str>::entry* sec = this->_sections.get(sectionName);
-		return sec ? &sec->value : nullptr;
+		return this->get_section(sectionName);
 	}
 
 	bool has_key(const std::wstring& sectionName, const std::wstring& keyName) const {
@@ -105,8 +103,7 @@ public:
 	}
 
 	const std::wstring* val(const std::wstring& sectionName, const std::wstring& keyName) const {
-		const dictionary_str_str* sec = this->get_section(sectionName);
-		return sec ? sec->val(keyName) : nullptr;
+		return this->val(sectionName, keyName);
 	}
 };
 

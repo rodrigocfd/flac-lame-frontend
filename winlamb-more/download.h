@@ -236,7 +236,7 @@ private:
 		// Add the request headers to request handle.
 		std::wstring rhTmp;
 		rhTmp.reserve(20);
-		for (const dictionary_str_str::entry& rh : this->_requestHeaders.entries()) {
+		for (const dictionary_str_str::item& rh : this->_requestHeaders.entries()) {
 			rhTmp = rh.key;
 			rhTmp += L": ";
 			rhTmp += rh.value;
