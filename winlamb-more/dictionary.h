@@ -36,7 +36,10 @@ public:
 	}
 
 	const item* entry(const keyT& key) const {
-		return this->entry(key);
+		for (const item& e : this->_items) { // simple linear search
+			if (e.key == key) return &e;
+		}
+		return nullptr;
 	}
 
 	bool has(const keyT& key) const {
@@ -49,7 +52,8 @@ public:
 	}
 
 	const valueT* val(const keyT& key) const {
-		return this->val(key);
+		const item* e = this->entry(key);
+		return e ? &e->value : nullptr;
 	}
 
 	item& add(const keyT& key, const valueT& value = valueT()) {
