@@ -41,7 +41,7 @@ public:
 					strBuf.clear();
 					strBuf.insert(0, &line[0], idxEq); // extract key name
 					str::trim(strBuf);
-					dictionary_str_str::entry& newEntry = pCurSection->add(strBuf); // if already exists, will return existent
+					dictionary_str_str::item& newEntry = pCurSection->add(strBuf); // if already exists, will return existent
 
 					strBuf.clear();
 					strBuf.insert(0, &line[idxEq + 1], line.length() - (idxEq + 1)); // extract value
@@ -63,7 +63,7 @@ public:
 		std::wstring out;
 		bool isFirst = true;
 
-		for (const dictionary_str<dictionary_str_str>::entry& sec : this->_sections.entries()) {
+		for (const dictionary_str<dictionary_str_str>::item& sec : this->_sections.entries()) {
 			if (isFirst) {
 				isFirst = false;
 			} else {
@@ -71,7 +71,7 @@ public:
 			}
 			out.append(L"[").append(sec.key).append(L"]\r\n");
 
-			for (const dictionary_str_str::entry& entry : sec.value.entries()) {
+			for (const dictionary_str_str::item& entry : sec.value.entries()) {
 				out.append(entry.key).append(L"=")
 					.append(entry.value).append(L"\r\n");
 			}
@@ -84,12 +84,13 @@ public:
 	}
 
 	dictionary_str_str* get_section(const std::wstring& sectionName) {
-		dictionary_str<dictionary_str_str>::entry* sec = this->_sections.get(sectionName);
+		dictionary_str<dictionary_str_str>::item* sec = this->_sections.entry(sectionName);
 		return sec ? &sec->value : nullptr;
 	}
 
 	const dictionary_str_str* get_section(const std::wstring& sectionName) const {
-		return this->get_section(sectionName);
+		const dictionary_str<dictionary_str_str>::item* sec = this->_sections.entry(sectionName);
+		return sec ? &sec->value : nullptr;
 	}
 
 	bool has_key(const std::wstring& sectionName, const std::wstring& keyName) const {
@@ -103,7 +104,8 @@ public:
 	}
 
 	const std::wstring* val(const std::wstring& sectionName, const std::wstring& keyName) const {
-		return this->val(sectionName, keyName);
+		const dictionary_str_str* sec = this->get_section(sectionName);
+		return sec ? sec->val(keyName) : nullptr;
 	}
 };
 
