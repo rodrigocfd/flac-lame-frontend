@@ -5,6 +5,7 @@
  */
 
 #pragma once
+#include <functional>
 #include <Windows.h>
 #include <winhttp.h>
 #include "dictionary.h"
@@ -110,12 +111,13 @@ public:
 	};
 
 private:
-	const session&     _session;
-	HINTERNET          _hConnect, _hRequest;
-	size_t             _contentLength, _totalGot;
-	std::wstring       _url, _verb, _referrer;
-	dictionary_str_str _requestHeaders;
-	dictionary_str_str _responseHeaders;
+	const session&        _session;
+	HINTERNET             _hConnect, _hRequest;
+	size_t                _contentLength, _totalGot;
+	std::wstring          _url, _verb, _referrer;
+	dictionary_str_str    _requestHeaders;
+	dictionary_str_str    _responseHeaders;
+	std::function<bool()> _startCallback, _progressCallback;
 
 public:
 	std::vector<BYTE> data;
@@ -142,13 +144,19 @@ public:
 		return *this;
 	}
 
-	download& set_referrer(const wchar_t* referrer) {
+	download& set_referrer(const std::wstring& referrer) {
 		this->_referrer = referrer;
 		return *this;
 	}
 
-	download& set_referrer(const std::wstring& referrer) {
-		return this->set_referrer(referrer.c_str());
+	download& on_start(std::function<bool()> callback) {
+		this->_startCallback = std::move(callback);
+		return *this;
+	}
+
+	download& on_progress(std::function<bool()> callback) {
+		this->_progressCallback = std::move(callback);
+		return *this;
 	}
 
 	bool start(std::wstring* pErr = nullptr) {
@@ -167,6 +175,22 @@ public:
 		if (this->_contentLength) { // server informed content length?
 			this->data.reserve(this->_contentLength);
 		}
+
+		if (!this->_startCallback || this->_startCallback()) { // download only if callback returns true
+			for (;;) {
+				DWORD incomingBytes = 0; // chunk size about to come
+				if (!this->_get_incoming_byte_count(incomingBytes, pErr)) {
+					return false;
+				}
+				if (!incomingBytes) break; // no more bytes remaining
+				if (!this->_receive_bytes(incomingBytes, pErr)) { // chunk will be appended into this->data
+					return false;
+				}
+				if (this->_progressCallback && !this->_progressCallback()) break; // if callbacks returns false, abort			
+			}
+		}
+
+		this->abort(); // cleanup
 		if (pErr) pErr->clear();
 		return true;
 	}
@@ -180,24 +204,6 @@ public:
 		return this->_contentLength ?
 			(static_cast<float>(this->_totalGot) / this->_contentLength) * 100 :
 			0;
-	}
-
-	bool has_data(std::wstring* pErr = nullptr) {
-		// Receive the data from server; user must call this until false.
-		DWORD incomingBytes = 0;
-		if (!this->_get_incoming_byte_count(incomingBytes, pErr)) {
-			return false;
-		}
-		if (!incomingBytes) { // no more bytes to be downloaded
-			this->abort();
-			if (pErr) pErr->clear();
-			return false;
-		}
-		if (!this->_receive_bytes(incomingBytes, pErr)) {
-			return false;
-		}
-		if (pErr) pErr->clear();
-		return true; // more data to come, call again
 	}
 
 private:
@@ -334,7 +340,7 @@ private:
 		this->data.resize(this->data.size() + nBytesToRead); // make room
 
 		if (!WinHttpReadData(this->_hRequest,
-			static_cast<void*>(&this->data[this->data.size() - nBytesToRead]), // append to user buffer
+			static_cast<void*>(&this->data[this->data.size() - nBytesToRead]), // append to buffer
 			nBytesToRead, &dwRead) )
 		{
 			DWORD dwErr = GetLastError();
