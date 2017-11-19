@@ -1,48 +1,22 @@
 
 #pragma once
-#include <winlamb-more/file_ini.h>
+#include "std.h"
+#include <winlamb/file_ini.h>
 
 struct Convert final {
-protected:
-	Convert() = default;
+private:
+	Convert() = delete;
 
 public:
-	static bool paths_are_valid(
-		const wl::file_ini& ini,
-		std::wstring*       pErr = nullptr);
-
-	static bool to_wav(
-		const wl::file_ini& ini,
-		std::wstring        src,
-		std::wstring        dest,
-		bool                delSrc,
-		std::wstring*       pErr = nullptr);
-
-	static bool to_flac(
-		const wl::file_ini& ini,
-		std::wstring        src,
-		std::wstring        dest,
-		bool                delSrc,
-		const std::wstring& quality,
-		std::wstring*       pErr = nullptr);
-
-	static bool to_mp3(
-		const wl::file_ini& ini,
-		std::wstring        src,
-		std::wstring        dest,
-		bool                delSrc,
-		const std::wstring& quality,
-		bool                isVbr,
-		std::wstring*       pErr = nullptr);
+	static void validate_paths(const wl::file_ini& ini);
+	static void to_wav(const wl::file_ini& ini, wstring src, wstring dest, bool delSrc);
+	static void to_flac(const wl::file_ini& ini, wstring src, wstring dest,
+		bool delSrc, const wstring& quality);
+	static void to_mp3(const wl::file_ini& ini, wstring src, wstring dest,
+		bool delSrc, const wstring& quality, bool isVbr);
 
 private:
-	static bool _check_dest_folder(
-		std::wstring&       dest,
-		std::wstring*       pErr = nullptr);
-
-	static bool _execute(
-		const std::wstring& cmdLine,
-		const std::wstring& src,
-		bool                delSrc,
-		std::wstring*       pErr = nullptr);
+	static void _validate_dest_folder(wstring& dest);
+	static void _execute(const wstring& cmdLine, const wstring& src, bool delSrc);
+	static void _raw_execute(wstring cmdLine);
 };

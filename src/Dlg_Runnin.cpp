@@ -1,13 +1,11 @@
 
 #include "Dlg_Runnin.h"
-#include <winlamb-more/str.h>
-#include <winlamb-more/sys.h>
-#include <winlamb-more/sysdlg.h>
+#include <winlamb/str.h>
+#include <winlamb/sysdlg.h>
+#include <winlamb/thread.h>
 #include "Convert.h"
 #include "res/resource.h"
 using namespace wl;
-using std::wstring;
-using std::vector;
 
 Dlg_Runnin::Dlg_Runnin(
 	progress_taskbar&      taskBar,
@@ -26,7 +24,7 @@ Dlg_Runnin::Dlg_Runnin(
 {
 	setup.dialogId = DLG_RUNNIN;
 
-	on_message(WM_INITDIALOG, [&](params&)
+	on_message(WM_INITDIALOG, [&](wm::initdialog)
 	{
 		m_lbl.assign(this, LBL_STATUS);
 		m_prog.assign(this, PRO_STATUS);
@@ -41,7 +39,7 @@ Dlg_Runnin::Dlg_Runnin(
 			m_numThreads : m_files.size(); // limit parallel processing
 
 		for (size_t i = 0; i < batchSz; ++i) {
-			sys::start_thread([&]() {
+			thread::run_detached([&]() {
 				process_next_file();
 			});
 		}
@@ -50,7 +48,7 @@ Dlg_Runnin::Dlg_Runnin(
 		return TRUE;
 	});
 
-	on_message(WM_CLOSE, [](params&)
+	on_message(WM_CLOSE, [](wm::close)
 	{
 		return TRUE; // don't close the dialog, EndDialog() not called
 	});
@@ -62,50 +60,50 @@ void Dlg_Runnin::process_next_file()
 	if (curIndex >= m_files.size()) return;
 
 	const wstring& file = m_files[curIndex];
-	bool good = true;
-	wstring err;
 
+	try {
 	switch (m_targetType) {
-	case target::MP3:
-		good = Convert::to_mp3(m_ini, file, m_destFolder, m_delSrc, m_quality, m_isVbr, &err);
-		break;
-	case target::FLAC:
-		good = Convert::to_flac(m_ini, file, m_destFolder, m_delSrc, m_quality, &err);
-		break;
-	case target::WAV:
-		good = Convert::to_wav(m_ini, file, m_destFolder, m_delSrc, &err);
-	}
-
-	if (!good) {
+		case target::MP3:
+			Convert::to_mp3(m_ini, file, m_destFolder, m_delSrc, m_quality, m_isVbr);
+			break;
+		case target::FLAC:
+			Convert::to_flac(m_ini, file, m_destFolder, m_delSrc, m_quality);
+			break;
+		case target::WAV:
+			Convert::to_wav(m_ini, file, m_destFolder, m_delSrc);
+		}
+	} catch (const std::exception& e) {
 		m_curFile = m_files.size(); // error, so avoid further processing
 		run_ui_thread([&]() {
 			sysdlg::msgbox(this, L"Conversion failed",
-				str::format(L"File #%u:\n%s\n%s", curIndex, file.c_str(), err.c_str()),
+				str::format(L"File #%u:\n%s\n%s",
+					curIndex, file, str::parse_ascii(e.what())),
 				MB_ICONERROR);
 			m_taskbarProgr.clear();
 			EndDialog(hwnd(), IDCANCEL);
 		});
-	} else {
-		++m_filesDone;
-		run_ui_thread([&]() {
-			m_prog.set_pos(m_filesDone);
-			m_taskbarProgr.set_pos(m_filesDone, m_files.size());
-			m_lbl.set_text( str::format(L"%u of %u files finished...",
-				m_filesDone, m_files.size()) );
-		});
+		return;
+	}
 
-		if (m_filesDone < m_files.size()) { // more files to come
-			process_next_file();
-		} else { // finished all processing
-			run_ui_thread([&]() {
-				datetime fin;
-				sysdlg::msgbox(this, L"Conversion finished",
-					str::format(L"%u files processed in %.2f seconds.",
-						m_files.size(), static_cast<double>(fin.minus(m_time0)) / 1000),
-					MB_ICONINFORMATION);
-				m_taskbarProgr.clear();
-				EndDialog(hwnd(), IDOK);
-			});
-		}
+	++m_filesDone;
+	run_ui_thread([&]() {
+		m_prog.set_pos(m_filesDone);
+		m_taskbarProgr.set_pos(m_filesDone, m_files.size());
+		m_lbl.set_text( str::format(L"%u of %u files finished...",
+			m_filesDone, m_files.size()) );
+	});
+
+	if (m_filesDone < m_files.size()) { // more files to come
+		process_next_file();
+	} else { // finished all processing
+		run_ui_thread([&]() {
+			datetime fin;
+			sysdlg::msgbox(this, L"Conversion finished",
+				str::format(L"%u files processed in %.2f seconds.",
+					m_files.size(), static_cast<double>(fin.minus(m_time0)) / 1000),
+				MB_ICONINFORMATION);
+			m_taskbarProgr.clear();
+			EndDialog(hwnd(), IDOK); // finally close dialog
+		});
 	}
 }

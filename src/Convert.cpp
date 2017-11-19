@@ -1,41 +1,35 @@
 
 #include "Convert.h"
-#include <winlamb-more/file.h>
-#include <winlamb-more/path.h>
-#include <winlamb-more/str.h>
-#include <winlamb-more/sys.h>
+#include <winlamb/file.h>
+#include <winlamb/path.h>
 using namespace wl;
-using std::wstring;
+using std::runtime_error;
 
-bool Convert::paths_are_valid(const file_ini& ini, wstring* pErr)
+void Convert::validate_paths(const file_ini& ini)
 {
-	if (!ini.has_key(L"Tools", L"lame") || !ini.has_key(L"Tools", L"flac")) {
-		if (pErr) *pErr = L"INI file doesn't have the right entries.";
-		return false;
+	if (!ini.sections.has(L"Tools") ||
+			!ini.sections[L"Tools"].has(L"lame") ||
+			!ini.sections[L"Tools"].has(L"flac") )
+	{
+		throw runtime_error("INI file doesn't have the right entries.");
 	}
 
 	// Search for FLAC and LAME tools.
-	if (!file::exists( *ini.val(L"Tools", L"lame") )) {
-		if (pErr) *pErr = str::format(L"Could not find LAME tool at:\n%s",
-			ini.val(L"Tools", L"lame")->c_str());
-		return false;
+	if (!file::exists(ini[L"Tools"][L"lame"])) {
+		throw runtime_error(str::to_ascii(
+			str::format(L"Could not find LAME tool at:\n%s",
+				ini[L"Tools"][L"lame"]) ));
 	}
-	if (!file::exists( *ini.val(L"Tools", L"flac") )) {
-		if (pErr) *pErr = str::format(L"Could not find FLAC tool at:\n%s",
-			ini.val(L"Tools", L"lame")->c_str());
-		return false;
+	if (!file::exists(ini[L"Tools"][L"flac"])) {
+		throw runtime_error(str::to_ascii(
+			str::format(L"Could not find FLAC tool at:\n%s",
+				ini[L"Tools"][L"lame"]) ));
 	}
-
-	// All good.
-	if (pErr) pErr->clear();
-	return true;
 }
 
-bool Convert::to_wav(const file_ini& ini, wstring src, wstring dest, bool delSrc, wstring* pErr)
+void Convert::to_wav(const file_ini& ini, wstring src, wstring dest, bool delSrc)
 {
-	if (!_check_dest_folder(dest, pErr)) {
-		return false;
-	}
+	_validate_dest_folder(dest);
 
 	if (path::is_same(path::folder_from(src), dest)) { // destination folder is same of origin
 		dest.clear();
@@ -44,165 +38,165 @@ bool Convert::to_wav(const file_ini& ini, wstring src, wstring dest, bool delSrc
 	wstring cmdLine;
 	if (path::has_extension(src, L".mp3")) {
 		cmdLine = str::format(L"\"%s\" --decode \"%s\"",
-			ini.val(L"Tools", L"lame")->c_str(), src.c_str());
+			ini[L"Tools"][L"lame"], src);
 	} else if (path::has_extension(src, L".flac")) {
 		cmdLine = str::format(L"\"%s\" -d \"%s\"",
-			ini.val(L"Tools", L"flac")->c_str(), src.c_str());
+			ini[L"Tools"][L"flac"], src);
 		if (!dest.empty()) {
 			cmdLine.append(L" -o"); // different destination folder requires flag
 		}
 	} else {
-		if (pErr) *pErr = str::format(L"Not a FLAC/MP3: %s\n", src.c_str());
-		return false;
+		throw runtime_error(str::to_ascii(
+			str::format(L"Not a FLAC/MP3: %s\n", src) ));
 	}
 
 	if (!dest.empty()) { // different destination folder
-		wstring destWavPath(src);
+		wstring destWavPath = src;
 		path::change_extension(destWavPath, L".wav");
 		cmdLine.append( str::format(L" \"%s\\%s\"",
-			dest.c_str(), path::file_from(destWavPath).c_str()) );
+			dest, path::file_from(destWavPath)) );
 	}
 
-	if (!_execute(cmdLine, src, delSrc, pErr)) {
-		return false;
-	}
-	if (pErr) pErr->clear();
-	return true;
+	_execute(cmdLine, src, delSrc);
 }
 
-bool Convert::to_flac(const file_ini& ini, wstring src, wstring dest, bool delSrc,
-	const wstring& quality, wstring* pErr)
+void Convert::to_flac(const file_ini& ini, wstring src, wstring dest,
+	bool delSrc, const wstring& quality)
 {
-	if (!_check_dest_folder(dest, pErr)) {
-		return false;
-	}
+	_validate_dest_folder(dest);
 
 	if (path::is_same(path::folder_from(src), dest)) { // destination folder is same of origin
 		dest.clear();
 	}
 
-	if (path::has_extension(src, { L".flac", L".mp3" })) { // needs intermediary WAV conversion
+	if (path::has_extension(src, {L".flac", L".mp3"})) { // needs intermediary WAV conversion
 		if (path::has_extension(src, L".mp3")) {
-			if (!to_wav(ini, src, dest, delSrc, pErr)) { // send WAV straight to new folder, if any
-				return false;
-			}
+			to_wav(ini, src, dest, delSrc); // send WAV straight to new folder, if any
 		} else if (path::has_extension(src, L".flac")) {
 			to_wav(ini, src, dest, // send WAV straight to new folder, if any
-				dest.empty() ? true : delSrc, // if same destination folder, then delete source (will be replaced)
-				pErr);
+				dest.empty() ? true : delSrc); // if same destination folder, then delete source (will be replaced)
 		}
 
 		if (!dest.empty()) { // different destination folder
-			src = str::format(L"%s\\%s", dest.c_str(), path::file_from(src).c_str());
+			src = str::format(L"%s\\%s", dest, path::file_from(src));
 			dest.clear();
 		}
 
 		path::change_extension(src, L".wav"); // our source is now a WAV
 		delSrc = true; // delete the WAV at end
 	} else if (!path::has_extension(src, L".wav")) {
-		if (pErr) *pErr = str::format(L"Not a FLAC/WAV: %s\n", src.c_str());
-		return false;
+		throw runtime_error(str::to_ascii(
+			str::format(L"Not a FLAC/WAV: %s\n", src) ));
 	}
 
 	wstring cmdLine = str::format(L"\"%s\" -%s -V --no-seektable \"%s\"",
-		ini.val(L"Tools", L"flac")->c_str(), quality.c_str(), src.c_str());
+		ini[L"Tools"][L"flac"], quality, src);
 
 	if (!dest.empty()) { // different destination folder
 		wstring destFlacPath(src);
 		path::change_extension(src, L".flac");
 		cmdLine.append( str::format(L" -o \"%s\\%s\"",
-			dest.c_str(), path::file_from(destFlacPath).c_str()) );
+			dest, path::file_from(destFlacPath)) );
 	}
 
-	if (!_execute(cmdLine, src, delSrc, pErr)) {
-		return false;
-	}
-	if (pErr) pErr->clear();
-	return true;
+	_execute(cmdLine, src, delSrc);
 }
 
-bool Convert::to_mp3(const file_ini& ini, wstring src, wstring dest, bool delSrc,
-	const wstring& quality, bool isVbr, wstring *pErr)
+void Convert::to_mp3(const file_ini& ini, wstring src, wstring dest, bool delSrc,
+	const wstring& quality, bool isVbr)
 {
-	if (!_check_dest_folder(dest, pErr)) {
-		return false;
-	}
+	_validate_dest_folder(dest);
 
 	if (path::is_same(path::folder_from(src), dest)) { // destination folder is same of origin
 		dest.clear();
 	}
 
-	if (path::has_extension(src, { L".flac", L".mp3" })) { // needs intermediary WAV conversion
+	if (path::has_extension(src, {L".flac", L".mp3"})) { // needs intermediary WAV conversion
 		if (path::has_extension(src, L".flac")) {
-			if (!to_wav(ini, src, dest, delSrc, pErr)) { // send WAV straight to new folder, if any
-				return false;
-			}
+			to_wav(ini, src, dest, delSrc); // send WAV straight to new folder, if any
 		} else if (path::has_extension(src, L".mp3")) {
-			if (!to_wav(ini, src, dest, // send WAV straight to new folder, if any
-				dest.empty() ? true : delSrc, // if same destination folder, then delete source (will be replaced)
-				pErr))
-				return false;
+			to_wav(ini, src, dest, // send WAV straight to new folder, if any
+				dest.empty() ? true : delSrc); // if same destination folder, then delete source (will be replaced)
 		}
 
 		if (!dest.empty()) { // different destination folder
-			src = str::format(L"%s\\%s", dest.c_str(), path::file_from(src).c_str());
+			src = str::format(L"%s\\%s", dest, path::file_from(src));
 			dest.clear();
 		}
 
 		path::change_extension(src, L".wav"); // our source is now a WAV
 		delSrc = true; // delete the WAV at end
 	} else if (!path::has_extension(src, L".wav")) {
-		if (pErr) *pErr = str::format(L"Not a FLAC/MP3/WAV: %s\n", src.c_str());
-		return false;
+		throw runtime_error(str::to_ascii(
+			str::format(L"Not a FLAC/MP3/WAV: %s\n", src) ));
 	}
 
 	wstring cmdLine = str::format(L"\"%s\" -%s%s --noreplaygain \"%s\"",
-		ini.val(L"Tools", L"lame")->c_str(), (isVbr ? L"V" : L"b"), quality.c_str(), src.c_str());
+		ini[L"Tools"][L"lame"], (isVbr ? L"V" : L"b"), quality, src);
 
 	if (!dest.empty()) { // different destination folder
 		wstring destMp3Path(src);
 		path::change_extension(src, L".mp3");
 		cmdLine.append( str::format(L" \"%s\\%s\"",
-			dest.c_str(), path::file_from(destMp3Path).c_str()) );
+			dest, path::file_from(destMp3Path)) );
 	}
 
-	if (!_execute(cmdLine, src, delSrc, pErr)) {
-		return false;
-	}
-	if (pErr) pErr->clear();
-	return true;
+	_execute(cmdLine, src, delSrc);
 }
 
-bool Convert::_check_dest_folder(wstring& dest, wstring *pErr)
+void Convert::_validate_dest_folder(wstring& dest)
 {
 	if (dest.empty()) {
-		return true; // same destination of source file, it's OK
+		return; // same destination of source file, it's OK
 	}
+
 	path::trim_backslash(dest);
+
 	if (!file::is_dir(dest)) {
-		if (pErr) *pErr = str::format(L"Destination is not a folder:\n%s", dest.c_str());
-		return false;
+		throw runtime_error(str::to_ascii(
+			str::format(L"Destination is not a folder:\n%s", dest) ));
 	}
-	if (pErr) pErr->clear();
-	return true;
 }
 
-bool Convert::_execute(const wstring& cmdLine, const wstring& src, bool delSrc, wstring* pErr)
+void Convert::_execute(const wstring& cmdLine, const wstring& src, bool delSrc)
 {
 #ifdef _DEBUG
 	// Debug summary of operations about to be performed.
-	OutputDebugString( str::format(L"Run %s\n", cmdLine.c_str()).c_str() );
+	OutputDebugString( str::format(L"Run %s\n", cmdLine).c_str() );
 	if (delSrc) {
-		OutputDebugString( str::format(L"Del %s\n", src.c_str()).c_str() );
+		OutputDebugString( str::format(L"Del %s\n", src).c_str() );
 	}
 #endif
 
-	sys::exec(cmdLine); // run tool
+	_raw_execute(cmdLine); // run tool
+
 	if (delSrc) {
-		if (!file::del(src, pErr)) { // delete source file
-			return false;
-		}
+		file::del(src); // delete source file
 	}
-	if (pErr) pErr->clear();
-	return true;
+}
+
+void Convert::_raw_execute(wstring cmdLine)
+{
+	SECURITY_ATTRIBUTES sa{};
+	sa.nLength = sizeof(sa);
+	sa.bInheritHandle = TRUE;
+
+	STARTUPINFO si{};
+	si.cb = sizeof(si);
+	si.dwFlags = STARTF_USESHOWWINDOW;
+	si.wShowWindow = SW_SHOW;
+
+	PROCESS_INFORMATION pi{};
+	DWORD dwExitCode = 1; // returned by executed program
+
+	// http://blogs.msdn.com/b/oldnewthing/archive/2009/06/01/9673254.aspx
+	if (!CreateProcessW(nullptr, &cmdLine[0], &sa, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi)) {
+		throw std::system_error(GetLastError(), std::system_category(),
+			"CreateProcess failed");
+	}
+
+	WaitForSingleObject(pi.hProcess, INFINITE); // the program flow is stopped here to wait
+	GetExitCodeProcess(pi.hProcess, &dwExitCode);
+	CloseHandle(pi.hThread);
+	CloseHandle(pi.hProcess);
 }

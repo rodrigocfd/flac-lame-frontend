@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="WinLamb">
+      <UniqueIdentifier>{8c30c5df-89ad-40b3-87a7-cde573276796}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="WinLamb internals">
+      <UniqueIdentifier>{3863f634-8dcf-49f7-9c50-6a8528bb71af}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Convert.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Dlg_Main.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Dlg_Runnin.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\com_bstr.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\com_lib.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\com_ptr.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\com_variant.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\dialog.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\download_session.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\download_url.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\has_enable.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\has_focus.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\has_text.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\hover_scroll.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\hwnd_wrapper.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\inventory.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\listview_column_collection.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\listview_item.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\listview_item_collection.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\loop.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\member_image_list.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\native_control.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\params.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\params_wm.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\params_wmn.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\path_get.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\run.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\store.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\styler.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\treeview_item.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\treeview_item_collection.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\ui_thread.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\user_control.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\window.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\font.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\icon.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\image_list.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\label.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\lazy_map.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\listview.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\menu.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\path.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\progress_taskbar.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\progressbar.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\resizer.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\statusbar.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\str.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\subclass.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\sysdlg.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\textbox.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\thread.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\treeview.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\version.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\window_control.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\window_main.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\xml.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\zip.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\button.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\checkbox.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\com.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\datetime.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\datetime_picker.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\device_context.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\dialog_control.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\dialog_main.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\dialog_modal.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\dialog_modeless.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\download.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\file.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\file_ini.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\file_mapped.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="res\resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\std.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\combobox.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Convert.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Dlg_Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Dlg_Runnin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\Ron Burgundy.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="res\flac-lame-frontend.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

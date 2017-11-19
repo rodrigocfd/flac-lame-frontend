@@ -1,30 +1,28 @@
 
 #include "Dlg_Main.h"
-#include <winlamb-more/file.h>
-#include <winlamb-more/menu.h>
-#include <winlamb-more/path.h>
-#include <winlamb-more/str.h>
-#include <winlamb-more/sys.h>
-#include <winlamb-more/sysdlg.h>
+#include <winlamb/menu.h>
+#include <winlamb/path.h>
+#include <winlamb/str.h>
+#include <winlamb/sysdlg.h>
+#include <winlamb/thread.h>
 #include "Dlg_Runnin.h"
 #include "Convert.h"
 #include "res/resource.h"
 using namespace wl;
-using std::vector;
-using std::wstring;
 
 RUN(Dlg_Main);
 
-Dlg_Main::Dlg_Main()
-	: dialog_main(10), msg_command(20), msg_notify(10)
-{
+Dlg_Main::Dlg_Main() {
 	setup.dialogId = DLG_MAIN;
 	setup.iconId = ICO_MAIN;
 	setup.accelTableId = ACC_MAIN;
 
-	on_message(WM_INITDIALOG, [&](params&)
+	on_message(WM_INITDIALOG, [&](wm::initdialog)
 	{
-		if (!preliminar_checks()) {
+		try {
+			validate_ini();
+		} catch (const std::exception& e) {
+			sysdlg::msgbox(this, L"Fail", str::parse_ascii(e.what()), MB_ICONERROR);
 			SendMessage(hwnd(), WM_CLOSE, 0, 0); // halt program
 			return TRUE;
 		}
@@ -35,11 +33,9 @@ Dlg_Main::Dlg_Main()
 		// Main listview initialization.
 		m_lstFiles.assign(this, LST_FILES)
 			.set_context_menu(MEN_MAIN)
-			.column_add(L"File", 300)
-			.column_fit(0)
-			.icon_16_push(L"mp3")
-			.icon_16_push(L"flac")
-			.icon_16_push(L"wav"); // icons of the 3 filetypes we use
+			.columns.add(L"File", 300)
+			.columns.set_width_to_fill(0)
+			.imageList16.load_from_shell({L"mp3", L"flac", L"wav"}); // icons of the 3 filetypes we use
 
 		// Initializing comboboxes.
 		m_cmbCbr.assign(this, CMB_CBR)
@@ -60,7 +56,7 @@ Dlg_Main::Dlg_Main()
 		m_cmbNumThreads.assign(this, CMB_NUMTHREADS)
 			.item_add(L"1|2|4|8");
 
-		switch (num_processors()) {
+		switch (thread::num_processors()) {
 			case 1:  m_cmbNumThreads.item_set_selected(0); break;
 			case 2:  m_cmbNumThreads.item_set_selected(1); break;
 			case 4:  m_cmbNumThreads.item_set_selected(2); break;
@@ -80,18 +76,18 @@ Dlg_Main::Dlg_Main()
 		// Layout control when resizing.
 		m_resz.add(this, LST_FILES, resizer::go::RESIZE, resizer::go::RESIZE)
 			.add(this, TXT_DEST, resizer::go::RESIZE, resizer::go::REPOS)
-			.add(this, { LBL_DEST, FRA_CONV, RAD_MP3, RAD_FLAC, RAD_WAV, RAD_CBR, RAD_VBR, LBL_LEVEL,
-				CMB_CBR, CMB_VBR, CMB_FLAC, CHK_DELSRC, LBL_NUMTHREADS, CMB_NUMTHREADS },
+			.add(this, {LBL_DEST, FRA_CONV, RAD_MP3, RAD_FLAC, RAD_WAV, RAD_CBR, RAD_VBR,
+				LBL_LEVEL, CMB_CBR, CMB_VBR, CMB_FLAC, CHK_DELSRC, LBL_NUMTHREADS, CMB_NUMTHREADS},
 				resizer::go::NOTHING, resizer::go::REPOS)
-			.add(this, { BTN_DEST, BTN_RUN }, resizer::go::REPOS, resizer::go::REPOS);
+			.add(this, {BTN_DEST, BTN_RUN}, resizer::go::REPOS, resizer::go::REPOS);
 
 		return TRUE;
 	});
 
-	on_message(WM_SIZE, [&](params& p)
+	on_message(WM_SIZE, [&](wm::size p)
 	{
 		m_resz.arrange(p);
-		m_lstFiles.column_fit(0);
+		m_lstFiles.columns.set_width_to_fill(0);
 		return TRUE;
 	});
 
@@ -101,13 +97,13 @@ Dlg_Main::Dlg_Main()
 
 		for (const wstring& drop : files) {
 			if (file::is_dir(drop)) { // if a directory, add all files inside of it
-				for (const wstring& f : file::list_dir(drop.c_str(), L"*.mp3")) {
+				for (const wstring& f : file::list_dir(drop, L"*.mp3")) {
 					file_to_list(f);
 				}
-				for (const wstring& f : file::list_dir(drop.c_str(), L"*.flac")) {
+				for (const wstring& f : file::list_dir(drop, L"*.flac")) {
 					file_to_list(f);
 				}
-				for (const wstring& f : file::list_dir(drop.c_str(), L"*.wav")) {
+				for (const wstring& f : file::list_dir(drop, L"*.wav")) {
 					file_to_list(f);
 				}
 			} else {
@@ -115,18 +111,20 @@ Dlg_Main::Dlg_Main()
 			}
 		}
 
-		update_counter( m_lstFiles.items.count() );
+		update_counter(m_lstFiles.items.count());
 		return TRUE;
 	});
 
-	on_initmenupopup(MNU_OPENFILES, [&](wm::initmenupopup p)
+	on_message(WM_INITMENUPOPUP, [&](wm::initmenupopup p)
 	{
-		menu m = p.hmenu();
-		m.enable_item(MNU_REMSELECTED, m_lstFiles.items.count_selected() > 0);
+		if (p.first_menu_item_id() == MNU_OPENFILES) {
+			menu m = p.hmenu();
+			m.enable_item(MNU_REMSELECTED, m_lstFiles.items.count_selected() > 0);
+		}
 		return TRUE;
 	});
 
-	on_command(MNU_ABOUT, [&](params&)
+	on_command(MNU_ABOUT, [&](wm::command)
 	{
 		sysdlg::msgbox(this, L"About v1.1.6",
 			L"FLAC/LAME graphical front-end.\n"
@@ -135,7 +133,7 @@ Dlg_Main::Dlg_Main()
 		return TRUE;
 	});
 
-	on_command(MNU_OPENFILES, [&](params&)
+	on_command(MNU_OPENFILES, [&](wm::command)
 	{
 		vector<wstring> files;
 		if (sysdlg::open_file(this,
@@ -148,19 +146,19 @@ Dlg_Main::Dlg_Main()
 			for (const wstring& file : files) {
 				file_to_list(file);
 			}
-			update_counter( m_lstFiles.items.count() );
+			update_counter(m_lstFiles.items.count());
 		}
 		return TRUE;
 	});
 
-	on_command(MNU_REMSELECTED, [&](params&)
+	on_command(MNU_REMSELECTED, [&](wm::command)
 	{
 		m_lstFiles.items.remove_selected();
-		update_counter( m_lstFiles.items.count() );
+		update_counter(m_lstFiles.items.count());
 		return TRUE;
 	});
 
-	on_command(IDCANCEL, [&](params&)
+	on_command(IDCANCEL, [&](wm::command)
 	{
 		if (!m_lstFiles.items.count() || IsWindowEnabled(GetDlgItem(hwnd(), BTN_RUN))) {
 			SendMessage(hwnd(), WM_CLOSE, 0, 0); // close on ESC only if not processing
@@ -168,41 +166,46 @@ Dlg_Main::Dlg_Main()
 		return TRUE;
 	});
 
-	on_command(BTN_DEST, [&](params&)
+	on_command(BTN_DEST, [&](wm::command)
 	{
 		wstring folder;
 		if (sysdlg::choose_folder(this, folder)) {
 			m_txtDest.set_text(folder)
 				.selection_set_all()
-				.focus();
+				.set_focus();
 		}
 		return TRUE;
 	});
 
-	on_command({RAD_MP3, RAD_FLAC, RAD_WAV}, [&](params&)
+	on_command({RAD_MP3, RAD_FLAC, RAD_WAV}, [&](wm::command)
 	{
-		m_radMp3Cbr.enable(m_radMp3.is_checked());
-		m_cmbCbr.enable(m_radMp3.is_checked() && m_radMp3Cbr.is_checked());
+		m_radMp3Cbr.set_enable(m_radMp3.is_checked());
+		m_cmbCbr.set_enable(m_radMp3.is_checked() && m_radMp3Cbr.is_checked());
 
-		m_radMp3Vbr.enable(m_radMp3.is_checked());
-		m_cmbVbr.enable(m_radMp3.is_checked() && m_radMp3Vbr.is_checked());
+		m_radMp3Vbr.set_enable(m_radMp3.is_checked());
+		m_cmbVbr.set_enable(m_radMp3.is_checked() && m_radMp3Vbr.is_checked());
 
 		EnableWindow(GetDlgItem(hwnd(), LBL_LEVEL), m_radFlac.is_checked());
-		m_cmbFlac.enable(m_radFlac.is_checked());
+		m_cmbFlac.set_enable(m_radFlac.is_checked());
 		return TRUE;
 	});
 
-	on_command({RAD_CBR, RAD_VBR}, [&](params&)
+	on_command({RAD_CBR, RAD_VBR}, [&](wm::command)
 	{
-		m_cmbCbr.enable(m_radMp3Cbr.is_checked());
-		m_cmbVbr.enable(m_radMp3Vbr.is_checked());
+		m_cmbCbr.set_enable(m_radMp3Cbr.is_checked());
+		m_cmbVbr.set_enable(m_radMp3Vbr.is_checked());
 		return TRUE;
 	});
 
-	on_command(BTN_RUN, [&](params&)
+	on_command(BTN_RUN, [&](wm::command)
 	{
 		vector<wstring> files;
-		if (!dest_folder_is_ok() || !files_exist(files)) {
+		try {
+			validate_dest_folder();
+			files = m_lstFiles.items.get_texts(m_lstFiles.items.get_all(), 0);
+			validate_files_exist(files);
+		} catch (const std::exception& e) {
+			sysdlg::msgbox(this, L"Fail", str::parse_ascii(e.what()), MB_ICONERROR);
 			return TRUE;
 		}
 
@@ -213,7 +216,7 @@ Dlg_Main::Dlg_Main()
 
 		wstring quality;
 		if (m_radMp3.is_checked()) {
-			combo& cmbQuality = (isVbr ? m_cmbVbr : m_cmbCbr);
+			combobox& cmbQuality = (isVbr ? m_cmbVbr : m_cmbCbr);
 			quality = cmbQuality.item_get_selected_text();
 			quality.resize(quality.find_first_of(L' ')); // first characters of chosen option are the quality setting itself
 		} else if (m_radFlac.is_checked()) {
@@ -235,22 +238,22 @@ Dlg_Main::Dlg_Main()
 		return TRUE;
 	});
 
-	on_notify(LST_FILES, LVN_INSERTITEM, [&](params&)
+	on_notify(LST_FILES, LVN_INSERTITEM, [&](wmn::lvn::insertitem)
 	{
 		return update_counter(m_lstFiles.items.count()); // new item inserted
 	});
 
-	on_notify(LST_FILES, LVN_DELETEITEM, [&](params&)
+	on_notify(LST_FILES, LVN_DELETEITEM, [&](wmn::lvn::deleteitem)
 	{
 		return update_counter(m_lstFiles.items.count() - 1); // item about to be deleted
 	});
 
-	on_notify(LST_FILES, LVN_DELETEALLITEMS, [&](params&)
+	on_notify(LST_FILES, LVN_DELETEALLITEMS, [&](wmn::lvn::deleteallitems)
 	{
 		return update_counter(0); // all items about to be deleted
 	});
 
-	on_notify(LST_FILES, LVN_KEYDOWN, [&](wm::lvn_keydown p)
+	on_notify(LST_FILES, LVN_KEYDOWN, [&](wmn::lvn::keydown p)
 	{
 		if (p.nmhdr().wVKey == VK_DELETE) {
 			SendMessage(hwnd(), WM_COMMAND, MAKEWPARAM(MNU_REMSELECTED, 0), 0);
@@ -260,83 +263,56 @@ Dlg_Main::Dlg_Main()
 	});
 }
 
-bool Dlg_Main::preliminar_checks()
+void Dlg_Main::validate_ini()
 {
 	// Validate and load INI file.
-	wstring iniPath = sys::get_exe_path().append(L"\\FlacLameFE.ini");
+	wstring iniPath = path::get::exe_itself().append(L"\\FlacLameFE.ini");
 	if (!file::exists(iniPath)) {
-		sysdlg::msgbox(this, L"Fail",
-			str::format(L"File not found:\n%s", iniPath.c_str()),
-			MB_ICONERROR);
-		return false;
+		throw std::runtime_error(str::to_ascii(
+			str::format(L"File not found:\n%s", iniPath) ));
 	}
 
-	wstring err;
-	if (!m_iniFile.load_from_file(iniPath, &err)) {
-		sysdlg::msgbox(this, L"Fail",
-			str::format(L"Failed to load:\n%s\n%s", iniPath.c_str(), err.c_str()),
-			MB_ICONERROR);
-		return false;
-	}
-
-	// Validate tools.
-	if (!Convert::paths_are_valid(m_iniFile, &err)) {
-		sysdlg::msgbox(this, L"Fail", err, MB_ICONERROR);
-		return false;
-	}
-
-	return true;
+	m_iniFile.load_from_file(iniPath);
+	Convert::validate_paths(m_iniFile); // validate tools
 }
 
-DWORD Dlg_Main::num_processors() const
-{
-	SYSTEM_INFO si = { 0 };
-	GetSystemInfo(&si);
-	return si.dwNumberOfProcessors;
-}
-
-bool Dlg_Main::dest_folder_is_ok()
+void Dlg_Main::validate_dest_folder()
 {
 	wstring destFolder = m_txtDest.get_text();
-	if (!destFolder.empty()) {
-		if (!file::exists(destFolder)) {
-			int q = sysdlg::msgbox(this, L"Create directory",
-				str::format(L"The following directory:\n%s\ndoes not exist. Create it?", destFolder.c_str()),
-				MB_ICONQUESTION | MB_YESNO);
-			if (q == IDYES) {
-				wstring err;
-				if (!file::create_dir(destFolder, &err)) {
-					sysdlg::msgbox(this, L"Fail",
-						str::format(L"The directory failed to be created:\n%s\n%s", destFolder.c_str(), err.c_str()),
-						MB_ICONERROR);
-					return false; // halt
-				}
-			} else { // user didn't want to create the new dir
-				return false; // halt
+	if (destFolder.empty()) return;
+
+	if (!file::exists(destFolder)) {
+		int q = sysdlg::msgbox(this, L"Create directory",
+			str::format(L"The following directory:\n%s\ndoes not exist. Create it?",
+				destFolder),
+			MB_ICONQUESTION | MB_YESNO);
+		
+		if (q == IDYES) {
+			try {
+				file::create_dir(destFolder);
+			} catch (const std::exception& e) {
+				throw std::runtime_error(str::to_ascii(
+					str::format(L"The directory failed to be created:\n%s\n%s",
+						destFolder, str::parse_ascii(e.what())) ));
 			}
-		} else if (!file::is_dir(destFolder)) {
-			sysdlg::msgbox(this, L"Fail",
-				str::format(L"The following path is not a directory:\n%s", destFolder.c_str()),
-				MB_ICONERROR);
-			return false; // halt
+		} else { // user didn't want to create the new dir
+			return; // halt
 		}
+	} else if (!file::is_dir(destFolder)) {
+		throw std::runtime_error(str::to_ascii(
+			str::format(L"The following path is not a directory:\n%s",
+				destFolder) ));
 	}
-	return true;
 }
 
-bool Dlg_Main::files_exist(vector<wstring>& files)
+void Dlg_Main::validate_files_exist(const vector<wstring>& files)
 {
-	files = m_lstFiles.items.get_texts(m_lstFiles.items.get_all(), 0);
-
 	for (const wstring& f : files) { // each filepath
 		if (!file::exists(f)) {
-			sysdlg::msgbox(this, L"Fail",
-				str::format(L"Process aborted, file does not exist:\n%s", f.c_str()),
-				MB_ICONERROR);
-			return false; // halt
+			throw std::runtime_error(str::to_ascii(
+				str::format(L"Process aborted, file does not exist:\n%s", f) ));
 		}
 	}
-	return true;
 }
 
 INT_PTR Dlg_Main::update_counter(size_t newCount)

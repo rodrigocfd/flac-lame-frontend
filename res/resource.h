@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by FlacLameFE.rc
+// Used by flac-lame-frontend.rc
 //
 #define DLG_MAIN                        101
 #define ICO_MAIN                        102

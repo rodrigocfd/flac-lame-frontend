@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{08BA0597-7B2D-438C-8486-00BD4BBE9E04}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>flaclamefrontend</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir);$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="res\resource.h" />
+    <ClInclude Include="src\Convert.h" />
+    <ClInclude Include="src\Dlg_Main.h" />
+    <ClInclude Include="src\Dlg_Runnin.h" />
+    <ClInclude Include="src\std.h" />
+    <ClInclude Include="winlamb\button.h" />
+    <ClInclude Include="winlamb\checkbox.h" />
+    <ClInclude Include="winlamb\com.h" />
+    <ClInclude Include="winlamb\combobox.h" />
+    <ClInclude Include="winlamb\datetime.h" />
+    <ClInclude Include="winlamb\datetime_picker.h" />
+    <ClInclude Include="winlamb\device_context.h" />
+    <ClInclude Include="winlamb\dialog_control.h" />
+    <ClInclude Include="winlamb\dialog_main.h" />
+    <ClInclude Include="winlamb\dialog_modal.h" />
+    <ClInclude Include="winlamb\dialog_modeless.h" />
+    <ClInclude Include="winlamb\download.h" />
+    <ClInclude Include="winlamb\file.h" />
+    <ClInclude Include="winlamb\file_ini.h" />
+    <ClInclude Include="winlamb\file_mapped.h" />
+    <ClInclude Include="winlamb\font.h" />
+    <ClInclude Include="winlamb\icon.h" />
+    <ClInclude Include="winlamb\image_list.h" />
+    <ClInclude Include="winlamb\internals\com_bstr.h" />
+    <ClInclude Include="winlamb\internals\com_lib.h" />
+    <ClInclude Include="winlamb\internals\com_ptr.h" />
+    <ClInclude Include="winlamb\internals\com_variant.h" />
+    <ClInclude Include="winlamb\internals\dialog.h" />
+    <ClInclude Include="winlamb\internals\download_session.h" />
+    <ClInclude Include="winlamb\internals\download_url.h" />
+    <ClInclude Include="winlamb\internals\has_enable.h" />
+    <ClInclude Include="winlamb\internals\has_focus.h" />
+    <ClInclude Include="winlamb\internals\has_text.h" />
+    <ClInclude Include="winlamb\internals\hover_scroll.h" />
+    <ClInclude Include="winlamb\internals\hwnd_wrapper.h" />
+    <ClInclude Include="winlamb\internals\inventory.h" />
+    <ClInclude Include="winlamb\internals\listview_column_collection.h" />
+    <ClInclude Include="winlamb\internals\listview_item.h" />
+    <ClInclude Include="winlamb\internals\listview_item_collection.h" />
+    <ClInclude Include="winlamb\internals\loop.h" />
+    <ClInclude Include="winlamb\internals\member_image_list.h" />
+    <ClInclude Include="winlamb\internals\native_control.h" />
+    <ClInclude Include="winlamb\internals\params.h" />
+    <ClInclude Include="winlamb\internals\params_wm.h" />
+    <ClInclude Include="winlamb\internals\params_wmn.h" />
+    <ClInclude Include="winlamb\internals\path_get.h" />
+    <ClInclude Include="winlamb\internals\run.h" />
+    <ClInclude Include="winlamb\internals\store.h" />
+    <ClInclude Include="winlamb\internals\styler.h" />
+    <ClInclude Include="winlamb\internals\treeview_item.h" />
+    <ClInclude Include="winlamb\internals\treeview_item_collection.h" />
+    <ClInclude Include="winlamb\internals\ui_thread.h" />
+    <ClInclude Include="winlamb\internals\user_control.h" />
+    <ClInclude Include="winlamb\internals\window.h" />
+    <ClInclude Include="winlamb\label.h" />
+    <ClInclude Include="winlamb\lazy_map.h" />
+    <ClInclude Include="winlamb\listview.h" />
+    <ClInclude Include="winlamb\menu.h" />
+    <ClInclude Include="winlamb\path.h" />
+    <ClInclude Include="winlamb\progressbar.h" />
+    <ClInclude Include="winlamb\progress_taskbar.h" />
+    <ClInclude Include="winlamb\resizer.h" />
+    <ClInclude Include="winlamb\statusbar.h" />
+    <ClInclude Include="winlamb\str.h" />
+    <ClInclude Include="winlamb\subclass.h" />
+    <ClInclude Include="winlamb\sysdlg.h" />
+    <ClInclude Include="winlamb\textbox.h" />
+    <ClInclude Include="winlamb\thread.h" />
+    <ClInclude Include="winlamb\treeview.h" />
+    <ClInclude Include="winlamb\version.h" />
+    <ClInclude Include="winlamb\window_control.h" />
+    <ClInclude Include="winlamb\window_main.h" />
+    <ClInclude Include="winlamb\xml.h" />
+    <ClInclude Include="winlamb\zip.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Convert.cpp" />
+    <ClCompile Include="src\Dlg_Main.cpp" />
+    <ClCompile Include="src\Dlg_Runnin.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\Ron Burgundy.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="res\flac-lame-frontend.rc" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
