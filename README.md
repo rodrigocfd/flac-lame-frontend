@@ -16,6 +16,8 @@ WinLamb by no means covers the whole Win32 API, simply because it's too huge. It
 
 WinLamb is a header-only library. You can clone the repository or simply download the files; once referenced in your source code, it should work right away.
 
+It has been tested with Visual C++ 2017.
+
 ### Example
 
 This is a simple Win32 program written with WinLamb. Each window has a class, and messages are handled with C++11 lambdas. There's no need to write a message loop or window registering.
@@ -25,8 +27,7 @@ This is a simple Win32 program written with WinLamb. Each window has a class, an
 
 #include "winlamb/window_main.h"
 
-class SimpleMainWindow : public wl::window_main
-{
+class SimpleMainWindow : public wl::window_main {
 public:
   SimpleMainWindow();
 };
@@ -44,21 +45,22 @@ SimpleMainWindow::SimpleMainWindow()
   setup.title = L"This is my window";
   setup.style |= WS_MINIMIZEBOX;
 
-  on_message(WM_CREATE, [&](wl::params p)->LRESULT
+  on_message(WM_CREATE, [this](wl::wm::create p)->LRESULT
   {
     set_text(L"A new title for the window");
     return 0;
   });
 
-  on_message(WM_LBUTTONDOWN, [&](wl::params p)->LRESULT
+  on_message(WM_LBUTTONDOWN, [](wl::wm::lbuttondown p)->LRESULT
   {
-    set_text(L"Window clicked!");
+    bool isCtrlDown = p.has_ctrl();
+    long xPos = p.pos().x;
     return 0;
   });
 }
 ````
 
-Full real-world projects can be seen browsing [winlamb tag](https://github.com/topics/winlamb).
+Full real-world projects can be seen browsing [winlamb topic](https://github.com/topics/winlamb).
 
 ### License
 
