@@ -15,12 +15,12 @@ void Convert::validate_paths(const file_ini& ini)
 	}
 
 	// Search for FLAC and LAME tools.
-	if (!file::exists(ini[L"Tools"][L"lame"])) {
+	if (!file::util::exists(ini[L"Tools"][L"lame"])) {
 		throw runtime_error(str::to_ascii(
 			str::format(L"Could not find LAME tool at:\n%s",
 				ini[L"Tools"][L"lame"]) ));
 	}
-	if (!file::exists(ini[L"Tools"][L"flac"])) {
+	if (!file::util::exists(ini[L"Tools"][L"flac"])) {
 		throw runtime_error(str::to_ascii(
 			str::format(L"Could not find FLAC tool at:\n%s",
 				ini[L"Tools"][L"lame"]) ));
@@ -152,7 +152,7 @@ void Convert::_validate_dest_folder(wstring& dest)
 
 	path::trim_backslash(dest);
 
-	if (!file::is_dir(dest)) {
+	if (!file::util::is_dir(dest)) {
 		throw runtime_error(str::to_ascii(
 			str::format(L"Destination is not a folder:\n%s", dest) ));
 	}
@@ -171,7 +171,7 @@ void Convert::_execute(const wstring& cmdLine, const wstring& src, bool delSrc)
 	_raw_execute(cmdLine); // run tool
 
 	if (delSrc) {
-		file::del(src); // delete source file
+		file::util::del(src); // delete source file
 	}
 }
 

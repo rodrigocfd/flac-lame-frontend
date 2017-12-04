@@ -97,14 +97,14 @@ Dlg_Main::Dlg_Main()
 		vector<wstring> files = p.files();
 
 		for (const wstring& drop : files) {
-			if (file::is_dir(drop)) { // if a directory, add all files inside of it
-				for (const wstring& f : file::list_dir(drop, L"*.mp3")) {
+			if (file::util::is_dir(drop)) { // if a directory, add all files inside of it
+				for (const wstring& f : file::util::list_dir(drop, L"*.mp3")) {
 					file_to_list(f);
 				}
-				for (const wstring& f : file::list_dir(drop, L"*.flac")) {
+				for (const wstring& f : file::util::list_dir(drop, L"*.flac")) {
 					file_to_list(f);
 				}
-				for (const wstring& f : file::list_dir(drop, L"*.wav")) {
+				for (const wstring& f : file::util::list_dir(drop, L"*.wav")) {
 					file_to_list(f);
 				}
 			} else {
@@ -268,7 +268,7 @@ void Dlg_Main::validate_ini()
 {
 	// Validate and load INI file.
 	wstring iniPath = path::get::exe_itself().append(L"\\FlacLameFE.ini");
-	if (!file::exists(iniPath)) {
+	if (!file::util::exists(iniPath)) {
 		throw std::runtime_error(str::to_ascii(
 			str::format(L"File not found:\n%s", iniPath) ));
 	}
@@ -282,7 +282,7 @@ void Dlg_Main::validate_dest_folder()
 	wstring destFolder = m_txtDest.get_text();
 	if (destFolder.empty()) return;
 
-	if (!file::exists(destFolder)) {
+	if (!file::util::exists(destFolder)) {
 		int q = sysdlg::msgbox(this, L"Create directory",
 			str::format(L"The following directory:\n%s\ndoes not exist. Create it?",
 				destFolder),
@@ -290,7 +290,7 @@ void Dlg_Main::validate_dest_folder()
 		
 		if (q == IDYES) {
 			try {
-				file::create_dir(destFolder);
+				file::util::create_dir(destFolder);
 			} catch (const std::exception& e) {
 				throw std::runtime_error(str::to_ascii(
 					str::format(L"The directory failed to be created:\n%s\n%s",
@@ -299,7 +299,7 @@ void Dlg_Main::validate_dest_folder()
 		} else { // user didn't want to create the new dir
 			return; // halt
 		}
-	} else if (!file::is_dir(destFolder)) {
+	} else if (!file::util::is_dir(destFolder)) {
 		throw std::runtime_error(str::to_ascii(
 			str::format(L"The following path is not a directory:\n%s",
 				destFolder) ));
@@ -309,7 +309,7 @@ void Dlg_Main::validate_dest_folder()
 void Dlg_Main::validate_files_exist(const vector<wstring>& files)
 {
 	for (const wstring& f : files) { // each filepath
-		if (!file::exists(f)) {
+		if (!file::util::exists(f)) {
 			throw std::runtime_error(str::to_ascii(
 				str::format(L"Process aborted, file does not exist:\n%s", f) ));
 		}
