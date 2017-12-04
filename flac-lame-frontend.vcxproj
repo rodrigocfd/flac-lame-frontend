@@ -170,6 +170,7 @@
     <ClInclude Include="winlamb\internals\com_lib.h" />
     <ClInclude Include="winlamb\internals\com_ptr.h" />
     <ClInclude Include="winlamb\internals\com_variant.h" />
+    <ClInclude Include="winlamb\internals\device_context_objects.h" />
     <ClInclude Include="winlamb\internals\dialog.h" />
     <ClInclude Include="winlamb\internals\download_session.h" />
     <ClInclude Include="winlamb\internals\download_url.h" />
