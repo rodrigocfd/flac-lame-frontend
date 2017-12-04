@@ -35,10 +35,10 @@ public:
 		this->abort();
 	}
 
-	download(const session& sess, std::wstring url, std::wstring verb = L"GET")
+	download(const session& sess, std::wstring url, std::wstring verb = L"GET") noexcept
 		: _session(sess), _url(url), _verb(verb) { }
 
-	download& abort() {
+	download& abort() noexcept {
 		if (this->_hRequest) {
 			WinHttpCloseHandle(this->_hRequest);
 			this->_hRequest = nullptr;
@@ -51,26 +51,29 @@ public:
 		return *this;
 	}
 
-	download& add_request_header(const wchar_t* name, const wchar_t* value) {
+	download& add_request_header(const wchar_t* name, const wchar_t* value) noexcept {
 		this->_requestHeaders[name] = value;
 		return *this;
 	}
 
-	download& set_referrer(const std::wstring& referrer) {
+	download& set_referrer(const std::wstring& referrer) noexcept {
 		this->_referrer = referrer;
 		return *this;
 	}
 
-	download& on_start(std::function<void()> callback) {
+	// Defines a lambda to be called once, right after the download starts.
+	download& on_start(std::function<void()> callback) noexcept {
 		this->_startCallback = std::move(callback);
 		return *this;
 	}
 
-	download& on_progress(std::function<void()> callback) {
+	// Defines a lambda do be called each time a chunk of bytes is received.
+	download& on_progress(std::function<void()> callback) noexcept {
 		this->_progressCallback = std::move(callback);
 		return *this;
 	}
 
+	// Effectively starts the download, returning only after it completes.
 	download& start() {
 		if (this->_hConnect) {
 			throw std::logic_error("A download is already in progress.");
@@ -102,14 +105,15 @@ public:
 		return this->abort(); // cleanup
 	}
 
-	const lazy_map<std::wstring, std::wstring>& get_request_headers() const  { return this->_requestHeaders; }
-	const lazy_map<std::wstring, std::wstring>& get_response_headers() const { return this->_responseHeaders; }
-	size_t                                      get_content_length() const   { return this->_contentLength; }
-	size_t                                      get_total_downloaded() const { return this->_totalGot; }
+	const lazy_map<std::wstring, std::wstring>& get_request_headers() const noexcept  { return this->_requestHeaders; }
+	const lazy_map<std::wstring, std::wstring>& get_response_headers() const noexcept { return this->_responseHeaders; }
+	size_t                                      get_content_length() const noexcept   { return this->_contentLength; }
+	size_t                                      get_total_downloaded() const noexcept { return this->_totalGot; }
 
-	float get_percent() const {
+	// If server informed content length, returns a value between 0 and 100.
+	float get_percent() const noexcept {
 		return this->_contentLength ?
-			(static_cast<float>(this->_totalGot) / this->_contentLength) * 100 : // 0 to 100
+			(static_cast<float>(this->_totalGot) / this->_contentLength) * 100 :
 			0;
 	}
 

@@ -25,19 +25,19 @@ public:
 	}
 
 	image_list() = default;
-	image_list(image_list&& other) { this->operator=(std::move(other)); }
+	image_list(image_list&& other) noexcept { this->operator=(std::move(other)); }
 
-	HIMAGELIST himagelist() const {
+	HIMAGELIST himagelist() const noexcept {
 		return this->_hImgList;
 	}
 
-	image_list& operator=(image_list&& other) {
+	image_list& operator=(image_list&& other) noexcept {
 		this->destroy();
 		std::swap(this->_hImgList, other._hImgList);
 		return *this;
 	}
 
-	image_list& destroy() {
+	image_list& destroy() noexcept {
 		if (this->_hImgList) {
 			ImageList_Destroy(this->_hImgList);
 			this->_hImgList = nullptr;
@@ -91,8 +91,9 @@ public:
 			reinterpret_cast<HINSTANCE>(GetWindowLongPtrW(hParent, GWLP_HINSTANCE)));
 	}
 
+	// Loads the icon used by Windows Explorer to represent the given file type.
 	image_list& load_from_shell(const wchar_t* fileExtension) {
-		icon::res iRes = icon::resolution_resolve_type(this->resolution());
+		icon::res iRes = icon::util::resolve_resolution_type(this->resolution());
 		if (iRes == icon::res::OTHER) {
 			throw std::logic_error("Trying to load icon from shell with unsupported resolution.");
 		}
@@ -101,6 +102,7 @@ public:
 		return this->load(tmpIco);
 	}
 
+	// Loads the icon used by Windows Explorer to represent the given file type.
 	image_list& load_from_shell(std::initializer_list<const wchar_t*> fileExtensions) {
 		for (const wchar_t* ext : fileExtensions) {
 			this->load_from_shell(ext);
@@ -108,7 +110,7 @@ public:
 		return *this;
 	}
 
-	SIZE resolution() const {
+	SIZE resolution() const noexcept {
 		SIZE buf{};
 		if (this->_hImgList) {
 			ImageList_GetIconSize(this->_hImgList,
@@ -117,7 +119,7 @@ public:
 		return buf;
 	}
 
-	size_t size() const {
+	size_t size() const noexcept {
 		return this->_hImgList ? ImageList_GetImageCount(this->_hImgList) : 0;
 	}
 };
