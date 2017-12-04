@@ -21,12 +21,12 @@ public:
 		return this->sections.operator[](sectionName);
 	}
 
-	lazy_map<std::wstring, std::wstring>& operator[](const std::wstring& sectionName) {
+	lazy_map<std::wstring, std::wstring>& operator[](const std::wstring& sectionName) noexcept {
 		return this->sections.operator[](sectionName);
 	}
 
 	file_ini& load_from_file(const wchar_t* filePath) {
-		std::wstring content = str::parse_blob(file_mapped::quick_read(filePath));
+		std::wstring content = str::parse_blob(file_mapped::util::read(filePath));
 		std::vector<std::wstring> lines = str::explode(content, str::get_linebreak(content));
 		lazy_map<std::wstring, std::wstring>* curSection = nullptr;
 		std::wstring tmpName, tmpValue; // temporary buffers
@@ -54,14 +54,15 @@ public:
 	}
 
 	file_ini& save_to_file(const wchar_t* filePath) const {
-		file::quick_write(filePath,
+		file::util::write(filePath,
 			str::to_utf8_blob(this->serialize(), str::write_bom::YES));
 	}
 
 	file_ini& load_from_file(const std::wstring& filePath)     { return this->load_from_file(filePath.c_str()); }
 	file_ini& save_to_file(const std::wstring& filePath) const { return this->save_to_file(filePath.c_str()); }
 
-	std::wstring serialize() const {
+	// Returns the INI contents as a string, ready to be written to a file.
+	std::wstring serialize() const noexcept {
 		std::wstring out;
 		bool isFirst = true;
 

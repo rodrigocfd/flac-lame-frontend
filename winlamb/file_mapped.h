@@ -23,9 +23,9 @@ public:
 	}
 
 	file_mapped() = default;
-	file_mapped(file_mapped&& other) { this->operator=(std::move(other)); }
+	file_mapped(file_mapped&& other) noexcept { this->operator=(std::move(other)); }
 
-	file_mapped& operator=(file_mapped&& other) {
+	file_mapped& operator=(file_mapped&& other) noexcept {
 		this->close();
 		std::swap(this->_file, other._file);
 		std::swap(this->_hMap, other._hMap);
@@ -33,12 +33,12 @@ public:
 		return *this;
 	}
 
-	file::access access_type() const { return this->_file.access_type(); }
-	size_t       size()              { return this->_file.size(); }
-	BYTE*        p_mem() const       { return reinterpret_cast<BYTE*>(this->_pMem); }
-	BYTE*        p_past_mem()        { return p_mem() + this->size(); }
+	file::access access_type() const noexcept { return this->_file.access_type(); }
+	size_t       size() noexcept              { return this->_file.size(); }
+	BYTE*        p_mem() const noexcept       { return reinterpret_cast<BYTE*>(this->_pMem); }
+	BYTE*        p_past_mem() noexcept        { return p_mem() + this->size(); }
 
-	file_mapped& close() {
+	file_mapped& close() noexcept {
 		if (this->_pMem) {
 			UnmapViewOfFile(this->_pMem);
 			this->_pMem = nullptr;
@@ -91,17 +91,15 @@ private:
 	}
 
 public:
+	// This method will truncate or expand the file, according to the new size.
 	file_mapped& set_new_size(size_t newSize) {
-		// This method will truncate or expand the file, according to the new size.
-		// It will probably fail if file was opened as read-only.
-
 		this->_check_file_mapped();
 
 		// Unmap file, but keep it open.
 		UnmapViewOfFile(this->_pMem);
 		CloseHandle(this->_hMap);
 
-		// Truncate/expand file.
+		// Truncate/expand file, probably fail if file was opened as read-only.
 		this->_file.set_new_size(newSize);
 
 		auto tooBad = [this](DWORD err, const char* msg)->void {
@@ -124,6 +122,7 @@ public:
 		return *this;
 	}
 
+	// Reads file content, by default all at once.
 	file_mapped& read_to_buffer(std::vector<BYTE>& buf, size_t offset = 0, size_t numBytes = -1) {
 		this->_check_file_mapped();
 		if (offset >= this->size()) {
@@ -137,6 +136,7 @@ public:
 		return *this;
 	}
 
+	// Retrieves file content, by default all at once.
 	std::vector<BYTE> read(size_t offset = 0, size_t numBytes = -1) {
 		std::vector<BYTE> buf;
 		this->read_to_buffer(buf, offset, numBytes);
@@ -144,20 +144,26 @@ public:
 	}
 
 public:
-	static void quick_read_to_buffer(const wchar_t* filePath, std::vector<BYTE>& buf) {
-		file_mapped fin;
-		fin.open(filePath, file::access::READONLY);
-		fin.read_to_buffer(buf);
-	}
+	class util final {
+	private:
+		util() = delete;
 
-	static std::vector<BYTE> quick_read(const wchar_t* filePath) {
-		std::vector<BYTE> buf;
-		quick_read_to_buffer(filePath, buf);
-		return buf;
-	}
+	public:
+		static void read_to_buffer(const wchar_t* filePath, std::vector<BYTE>& buf) {
+			file_mapped fin;
+			fin.open(filePath, file::access::READONLY);
+			fin.read_to_buffer(buf);
+		}
 
-	static void              quick_read_to_buffer(const std::wstring& filePath, std::vector<BYTE>& buf) { quick_read_to_buffer(filePath.c_str(), buf); }
-	static std::vector<BYTE> quick_read(const std::wstring& filePath)                                   { return quick_read(filePath.c_str()); }
+		static std::vector<BYTE> read(const wchar_t* filePath) {
+			std::vector<BYTE> buf;
+			read_to_buffer(filePath, buf);
+			return buf;
+		}
+
+		static void              read_to_buffer(const std::wstring& filePath, std::vector<BYTE>& buf) { read_to_buffer(filePath.c_str(), buf); }
+		static std::vector<BYTE> read(const std::wstring& filePath)                                   { return read(filePath.c_str()); }
+	};
 };
 
 }//namespace wl
