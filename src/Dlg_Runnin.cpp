@@ -7,20 +7,8 @@
 #include "res/resource.h"
 using namespace wl;
 
-Dlg_Runnin::Dlg_Runnin(
-	progress_taskbar&      taskBar,
-	size_t                 numThreads,
-	target                 targetType,
-	const vector<wstring>& files,
-	bool                   delSrc,
-	bool                   isVbr,
-	wstring                quality,
-	const file_ini&        ini,
-	wstring                destFolder
-)
-	: m_taskbarProgr(taskBar), m_numThreads(numThreads), m_targetType(targetType),
-		m_files(files), m_delSrc(delSrc), m_isVbr(isVbr), m_quality(quality), m_ini(ini),
-		m_destFolder(destFolder), m_curFile(0), m_filesDone(0)
+Dlg_Runnin::Dlg_Runnin(progress_taskbar& taskbarProgr, const file_ini& iniFile)
+	: m_taskbarProgr(taskbarProgr), m_iniFile(iniFile)
 {
 	setup.dialogId = DLG_RUNNIN;
 
@@ -29,14 +17,14 @@ Dlg_Runnin::Dlg_Runnin(
 		m_lbl.assign(this, LBL_STATUS);
 		m_prog.assign(this, PRO_STATUS);
 
-		m_prog.set_range(0, m_files.size());
+		m_prog.set_range(0, opts.files.size());
 		m_taskbarProgr.set_pos(0);
-		m_lbl.set_text( str::format(L"0 of %u files finished...", m_files.size()) ); // initial text
+		m_lbl.set_text( str::format(L"0 of %u files finished...", opts.files.size()) ); // initial text
 		m_time0.set_now(); // start timer
 
 		// Proceed to the file conversion straight away.
-		size_t batchSz = (m_numThreads < m_files.size()) ?
-			m_numThreads : m_files.size(); // limit parallel processing
+		size_t batchSz = (opts.numThreads < opts.files.size()) ?
+			opts.numThreads : opts.files.size(); // limit parallel processing
 
 		for (size_t i = 0; i < batchSz; ++i) {
 			thread::run_detached([&]() {
@@ -57,23 +45,23 @@ Dlg_Runnin::Dlg_Runnin(
 void Dlg_Runnin::process_next_file()
 {
 	size_t curIndex = m_curFile++;
-	if (curIndex >= m_files.size()) return;
+	if (curIndex >= opts.files.size()) return;
 
-	const wstring& file = m_files[curIndex];
+	const wstring& file = opts.files[curIndex];
 
 	try {
-	switch (m_targetType) {
+		switch (opts.targetType) {
 		case target::MP3:
-			Convert::to_mp3(m_ini, file, m_destFolder, m_delSrc, m_quality, m_isVbr);
+			Convert::to_mp3(m_iniFile, file, opts.destFolder, opts.delSrc, opts.quality, opts.isVbr);
 			break;
 		case target::FLAC:
-			Convert::to_flac(m_ini, file, m_destFolder, m_delSrc, m_quality);
+			Convert::to_flac(m_iniFile, file, opts.destFolder, opts.delSrc, opts.quality);
 			break;
 		case target::WAV:
-			Convert::to_wav(m_ini, file, m_destFolder, m_delSrc);
+			Convert::to_wav(m_iniFile, file, opts.destFolder, opts.delSrc);
 		}
 	} catch (const std::exception& e) {
-		m_curFile = m_files.size(); // error, so avoid further processing
+		m_curFile = opts.files.size(); // error, so avoid further processing
 		run_ui_thread([&]() {
 			sysdlg::msgbox(this, L"Conversion failed",
 				str::format(L"File #%u:\n%s\n%s",
@@ -88,19 +76,19 @@ void Dlg_Runnin::process_next_file()
 	++m_filesDone;
 	run_ui_thread([&]() {
 		m_prog.set_pos(m_filesDone);
-		m_taskbarProgr.set_pos(m_filesDone, m_files.size());
+		m_taskbarProgr.set_pos(m_filesDone, opts.files.size());
 		m_lbl.set_text( str::format(L"%u of %u files finished...",
-			m_filesDone, m_files.size()) );
+			m_filesDone, opts.files.size()) );
 	});
 
-	if (m_filesDone < m_files.size()) { // more files to come
+	if (m_filesDone < opts.files.size()) { // more files to come
 		process_next_file();
 	} else { // finished all processing
 		run_ui_thread([&]() {
 			datetime fin;
 			sysdlg::msgbox(this, L"Conversion finished",
 				str::format(L"%u files processed in %.2f seconds.",
-					m_files.size(), static_cast<double>(fin.minus(m_time0)) / 1000),
+					opts.files.size(), static_cast<double>(fin.minus(m_time0)) / 1000),
 				MB_ICONINFORMATION);
 			m_taskbarProgr.clear();
 			EndDialog(hwnd(), IDOK); // finally close dialog

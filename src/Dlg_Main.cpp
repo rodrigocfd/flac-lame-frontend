@@ -137,7 +137,7 @@ Dlg_Main::Dlg_Main()
 	on_command(MNU_OPENFILES, [&](wm::command)
 	{
 		vector<wstring> files;
-		if (sysdlg::open_file(this,
+		if (sysdlg::open_files(this,
 			L"Supported audio files (*.mp3, *.flac, *.wav)|*.mp3;*.flac;*.wav|"
 			L"MP3 audio files (*.mp3)|*.mp3|"
 			L"FLAC audio files (*.flac)|*.flac|"
@@ -200,6 +200,9 @@ Dlg_Main::Dlg_Main()
 
 	on_command(BTN_RUN, [&](wm::command)
 	{
+		Dlg_Runnin rd(m_taskbarProg, m_iniFile);
+		rd.opts.destFolder = m_txtDest.get_text();
+
 		vector<wstring> files;
 		try {
 			validate_dest_folder();
@@ -209,32 +212,29 @@ Dlg_Main::Dlg_Main()
 			sysdlg::msgbox(this, L"Fail", str::parse_ascii(e.what()), MB_ICONERROR);
 			return TRUE;
 		}
+		rd.opts.files = std::move(files);
 
 		// Retrieve settings.
-		bool delSrc = m_chkDelSrc.is_checked();
-		bool isVbr = m_radMp3Vbr.is_checked();
-		size_t numThreads = std::stoul(m_cmbNumThreads.item_get_selected_text());
+		rd.opts.delSrc = m_chkDelSrc.is_checked();
+		rd.opts.isVbr = m_radMp3Vbr.is_checked();
+		rd.opts.numThreads = std::stoul(m_cmbNumThreads.item_get_selected_text());
 
 		wstring quality;
 		if (m_radMp3.is_checked()) {
-			combobox& cmbQuality = (isVbr ? m_cmbVbr : m_cmbCbr);
+			combobox& cmbQuality = (rd.opts.isVbr ? m_cmbVbr : m_cmbCbr);
 			quality = cmbQuality.item_get_selected_text();
 			quality.resize(quality.find_first_of(L' ')); // first characters of chosen option are the quality setting itself
 		} else if (m_radFlac.is_checked()) {
 			quality = m_cmbFlac.item_get_selected_text(); // text is quality setting itself
 		}
+		rd.opts.quality = std::move(quality);
 
 		// Which format are we converting to?
-		Dlg_Runnin::target targetType = Dlg_Runnin::target::NONE;
-
-		if (m_radMp3.is_checked())       targetType = Dlg_Runnin::target::MP3;
-		else if (m_radFlac.is_checked()) targetType = Dlg_Runnin::target::FLAC;
-		else if (m_radWav.is_checked())  targetType = Dlg_Runnin::target::WAV;
+		if (m_radMp3.is_checked())       rd.opts.targetType = Dlg_Runnin::target::MP3;
+		else if (m_radFlac.is_checked()) rd.opts.targetType = Dlg_Runnin::target::FLAC;
+		else if (m_radWav.is_checked())  rd.opts.targetType = Dlg_Runnin::target::WAV;
 
 		// Finally invoke dialog.
-		Dlg_Runnin rd(m_taskbarProg, numThreads, targetType,
-			files, delSrc, isVbr, quality, m_iniFile,
-			m_txtDest.get_text());
 		rd.show(this);
 		return TRUE;
 	});
@@ -301,8 +301,7 @@ void Dlg_Main::validate_dest_folder()
 		}
 	} else if (!file::util::is_dir(destFolder)) {
 		throw std::runtime_error(str::to_ascii(
-			str::format(L"The following path is not a directory:\n%s",
-				destFolder) ));
+			str::format(L"The following path is not a directory:\n%s", destFolder) ));
 	}
 }
 
