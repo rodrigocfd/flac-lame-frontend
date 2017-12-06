@@ -74,6 +74,7 @@ Dlg_Main::Dlg_Main()
 		m_radWav   .assign(this, RAD_WAV);
 
 		m_chkDelSrc.assign(this, CHK_DELSRC);
+		m_btnRun.assign(this, BTN_RUN);
 
 		// Layout control when resizing.
 		m_resz.add(this, LST_FILES, resizer::go::RESIZE, resizer::go::RESIZE)
@@ -167,7 +168,7 @@ Dlg_Main::Dlg_Main()
 
 	on_command(IDCANCEL, [&](wm::command)
 	{
-		if (!m_lstFiles.items.count() || IsWindowEnabled(GetDlgItem(hwnd(), BTN_RUN))) {
+		if (!m_lstFiles.items.count() || m_btnRun.is_enabled()) {
 			SendMessage(hwnd(), WM_CLOSE, 0, 0); // close on ESC only if not processing
 		}
 		return TRUE;
@@ -326,9 +327,8 @@ INT_PTR Dlg_Main::update_counter(size_t newCount)
 	// Update counter on Run button.
 	wstring caption = newCount ?
 		str::format(L"&Run (%d)", newCount) : L"&Run";
-
-	SetWindowText(GetDlgItem(hwnd(), BTN_RUN), caption.c_str());
-	EnableWindow(GetDlgItem(hwnd(), BTN_RUN), newCount > 0); // Run button enabled if at least 1 file
+	m_btnRun.set_text(caption)
+		.set_enable(newCount > 0); // Run button enabled if at least 1 file
 	return 0;
 };
 

@@ -2,6 +2,7 @@
 #pragma once
 #include "std.h"
 #include <winlamb/dialog_main.h>
+#include <winlamb/button.h>
 #include <winlamb/checkbox.h>
 #include <winlamb/combobox.h>
 #include <winlamb/file_ini.h>
@@ -20,6 +21,7 @@ private:
 	wl::combobox         m_cmbCbr, m_cmbVbr, m_cmbFlac, m_cmbNumThreads;
 	wl::checkbox         m_radMp3, m_radMp3Cbr, m_radMp3Vbr, m_radFlac, m_radWav;
 	wl::checkbox         m_chkDelSrc;
+	wl::button           m_btnRun;
 
 public:
 	Dlg_Main();
