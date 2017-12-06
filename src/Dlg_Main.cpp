@@ -5,6 +5,7 @@
 #include <winlamb/str.h>
 #include <winlamb/sysdlg.h>
 #include <winlamb/thread.h>
+#include <winlamb/version.h>
 #include "Dlg_Runnin.h"
 #include "Convert.h"
 #include "res/resource.h"
@@ -127,10 +128,15 @@ Dlg_Main::Dlg_Main()
 
 	on_command(MNU_ABOUT, [&](wm::command)
 	{
-		sysdlg::msgbox(this, L"About v1.1.6",
+		version ver;
+		ver.read_current_exe();
+
+		sysdlg::msgbox(this,
+			str::format(L"About v%d.%d.%d", ver.num[0], ver.num[1], ver.num[2]),
 			L"FLAC/LAME graphical front-end.\n"
 			L"Rodrigo César de Freitas Dias.",
 			MB_ICONINFORMATION);
+
 		return TRUE;
 	});
 
