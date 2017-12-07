@@ -24,7 +24,7 @@ Dlg_Main::Dlg_Main()
 		try {
 			validate_ini();
 		} catch (const std::exception& e) {
-			sysdlg::msgbox(this, L"Fail", str::parse_ascii(e.what()), MB_ICONERROR);
+			sysdlg::msgbox(this, L"Fail", str::to_wstring(e.what()), MB_ICONERROR);
 			SendMessage(hwnd(), WM_CLOSE, 0, 0); // halt program
 			return TRUE;
 		}
@@ -216,7 +216,7 @@ Dlg_Main::Dlg_Main()
 			files = m_lstFiles.items.get_texts(m_lstFiles.items.get_all(), 0);
 			validate_files_exist(files);
 		} catch (const std::exception& e) {
-			sysdlg::msgbox(this, L"Fail", str::parse_ascii(e.what()), MB_ICONERROR);
+			sysdlg::msgbox(this, L"Fail", str::to_wstring(e.what()), MB_ICONERROR);
 			return TRUE;
 		}
 		rd.opts.files = std::move(files);
@@ -301,7 +301,7 @@ void Dlg_Main::validate_dest_folder()
 			} catch (const std::exception& e) {
 				throw std::runtime_error(str::to_ascii(
 					str::format(L"The directory failed to be created:\n%s\n%s",
-						destFolder, str::parse_ascii(e.what())) ));
+						destFolder, str::to_wstring(e.what())) ));
 			}
 		} else { // user didn't want to create the new dir
 			return; // halt

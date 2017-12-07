@@ -65,7 +65,7 @@ void Dlg_Runnin::process_next_file()
 		run_ui_thread([&]() {
 			sysdlg::msgbox(this, L"Conversion failed",
 				str::format(L"File #%u:\n%s\n%s",
-					curIndex, file, str::parse_ascii(e.what())),
+					curIndex, file, str::to_wstring(e.what())),
 				MB_ICONERROR);
 			m_taskbarProgr.clear();
 			EndDialog(hwnd(), IDCANCEL);
