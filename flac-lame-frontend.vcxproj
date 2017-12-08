@@ -178,7 +178,7 @@
     <ClInclude Include="winlamb\internals\has_focus.h" />
     <ClInclude Include="winlamb\internals\has_text.h" />
     <ClInclude Include="winlamb\internals\hover_scroll.h" />
-    <ClInclude Include="winlamb\internals\hwnd_wrapper.h" />
+    <ClInclude Include="winlamb\internals\hwnd_base.h" />
     <ClInclude Include="winlamb\internals\inventory.h" />
     <ClInclude Include="winlamb\internals\listview_column_collection.h" />
     <ClInclude Include="winlamb\internals\listview_item.h" />
