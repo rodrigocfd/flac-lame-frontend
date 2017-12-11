@@ -2,14 +2,15 @@
 #include "Convert.h"
 #include <winlamb/file.h>
 #include <winlamb/path.h>
+#include <winlamb/process.h>
 using namespace wl;
 using std::runtime_error;
 
 void Convert::validate_paths(const file_ini& ini)
 {
 	if (!ini.sections.has(L"Tools") ||
-			!ini.sections[L"Tools"].has(L"lame") ||
-			!ini.sections[L"Tools"].has(L"flac") )
+		!ini.sections[L"Tools"].has(L"lame") ||
+		!ini.sections[L"Tools"].has(L"flac") )
 	{
 		throw runtime_error("INI file doesn't have the right entries.");
 	}
@@ -168,35 +169,6 @@ void Convert::_execute(const wstring& cmdLine, const wstring& src, bool delSrc)
 	}
 #endif
 
-	_raw_execute(cmdLine); // run tool
-
-	if (delSrc) {
-		file::util::del(src); // delete source file
-	}
-}
-
-void Convert::_raw_execute(wstring cmdLine)
-{
-	SECURITY_ATTRIBUTES sa{};
-	sa.nLength = sizeof(sa);
-	sa.bInheritHandle = TRUE;
-
-	STARTUPINFO si{};
-	si.cb = sizeof(si);
-	si.dwFlags = STARTF_USESHOWWINDOW;
-	si.wShowWindow = SW_SHOW;
-
-	PROCESS_INFORMATION pi{};
-	DWORD dwExitCode = 1; // returned by executed program
-
-	// http://blogs.msdn.com/b/oldnewthing/archive/2009/06/01/9673254.aspx
-	if (!CreateProcessW(nullptr, &cmdLine[0], &sa, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi)) {
-		throw std::system_error(GetLastError(), std::system_category(),
-			"CreateProcess failed");
-	}
-
-	WaitForSingleObject(pi.hProcess, INFINITE); // the program flow is stopped here to wait
-	GetExitCodeProcess(pi.hProcess, &dwExitCode);
-	CloseHandle(pi.hThread);
-	CloseHandle(pi.hProcess);
+	process::exec(cmdLine); // run tool
+	if (delSrc) file::util::del(src); // delete source file
 }

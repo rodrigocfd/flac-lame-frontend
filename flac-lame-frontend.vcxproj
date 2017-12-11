@@ -164,6 +164,7 @@
     <ClInclude Include="winlamb\file_ini.h" />
     <ClInclude Include="winlamb\file_mapped.h" />
     <ClInclude Include="winlamb\font.h" />
+    <ClInclude Include="winlamb\held_map.h" />
     <ClInclude Include="winlamb\icon.h" />
     <ClInclude Include="winlamb\image_list.h" />
     <ClInclude Include="winlamb\internals\com_bstr.h" />
@@ -199,10 +200,10 @@
     <ClInclude Include="winlamb\internals\user_control.h" />
     <ClInclude Include="winlamb\internals\window.h" />
     <ClInclude Include="winlamb\label.h" />
-    <ClInclude Include="winlamb\lazy_map.h" />
     <ClInclude Include="winlamb\listview.h" />
     <ClInclude Include="winlamb\menu.h" />
     <ClInclude Include="winlamb\path.h" />
+    <ClInclude Include="winlamb\process.h" />
     <ClInclude Include="winlamb\progressbar.h" />
     <ClInclude Include="winlamb\progress_taskbar.h" />
     <ClInclude Include="winlamb\resizer.h" />

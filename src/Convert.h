@@ -18,5 +18,4 @@ public:
 private:
 	static void _validate_dest_folder(wstring& dest);
 	static void _execute(const wstring& cmdLine, const wstring& src, bool delSrc);
-	static void _raw_execute(wstring cmdLine);
 };
