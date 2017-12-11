@@ -17,8 +17,10 @@ public:
 	struct entry final {
 		keyT   key;
 		valueT value;
+
 		entry() = default;
 		explicit entry(const keyT& key) noexcept : key(key) { }
+		entry(const keyT& key, const valueT& value) noexcept : key(key), value(value) { }
 	};
 
 private:
@@ -26,12 +28,19 @@ private:
 
 public:
 	held_map() = default;
+	held_map(held_map&& other) noexcept { this->operator=(std::move(other)); }
 	held_map(std::initializer_list<entry> entries) noexcept : _entries{entries} { }
 
 	size_t    size() const noexcept               { return this->_entries.size(); }
 	bool      empty() const noexcept              { return this->_entries.empty(); }
 	held_map& clear() noexcept                    { this->_entries.clear(); return *this; }
 	held_map& reserve(size_t numEntries) noexcept { this->_entries.reserve(numEntries); return *this; }
+
+	held_map& operator=(held_map&& other) noexcept {
+		this->empty();
+		this->_entries.swap(other._entries);
+		return *this;
+	}
 
 	const valueT& operator[](const keyT& key) const {
 		std::vector<entry>::const_iterator ite = this->_find(key);
@@ -97,31 +106,49 @@ private:
 		return this->_entries.end();
 	}
 
-public:
-	class const_iterator final {
-	private:
-		typename std::vector<entry>::const_iterator _it;
+private:
+	template<typename wrapped_itT>
+	class _base_iterator {
+	protected:
+		typename wrapped_itT _it;
 	public:
-		const_iterator(typename std::vector<entry>::const_iterator it) noexcept : _it(it) { }
-		const_iterator operator++() noexcept                                  { const_iterator tmp = *this; this->_it++; return tmp; }
-		const_iterator operator++(int) noexcept                               { this->_it++; return *this; }
-		const entry&   operator*() noexcept                                   { return this->_it.operator*(); }
-		const entry*   operator->() noexcept                                  { return this->_it.operator->(); }
-		bool           operator==(const const_iterator& other) const noexcept { return this->_it == other._it; }
-		bool           operator!=(const const_iterator& other) const noexcept { return !this->operator==(other); }
+		_base_iterator() = default;
+		_base_iterator(const _base_iterator& other) noexcept { this->operator=(other); }
+		_base_iterator(const wrapped_itT& it) noexcept : _it(it) { }
+		_base_iterator& operator=(const _base_iterator& other) noexcept { this->_it = other._it; return *this; }
+		_base_iterator  operator+(std::ptrdiff_t off) const { return {this->_it + off}; }
+		_base_iterator  operator-(std::ptrdiff_t off) const { return {this->_it - off}; }
+		_base_iterator& operator+=(std::ptrdiff_t off)      { this->_it += off; return *this; }
+		_base_iterator& operator-=(std::ptrdiff_t off)      { this->_it -= off; return *this; }
+		_base_iterator& operator++()    { ++this->_it; return *this; }
+		_base_iterator  operator++(int) { _base_iterator tmp = *this; ++this->_it; return tmp; }
+		_base_iterator& operator--()    { --this->_it; return *this; }
+		_base_iterator  operator--(int) { _base_iterator tmp = *this; --this->_it; return tmp; }
+		bool            operator==(const _base_iterator& other) const noexcept { return this->_it == other._it; }
+		bool            operator!=(const _base_iterator& other) const noexcept { return !this->operator==(other); }
+		bool            operator>(const _base_iterator& other) const noexcept  { return this->_it > other._it; }
+		bool            operator<(const _base_iterator& other) const noexcept  { return this->_it < other._it; }
 	};
 
-	class iterator final {
-	private:
-		typename std::vector<entry>::iterator _it;
+public:
+	class const_iterator final : public _base_iterator<typename std::vector<entry>::const_iterator> {
 	public:
-		iterator(typename std::vector<entry>::iterator it) noexcept : _it(it) { }
-		iterator operator++() noexcept                            { iterator tmp = *this; this->_it++; return tmp; }
-		iterator operator++(int) noexcept                         { this->_it++; return *this; }
-		entry&   operator*() noexcept                             { return this->_it.operator*(); }
-		entry*   operator->() noexcept                            { return this->_it.operator->(); }
-		bool     operator==(const iterator& other) const noexcept { return this->_it == other._it; }
-		bool     operator!=(const iterator& other) const noexcept { return !this->operator==(other); }
+		const_iterator() = default;
+		const_iterator(const const_iterator& other) noexcept : _base_iterator(other) { }
+		const_iterator(const typename std::vector<entry>::const_iterator& it) noexcept : _base_iterator(it) { }
+		const_iterator& operator=(const const_iterator& other) noexcept { return this->_base_iterator(other); }
+		const entry&    operator*() const  { return this->_it.operator*(); }
+		const entry*    operator->() const { return this->_it.operator->(); }
+	};
+
+	class iterator final : public _base_iterator<typename std::vector<entry>::iterator> {
+	public:
+		iterator() = default;
+		iterator(const iterator& other) noexcept : _base_iterator(other) { }
+		iterator(const typename std::vector<entry>::iterator& it) noexcept : _base_iterator(it) { }
+		iterator& operator=(const iterator& other) noexcept { return this->_base_iterator(other); }
+		entry&    operator*()  { return this->_it.operator*(); }
+		entry*    operator->() { return this->_it.operator->(); }
 	};
 
 	const_iterator cbegin() const noexcept { return {this->_entries.cbegin()}; }
@@ -130,6 +157,35 @@ public:
 	const_iterator cend() const noexcept   { return {this->_entries.cend()}; }
 	const_iterator end() const noexcept    { return {this->_entries.cend()}; }
 	iterator       end() noexcept          { return {this->_entries.end()}; }
+
+	class const_reverse_iterator final : public _base_iterator<typename std::vector<entry>::const_reverse_iterator> {
+	public:
+		const_reverse_iterator() = default;
+		const_reverse_iterator(const const_reverse_iterator& other) noexcept : _base_iterator(other) { }
+		const_reverse_iterator(const typename std::vector<entry>::const_reverse_iterator& it) noexcept : _base_iterator(it) { }
+		const_reverse_iterator& operator=(const const_reverse_iterator& other) noexcept { return this->_base_iterator(other); }
+		const entry&            operator*() const  { return this->_it.operator*(); }
+		const entry*            operator->() const { return this->_it.operator->(); }
+		const_iterator          base() const { return {this->_it.base()}; }
+	};
+
+	class reverse_iterator final : public _base_iterator<typename std::vector<entry>::reverse_iterator> {
+	public:
+		reverse_iterator() = default;
+		reverse_iterator(const reverse_iterator& other) noexcept : _base_iterator(other) { }
+		reverse_iterator(const typename std::vector<entry>::reverse_iterator& it) noexcept : _base_iterator(it) { }
+		reverse_iterator& operator=(const reverse_iterator& other) noexcept { return this->_base_iterator(other); }
+		entry&            operator*()  { return this->_it.operator*(); }
+		entry*            operator->() { return this->_it.operator->(); }
+		iterator          base() const { return {this->_it.base()}; }
+	};
+
+	const_reverse_iterator crbegin() const noexcept { return {this->_entries.crbegin()}; }
+	const_reverse_iterator rbegin() const noexcept  { return {this->_entries.crbegin()}; }
+	reverse_iterator       rbegin() noexcept        { return {this->_entries.rbegin()}; }
+	const_reverse_iterator crend() const noexcept   { return {this->_entries.crend()}; }
+	const_reverse_iterator rend() const noexcept    { return {this->_entries.crend()}; }
+	reverse_iterator       rend() noexcept          { return {this->_entries.rend()}; }
 };
 
 }//namespace wl
