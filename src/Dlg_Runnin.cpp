@@ -4,7 +4,7 @@
 #include <winlamb/sysdlg.h>
 #include <winlamb/thread.h>
 #include "Convert.h"
-#include "res/resource.h"
+#include "../res/resource.h"
 using namespace wl;
 
 Dlg_Runnin::Dlg_Runnin(progress_taskbar& taskbarProgr, const file_ini& iniFile)

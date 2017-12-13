@@ -65,6 +65,9 @@
     <ClInclude Include="winlamb\resizer.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
+    <ClInclude Include="winlamb\scrollinfo.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
     <ClInclude Include="winlamb\statusbar.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
@@ -148,6 +151,15 @@
     </ClInclude>
     <ClInclude Include="winlamb\font.h">
       <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\com_ptr.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\com_variant.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\combinable_flags.h">
+      <Filter>WinLamb internals</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\internals\device_context_objects.h">
       <Filter>WinLamb internals</Filter>
@@ -239,21 +251,18 @@
     <ClInclude Include="winlamb\internals\com_lib.h">
       <Filter>WinLamb internals</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\internals\com_ptr.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\com_variant.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Convert.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Dlg_Main.cpp">
+    <ClCompile Include="src\Dlg_Runnin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Dlg_Runnin.cpp">
+    <ClCompile Include="src\Dlg_Main_messages.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Dlg_Main_methods.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

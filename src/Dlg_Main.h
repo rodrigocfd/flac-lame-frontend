@@ -27,6 +27,7 @@ public:
 	Dlg_Main();
 
 private:
+	void    messages();
 	void    validate_ini();
 	void    validate_dest_folder();
 	void    validate_files_exist(const vector<wstring>& files);

@@ -167,6 +167,7 @@
     <ClInclude Include="winlamb\held_map.h" />
     <ClInclude Include="winlamb\icon.h" />
     <ClInclude Include="winlamb\image_list.h" />
+    <ClInclude Include="winlamb\internals\combinable_flags.h" />
     <ClInclude Include="winlamb\internals\com_bstr.h" />
     <ClInclude Include="winlamb\internals\com_lib.h" />
     <ClInclude Include="winlamb\internals\com_ptr.h" />
@@ -207,6 +208,7 @@
     <ClInclude Include="winlamb\progressbar.h" />
     <ClInclude Include="winlamb\progress_taskbar.h" />
     <ClInclude Include="winlamb\resizer.h" />
+    <ClInclude Include="winlamb\scrollinfo.h" />
     <ClInclude Include="winlamb\statusbar.h" />
     <ClInclude Include="winlamb\str.h" />
     <ClInclude Include="winlamb\subclass.h" />
@@ -222,7 +224,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Convert.cpp" />
-    <ClCompile Include="src\Dlg_Main.cpp" />
+    <ClCompile Include="src\Dlg_Main_messages.cpp" />
+    <ClCompile Include="src\Dlg_Main_methods.cpp" />
     <ClCompile Include="src\Dlg_Runnin.cpp" />
   </ItemGroup>
   <ItemGroup>
