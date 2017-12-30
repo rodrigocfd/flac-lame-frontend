@@ -165,6 +165,7 @@
     <ClInclude Include="winlamb\file_mapped.h" />
     <ClInclude Include="winlamb\font.h" />
     <ClInclude Include="winlamb\held_map.h" />
+    <ClInclude Include="winlamb\hwnd_base.h" />
     <ClInclude Include="winlamb\icon.h" />
     <ClInclude Include="winlamb\image_list.h" />
     <ClInclude Include="winlamb\internals\combinable_flags.h" />
@@ -180,7 +181,6 @@
     <ClInclude Include="winlamb\internals\has_focus.h" />
     <ClInclude Include="winlamb\internals\has_text.h" />
     <ClInclude Include="winlamb\internals\hover_scroll.h" />
-    <ClInclude Include="winlamb\internals\hwnd_base.h" />
     <ClInclude Include="winlamb\internals\inventory.h" />
     <ClInclude Include="winlamb\internals\listview_column_collection.h" />
     <ClInclude Include="winlamb\internals\listview_item.h" />

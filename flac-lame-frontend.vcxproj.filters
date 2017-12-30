@@ -32,7 +32,106 @@
     <ClInclude Include="src\std.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="winlamb\internals\download_session.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\download_url.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\has_enable.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\has_focus.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\has_text.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\hover_scroll.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\inventory.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\listview_column_collection.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\listview_item.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\listview_item_collection.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\loop.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\member_image_list.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\native_control.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\params.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\params_wm.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\params_wmn.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\path_get.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\run.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\store.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\styler.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\treeview_item.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\treeview_item_collection.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\ui_thread.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\user_control.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\window.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\com_bstr.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\com_lib.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\com_ptr.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\com_variant.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\combinable_flags.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\device_context_objects.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\dialog.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
     <ClInclude Include="winlamb\held_map.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\hwnd_base.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\icon.h">
@@ -151,105 +250,6 @@
     </ClInclude>
     <ClInclude Include="winlamb\font.h">
       <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\com_ptr.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\com_variant.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\combinable_flags.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\device_context_objects.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\dialog.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\download_session.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\download_url.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\has_enable.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\has_focus.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\has_text.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\hover_scroll.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\hwnd_base.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\inventory.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\listview_column_collection.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\listview_item.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\listview_item_collection.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\loop.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\member_image_list.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\native_control.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\params.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\params_wm.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\params_wmn.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\path_get.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\run.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\store.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\styler.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\treeview_item.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\treeview_item_collection.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\ui_thread.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\user_control.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\window.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\com_bstr.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\com_lib.h">
-      <Filter>WinLamb internals</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
