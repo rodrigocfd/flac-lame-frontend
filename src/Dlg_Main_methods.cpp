@@ -92,3 +92,10 @@ void Dlg_Main::file_to_list(const wstring& file)
 		m_lstFiles.items.add(file, iType); // add only if not present yet
 	}
 }
+
+DWORD Dlg_Main::num_processors()
+{
+	SYSTEM_INFO si{};
+	GetSystemInfo(&si);
+	return si.dwNumberOfProcessors;
+}

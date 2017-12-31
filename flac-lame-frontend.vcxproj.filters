@@ -32,6 +32,15 @@
     <ClInclude Include="src\std.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="winlamb\internals\combinable_flags.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\device_context_objects.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\dialog.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
     <ClInclude Include="winlamb\internals\download_session.h">
       <Filter>WinLamb internals</Filter>
     </ClInclude>
@@ -51,6 +60,9 @@
       <Filter>WinLamb internals</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\internals\inventory.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\lippincott.h">
       <Filter>WinLamb internals</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\internals\listview_column_collection.h">
@@ -92,13 +104,13 @@
     <ClInclude Include="winlamb\internals\styler.h">
       <Filter>WinLamb internals</Filter>
     </ClInclude>
+    <ClInclude Include="winlamb\internals\thread_capable.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
     <ClInclude Include="winlamb\internals\treeview_item.h">
       <Filter>WinLamb internals</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\internals\treeview_item_collection.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\ui_thread.h">
       <Filter>WinLamb internals</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\internals\user_control.h">
@@ -119,14 +131,8 @@
     <ClInclude Include="winlamb\internals\com_variant.h">
       <Filter>WinLamb internals</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\internals\combinable_flags.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\device_context_objects.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\dialog.h">
-      <Filter>WinLamb internals</Filter>
+    <ClInclude Include="winlamb\font.h">
+      <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\held_map.h">
       <Filter>WinLamb</Filter>
@@ -180,9 +186,6 @@
       <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\textbox.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\thread.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\treeview.h">
@@ -246,9 +249,6 @@
       <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\file_mapped.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\font.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
   </ItemGroup>

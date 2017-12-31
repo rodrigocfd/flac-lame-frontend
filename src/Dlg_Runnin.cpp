@@ -2,7 +2,6 @@
 #include "Dlg_Runnin.h"
 #include <winlamb/str.h>
 #include <winlamb/sysdlg.h>
-#include <winlamb/thread.h>
 #include "Convert.h"
 #include "../res/resource.h"
 using namespace wl;
@@ -27,7 +26,7 @@ Dlg_Runnin::Dlg_Runnin(progress_taskbar& taskbarProgr, const file_ini& iniFile)
 			opts.numThreads : opts.files.size(); // limit parallel processing
 
 		for (size_t i = 0; i < batchSz; ++i) {
-			thread::run_detached([&]() {
+			run_thread_detached([&]() {
 				process_next_file();
 			});
 		}
@@ -62,7 +61,7 @@ void Dlg_Runnin::process_next_file()
 		}
 	} catch (const std::exception& e) {
 		m_curFile = opts.files.size(); // error, so avoid further processing
-		run_ui_thread([&]() {
+		run_thread_ui([&]() {
 			sysdlg::msgbox(this, L"Conversion failed",
 				str::format(L"File #%u:\n%s\n%s",
 					curIndex, file, str::to_wstring(e.what())),
@@ -74,7 +73,7 @@ void Dlg_Runnin::process_next_file()
 	}
 
 	++m_filesDone;
-	run_ui_thread([&]() {
+	run_thread_ui([&]() {
 		m_prog.set_pos(m_filesDone);
 		m_taskbarProgr.set_pos(m_filesDone, opts.files.size());
 		m_lbl.set_text( str::format(L"%u of %u files finished...",
@@ -84,7 +83,7 @@ void Dlg_Runnin::process_next_file()
 	if (m_filesDone < opts.files.size()) { // more files to come
 		process_next_file();
 	} else { // finished all processing
-		run_ui_thread([&]() {
+		run_thread_ui([&]() {
 			datetime fin;
 			sysdlg::msgbox(this, L"Conversion finished",
 				str::format(L"%u files processed in %.2f seconds.",

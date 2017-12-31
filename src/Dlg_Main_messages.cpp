@@ -1,7 +1,6 @@
 
 #include "Dlg_Main.h"
 #include <winlamb/sysdlg.h>
-#include <winlamb/thread.h>
 #include <winlamb/version.h>
 #include "Dlg_Runnin.h"
 #include "../res/resource.h"
@@ -48,7 +47,7 @@ void Dlg_Main::messages()
 		m_cmbNumThreads.assign(this, CMB_NUMTHREADS)
 			.item_add(L"1|2|4|8");
 
-		switch (thread::num_processors()) {
+		switch (num_processors()) {
 			case 1:  m_cmbNumThreads.item_set_selected(0); break;
 			case 2:  m_cmbNumThreads.item_set_selected(1); break;
 			case 4:  m_cmbNumThreads.item_set_selected(2); break;

@@ -182,6 +182,7 @@
     <ClInclude Include="winlamb\internals\has_text.h" />
     <ClInclude Include="winlamb\internals\hover_scroll.h" />
     <ClInclude Include="winlamb\internals\inventory.h" />
+    <ClInclude Include="winlamb\internals\lippincott.h" />
     <ClInclude Include="winlamb\internals\listview_column_collection.h" />
     <ClInclude Include="winlamb\internals\listview_item.h" />
     <ClInclude Include="winlamb\internals\listview_item_collection.h" />
@@ -195,9 +196,9 @@
     <ClInclude Include="winlamb\internals\run.h" />
     <ClInclude Include="winlamb\internals\store.h" />
     <ClInclude Include="winlamb\internals\styler.h" />
+    <ClInclude Include="winlamb\internals\thread_capable.h" />
     <ClInclude Include="winlamb\internals\treeview_item.h" />
     <ClInclude Include="winlamb\internals\treeview_item_collection.h" />
-    <ClInclude Include="winlamb\internals\ui_thread.h" />
     <ClInclude Include="winlamb\internals\user_control.h" />
     <ClInclude Include="winlamb\internals\window.h" />
     <ClInclude Include="winlamb\label.h" />
@@ -214,7 +215,6 @@
     <ClInclude Include="winlamb\subclass.h" />
     <ClInclude Include="winlamb\sysdlg.h" />
     <ClInclude Include="winlamb\textbox.h" />
-    <ClInclude Include="winlamb\thread.h" />
     <ClInclude Include="winlamb\treeview.h" />
     <ClInclude Include="winlamb\version.h" />
     <ClInclude Include="winlamb\window_control.h" />

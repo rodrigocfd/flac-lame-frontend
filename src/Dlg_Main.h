@@ -33,4 +33,6 @@ private:
 	void    validate_files_exist(const vector<wstring>& files);
 	INT_PTR update_counter(size_t newCount);
 	void    file_to_list(const wstring& file);
+
+	static DWORD num_processors();
 };
