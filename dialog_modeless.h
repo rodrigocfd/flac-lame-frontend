@@ -13,7 +13,7 @@
 /**
  * hwnd_base
  *  inventory
- *   ui_thread
+ *   thread_capable
  *    dialog
  *     has_text
  *      dialog_modeless
@@ -24,10 +24,10 @@ namespace wl {
 // Inherit from this class to have a dialog modeless popup.
 class dialog_modeless :
 	public wli::has_text<
-		dialog_modeless, wli::dialog_ui_thread>
+		dialog_modeless, wli::dialog_thread_capable>
 {
 protected:
-	struct setup_vars final : public wli::dialog_ui_thread::setup_vars { };
+	struct setup_vars final : public wli::dialog_thread_capable::setup_vars { };
 
 private:
 	wli::loop* _pLoop = nullptr; // pointer to parent's loop instance
@@ -35,12 +35,12 @@ private:
 protected:
 	setup_vars setup;
 
-	dialog_modeless() noexcept {
+	dialog_modeless() {
 		this->on_message(WM_CLOSE, [this](params) noexcept->INT_PTR {
 			DestroyWindow(this->hwnd());
 			return TRUE;
 		});
-		this->on_message(WM_NCDESTROY, [this](params) noexcept->INT_PTR {
+		this->on_message(WM_NCDESTROY, [this](params)->INT_PTR {
 			if (this->_pLoop) {
 				this->_pLoop->remove_modeless(this->hwnd());
 			}
