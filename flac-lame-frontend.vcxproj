@@ -208,6 +208,8 @@
     <ClInclude Include="winlamb\process.h" />
     <ClInclude Include="winlamb\progressbar.h" />
     <ClInclude Include="winlamb\progress_taskbar.h" />
+    <ClInclude Include="winlamb\radio.h" />
+    <ClInclude Include="winlamb\radio_group.h" />
     <ClInclude Include="winlamb\resizer.h" />
     <ClInclude Include="winlamb\scrollinfo.h" />
     <ClInclude Include="winlamb\statusbar.h" />

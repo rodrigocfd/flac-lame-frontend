@@ -27,6 +27,8 @@ The project showcases the following WinLamb features:
 * parallel multi-threaded background operations;
 * listview control;
 * combobox control;
+* group of radio controls;
 * progress indicator on taskbar;
 * read from INI files;
+* enumerate files in directories;
 * execute external command-line programs.

@@ -56,11 +56,11 @@ void Dlg_Main::messages()
 		}
 
 		// Initializing radio buttons.
-		m_radMp3   .assign(this, RAD_MP3).set_check_and_trigger(true);
-		m_radMp3Cbr.assign(this, RAD_CBR);
-		m_radMp3Vbr.assign(this, RAD_VBR).set_check_and_trigger(true);
-		m_radFlac  .assign(this, RAD_FLAC);
-		m_radWav   .assign(this, RAD_WAV);
+		m_radMFW.assign(this, {RAD_MP3, RAD_FLAC, RAD_WAV});
+		m_radMp3Type.assign(this, {RAD_CBR, RAD_VBR});
+
+		m_radMFW.set_checked_by_pos(0);
+		m_radMp3Type.set_checked_by_pos(1);
 
 		m_chkDelSrc.assign(this, CHK_DELSRC);
 		m_btnRun.assign(this, BTN_RUN);
@@ -176,21 +176,23 @@ void Dlg_Main::messages()
 
 	on_command({RAD_MP3, RAD_FLAC, RAD_WAV}, [&](wm::command)
 	{
-		m_radMp3Cbr.set_enable(m_radMp3.is_checked());
-		m_cmbCbr.set_enable(m_radMp3.is_checked() && m_radMp3Cbr.is_checked());
+		int mfw = m_radMFW.get_checked_id();
+		int cv = m_radMp3Type.get_checked_id();
 
-		m_radMp3Vbr.set_enable(m_radMp3.is_checked());
-		m_cmbVbr.set_enable(m_radMp3.is_checked() && m_radMp3Vbr.is_checked());
+		m_radMp3Type.set_enable(mfw == RAD_MP3);
+		m_cmbCbr.set_enable(mfw == RAD_MP3 && cv == RAD_CBR);
+		m_cmbVbr.set_enable(mfw == RAD_MP3 && cv == RAD_VBR);
 
-		EnableWindow(GetDlgItem(hwnd(), LBL_LEVEL), m_radFlac.is_checked());
-		m_cmbFlac.set_enable(m_radFlac.is_checked());
+		EnableWindow(GetDlgItem(hwnd(), LBL_LEVEL), mfw == RAD_FLAC);
+		m_cmbFlac.set_enable(mfw == RAD_FLAC);
 		return TRUE;
 	});
 
 	on_command({RAD_CBR, RAD_VBR}, [&](wm::command)
 	{
-		m_cmbCbr.set_enable(m_radMp3Cbr.is_checked());
-		m_cmbVbr.set_enable(m_radMp3Vbr.is_checked());
+		int cv = m_radMp3Type.get_checked_id();
+		m_cmbCbr.set_enable(cv == RAD_CBR);
+		m_cmbVbr.set_enable(cv == RAD_VBR);
 		return TRUE;
 	});
 
@@ -212,23 +214,26 @@ void Dlg_Main::messages()
 
 		// Retrieve settings.
 		rd.opts.delSrc = m_chkDelSrc.is_checked();
-		rd.opts.isVbr = m_radMp3Vbr.is_checked();
+		rd.opts.isVbr = m_radMp3Type.get_checked_id() == RAD_VBR;
 		rd.opts.numThreads = std::stoul(m_cmbNumThreads.item_get_selected_text());
 
+		int mfw = m_radMFW.get_checked_id();
 		wstring quality;
-		if (m_radMp3.is_checked()) {
+		if (mfw == RAD_MP3) {
 			combobox& cmbQuality = (rd.opts.isVbr ? m_cmbVbr : m_cmbCbr);
 			quality = cmbQuality.item_get_selected_text();
 			quality.resize(quality.find_first_of(L' ')); // first characters of chosen option are the quality setting itself
-		} else if (m_radFlac.is_checked()) {
+		} else if (mfw == RAD_FLAC) {
 			quality = m_cmbFlac.item_get_selected_text(); // text is quality setting itself
 		}
 		rd.opts.quality = std::move(quality);
 
 		// Which format are we converting to?
-		if (m_radMp3.is_checked())       rd.opts.targetType = Dlg_Runnin::target::MP3;
-		else if (m_radFlac.is_checked()) rd.opts.targetType = Dlg_Runnin::target::FLAC;
-		else if (m_radWav.is_checked())  rd.opts.targetType = Dlg_Runnin::target::WAV;
+		switch (mfw) {
+		case RAD_MP3:  rd.opts.targetType = Dlg_Runnin::target::MP3; break;
+		case RAD_FLAC: rd.opts.targetType = Dlg_Runnin::target::FLAC; break;
+		case RAD_WAV:  rd.opts.targetType = Dlg_Runnin::target::WAV;
+		}
 
 		// Finally invoke dialog.
 		rd.show(this);

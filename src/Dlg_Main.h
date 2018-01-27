@@ -7,6 +7,7 @@
 #include <winlamb/combobox.h>
 #include <winlamb/file_ini.h>
 #include <winlamb/listview.h>
+#include <winlamb/radio_group.h>
 #include <winlamb/resizer.h>
 #include <winlamb/progress_taskbar.h>
 #include <winlamb/textbox.h>
@@ -19,7 +20,7 @@ private:
 	wl::listview         m_lstFiles;
 	wl::textbox          m_txtDest;
 	wl::combobox         m_cmbCbr, m_cmbVbr, m_cmbFlac, m_cmbNumThreads;
-	wl::checkbox         m_radMp3, m_radMp3Cbr, m_radMp3Vbr, m_radFlac, m_radWav;
+	wl::radio_group      m_radMFW, m_radMp3Type;
 	wl::checkbox         m_chkDelSrc;
 	wl::button           m_btnRun;
 
