@@ -111,7 +111,7 @@ void Dlg_Main::messages()
 	{
 		if (p.first_menu_item_id() == MNU_OPENFILES) {
 			menu m = p.hmenu();
-			m.enable_item(MNU_REMSELECTED, m_lstFiles.items.count_selected() > 0);
+			m.enable_item_by_id(MNU_REMSELECTED, m_lstFiles.items.count_selected() > 0);
 		}
 		return TRUE;
 	});
