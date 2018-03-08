@@ -45,13 +45,15 @@ void Dlg_Main::messages()
 			.item_set_selected(7);
 
 		m_cmbNumThreads.assign(this, CMB_NUMTHREADS)
-			.item_add(L"1|2|4|8");
+			.item_add(L"1|2|4|6|8|12");
 
 		switch (num_processors()) {
 			case 1:  m_cmbNumThreads.item_set_selected(0); break;
 			case 2:  m_cmbNumThreads.item_set_selected(1); break;
 			case 4:  m_cmbNumThreads.item_set_selected(2); break;
-			case 8:  m_cmbNumThreads.item_set_selected(3); break;
+			case 6:  m_cmbNumThreads.item_set_selected(3); break;
+			case 8:  m_cmbNumThreads.item_set_selected(4); break;
+			case 12: m_cmbNumThreads.item_set_selected(5); break;
 			default: m_cmbNumThreads.item_set_selected(0);
 		}
 
