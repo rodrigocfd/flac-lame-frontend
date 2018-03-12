@@ -197,9 +197,6 @@
     <ClInclude Include="winlamb\internals\has_text.h">
       <Filter>WinLamb internals</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\internals\hover_scroll.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
     <ClInclude Include="winlamb\internals\inventory.h">
       <Filter>WinLamb internals</Filter>
     </ClInclude>
@@ -257,6 +254,9 @@
     <ClInclude Include="winlamb\radio.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
+    <ClInclude Include="winlamb\internals\scroll_inactive.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Convert.cpp">
@@ -281,5 +281,10 @@
     <ResourceCompile Include="res\flac-lame-frontend.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="winlamb\win10.exe.manifest">
+      <Filter>WinLamb</Filter>
+    </Manifest>
   </ItemGroup>
 </Project>

@@ -180,7 +180,6 @@
     <ClInclude Include="winlamb\internals\has_enable.h" />
     <ClInclude Include="winlamb\internals\has_focus.h" />
     <ClInclude Include="winlamb\internals\has_text.h" />
-    <ClInclude Include="winlamb\internals\hover_scroll.h" />
     <ClInclude Include="winlamb\internals\inventory.h" />
     <ClInclude Include="winlamb\internals\lippincott.h" />
     <ClInclude Include="winlamb\internals\listview_column_collection.h" />
@@ -194,6 +193,7 @@
     <ClInclude Include="winlamb\internals\params_wmn.h" />
     <ClInclude Include="winlamb\internals\path_get.h" />
     <ClInclude Include="winlamb\internals\run.h" />
+    <ClInclude Include="winlamb\internals\scroll_inactive.h" />
     <ClInclude Include="winlamb\internals\store.h" />
     <ClInclude Include="winlamb\internals\styler.h" />
     <ClInclude Include="winlamb\internals\thread_capable.h" />
@@ -235,6 +235,9 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\flac-lame-frontend.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="winlamb\win10.exe.manifest" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
