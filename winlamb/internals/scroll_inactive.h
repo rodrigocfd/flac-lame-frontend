@@ -16,12 +16,14 @@ namespace wli {
 class scroll_inactive final {
 public:
 	static void apply_behavior(HWND hWnd) noexcept {
+		// Scrolling of inative windows has been natively implemented in
+		// Windows 10, so we don't need to implement it here.
 		if (IsWindows10OrGreater()) return;
 
 		EnumChildWindows(hWnd, [](HWND hChild, LPARAM lp) noexcept->BOOL {
 			static UINT_PTR uniqueSubclassId = 1;
 			if (GetWindowLongPtrW(hChild, GWL_STYLE) & WS_TABSTOP) {
-				SetWindowSubclass(hChild, _proc, uniqueSubclassId++,
+				SetWindowSubclass(hChild, _scroll_proc, uniqueSubclassId++,
 					static_cast<DWORD_PTR>(lp)); // subclass every focusable control
 			}
 			return TRUE;
@@ -29,7 +31,7 @@ public:
 	}
 
 private:
-	static LRESULT CALLBACK _proc(HWND hChild, UINT msg, WPARAM wp, LPARAM lp,
+	static LRESULT CALLBACK _scroll_proc(HWND hChild, UINT msg, WPARAM wp, LPARAM lp,
 		UINT_PTR idSubclass, DWORD_PTR refData) noexcept
 	{
 		switch (msg) {
@@ -48,7 +50,7 @@ private:
 				break; // finally dispatch to default processing
 			}
 		case WM_NCDESTROY:
-			RemoveWindowSubclass(hChild, _proc, idSubclass); // http://blogs.msdn.com/b/oldnewthing/archive/2003/11/11/55653.aspx
+			RemoveWindowSubclass(hChild, _scroll_proc, idSubclass); // http://blogs.msdn.com/b/oldnewthing/archive/2003/11/11/55653.aspx
 		}
 		return DefSubclassProc(hChild, msg, wp, lp);
 	}
