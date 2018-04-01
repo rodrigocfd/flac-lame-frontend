@@ -11,7 +11,7 @@ Dlg_Runnin::Dlg_Runnin(progress_taskbar& taskbarProgr, const file_ini& iniFile)
 {
 	setup.dialogId = DLG_RUNNIN;
 
-	on_message(WM_INITDIALOG, [&](wm::initdialog)
+	on_message(WM_INITDIALOG, [&](params)
 	{
 		m_lbl.assign(this, LBL_STATUS);
 		m_prog.assign(this, PRO_STATUS);
@@ -35,7 +35,7 @@ Dlg_Runnin::Dlg_Runnin(progress_taskbar& taskbarProgr, const file_ini& iniFile)
 		return TRUE;
 	});
 
-	on_message(WM_CLOSE, [](wm::close)
+	on_message(WM_CLOSE, [](params)
 	{
 		return TRUE; // don't close the dialog, EndDialog() not called
 	});
@@ -87,7 +87,8 @@ void Dlg_Runnin::process_next_file()
 			datetime fin;
 			sysdlg::msgbox(this, L"Conversion finished",
 				str::format(L"%u files processed in %.2f seconds.",
-					opts.files.size(), static_cast<double>(fin.minus(m_time0)) / 1000),
+					opts.files.size(),
+					static_cast<double>(fin.ms_diff_from(m_time0)) / 1000),
 				MB_ICONINFORMATION);
 			m_taskbarProgr.clear();
 			EndDialog(hwnd(), IDOK); // finally close dialog

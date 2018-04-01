@@ -8,7 +8,7 @@ using namespace wl;
 
 void Dlg_Main::messages()
 {
-	on_message(WM_INITDIALOG, [&](wm::initdialog)
+	on_message(WM_INITDIALOG, [&](params)
 	{
 		try {
 			validate_ini();
@@ -118,7 +118,7 @@ void Dlg_Main::messages()
 		return TRUE;
 	});
 
-	on_command(MNU_ABOUT, [&](wm::command)
+	on_command(MNU_ABOUT, [&](params)
 	{
 		version ver;
 		ver.read_current_exe();
@@ -132,7 +132,7 @@ void Dlg_Main::messages()
 		return TRUE;
 	});
 
-	on_command(MNU_OPENFILES, [&](wm::command)
+	on_command(MNU_OPENFILES, [&](params)
 	{
 		vector<wstring> files;
 		if (sysdlg::open_files(this,
@@ -150,14 +150,14 @@ void Dlg_Main::messages()
 		return TRUE;
 	});
 
-	on_command(MNU_REMSELECTED, [&](wm::command)
+	on_command(MNU_REMSELECTED, [&](params)
 	{
 		m_lstFiles.items.remove_selected();
 		update_counter(m_lstFiles.items.count());
 		return TRUE;
 	});
 
-	on_command(IDCANCEL, [&](wm::command)
+	on_command(IDCANCEL, [&](params)
 	{
 		if (!m_lstFiles.items.count() || m_btnRun.is_enabled()) {
 			SendMessage(hwnd(), WM_CLOSE, 0, 0); // close on ESC only if not processing
@@ -165,7 +165,7 @@ void Dlg_Main::messages()
 		return TRUE;
 	});
 
-	on_command(BTN_DEST, [&](wm::command)
+	on_command(BTN_DEST, [&](params)
 	{
 		wstring folder;
 		if (sysdlg::choose_folder(this, folder)) {
@@ -176,7 +176,7 @@ void Dlg_Main::messages()
 		return TRUE;
 	});
 
-	on_command({RAD_MP3, RAD_FLAC, RAD_WAV}, [&](wm::command)
+	on_command({RAD_MP3, RAD_FLAC, RAD_WAV}, [&](params)
 	{
 		int mfw = m_radMFW.get_checked_id();
 		int cv = m_radMp3Type.get_checked_id();
@@ -190,7 +190,7 @@ void Dlg_Main::messages()
 		return TRUE;
 	});
 
-	on_command({RAD_CBR, RAD_VBR}, [&](wm::command)
+	on_command({RAD_CBR, RAD_VBR}, [&](params)
 	{
 		int cv = m_radMp3Type.get_checked_id();
 		m_cmbCbr.set_enable(cv == RAD_CBR);
@@ -198,7 +198,7 @@ void Dlg_Main::messages()
 		return TRUE;
 	});
 
-	on_command(BTN_RUN, [&](wm::command)
+	on_command(BTN_RUN, [&](params)
 	{
 		Dlg_Runnin rd(m_taskbarProg, m_iniFile);
 		rd.opts.destFolder = m_txtDest.get_text();
@@ -242,17 +242,17 @@ void Dlg_Main::messages()
 		return TRUE;
 	});
 
-	on_notify(LST_FILES, LVN_INSERTITEM, [&](wmn::lvn::insertitem)
+	on_notify(LST_FILES, LVN_INSERTITEM, [&](params)
 	{
 		return update_counter(m_lstFiles.items.count()); // new item inserted
 	});
 
-	on_notify(LST_FILES, LVN_DELETEITEM, [&](wmn::lvn::deleteitem)
+	on_notify(LST_FILES, LVN_DELETEITEM, [&](params)
 	{
 		return update_counter(m_lstFiles.items.count() - 1); // item about to be deleted
 	});
 
-	on_notify(LST_FILES, LVN_DELETEALLITEMS, [&](wmn::lvn::deleteallitems)
+	on_notify(LST_FILES, LVN_DELETEALLITEMS, [&](params)
 	{
 		return update_counter(0); // all items about to be deleted
 	});

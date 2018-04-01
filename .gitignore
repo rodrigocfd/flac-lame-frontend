@@ -3,3 +3,4 @@ Release/
 .vs/
 *.aps
 *.ffs_db
+*.user
