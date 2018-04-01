@@ -15,7 +15,7 @@
 
 /**
  * hwnd_base
- *  w_inventory
+ *  w_message
  */
 
 namespace wl {
@@ -26,7 +26,7 @@ template<typename baseT> class dialog; // friend forward declarations
 template<typename baseT> class window;
 
 template<typename retT>
-class w_inventory : public hwnd_base {
+class w_message : public hwnd_base {
 	friend class subclass;
 	template<typename baseT> friend class dialog;
 	template<typename baseT> friend class window;
@@ -41,7 +41,7 @@ private:
 	bool              _canAdd = true;
 
 protected:
-	w_inventory() = default;
+	w_message() = default;
 
 private:
 	std::pair<bool, retT> _process_msg(UINT msg, WPARAM wp, LPARAM lp) noexcept {
@@ -82,16 +82,53 @@ private:
 	}
 
 public:
-	template<typename handlerT> void on_message(UINT msg, handlerT&& func)                                  { this->_can(); this->_msgs.add(msg, std::move(func)); }
-	template<typename handlerT> void on_message(std::initializer_list<UINT> msgs, handlerT&& func)          { this->_can(); this->_msgs.add(msgs, std::move(func)); }
-	template<typename handlerT> void on_command(WORD cmd, handlerT&& func)                                  { this->_can(); this->_cmds.add(cmd, std::move(func)); }
-	template<typename handlerT> void on_command(std::initializer_list<WORD> cmds, handlerT&& func)          { this->_can(); this->_cmds.add(cmds, std::move(func)); }
-	template<typename handlerT> void on_notify(UINT_PTR idFrom, UINT code, handlerT&& func)                 { this->_can(); this->_ntfs.add({idFrom, code}, std::move(func)); }
-	template<typename handlerT> void on_notify(ntfT idFromAndCode, handlerT&& func)                         { this->_can(); this->_ntfs.add(idFromAndCode, std::move(func)); }
-	template<typename handlerT> void on_notify(std::initializer_list<ntfT> idFromAndCodes, handlerT&& func) { this->_can(); this->_ntfs.add(idFromAndCodes, std::move(func)); }
+	// Assigns a lambda to handle a window message.
+	template<typename lambdaT>
+	void on_message(UINT msg, lambdaT&& func) {
+		this->_check_can_add();
+		this->_msgs.add(msg, std::move(func));
+	}
+	// Assigns a lambda to handle a window message.
+	template<typename lambdaT>
+	void on_message(std::initializer_list<UINT> msgs, lambdaT&& func) {
+		this->_check_can_add();
+		this->_msgs.add(msgs, std::move(func));
+	}
 
+	// Assigns a lambda to handle a WM_COMMAND message.
+	template<typename lambdaT>
+	void on_command(WORD cmd, lambdaT&& func) {
+		this->_check_can_add();
+		this->_cmds.add(cmd, std::move(func));
+	}
+	// Assigns a lambda to handle a WM_COMMAND message.
+	template<typename lambdaT>
+	void on_command(std::initializer_list<WORD> cmds, lambdaT&& func) {
+		this->_check_can_add();
+		this->_cmds.add(cmds, std::move(func));
+	}
+
+	// Assigns a lambda to handle a WM_NOTIFY message.
+	template<typename lambdaT>
+	void on_notify(UINT_PTR idFrom, UINT code, lambdaT&& func) {
+		this->_check_can_add();
+		this->_ntfs.add({idFrom, code}, std::move(func));
+	}
+	// Assigns a lambda to handle a WM_NOTIFY message.
+	template<typename lambdaT>
+	void on_notify(ntfT idFromAndCode, lambdaT&& func) {
+		this->_check_can_add();
+		this->_ntfs.add(idFromAndCode, std::move(func));
+	}
+	// Assigns a lambda to handle a WM_NOTIFY message.
+	template<typename lambdaT>
+	void on_notify(std::initializer_list<ntfT> idFromAndCodes, lambdaT&& func) {
+		this->_check_can_add();
+		this->_ntfs.add(idFromAndCodes, std::move(func));
+	}
+	
 private:
-	void _can() const {
+	void _check_can_add() const {
 		if (!this->_canAdd) {
 			throw std::logic_error("Can't add a message handler after the loop started.\n"
 				"This would be an unsafe operation, therefore it's explicitly forbidden.");
