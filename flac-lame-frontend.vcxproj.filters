@@ -32,6 +32,42 @@
     <ClInclude Include="src\std.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="winlamb\internals\com_variant.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\combinable_flags.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\device_context_objects.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\dialog.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\download_session.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\download_url.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\lippincott.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\listview_column_collection.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\listview_item.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\listview_item_collection.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\listview_styler.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\loop.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
     <ClInclude Include="winlamb\internals\member_image_list.h">
       <Filter>WinLamb internals</Filter>
     </ClInclude>
@@ -100,81 +136,6 @@
     </ClInclude>
     <ClInclude Include="winlamb\internals\com_ptr.h">
       <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\com_variant.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\combinable_flags.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\device_context_objects.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\dialog.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\download_session.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\download_url.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\lippincott.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\listview_column_collection.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\listview_item.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\listview_item_collection.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\listview_styler.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\loop.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\icon.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\image_list.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\label.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\listview.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\menu.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\path.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\process.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\progress_taskbar.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\progressbar.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\radio.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\radio_group.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\resizer.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\scrollinfo.h">
-      <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\statusbar.h">
       <Filter>WinLamb</Filter>
@@ -257,10 +218,49 @@
     <ClInclude Include="winlamb\font.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\held_map.h">
+    <ClInclude Include="winlamb\hwnd_base.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\hwnd_base.h">
+    <ClInclude Include="winlamb\icon.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\image_list.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\insert_order_map.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\label.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\listview.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\menu.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\path.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\process.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\progress_taskbar.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\progressbar.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\radio.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\radio_group.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\resizer.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\scrollinfo.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
   </ItemGroup>

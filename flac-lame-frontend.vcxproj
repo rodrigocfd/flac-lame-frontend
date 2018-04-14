@@ -164,10 +164,10 @@
     <ClInclude Include="winlamb\file_ini.h" />
     <ClInclude Include="winlamb\file_mapped.h" />
     <ClInclude Include="winlamb\font.h" />
-    <ClInclude Include="winlamb\held_map.h" />
     <ClInclude Include="winlamb\hwnd_base.h" />
     <ClInclude Include="winlamb\icon.h" />
     <ClInclude Include="winlamb\image_list.h" />
+    <ClInclude Include="winlamb\insert_order_map.h" />
     <ClInclude Include="winlamb\internals\combinable_flags.h" />
     <ClInclude Include="winlamb\internals\com_bstr.h" />
     <ClInclude Include="winlamb\internals\com_lib.h" />
