@@ -220,6 +220,7 @@
     <ClInclude Include="winlamb\sysdlg.h" />
     <ClInclude Include="winlamb\textbox.h" />
     <ClInclude Include="winlamb\treeview.h" />
+    <ClInclude Include="winlamb\vec.h" />
     <ClInclude Include="winlamb\version.h" />
     <ClInclude Include="winlamb\window_control.h" />
     <ClInclude Include="winlamb\window_main.h" />

@@ -263,6 +263,9 @@
     <ClInclude Include="winlamb\scrollinfo.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
+    <ClInclude Include="winlamb\vec.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Convert.cpp">
