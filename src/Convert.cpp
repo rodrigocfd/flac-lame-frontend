@@ -1,8 +1,8 @@
 
 #include "Convert.h"
+#include <winlamb/executable.h>
 #include <winlamb/file.h>
 #include <winlamb/path.h>
-#include <winlamb/process.h>
 using namespace wl;
 using std::runtime_error;
 
@@ -169,6 +169,6 @@ void Convert::_execute(const wstring& cmdLine, const wstring& src, bool delSrc)
 	}
 #endif
 
-	process::exec(cmdLine); // run tool
+	executable::exec(cmdLine); // run tool
 	if (delSrc) file::util::del(src); // delete source file
 }

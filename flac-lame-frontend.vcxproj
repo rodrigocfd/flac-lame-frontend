@@ -160,6 +160,7 @@
     <ClInclude Include="winlamb\dialog_modal.h" />
     <ClInclude Include="winlamb\dialog_modeless.h" />
     <ClInclude Include="winlamb\download.h" />
+    <ClInclude Include="winlamb\executable.h" />
     <ClInclude Include="winlamb\file.h" />
     <ClInclude Include="winlamb\file_ini.h" />
     <ClInclude Include="winlamb\file_mapped.h" />
@@ -207,7 +208,6 @@
     <ClInclude Include="winlamb\listview.h" />
     <ClInclude Include="winlamb\menu.h" />
     <ClInclude Include="winlamb\path.h" />
-    <ClInclude Include="winlamb\process.h" />
     <ClInclude Include="winlamb\progressbar.h" />
     <ClInclude Include="winlamb\progress_taskbar.h" />
     <ClInclude Include="winlamb\radio.h" />
