@@ -1,5 +1,6 @@
 
 #include "Dlg_Main.h"
+#include <winlamb/executable.h>
 #include <winlamb/path.h>
 #include <winlamb/sysdlg.h>
 #include "Convert.h"
@@ -20,7 +21,7 @@ Dlg_Main::Dlg_Main()
 void Dlg_Main::validate_ini()
 {
 	// Validate and load INI file.
-	wstring iniPath = path::get::exe_itself().append(L"\\flac-lame-frontend.ini");
+	wstring iniPath = executable::get_own_path().append(L"\\flac-lame-frontend.ini");
 	if (!file::util::exists(iniPath)) {
 		throw std::runtime_error(str::to_ascii(
 			str::format(L"File not found:\n%s", iniPath) ));

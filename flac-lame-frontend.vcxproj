@@ -189,7 +189,6 @@
     <ClInclude Include="winlamb\internals\params.h" />
     <ClInclude Include="winlamb\internals\params_wm.h" />
     <ClInclude Include="winlamb\internals\params_wmn.h" />
-    <ClInclude Include="winlamb\internals\path_get.h" />
     <ClInclude Include="winlamb\internals\run.h" />
     <ClInclude Include="winlamb\internals\scroll_inactive.h" />
     <ClInclude Include="winlamb\internals\store.h" />
@@ -218,6 +217,7 @@
     <ClInclude Include="winlamb\str.h" />
     <ClInclude Include="winlamb\subclass.h" />
     <ClInclude Include="winlamb\sysdlg.h" />
+    <ClInclude Include="winlamb\syspath.h" />
     <ClInclude Include="winlamb\textbox.h" />
     <ClInclude Include="winlamb\treeview.h" />
     <ClInclude Include="winlamb\vec.h" />
