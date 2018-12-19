@@ -30,31 +30,31 @@ void Dlg_Main::messages()
 
 		// Initializing comboboxes.
 		m_cmbCbr.assign(this, CMB_CBR)
-			.item_add(L"32 kbps|40 kbps|48 kbps|56 kbps|64 kbps|80 kbps|96 kbps|"
+			.add(L"32 kbps|40 kbps|48 kbps|56 kbps|64 kbps|80 kbps|96 kbps|"
 				L"112 kbps|128 kbps; default|160 kbps|192 kbps|224 kbps|256 kbps|320 kbps")
-			.item_set_selected(8);
+			.select(8);
 
 		m_cmbVbr.assign(this, CMB_VBR)
-			.item_add(L"0 (~245 kbps)|1 (~225 kbps)|2 (~190 kbps)|3 (~175 kbps)|"
+			.add(L"0 (~245 kbps)|1 (~225 kbps)|2 (~190 kbps)|3 (~175 kbps)|"
 				L"4 (~165 kbps); default|5 (~130 kbps)|6 (~115 kbps)|7 (~100 kbps)|"
 				L"8 (~85 kbps)|9 (~65 kbps)")
-			.item_set_selected(4);
+			.select(4);
 
 		m_cmbFlac.assign(this, CMB_FLAC)
-			.item_add(L"1|2|3|4|5|6|7|8")
-			.item_set_selected(7);
+			.add(L"1|2|3|4|5|6|7|8")
+			.select(7);
 
 		m_cmbNumThreads.assign(this, CMB_NUMTHREADS)
-			.item_add(L"1|2|4|6|8|12");
+			.add(L"1|2|4|6|8|12");
 
 		switch (num_processors()) {
-			case 1:  m_cmbNumThreads.item_set_selected(0); break;
-			case 2:  m_cmbNumThreads.item_set_selected(1); break;
-			case 4:  m_cmbNumThreads.item_set_selected(2); break;
-			case 6:  m_cmbNumThreads.item_set_selected(3); break;
-			case 8:  m_cmbNumThreads.item_set_selected(4); break;
-			case 12: m_cmbNumThreads.item_set_selected(5); break;
-			default: m_cmbNumThreads.item_set_selected(0);
+			case 1:  m_cmbNumThreads.select(0); break;
+			case 2:  m_cmbNumThreads.select(1); break;
+			case 4:  m_cmbNumThreads.select(2); break;
+			case 6:  m_cmbNumThreads.select(3); break;
+			case 8:  m_cmbNumThreads.select(4); break;
+			case 12: m_cmbNumThreads.select(5); break;
+			default: m_cmbNumThreads.select(0);
 		}
 
 		// Initializing radio buttons.
@@ -80,7 +80,7 @@ void Dlg_Main::messages()
 
 	on_message(WM_SIZE, [&](wm::size p)
 	{
-		m_resz.arrange(p);
+		m_resz.adjust(p);
 		m_lstFiles.columns.set_width_to_fill(0);
 		return TRUE;
 	});
@@ -159,7 +159,7 @@ void Dlg_Main::messages()
 
 	on_command(IDCANCEL, [&](params)
 	{
-		if (!m_lstFiles.items.count() || m_btnRun.is_enabled()) {
+		if (!m_lstFiles.items.count() || IsWindowEnabled(m_btnRun.hwnd())) {
 			SendMessage(hwnd(), WM_CLOSE, 0, 0); // close on ESC only if not processing
 		}
 		return TRUE;
@@ -170,8 +170,8 @@ void Dlg_Main::messages()
 		wstring folder;
 		if (sysdlg::choose_folder(this, folder)) {
 			m_txtDest.set_text(folder)
-				.selection_set_all()
-				.set_focus();
+				.select_all();
+			SetFocus(m_txtDest.hwnd());
 		}
 		return TRUE;
 	});
@@ -182,19 +182,19 @@ void Dlg_Main::messages()
 		int cv = m_radMp3Type.get_checked_id();
 
 		m_radMp3Type.set_enable(mfw == RAD_MP3);
-		m_cmbCbr.set_enable(mfw == RAD_MP3 && cv == RAD_CBR);
-		m_cmbVbr.set_enable(mfw == RAD_MP3 && cv == RAD_VBR);
+		EnableWindow(m_cmbCbr.hwnd(), mfw == RAD_MP3 && cv == RAD_CBR);
+		EnableWindow(m_cmbVbr.hwnd(), mfw == RAD_MP3 && cv == RAD_VBR);
 
 		EnableWindow(GetDlgItem(hwnd(), LBL_LEVEL), mfw == RAD_FLAC);
-		m_cmbFlac.set_enable(mfw == RAD_FLAC);
+		EnableWindow(m_cmbFlac.hwnd(), mfw == RAD_FLAC);
 		return TRUE;
 	});
 
 	on_command({RAD_CBR, RAD_VBR}, [&](params)
 	{
 		int cv = m_radMp3Type.get_checked_id();
-		m_cmbCbr.set_enable(cv == RAD_CBR);
-		m_cmbVbr.set_enable(cv == RAD_VBR);
+		EnableWindow(m_cmbCbr.hwnd(), cv == RAD_CBR);
+		EnableWindow(m_cmbVbr.hwnd(), cv == RAD_VBR);
 		return TRUE;
 	});
 
@@ -217,16 +217,16 @@ void Dlg_Main::messages()
 		// Retrieve settings.
 		rd.opts.delSrc = m_chkDelSrc.is_checked();
 		rd.opts.isVbr = m_radMp3Type.get_checked_id() == RAD_VBR;
-		rd.opts.numThreads = std::stoul(m_cmbNumThreads.item_get_selected_text());
+		rd.opts.numThreads = std::stoul(m_cmbNumThreads.get_selected_text());
 
 		int mfw = m_radMFW.get_checked_id();
 		wstring quality;
 		if (mfw == RAD_MP3) {
 			combobox& cmbQuality = (rd.opts.isVbr ? m_cmbVbr : m_cmbCbr);
-			quality = cmbQuality.item_get_selected_text();
+			quality = cmbQuality.get_selected_text();
 			quality.resize(quality.find_first_of(L' ')); // first characters of chosen option are the quality setting itself
 		} else if (mfw == RAD_FLAC) {
-			quality = m_cmbFlac.item_get_selected_text(); // text is quality setting itself
+			quality = m_cmbFlac.get_selected_text(); // text is quality setting itself
 		}
 		rd.opts.quality = std::move(quality);
 

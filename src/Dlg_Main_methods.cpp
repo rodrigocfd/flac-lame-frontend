@@ -74,8 +74,8 @@ INT_PTR Dlg_Main::update_counter(size_t newCount)
 	// Update counter on Run button.
 	wstring caption = newCount ?
 		str::format(L"&Run (%d)", newCount) : L"&Run";
-	m_btnRun.set_text(caption)
-		.set_enable(newCount > 0); // Run button enabled if at least 1 file
+	m_btnRun.set_text(caption);
+	EnableWindow(m_btnRun.hwnd(), newCount > 0); // Run button enabled if at least 1 file
 	return 0;
 };
 
