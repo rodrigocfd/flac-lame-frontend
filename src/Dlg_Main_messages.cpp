@@ -4,6 +4,8 @@
 #include <winlamb/version.h>
 #include "Dlg_Runnin.h"
 #include "../res/resource.h"
+using std::vector;
+using std::wstring;
 using namespace wl;
 
 void Dlg_Main::messages()

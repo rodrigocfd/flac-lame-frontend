@@ -1,6 +1,5 @@
 
 #pragma once
-#include "std.h"
 #include <winlamb/file_ini.h>
 
 struct Convert final {
@@ -9,13 +8,13 @@ private:
 
 public:
 	static void validate_paths(const wl::file_ini& ini);
-	static void to_wav(const wl::file_ini& ini, wstring src, wstring dest, bool delSrc);
-	static void to_flac(const wl::file_ini& ini, wstring src, wstring dest,
-		bool delSrc, const wstring& quality);
-	static void to_mp3(const wl::file_ini& ini, wstring src, wstring dest,
-		bool delSrc, const wstring& quality, bool isVbr);
+	static void to_wav(const wl::file_ini& ini, std::wstring src, std::wstring dest, bool delSrc);
+	static void to_flac(const wl::file_ini& ini, std::wstring src, std::wstring dest,
+		bool delSrc, const std::wstring& quality);
+	static void to_mp3(const wl::file_ini& ini, std::wstring src, std::wstring dest,
+		bool delSrc, const std::wstring& quality, bool isVbr);
 
 private:
-	static void _validate_dest_folder(wstring& dest);
-	static void _execute(const wstring& cmdLine, const wstring& src, bool delSrc);
+	static void _validate_dest_folder(std::wstring& dest);
+	static void _execute(const std::wstring& cmdLine, const std::wstring& src, bool delSrc);
 };

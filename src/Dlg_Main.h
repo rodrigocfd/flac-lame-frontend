@@ -1,6 +1,5 @@
 
 #pragma once
-#include "std.h"
 #include <winlamb/dialog_main.h>
 #include <winlamb/button.h>
 #include <winlamb/checkbox.h>
@@ -31,9 +30,9 @@ private:
 	void    messages();
 	void    validate_ini();
 	void    validate_dest_folder();
-	void    validate_files_exist(const vector<wstring>& files);
+	void    validate_files_exist(const std::vector<std::wstring>& files);
 	INT_PTR update_counter(size_t newCount);
-	void    file_to_list(const wstring& file);
+	void    file_to_list(const std::wstring& file);
 
 	static DWORD num_processors();
 };

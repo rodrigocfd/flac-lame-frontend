@@ -1,6 +1,5 @@
 
 #pragma once
-#include "std.h"
 #include <winlamb/dialog_modal.h>
 #include <winlamb/file_ini.h>
 #include <winlamb/label.h>
@@ -12,13 +11,13 @@ public:
 	enum class target { NONE = 0, MP3, FLAC, WAV };
 
 	struct runnin_options final {
-		vector<wstring> files;
-		size_t          numThreads = 2;
-		target          targetType = target::NONE;
-		bool            delSrc = false;
-		bool            isVbr = false;
-		wstring         quality;
-		wstring         destFolder;
+		std::vector<std::wstring> files;
+		size_t                    numThreads = 2;
+		target                    targetType = target::NONE;
+		bool                      delSrc = false;
+		bool                      isVbr = false;
+		std::wstring              quality;
+		std::wstring              destFolder;
 	};
 
 private:

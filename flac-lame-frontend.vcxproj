@@ -147,7 +147,6 @@
     <ClInclude Include="src\Convert.h" />
     <ClInclude Include="src\Dlg_Main.h" />
     <ClInclude Include="src\Dlg_Runnin.h" />
-    <ClInclude Include="src\std.h" />
     <ClInclude Include="winlamb\button.h" />
     <ClInclude Include="winlamb\checkbox.h" />
     <ClInclude Include="winlamb\com.h" />

@@ -3,8 +3,9 @@
 #include <winlamb/executable.h>
 #include <winlamb/file.h>
 #include <winlamb/path.h>
-using namespace wl;
 using std::runtime_error;
+using std::wstring;
+using namespace wl;
 
 void Convert::validate_paths(const file_ini& ini)
 {

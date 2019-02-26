@@ -5,6 +5,8 @@
 #include <winlamb/sysdlg.h>
 #include "Convert.h"
 #include "../res/resource.h"
+using std::vector;
+using std::wstring;
 using namespace wl;
 
 RUN(Dlg_Main);

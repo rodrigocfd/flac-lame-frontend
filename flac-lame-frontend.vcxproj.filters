@@ -29,9 +29,6 @@
     <ClInclude Include="res\resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\std.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="winlamb\internals\base_native_ctrl_impl.h">
       <Filter>WinLamb internals</Filter>
     </ClInclude>
