@@ -63,15 +63,13 @@ public:
 	}
 
 	// Defines a lambda to be called once, right after the download starts.
-	template<typename callbackT>
-	download& on_start(callbackT&& callback) noexcept {
+	download& on_start(std::function<void()>&& callback) noexcept {
 		this->_startCallback = std::move(callback);
 		return *this;
 	}
 
 	// Defines a lambda do be called each time a chunk of bytes is received.
-	template<typename callbackT>
-	download& on_progress(callbackT&& callback) noexcept {
+	download& on_progress(std::function<void()>&& callback) noexcept {
 		this->_progressCallback = std::move(callback);
 		return *this;
 	}
@@ -189,7 +187,7 @@ private:
 
 		// Parse the raw response headers into an associative array.
 		this->_responseHeaders.clear();
-		std::vector<std::wstring> lines = str::explode(rawReh, str::get_linebreak(rawReh));
+		std::vector<std::wstring> lines = str::split_lines(rawReh);
 
 		for (const std::wstring& line : lines) {
 			if (line.empty()) {

@@ -33,7 +33,7 @@ public:
 	static int msgbox(HWND hParent, const std::wstring& title, const std::wstring& text, UINT uType = 0) {
 		if (hParent) { // the hook will center the messagebox window on parent
 			_hWndParent.val = hParent;
-			_hHookMsgBox.val = SetWindowsHookExW(WH_CBT, [](int code, WPARAM wp, LPARAM lp) noexcept->LRESULT {
+			_hHookMsgBox.val = SetWindowsHookExW(WH_CBT, [](int code, WPARAM wp, LPARAM lp) noexcept -> LRESULT {
 				// http://www.codeguru.com/cpp/w-p/win32/messagebox/print.php/c4541
 				if (code == HCBT_ACTIVATE) {
 					HWND hMsgbox = reinterpret_cast<HWND>(wp);
@@ -143,7 +143,7 @@ public:
 			return false;
 		}
 
-		std::vector<std::wstring> strs = str::explode_multi_zero(&multiBuf[0]);
+		std::vector<std::wstring> strs = str::split_multi_zero(&multiBuf[0]);
 		if (strs.empty()) {
 			throw std::runtime_error("GetOpenFileName didn't return multiple strings.");
 		}
