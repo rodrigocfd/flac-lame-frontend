@@ -9,10 +9,7 @@ using namespace wl;
 
 void Convert::validate_paths(const file_ini& ini)
 {
-	if (!ini.sections.has(L"Tools") ||
-		!ini.sections[L"Tools"].has(L"lame") ||
-		!ini.sections[L"Tools"].has(L"flac") )
-	{
+	if (!ini.structure_is(L"[Tools]lame,flac")) {
 		throw runtime_error("INI file doesn't have the right entries.");
 	}
 
