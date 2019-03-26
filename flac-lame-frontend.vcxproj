@@ -170,13 +170,13 @@
     <ClInclude Include="winlamb\internals\base_dialog.h" />
     <ClInclude Include="winlamb\internals\base_loop.h" />
     <ClInclude Include="winlamb\internals\base_msg.h" />
-    <ClInclude Include="winlamb\internals\base_msg_impl.h" />
+    <ClInclude Include="winlamb\internals\base_msg_pubm.h" />
     <ClInclude Include="winlamb\internals\base_native_ctrl.h" />
-    <ClInclude Include="winlamb\internals\base_native_ctrl_impl.h" />
+    <ClInclude Include="winlamb\internals\base_native_ctrl_pubm.h" />
     <ClInclude Include="winlamb\internals\base_scroll.h" />
-    <ClInclude Include="winlamb\internals\base_text_impl.h" />
+    <ClInclude Include="winlamb\internals\base_text_pubm.h" />
     <ClInclude Include="winlamb\internals\base_thread.h" />
-    <ClInclude Include="winlamb\internals\base_thread_impl.h" />
+    <ClInclude Include="winlamb\internals\base_thread_pubm.h" />
     <ClInclude Include="winlamb\internals\base_user_ctrl.h" />
     <ClInclude Include="winlamb\internals\base_window.h" />
     <ClInclude Include="winlamb\internals\com_bstr.h" />
