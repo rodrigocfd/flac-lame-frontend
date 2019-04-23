@@ -10,7 +10,9 @@
 #include <Windows.h>
 
 namespace wl {
-namespace wli {
+
+// Wrappers to GDI objects.
+namespace gdi {
 
 // Wrapper to device context HPEN.
 class pen final {
@@ -104,5 +106,5 @@ public:
 	}
 };
 
-}//namespace wli
+}//namespace gdi
 }//namespace wl
