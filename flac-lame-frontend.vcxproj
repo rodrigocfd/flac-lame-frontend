@@ -153,7 +153,6 @@
     <ClInclude Include="winlamb\combobox.h" />
     <ClInclude Include="winlamb\datetime.h" />
     <ClInclude Include="winlamb\datetime_picker.h" />
-    <ClInclude Include="winlamb\device_context.h" />
     <ClInclude Include="winlamb\dialog_control.h" />
     <ClInclude Include="winlamb\dialog_main.h" />
     <ClInclude Include="winlamb\dialog_modal.h" />
@@ -164,6 +163,7 @@
     <ClInclude Include="winlamb\file_ini.h" />
     <ClInclude Include="winlamb\file_mapped.h" />
     <ClInclude Include="winlamb\font.h" />
+    <ClInclude Include="winlamb\gdi.h" />
     <ClInclude Include="winlamb\icon.h" />
     <ClInclude Include="winlamb\image_list.h" />
     <ClInclude Include="winlamb\insert_order_map.h" />
@@ -183,10 +183,10 @@
     <ClInclude Include="winlamb\internals\com_lib.h" />
     <ClInclude Include="winlamb\internals\com_ptr.h" />
     <ClInclude Include="winlamb\internals\com_variant.h" />
-    <ClInclude Include="winlamb\internals\device_context_objects.h" />
     <ClInclude Include="winlamb\internals\download_session.h" />
     <ClInclude Include="winlamb\internals\download_url.h" />
     <ClInclude Include="winlamb\internals\enable_bitmask_operators.h" />
+    <ClInclude Include="winlamb\internals\gdi_objects.h" />
     <ClInclude Include="winlamb\internals\lippincott.h" />
     <ClInclude Include="winlamb\internals\listview_column_collection.h" />
     <ClInclude Include="winlamb\internals\listview_item.h" />
@@ -198,10 +198,12 @@
     <ClInclude Include="winlamb\internals\params_wmn.h" />
     <ClInclude Include="winlamb\internals\run.h" />
     <ClInclude Include="winlamb\internals\store.h" />
+    <ClInclude Include="winlamb\internals\str_priv.h" />
     <ClInclude Include="winlamb\internals\styler.h" />
     <ClInclude Include="winlamb\internals\styles_wc.h" />
     <ClInclude Include="winlamb\internals\styles_ws.h" />
     <ClInclude Include="winlamb\internals\styles_wsx.h" />
+    <ClInclude Include="winlamb\internals\sysdlg_priv.h" />
     <ClInclude Include="winlamb\internals\treeview_item.h" />
     <ClInclude Include="winlamb\internals\treeview_item_collection.h" />
     <ClInclude Include="winlamb\internals\treeview_styler.h" />
