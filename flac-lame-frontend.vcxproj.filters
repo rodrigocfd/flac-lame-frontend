@@ -29,15 +29,6 @@
     <ClInclude Include="res\resource.h">
       <Filter>Resource Files</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\internals\base_loop.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\base_msg.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\internals\base_msg_pubm.h">
-      <Filter>WinLamb internals</Filter>
-    </ClInclude>
     <ClInclude Include="winlamb\internals\base_native_ctrl.h">
       <Filter>WinLamb internals</Filter>
     </ClInclude>
@@ -148,6 +139,18 @@
     </ClInclude>
     <ClInclude Include="winlamb\internals\base_dialog.h">
       <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\base_loop.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\base_msg.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\internals\base_msg_pubm.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\statusbar.h">
+      <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\str.h">
       <Filter>WinLamb</Filter>
@@ -276,9 +279,6 @@
       <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\scrollinfo.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\statusbar.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
   </ItemGroup>
