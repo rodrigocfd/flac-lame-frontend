@@ -23,7 +23,9 @@ class listview final :
 	public _wli::base_native_ctrl_pubm<listview>
 {
 public:
-	using item = _wli::listview_item<listview>;
+	using item              = _wli::listview_item;
+	using item_collection   = _wli::listview_item_collection;
+	using column_collection = _wli::listview_column_collection;
 
 	enum class view : WORD {
 		DETAILS   = LV_VIEW_DETAILS,
@@ -34,9 +36,6 @@ public:
 	};
 
 private:
-	using _column_collection = _wli::listview_column_collection<listview>;
-	using _item_collection = _wli::listview_item_collection<listview>;
-
 	HWND                   _hWnd = nullptr;
 	_wli::base_native_ctrl _baseNativeCtrl{_hWnd};
 	subclass               _subclass;
@@ -46,9 +45,17 @@ public:
 	// Wraps window style changes done by Get/SetWindowLongPtr.
 	_wli::listview_styler<listview>   style{this};
 
-	_item_collection                  items{this};
-	_column_collection                columns{this};
-	_wli::member_image_list<listview> imageList16{this, 16}, imageList32{this, 32};
+	// Access to the items of the listview.
+	item_collection                   items{this->_hWnd};
+
+	// Access to the columns of the listview.
+	column_collection                 columns{this->_hWnd};
+
+	// Access to the 16x16 image list of the listview.
+	_wli::member_image_list<listview> imageList16{this, 16};
+
+	// Access to the 32x32 image list of the listview.
+	_wli::member_image_list<listview> imageList32{this, 32};
 
 	~listview() {
 		this->_contextMenu.destroy();
@@ -111,6 +118,7 @@ public:
 		return this->_install_subclass();
 	}
 
+	// Assigns a context menu from RC file to this listview.
 	listview& set_context_menu(int contextMenuId) {
 		if (this->_contextMenu.hmenu()) {
 			throw std::logic_error("Trying to set listview context menu twice.");
@@ -120,6 +128,8 @@ public:
 		return *this;
 	}
 
+	// Sends a WM_SETREDRAW message to allow changes in that window to be redrawn
+	// or to prevent changes in that window from being redrawn.
 	listview& set_redraw(bool doRedraw) noexcept {
 		SendMessageW(this->_hWnd, WM_SETREDRAW,
 			static_cast<WPARAM>(static_cast<BOOL>(doRedraw)), 0);
