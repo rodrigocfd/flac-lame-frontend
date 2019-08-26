@@ -77,7 +77,7 @@ INT_PTR Dlg_Main::update_counter(size_t newCount)
 	wstring caption = newCount ?
 		str::format(L"&Run (%d)", newCount) : L"&Run";
 	m_btnRun.set_text(caption);
-	EnableWindow(m_btnRun.hwnd(), newCount > 0); // Run button enabled if at least 1 file
+	m_btnRun.set_enabled(newCount > 0); // Run button enabled if at least 1 file
 	return 0;
 };
 
@@ -92,7 +92,7 @@ void Dlg_Main::file_to_list(const wstring& file)
 		return; // bypass file if unaccepted format
 	}
 	if (!m_lstFiles.items.exists(file)) {
-		m_lstFiles.items.add(file, iType); // add only if not present yet
+		m_lstFiles.items.add_with_icon(file, iType); // add only if not present yet
 	}
 }
 

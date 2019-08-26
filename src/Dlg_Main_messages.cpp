@@ -27,8 +27,8 @@ void Dlg_Main::messages()
 		m_lstFiles.assign(this, LST_FILES)
 			.set_context_menu(MEN_MAIN)
 			.columns.add(L"File", 300)
-			.columns.set_width_to_fill(0)
-			.imageList16.load_from_shell({L"mp3", L"flac", L"wav"}); // icons of the 3 filetypes we use
+				.set_width_to_fill(0);
+		m_lstFiles.imageList16.load_from_shell({L"mp3", L"flac", L"wav"}); // icons of the 3 filetypes we use
 
 		// Initializing comboboxes.
 		m_cmbCbr.assign(this, CMB_CBR)
@@ -183,20 +183,20 @@ void Dlg_Main::messages()
 		int mfw = m_radMFW.get_checked_id();
 		int cv = m_radMp3Type.get_checked_id();
 
-		m_radMp3Type.set_enable(mfw == RAD_MP3);
-		EnableWindow(m_cmbCbr.hwnd(), mfw == RAD_MP3 && cv == RAD_CBR);
-		EnableWindow(m_cmbVbr.hwnd(), mfw == RAD_MP3 && cv == RAD_VBR);
+		m_radMp3Type.set_enabled(mfw == RAD_MP3);
+		m_cmbCbr.set_enabled(mfw == RAD_MP3 && cv == RAD_CBR);
+		m_cmbVbr.set_enabled(mfw == RAD_MP3 && cv == RAD_VBR);
 
 		EnableWindow(GetDlgItem(hwnd(), LBL_LEVEL), mfw == RAD_FLAC);
-		EnableWindow(m_cmbFlac.hwnd(), mfw == RAD_FLAC);
+		m_cmbFlac.set_enabled(mfw == RAD_FLAC);
 		return TRUE;
 	});
 
 	on_command({RAD_CBR, RAD_VBR}, [&](params)
 	{
 		int cv = m_radMp3Type.get_checked_id();
-		EnableWindow(m_cmbCbr.hwnd(), cv == RAD_CBR);
-		EnableWindow(m_cmbVbr.hwnd(), cv == RAD_VBR);
+		m_cmbCbr.set_enabled(cv == RAD_CBR);
+		m_cmbVbr.set_enabled(cv == RAD_VBR);
 		return TRUE;
 	});
 
