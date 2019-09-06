@@ -145,8 +145,8 @@
   <ItemGroup>
     <ClInclude Include="res\resource.h" />
     <ClInclude Include="src\Convert.h" />
-    <ClInclude Include="src\Dlg_Main.h" />
-    <ClInclude Include="src\Dlg_Runnin.h" />
+    <ClInclude Include="src\DlgMain.h" />
+    <ClInclude Include="src\DlgRunnin.h" />
     <ClInclude Include="winlamb\button.h" />
     <ClInclude Include="winlamb\checkbox.h" />
     <ClInclude Include="winlamb\com.h" />
@@ -234,9 +234,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Convert.cpp" />
-    <ClCompile Include="src\Dlg_Main_messages.cpp" />
-    <ClCompile Include="src\Dlg_Main_methods.cpp" />
-    <ClCompile Include="src\Dlg_Runnin.cpp" />
+    <ClCompile Include="src\DlgMain_messages.cpp" />
+    <ClCompile Include="src\DlgMain_methods.cpp" />
+    <ClCompile Include="src\DlgRunnin.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\Ron Burgundy.ico" />

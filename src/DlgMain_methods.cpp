@@ -1,5 +1,5 @@
 
-#include "Dlg_Main.h"
+#include "DlgMain.h"
 #include <winlamb/executable.h>
 #include <winlamb/path.h>
 #include <winlamb/sysdlg.h>
@@ -9,9 +9,9 @@ using std::vector;
 using std::wstring;
 using namespace wl;
 
-RUN(Dlg_Main);
+RUN(DlgMain);
 
-Dlg_Main::Dlg_Main()
+DlgMain::DlgMain()
 {
 	setup.dialogId = DLG_MAIN;
 	setup.iconId = ICO_MAIN;
@@ -20,7 +20,7 @@ Dlg_Main::Dlg_Main()
 	messages();
 }
 
-void Dlg_Main::validate_ini()
+void DlgMain::validateIni()
 {
 	// Validate and load INI file.
 	wstring iniPath = executable::get_own_path().append(L"\\flac-lame-frontend.ini");
@@ -29,13 +29,13 @@ void Dlg_Main::validate_ini()
 			str::format(L"File not found:\n%s", iniPath) ));
 	}
 
-	m_iniFile.load_from_file(iniPath);
-	Convert::validate_paths(m_iniFile); // validate tools
+	mIniFile.load_from_file(iniPath);
+	Convert::validatePaths(mIniFile); // validate tools
 }
 
-void Dlg_Main::validate_dest_folder()
+void DlgMain::validateDestFolder()
 {
-	wstring destFolder = m_txtDest.get_text();
+	wstring destFolder = mTxtDest.get_text();
 	if (destFolder.empty()) return;
 
 	if (!file::util::exists(destFolder)) {
@@ -43,7 +43,7 @@ void Dlg_Main::validate_dest_folder()
 			str::format(L"The following directory:\n%s\ndoes not exist. Create it?",
 				destFolder),
 			MB_ICONQUESTION | MB_YESNO);
-		
+
 		if (q == IDYES) {
 			try {
 				file::util::create_dir(destFolder);
@@ -61,7 +61,7 @@ void Dlg_Main::validate_dest_folder()
 	}
 }
 
-void Dlg_Main::validate_files_exist(const vector<wstring>& files)
+void DlgMain::validateFilesExist(const vector<wstring>& files)
 {
 	for (const wstring& f : files) { // each filepath
 		if (!file::util::exists(f)) {
@@ -71,17 +71,17 @@ void Dlg_Main::validate_files_exist(const vector<wstring>& files)
 	}
 }
 
-INT_PTR Dlg_Main::update_counter(size_t newCount)
+INT_PTR DlgMain::updateCounter(size_t newCount)
 {
 	// Update counter on Run button.
 	wstring caption = newCount ?
 		str::format(L"&Run (%d)", newCount) : L"&Run";
-	m_btnRun.set_text(caption);
-	m_btnRun.set_enabled(newCount > 0); // Run button enabled if at least 1 file
+	mBtnRun.set_text(caption);
+	mBtnRun.set_enabled(newCount > 0); // Run button enabled if at least 1 file
 	return 0;
 };
 
-void Dlg_Main::file_to_list(const wstring& file)
+void DlgMain::putFileIntoList(const wstring& file)
 {
 	int iType = -1;
 	if (path::has_extension(file, L".mp3"))       iType = 0;
@@ -91,12 +91,12 @@ void Dlg_Main::file_to_list(const wstring& file)
 	if (iType == -1) {
 		return; // bypass file if unaccepted format
 	}
-	if (!m_lstFiles.items.exists(file)) {
-		m_lstFiles.items.add_with_icon(file, iType); // add only if not present yet
+	if (!mLstFiles.items.exists(file)) {
+		mLstFiles.items.add_with_icon(file, iType); // add only if not present yet
 	}
 }
 
-DWORD Dlg_Main::num_processors()
+DWORD DlgMain::numProcessors()
 {
 	SYSTEM_INFO si{};
 	GetSystemInfo(&si);

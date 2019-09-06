@@ -7,7 +7,7 @@ using std::runtime_error;
 using std::wstring;
 using namespace wl;
 
-void Convert::validate_paths(const file_ini& ini)
+void Convert::validatePaths(const file_ini& ini)
 {
 	if (!ini.structure_is(L"[Tools]lame,flac")) {
 		throw runtime_error("INI file doesn't have the right entries.");
@@ -26,9 +26,9 @@ void Convert::validate_paths(const file_ini& ini)
 	}
 }
 
-void Convert::to_wav(const file_ini& ini, wstring src, wstring dest, bool delSrc)
+void Convert::toWav(const file_ini& ini, wstring src, wstring dest, bool delSrc)
 {
-	_validate_dest_folder(dest);
+	_validateDestFolder(dest);
 
 	if (path::is_same(path::folder_from(src), dest)) { // destination folder is same of origin
 		dest.clear();
@@ -59,10 +59,10 @@ void Convert::to_wav(const file_ini& ini, wstring src, wstring dest, bool delSrc
 	_execute(cmdLine, src, delSrc);
 }
 
-void Convert::to_flac(const file_ini& ini, wstring src, wstring dest,
+void Convert::toFlac(const file_ini& ini, wstring src, wstring dest,
 	bool delSrc, const wstring& quality)
 {
-	_validate_dest_folder(dest);
+	_validateDestFolder(dest);
 
 	if (path::is_same(path::folder_from(src), dest)) { // destination folder is same of origin
 		dest.clear();
@@ -70,9 +70,9 @@ void Convert::to_flac(const file_ini& ini, wstring src, wstring dest,
 
 	if (path::has_extension(src, {L".flac", L".mp3"})) { // needs intermediary WAV conversion
 		if (path::has_extension(src, L".mp3")) {
-			to_wav(ini, src, dest, delSrc); // send WAV straight to new folder, if any
+			toWav(ini, src, dest, delSrc); // send WAV straight to new folder, if any
 		} else if (path::has_extension(src, L".flac")) {
-			to_wav(ini, src, dest, // send WAV straight to new folder, if any
+			toWav(ini, src, dest, // send WAV straight to new folder, if any
 				dest.empty() ? true : delSrc); // if same destination folder, then delete source (will be replaced)
 		}
 
@@ -101,10 +101,10 @@ void Convert::to_flac(const file_ini& ini, wstring src, wstring dest,
 	_execute(cmdLine, src, delSrc);
 }
 
-void Convert::to_mp3(const file_ini& ini, wstring src, wstring dest, bool delSrc,
+void Convert::toMp3(const file_ini& ini, wstring src, wstring dest, bool delSrc,
 	const wstring& quality, bool isVbr)
 {
-	_validate_dest_folder(dest);
+	_validateDestFolder(dest);
 
 	if (path::is_same(path::folder_from(src), dest)) { // destination folder is same of origin
 		dest.clear();
@@ -112,9 +112,9 @@ void Convert::to_mp3(const file_ini& ini, wstring src, wstring dest, bool delSrc
 
 	if (path::has_extension(src, {L".flac", L".mp3"})) { // needs intermediary WAV conversion
 		if (path::has_extension(src, L".flac")) {
-			to_wav(ini, src, dest, delSrc); // send WAV straight to new folder, if any
+			toWav(ini, src, dest, delSrc); // send WAV straight to new folder, if any
 		} else if (path::has_extension(src, L".mp3")) {
-			to_wav(ini, src, dest, // send WAV straight to new folder, if any
+			toWav(ini, src, dest, // send WAV straight to new folder, if any
 				dest.empty() ? true : delSrc); // if same destination folder, then delete source (will be replaced)
 		}
 
@@ -143,7 +143,7 @@ void Convert::to_mp3(const file_ini& ini, wstring src, wstring dest, bool delSrc
 	_execute(cmdLine, src, delSrc);
 }
 
-void Convert::_validate_dest_folder(wstring& dest)
+void Convert::_validateDestFolder(wstring& dest)
 {
 	if (dest.empty()) {
 		return; // same destination of source file, it's OK

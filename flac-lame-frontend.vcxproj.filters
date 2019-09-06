@@ -20,10 +20,10 @@
     <ClInclude Include="src\Convert.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Dlg_Main.h">
+    <ClInclude Include="src\DlgMain.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Dlg_Runnin.h">
+    <ClInclude Include="src\DlgRunnin.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="res\resource.h">
@@ -286,13 +286,13 @@
     <ClCompile Include="src\Convert.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Dlg_Runnin.cpp">
+    <ClCompile Include="src\DlgRunnin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Dlg_Main_messages.cpp">
+    <ClCompile Include="src\DlgMain_messages.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Dlg_Main_methods.cpp">
+    <ClCompile Include="src\DlgMain_methods.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
