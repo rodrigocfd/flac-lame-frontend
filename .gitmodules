@@ -1,0 +1,3 @@
+[submodule "winlamb"]
+	path = winlamb
+	url = git@github.com:rodrigocfd/winlamb.git

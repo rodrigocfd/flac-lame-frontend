@@ -11,18 +11,12 @@ Once dowloaded, write the paths in `flac-lame-frontend.ini` file.
 
 ## WinLamb library
 
-This project uses [WinLamb](https://github.com/rodrigocfd/winlamb) library in a [subtree](http://bluedesk.blogspot.com.br/2017/06/trying-out-git-subtree.html). To add the subtree, run:
+This project uses [WinLamb](https://github.com/rodrigocfd/winlamb) library in a [submodule](http://blog.joncairns.com/2011/10/how-to-use-git-submodules).
 
-```
-git remote add winlamb --no-tags https://github.com/rodrigocfd/winlamb.git
-git subtree add --prefix winlamb winlamb master --squash
-```
+After cloning the repository, pull the submodule files by running:
 
-If you want to update the library, pull the code from the repo:
-
-```
-git subtree pull --prefix winlamb winlamb master --squash
-```
+    git submodule init
+    git submodule update
 
 ### Showcase
 
