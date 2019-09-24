@@ -60,18 +60,19 @@ void DlgMain::messages()
 		}
 
 		// Initializing radio buttons.
-		mRadMFW.assign(this, {RAD_MP3, RAD_FLAC, RAD_WAV});
+		mRadMp3FlacWav.assign(this, {RAD_MP3, RAD_FLAC, RAD_WAV});
 		mRadMp3Type.assign(this, {RAD_CBR, RAD_VBR});
 
-		mRadMFW.set_checked_by_pos(0);
+		mRadMp3FlacWav.set_checked_by_pos(0);
 		mRadMp3Type.set_checked_by_pos(1);
 
 		mChkDelSrc.assign(this, CHK_DELSRC);
 		mBtnRun.assign(this, BTN_RUN);
 
 		// Layout control when resizing.
-		mResz.add(this, LST_FILES, resizer::go::RESIZE, resizer::go::RESIZE)
-			.add(this, TXT_DEST, resizer::go::RESIZE, resizer::go::REPOS)
+		mLayoutResizer
+			.add(mLstFiles, resizer::go::RESIZE, resizer::go::RESIZE)
+			.add(mTxtDest, resizer::go::RESIZE, resizer::go::REPOS)
 			.add(this, {LBL_DEST, FRA_CONV, RAD_MP3, RAD_FLAC, RAD_WAV, RAD_CBR, RAD_VBR,
 				LBL_LEVEL, CMB_CBR, CMB_VBR, CMB_FLAC, CHK_DELSRC, LBL_NUMTHREADS, CMB_NUMTHREADS},
 				resizer::go::NOTHING, resizer::go::REPOS)
@@ -82,7 +83,7 @@ void DlgMain::messages()
 
 	on_message(WM_SIZE, [&](wm::size p)
 	{
-		mResz.adjust(p);
+		mLayoutResizer.adjust(p);
 		mLstFiles.columns.set_width_to_fill(0);
 		return TRUE;
 	});
@@ -107,7 +108,7 @@ void DlgMain::messages()
 			}
 		}
 
-		updateCounter(mLstFiles.items.count());
+		updateRunBtnCounter(mLstFiles.items.count());
 		return TRUE;
 	});
 
@@ -128,7 +129,7 @@ void DlgMain::messages()
 		sysdlg::msgbox(this,
 			str::format(L"About v%d.%d.%d", ver.num[0], ver.num[1], ver.num[2]),
 			L"FLAC/LAME graphical front-end.\n"
-			L"Rodrigo C�sar de Freitas Dias.",
+			L"Rodrigo Cesar de Freitas Dias.",
 			MB_ICONINFORMATION);
 
 		return TRUE;
@@ -147,7 +148,7 @@ void DlgMain::messages()
 			for (const wstring& file : files) {
 				putFileIntoList(file);
 			}
-			updateCounter(mLstFiles.items.count());
+			updateRunBtnCounter(mLstFiles.items.count());
 		}
 		return TRUE;
 	});
@@ -155,13 +156,13 @@ void DlgMain::messages()
 	on_command(MNU_REMSELECTED, [&](params)
 	{
 		mLstFiles.items.remove_selected();
-		updateCounter(mLstFiles.items.count());
+		updateRunBtnCounter(mLstFiles.items.count());
 		return TRUE;
 	});
 
 	on_command(IDCANCEL, [&](params)
 	{
-		if (!mLstFiles.items.count() || IsWindowEnabled(mBtnRun.hwnd())) {
+		if (!mLstFiles.items.count() || mBtnRun.is_enabled()) {
 			SendMessage(hwnd(), WM_CLOSE, 0, 0); // close on ESC only if not processing
 		}
 		return TRUE;
@@ -180,7 +181,7 @@ void DlgMain::messages()
 
 	on_command({RAD_MP3, RAD_FLAC, RAD_WAV}, [&](params)
 	{
-		int mfw = mRadMFW.get_checked_id();
+		int mfw = mRadMp3FlacWav.get_checked_id();
 		int cv = mRadMp3Type.get_checked_id();
 
 		mRadMp3Type.set_enabled(mfw == RAD_MP3);
@@ -202,8 +203,8 @@ void DlgMain::messages()
 
 	on_command(BTN_RUN, [&](params)
 	{
-		DlgRunnin rd(mTaskbarProg, mIniFile);
-		rd.opts.destFolder = mTxtDest.get_text();
+		DlgRunnin dlgRun(mTaskbarProg, mIniFile);
+		dlgRun.opts.destFolder = mTxtDest.get_text();
 
 		vector<wstring> files;
 		try {
@@ -214,49 +215,49 @@ void DlgMain::messages()
 			sysdlg::msgbox(this, L"Fail", str::to_wstring(e.what()), MB_ICONERROR);
 			return TRUE;
 		}
-		rd.opts.files = std::move(files);
+		dlgRun.opts.files = std::move(files);
 
 		// Retrieve settings.
-		rd.opts.delSrc = mChkDelSrc.is_checked();
-		rd.opts.isVbr = mRadMp3Type.get_checked_id() == RAD_VBR;
-		rd.opts.numThreads = std::stoul(mCmbNumThreads.get_selected_text());
+		dlgRun.opts.delSrc = mChkDelSrc.is_checked();
+		dlgRun.opts.isVbr = mRadMp3Type.get_checked_id() == RAD_VBR;
+		dlgRun.opts.numThreads = std::stoul(mCmbNumThreads.get_selected_text());
 
-		int mfw = mRadMFW.get_checked_id();
+		int mfw = mRadMp3FlacWav.get_checked_id();
 		wstring quality;
 		if (mfw == RAD_MP3) {
-			combobox& cmbQuality = (rd.opts.isVbr ? mCmbVbr : mCmbCbr);
+			combobox& cmbQuality = (dlgRun.opts.isVbr ? mCmbVbr : mCmbCbr);
 			quality = cmbQuality.get_selected_text();
 			quality.resize(quality.find_first_of(L' ')); // first characters of chosen option are the quality setting itself
 		} else if (mfw == RAD_FLAC) {
 			quality = mCmbFlac.get_selected_text(); // text is quality setting itself
 		}
-		rd.opts.quality = std::move(quality);
+		dlgRun.opts.quality = std::move(quality);
 
 		// Which format are we converting to?
 		switch (mfw) {
-		case RAD_MP3:  rd.opts.targetType = DlgRunnin::target::MP3; break;
-		case RAD_FLAC: rd.opts.targetType = DlgRunnin::target::FLAC; break;
-		case RAD_WAV:  rd.opts.targetType = DlgRunnin::target::WAV;
+		case RAD_MP3:  dlgRun.opts.targetType = DlgRunnin::target::MP3; break;
+		case RAD_FLAC: dlgRun.opts.targetType = DlgRunnin::target::FLAC; break;
+		case RAD_WAV:  dlgRun.opts.targetType = DlgRunnin::target::WAV;
 		}
 
 		// Finally invoke dialog.
-		rd.show(this);
+		dlgRun.show(this);
 		return TRUE;
 	});
 
 	on_notify(LST_FILES, LVN_INSERTITEM, [&](params)
 	{
-		return updateCounter(mLstFiles.items.count()); // new item inserted
+		return updateRunBtnCounter(mLstFiles.items.count()); // new item inserted
 	});
 
 	on_notify(LST_FILES, LVN_DELETEITEM, [&](params)
 	{
-		return updateCounter(mLstFiles.items.count() - 1); // item about to be deleted
+		return updateRunBtnCounter(mLstFiles.items.count() - 1); // item about to be deleted
 	});
 
 	on_notify(LST_FILES, LVN_DELETEALLITEMS, [&](params)
 	{
-		return updateCounter(0); // all items about to be deleted
+		return updateRunBtnCounter(0); // all items about to be deleted
 	});
 
 	on_notify(LST_FILES, LVN_KEYDOWN, [&](wmn::lvn::keydown p)

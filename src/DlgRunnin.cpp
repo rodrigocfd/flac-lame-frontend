@@ -28,7 +28,7 @@ DlgRunnin::DlgRunnin(progress_taskbar& taskbarProgr, const file_ini& iniFile)
 
 		for (size_t i = 0; i < batchSz; ++i) {
 			run_thread_detached([&]() {
-				process_next_file();
+				processNextFile();
 			});
 		}
 
@@ -42,7 +42,7 @@ DlgRunnin::DlgRunnin(progress_taskbar& taskbarProgr, const file_ini& iniFile)
 	});
 }
 
-void DlgRunnin::process_next_file()
+void DlgRunnin::processNextFile()
 {
 	size_t curIndex = mCurFile++;
 	if (curIndex >= opts.files.size()) return;
@@ -82,7 +82,7 @@ void DlgRunnin::process_next_file()
 	});
 
 	if (mFilesDone < opts.files.size()) { // more files to come
-		process_next_file();
+		processNextFile();
 	} else { // finished all processing
 		run_thread_ui([&]() {
 			datetime fin;

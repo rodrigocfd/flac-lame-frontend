@@ -33,5 +33,5 @@ public:
 	DlgRunnin(wl::progress_taskbar& taskbarProgr, const wl::file_ini& iniFile);
 
 private:
-	void process_next_file();
+	void processNextFile();
 };

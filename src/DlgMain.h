@@ -15,11 +15,11 @@ class DlgMain final : public wl::dialog_main {
 private:
 	wl::file_ini         mIniFile;
 	wl::progress_taskbar mTaskbarProg;
-	wl::resizer          mResz;
+	wl::resizer          mLayoutResizer;
 	wl::listview         mLstFiles;
 	wl::textbox          mTxtDest;
 	wl::combobox         mCmbCbr, mCmbVbr, mCmbFlac, mCmbNumThreads;
-	wl::radio_group      mRadMFW, mRadMp3Type;
+	wl::radio_group      mRadMp3FlacWav, mRadMp3Type;
 	wl::checkbox         mChkDelSrc;
 	wl::button           mBtnRun;
 
@@ -31,7 +31,7 @@ private:
 	void    validateIni();
 	void    validateDestFolder();
 	void    validateFilesExist(const std::vector<std::wstring>& files);
-	INT_PTR updateCounter(size_t newCount);
+	INT_PTR updateRunBtnCounter(size_t newCount);
 	void    putFileIntoList(const std::wstring& file);
 
 	static DWORD numProcessors();

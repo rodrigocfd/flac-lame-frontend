@@ -71,13 +71,12 @@ void DlgMain::validateFilesExist(const vector<wstring>& files)
 	}
 }
 
-INT_PTR DlgMain::updateCounter(size_t newCount)
+INT_PTR DlgMain::updateRunBtnCounter(size_t newCount)
 {
-	// Update counter on Run button.
 	wstring caption = newCount ?
 		str::format(L"&Run (%d)", newCount) : L"&Run";
-	mBtnRun.set_text(caption);
-	mBtnRun.set_enabled(newCount > 0); // Run button enabled if at least 1 file
+	mBtnRun.set_text(caption)
+		.set_enabled(newCount > 0); // Run button enabled if at least 1 file
 	return 0;
 };
 
