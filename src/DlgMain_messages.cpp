@@ -174,7 +174,7 @@ void DlgMain::messages()
 		if (sysdlg::choose_folder(this, folder)) {
 			mTxtDest.set_text(folder)
 				.select_all();
-			SetFocus(mTxtDest.hwnd());
+			mTxtDest.set_focus();
 		}
 		return TRUE;
 	});
