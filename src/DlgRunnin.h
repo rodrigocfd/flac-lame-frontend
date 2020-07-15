@@ -1,10 +1,10 @@
 
 #pragma once
-#include <winlamb/dialog_modal.h>
-#include <winlamb/file_ini.h>
-#include <winlamb/label.h>
-#include <winlamb/progressbar.h>
-#include <winlamb/progress_taskbar.h>
+#include "../winlamb/dialog_modal.h"
+#include "../winlamb/file_ini.h"
+#include "../winlamb/label.h"
+#include "../winlamb/progressbar.h"
+#include "../winlamb/progress_taskbar.h"
 
 class DlgRunnin final : public wl::dialog_modal {
 public:

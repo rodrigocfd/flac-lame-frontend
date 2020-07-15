@@ -1,7 +1,7 @@
 
 #include "DlgRunnin.h"
-#include <winlamb/str.h>
-#include <winlamb/sysdlg.h>
+#include "../winlamb/str.h"
+#include "../winlamb/sysdlg.h"
 #include "Convert.h"
 #include "../res/resource.h"
 using std::wstring;

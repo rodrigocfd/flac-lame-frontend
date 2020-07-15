@@ -1,6 +1,6 @@
 
 #pragma once
-#include <winlamb/file_ini.h>
+#include "../winlamb/file_ini.h"
 
 struct Convert final {
 private:

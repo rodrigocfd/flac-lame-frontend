@@ -1,8 +1,8 @@
 
 #include "Convert.h"
-#include <winlamb/executable.h>
-#include <winlamb/file.h>
-#include <winlamb/path.h>
+#include "../winlamb/executable.h"
+#include "../winlamb/file.h"
+#include "../winlamb/path.h"
 using std::runtime_error;
 using std::wstring;
 using namespace wl;

@@ -1,33 +1,24 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="WinLamb">
-      <UniqueIdentifier>{8c30c5df-89ad-40b3-87a7-cde573276796}</UniqueIdentifier>
+      <UniqueIdentifier>{6070f287-54d3-462d-8396-e2e1d08e2c22}</UniqueIdentifier>
     </Filter>
     <Filter Include="WinLamb internals">
-      <UniqueIdentifier>{3863f634-8dcf-49f7-9c50-6a8528bb71af}</UniqueIdentifier>
+      <UniqueIdentifier>{d7bc22f5-eb8b-4a1c-8434-c678d7714e89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Convert.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\DlgMain.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\DlgRunnin.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="res\resource.h">
-      <Filter>Resource Files</Filter>
+    <ClInclude Include="winlamb\internals\base_msg_pubm.h">
+      <Filter>WinLamb internals</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\internals\base_native_ctrl.h">
       <Filter>WinLamb internals</Filter>
@@ -140,14 +131,59 @@
     <ClInclude Include="winlamb\internals\base_dialog.h">
       <Filter>WinLamb internals</Filter>
     </ClInclude>
+    <ClInclude Include="winlamb\internals\base_focus_pubm.h">
+      <Filter>WinLamb internals</Filter>
+    </ClInclude>
     <ClInclude Include="winlamb\internals\base_loop.h">
       <Filter>WinLamb internals</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\internals\base_msg.h">
       <Filter>WinLamb internals</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\internals\base_msg_pubm.h">
-      <Filter>WinLamb internals</Filter>
+    <ClInclude Include="winlamb\font.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\gdi.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\icon.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\image_list.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\insert_order_map.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\label.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\listview.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\menu.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\path.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\progress_taskbar.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\progressbar.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\radio.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\radio_group.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\resizer.h">
+      <Filter>WinLamb</Filter>
+    </ClInclude>
+    <ClInclude Include="winlamb\scrollinfo.h">
+      <Filter>WinLamb</Filter>
     </ClInclude>
     <ClInclude Include="winlamb\statusbar.h">
       <Filter>WinLamb</Filter>
@@ -236,65 +272,23 @@
     <ClInclude Include="winlamb\file_mapped.h">
       <Filter>WinLamb</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\font.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="res\resource.h">
+      <Filter>Resource Files</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\gdi.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="src\Convert.h">
+      <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\icon.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="src\DlgMain.h">
+      <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="winlamb\image_list.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\insert_order_map.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\label.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\listview.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\menu.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\path.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\progress_taskbar.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\progressbar.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\radio.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\radio_group.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\resizer.h">
-      <Filter>WinLamb</Filter>
-    </ClInclude>
-    <ClInclude Include="winlamb\scrollinfo.h">
-      <Filter>WinLamb</Filter>
+    <ClInclude Include="src\DlgRunnin.h">
+      <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Convert.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\DlgRunnin.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\DlgMain_messages.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\DlgMain_methods.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    <Manifest Include="winlamb\win10.exe.manifest">
+      <Filter>WinLamb</Filter>
+    </Manifest>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\Ron Burgundy.ico">
@@ -307,8 +301,17 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Manifest Include="winlamb\win10.exe.manifest">
-      <Filter>WinLamb</Filter>
-    </Manifest>
+    <ClCompile Include="src\Convert.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DlgMain_messages.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DlgMain_methods.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DlgRunnin.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

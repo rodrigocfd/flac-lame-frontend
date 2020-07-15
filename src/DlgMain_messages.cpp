@@ -1,7 +1,7 @@
 
 #include "DlgMain.h"
-#include <winlamb/sysdlg.h>
-#include <winlamb/version.h>
+#include "../winlamb/sysdlg.h"
+#include "../winlamb/version.h"
 #include "DlgRunnin.h"
 #include "../res/resource.h"
 using std::vector;

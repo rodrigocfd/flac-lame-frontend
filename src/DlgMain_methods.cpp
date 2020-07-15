@@ -1,8 +1,8 @@
 
 #include "DlgMain.h"
-#include <winlamb/executable.h>
-#include <winlamb/path.h>
-#include <winlamb/sysdlg.h>
+#include "../winlamb/executable.h"
+#include "../winlamb/path.h"
+#include "../winlamb/sysdlg.h"
 #include "Convert.h"
 #include "../res/resource.h"
 using std::vector;
