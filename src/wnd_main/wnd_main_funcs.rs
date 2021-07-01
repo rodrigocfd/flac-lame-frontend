@@ -43,4 +43,8 @@ impl WndMain {
 	pub fn run(&self) -> w::WinResult<()> {
 		self.wnd.run_main(None)
 	}
+
+	pub(super) fn load_ini(&self) {
+
+	}
 }
