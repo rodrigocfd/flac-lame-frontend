@@ -26,6 +26,6 @@ pub const MNU_OPEN:    u16 = 1501;
 pub const MNU_REM_SEL: u16 = 1502;
 pub const MNU_ABOUT:   u16 = 1503;
 
-pub const DLG_RUNNING: u16 = 2000;
-pub const LBL_STATUS:  u16 = 2001;
-pub const PRO_STATUS:  u16 = 2002;
+pub const DLG_RUN:    u16 = 2000;
+pub const LBL_STATUS: u16 = 2001;
+pub const PRO_STATUS: u16 = 2002;
