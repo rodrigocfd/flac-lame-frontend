@@ -21,7 +21,7 @@ pub const LBL_THREADS:  u16 = 1016;
 pub const CMB_THREADS:  u16 = 1017;
 pub const BTN_RUN:      u16 = 1018;
 
-pub const MNU_MAIN:    u16 = 1500;
+pub const MEN_MAIN:    u16 = 1500;
 pub const MNU_OPEN:    u16 = 1501;
 pub const MNU_REM_SEL: u16 = 1502;
 pub const MNU_ABOUT:   u16 = 1503;

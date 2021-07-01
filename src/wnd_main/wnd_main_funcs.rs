@@ -6,7 +6,7 @@ use super::WndMain;
 impl WndMain {
 	pub fn new() -> Self {
 		let context_menu = w::HINSTANCE::NULL
-			.LoadMenu(ids::MNU_MAIN).unwrap()
+			.LoadMenu(ids::MEN_MAIN).unwrap()
 			.GetSubMenu(0).unwrap();
 
 		let wnd = gui::WindowMain::new_dlg(ids::DLG_MAIN, Some(ids::ICO_MAIN), Some(ids::ACC_MAIN));
