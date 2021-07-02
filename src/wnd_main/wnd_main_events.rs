@@ -1,4 +1,4 @@
-use winsafe::{self as w, co, msg};
+use winsafe::{self as w, co, gui, msg};
 
 use super::WndMain;
 
@@ -30,7 +30,7 @@ impl WndMain {
 				self2.cmb_flac_lvl.items().set_selected(Some(7));
 
 				self2.rad_mp3_flac_wav[0].trigger_click().unwrap();
-				self2.rad_cbr_vbr[0].trigger_click().unwrap();
+				self2.rad_cbr_vbr[1].trigger_click().unwrap();
 
 				let mut si = w::SYSTEM_INFO::default();
 				w::GetSystemInfo(&mut si);
@@ -55,14 +55,28 @@ impl WndMain {
 		self.rad_mp3_flac_wav.on().bn_clicked({
 			let self2 = self.clone();
 			move || {
+				let checked_idx = self2.rad_mp3_flac_wav.checked_index().unwrap();
 
+				self2.rad_cbr_vbr.iter().for_each(|radio: &gui::RadioButton| {
+					radio.hwnd().EnableWindow(checked_idx == 0);
+					if radio.is_checked() {
+						radio.trigger_click().unwrap();
+					}
+				});
+
+				self2.lbl_flac_lvl.hwnd().EnableWindow(checked_idx == 1);
+				self2.cmb_flac_lvl.hwnd().EnableWindow(checked_idx == 1);
 			}
 		});
 
 		self.rad_cbr_vbr.on().bn_clicked({
 			let self2 = self.clone();
 			move || {
+				let is_mp3 = self2.rad_mp3_flac_wav.checked_index().unwrap() == 0;
+				let checked_idx = self2.rad_cbr_vbr.checked_index().unwrap();
 
+				self2.cmb_cbr.hwnd().EnableWindow(checked_idx == 0 && is_mp3);
+				self2.cmb_vbr.hwnd().EnableWindow(checked_idx == 1 && is_mp3);
 			}
 		});
 	}
