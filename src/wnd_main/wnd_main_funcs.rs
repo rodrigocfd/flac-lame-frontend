@@ -37,6 +37,7 @@ impl WndMain {
 			chk_del_orig, lbl_threads, cmb_threads, btn_run,
 		};
 		new_self.events();
+		new_self.menu_events();
 		new_self
 	}
 
