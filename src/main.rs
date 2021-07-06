@@ -4,8 +4,6 @@
 mod defer;
 
 mod ids;
-mod ini;
-mod mapped_file;
 mod prompt;
 mod wnd_main;
 mod wnd_run;
