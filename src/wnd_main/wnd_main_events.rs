@@ -29,8 +29,8 @@ impl WndMain {
 				self2.cmb_flac_lvl.items().add(&["1", "2", "3", "4", "5", "6", "7", "8"]).unwrap();
 				self2.cmb_flac_lvl.items().set_selected(Some(7));
 
-				self2.rad_mp3_flac_wav[0].trigger_click().unwrap();
-				self2.rad_cbr_vbr[1].trigger_click().unwrap();
+				self2.rad_mp3_flac_wav[0].trigger_click();
+				self2.rad_cbr_vbr[1].trigger_click();
 
 				let mut si = w::SYSTEM_INFO::default();
 				w::GetSystemInfo(&mut si);
@@ -60,7 +60,7 @@ impl WndMain {
 				self2.rad_cbr_vbr.iter().for_each(|radio: &gui::RadioButton| {
 					radio.hwnd().EnableWindow(checked_idx == 0);
 					if radio.is_checked() {
-						radio.trigger_click().unwrap();
+						radio.trigger_click();
 					}
 				});
 

@@ -1,6 +1,11 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+#[macro_use]
+mod defer;
+
 mod ids;
+mod ini;
+mod mapped_file;
 mod prompt;
 mod wnd_main;
 mod wnd_run;
