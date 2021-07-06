@@ -1,4 +1,6 @@
-use winsafe::gui;
+use std::cell::Cell;
+use std::rc::Rc;
+use winsafe::{self as w, gui};
 
 mod wnd_main_events;
 mod wnd_main_funcs;
@@ -13,7 +15,7 @@ pub struct WndMain {
 	txt_dest: gui::Edit,
 	btn_dest: gui::Button,
 
-	fra_bitrate:      gui::Label,
+	fra_conversion:   gui::Label,
 	rad_mp3_flac_wav: gui::RadioGroup,
 	rad_cbr_vbr:      gui::RadioGroup,
 	cmb_cbr:          gui::ComboBox,
@@ -25,4 +27,7 @@ pub struct WndMain {
 	lbl_threads:  gui::Label,
 	cmb_threads:  gui::ComboBox,
 	btn_run:      gui::Button,
+
+	resz:    gui::Resizer,
+	orig_sz: Rc<Cell<w::SIZE>>,
 }

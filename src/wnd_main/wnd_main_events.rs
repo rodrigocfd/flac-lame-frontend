@@ -47,8 +47,28 @@ impl WndMain {
 					}),
 				);
 
+				let rc = self2.wnd.hwnd().GetWindowRect().unwrap();
+				self2.orig_sz.replace(w::SIZE::new(rc.right - rc.left, rc.bottom - rc.top - 200));
+
 				self2.load_ini();
 				true
+			}
+		});
+
+		self.wnd.on().wm_size({
+			let lst_files = self.lst_files.clone();
+			move |p: msg::wm::Size| {
+				if p.request != co::SIZE_R::MINIMIZED {
+					lst_files.columns().set_width_to_fill(0).unwrap();
+				}
+			}
+		});
+
+		self.wnd.on().wm_get_min_max_info({
+			let self2 = self.clone();
+			move |p: msg::wm::GetMinMaxInfo| {
+				let orig_sz = self2.orig_sz.get();
+				p.info.ptMinTrackSize = w::POINT::new(orig_sz.cx, orig_sz.cy); // limit min size
 			}
 		});
 

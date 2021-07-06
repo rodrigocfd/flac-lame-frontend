@@ -1,3 +1,5 @@
+use std::cell::Cell;
+use std::rc::Rc;
 use winsafe::{self as w, gui};
 
 use crate::ids;
@@ -16,7 +18,7 @@ impl WndMain {
 		let txt_dest = gui::Edit::new_dlg(&wnd, ids::TXT_DEST);
 		let btn_dest = gui::Button::new_dlg(&wnd, ids::BTN_DEST);
 
-		let fra_bitrate      = gui::Label::new_dlg(&wnd, ids::FRA_BITRATE);
+		let fra_conversion   = gui::Label::new_dlg(&wnd, ids::FRA_CONVERSION);
 		let rad_mp3_flac_wav = gui::RadioGroup::new_dlg(&wnd, &[ids::RAD_MP3, ids::RAD_FLAC, ids::RAD_WAV]);
 		let rad_cbr_vbr      = gui::RadioGroup::new_dlg(&wnd, &[ids::RAD_CBR, ids::RAD_VBR]);
 		let cmb_cbr          = gui::ComboBox::new_dlg(&wnd, ids::CMB_CBR);
@@ -29,12 +31,29 @@ impl WndMain {
 		let cmb_threads  = gui::ComboBox::new_dlg(&wnd, ids::CMB_THREADS);
 		let btn_run      = gui::Button::new_dlg(&wnd, ids::BTN_RUN);
 
+		let resz = gui::Resizer::new(&wnd, &[
+			(gui::Resz::Resize, gui::Resz::Resize, &[&lst_files]),
+			(gui::Resz::Nothing, gui::Resz::Repos, &[&lbl_dest]),
+			(gui::Resz::Resize, gui::Resz::Repos, &[&txt_dest]),
+			(gui::Resz::Repos, gui::Resz::Repos, &[&btn_dest]),
+			(gui::Resz::Nothing, gui::Resz::Repos, &[
+				&fra_conversion,
+				&cmb_cbr, &cmb_vbr,
+				&lbl_flac_lvl, &cmb_flac_lvl,
+				&chk_del_orig, &lbl_threads, &cmb_threads,
+			]),
+			(gui::Resz::Nothing, gui::Resz::Repos, &rad_mp3_flac_wav.as_child_vec()),
+			(gui::Resz::Nothing, gui::Resz::Repos, &rad_cbr_vbr.as_child_vec()),
+			(gui::Resz::Repos, gui::Resz::Repos, &[&btn_run]),
+		]);
+
 		let new_self = Self {
 			wnd, lst_files,
 			lbl_dest, txt_dest, btn_dest,
-			fra_bitrate, rad_mp3_flac_wav, rad_cbr_vbr,
+			fra_conversion, rad_mp3_flac_wav, rad_cbr_vbr,
 			cmb_cbr, cmb_vbr, lbl_flac_lvl, cmb_flac_lvl,
-			chk_del_orig, lbl_threads, cmb_threads, btn_run,
+			chk_del_orig, lbl_threads, cmb_threads, btn_run, resz,
+			orig_sz: Rc::new(Cell::new(w::SIZE::default())),
 		};
 		new_self.events();
 		new_self.menu_events();
