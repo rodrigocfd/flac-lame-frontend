@@ -1,3 +1,10 @@
+use std::error::Error;
+use winsafe::{self as w, co};
+
+pub fn is_dir(path: &str) -> Result<bool, Box<dyn Error>> {
+	Ok(w::GetFileAttributes(path)?.has(co::FILE_ATTRIBUTE::DIRECTORY))
+}
+
 pub fn format_bytes(num_bytes: usize) -> String {
 	if num_bytes < 1024 {
 		format!("{} bytes", num_bytes)

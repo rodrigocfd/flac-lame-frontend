@@ -1,6 +1,7 @@
-use winsafe::{self as w, co, gui, msg};
+use winsafe::{self as w, co, gui, msg, shell};
 
 use crate::ids;
+use crate::util;
 use super::WndMain;
 
 impl WndMain {
@@ -84,13 +85,14 @@ impl WndMain {
 				[".mp3", ".flac", ".wav"].iter().for_each(|ext: &&str| {
 					dropped_files.iter().for_each(|file: &String| {
 						let mut file = file.clone();
+						file.reserve(file.len() + 10); // arbitrary
 
-						if w::GetFileAttributes(&file).unwrap().has(co::FILE_ATTRIBUTE::DIRECTORY) {
+						if util::is_dir(&file).unwrap() {
 							if !file.ends_with('\\') {
 								file.push('\\');
 							}
 							file.push('*');
-							file.push_str(*ext);
+							file.push_str(*ext); // *.mp3
 
 							for sub_file in w::HFINDFILE::ListAll(&file).unwrap() { // just search 1 level below
 								if sub_file.to_lowercase().ends_with(*ext) {
@@ -143,6 +145,31 @@ impl WndMain {
 
 				self2.cmb_cbr.hwnd().EnableWindow(checked_idx == 0 && is_mp3);
 				self2.cmb_vbr.hwnd().EnableWindow(checked_idx == 1 && is_mp3);
+			}
+		});
+
+		self.btn_dest.on().bn_clicked({
+			let self2 = self.clone();
+			move || {
+				let foldero: shell::IFileOpenDialog = w::CoCreateInstance(
+					&shell::clsid::FileOpenDialog,
+					None,
+					co::CLSCTX::INPROC_SERVER,
+				).unwrap();
+
+				foldero.SetOptions(
+					foldero.GetOptions().unwrap()
+						| shell::co::FOS::FORCEFILESYSTEM
+						| shell::co::FOS::FILEMUSTEXIST
+						| shell::co::FOS::PICKFOLDERS,
+				).unwrap();
+
+				if foldero.Show(self2.wnd.hwnd()).unwrap() {
+					self2.txt_dest.set_text(
+						&foldero.GetResult().unwrap()
+							.GetDisplayName(shell::co::SIGDN::FILESYSPATH).unwrap(),
+					).unwrap();
+				}
 			}
 		});
 	}
