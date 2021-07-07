@@ -10,4 +10,4 @@ codegen-units = 1
 #panic = "abort"
 
 [dependencies]
-winsafe = { path = "../winsafe" }
+winsafe = { path = "../winsafe", features = ["shell"] }

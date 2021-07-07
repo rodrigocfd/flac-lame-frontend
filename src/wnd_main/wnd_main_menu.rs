@@ -1,4 +1,4 @@
-use winsafe::{self as w, co, msg};
+use winsafe::{self as w, co, msg, shell};
 
 use crate::ids;
 use crate::prompt;
@@ -6,6 +6,16 @@ use super::WndMain;
 
 impl WndMain {
 	pub(super) fn menu_events(&self) {
+		self.wnd.on().wm_init_menu_popup({
+			let self2 = self.clone();
+			move |p: msg::wm::InitMenuPopup| {
+				if p.hmenu == self2.lst_files.context_menu().unwrap() {
+					let has_sel = self2.lst_files.items().selected_count() > 0;
+					p.hmenu.EnableMenuItem(w::IdPos::Id(ids::MNU_REM_SEL), has_sel).unwrap();
+				}
+			}
+		});
+
 		self.wnd.on().wm_command_accel_menu(co::DLGID::CANCEL.into(), {
 			let wnd = self.wnd.clone();
 			move || {
@@ -14,14 +24,44 @@ impl WndMain {
 		});
 
 		self.wnd.on().wm_command_accel_menu(ids::MNU_OPEN, {
+			let self2 = self.clone();
 			move || {
+				let fileo: shell::IFileOpenDialog = w::CoCreateInstance(
+					&shell::clsid::FileOpenDialog,
+					None,
+					co::CLSCTX::INPROC_SERVER,
+				).unwrap();
 
+				fileo.SetOptions(
+					fileo.GetOptions().unwrap()
+						| shell::co::FOS::FORCEFILESYSTEM
+						| shell::co::FOS::FILEMUSTEXIST
+						| shell::co::FOS::ALLOWMULTISELECT,
+				).unwrap();
+
+				fileo.SetFileTypes(&[
+					("MP3 audio files", "*.mp3"),
+					("FLAC audio files", "*.flac"),
+					("WAV audio files", "*.wav"),
+					("Supported audio files", "*.mp3;*.flac;*.wav"),
+				]).unwrap();
+
+				fileo.SetFileTypeIndex(4).unwrap();
+
+				if fileo.Show(self2.wnd.hwnd()).unwrap() {
+					self2.add_files(
+						&fileo.GetResults().unwrap()
+							.GetDisplayNames(shell::co::SIGDN::FILESYSPATH).unwrap(),
+					).unwrap();
+				}
 			}
 		});
 
 		self.wnd.on().wm_command_accel_menu(ids::MNU_REM_SEL, {
+			let self2 = self.clone();
 			move || {
-
+				self2.lst_files.items().delete_selected().unwrap();
+				self2.update_run_count().unwrap();
 			}
 		});
 

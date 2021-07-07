@@ -28,6 +28,6 @@ pub struct WndMain {
 	cmb_threads:  gui::ComboBox,
 	btn_run:      gui::Button,
 
-	resz:    gui::Resizer,
-	orig_sz: Rc<Cell<w::SIZE>>,
+	resz:   gui::Resizer,
+	min_sz: Rc<Cell<w::SIZE>>,
 }

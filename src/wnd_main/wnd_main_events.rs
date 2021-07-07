@@ -1,5 +1,6 @@
 use winsafe::{self as w, co, gui, msg};
 
+use crate::ids;
 use super::WndMain;
 
 impl WndMain {
@@ -7,10 +8,13 @@ impl WndMain {
 		self.wnd.on().wm_init_dialog({
 			let self2 = self.clone();
 			move |_: msg::wm::InitDialog| -> bool {
-				let img_list = w::HIMAGELIST::Create(16, 16, co::ILC::COLOR32, 1, 1).unwrap();
-				self2.lst_files.set_image_list(co::LVSIL::SMALL, img_list);
+				// Since it doesn't have LVS_SHAREIMAGELISTS style, the image
+				// list will be automatically deleted by the list view.
+				let himg = w::HIMAGELIST::Create(16, 16, co::ILC::COLOR32, 1, 1).unwrap();
+				himg.AddIconFromShell(&["mp3", "flac", "wav"]).unwrap();
+				self2.lst_files.set_image_list(co::LVSIL::SMALL, himg);
 
-				self2.lst_files.columns().add(&[("File", 100), ("Size", 80)]).unwrap();
+				self2.lst_files.columns().add(&[("File", 100), ("Size", 70)]).unwrap();
 				self2.lst_files.columns().set_width_to_fill(0).unwrap();
 
 				self2.cmb_cbr.items().add(&[
@@ -48,9 +52,8 @@ impl WndMain {
 				);
 
 				let rc = self2.wnd.hwnd().GetWindowRect().unwrap();
-				self2.orig_sz.replace(w::SIZE::new(rc.right - rc.left, rc.bottom - rc.top - 200));
+				self2.min_sz.replace(w::SIZE::new(rc.right - rc.left, rc.bottom - rc.top - 200));
 
-				self2.load_ini();
 				true
 			}
 		});
@@ -67,8 +70,51 @@ impl WndMain {
 		self.wnd.on().wm_get_min_max_info({
 			let self2 = self.clone();
 			move |p: msg::wm::GetMinMaxInfo| {
-				let orig_sz = self2.orig_sz.get();
-				p.info.ptMinTrackSize = w::POINT::new(orig_sz.cx, orig_sz.cy); // limit min size
+				let min_sz = self2.min_sz.get();
+				p.info.ptMinTrackSize = w::POINT::new(min_sz.cx, min_sz.cy); // limit min size
+			}
+		});
+
+		self.wnd.on().wm_drop_files({
+			let self2 = self.clone();
+			move |p: msg::wm::DropFiles| {
+				let dropped_files = p.hdrop.DragQueryFiles().unwrap();
+				let mut all_files = Vec::with_capacity(dropped_files.len());
+
+				[".mp3", ".flac", ".wav"].iter().for_each(|ext: &&str| {
+					dropped_files.iter().for_each(|file: &String| {
+						let mut file = file.clone();
+
+						if w::GetFileAttributes(&file).unwrap().has(co::FILE_ATTRIBUTE::DIRECTORY) {
+							if !file.ends_with('\\') {
+								file.push('\\');
+							}
+							file.push('*');
+							file.push_str(*ext);
+
+							for sub_file in w::HFINDFILE::ListAll(&file).unwrap() { // just search 1 level below
+								if sub_file.to_lowercase().ends_with(*ext) {
+									all_files.push(sub_file);
+								}
+							}
+						} else if file.to_lowercase().ends_with(*ext) {
+							all_files.push(file);
+						}
+					});
+				});
+
+				self2.add_files(&all_files).unwrap();
+			}
+		});
+
+		self.lst_files.on().lvn_key_down({
+			let self2 = self.clone();
+			move |p: &w::NMLVKEYDOWN| {
+				if p.wVKey == co::VK::DELETE { // delete item on DEL
+					self2.wnd.hwnd().SendMessage(msg::wm::Command {
+						event: w::AccelMenuCtrl::Menu(ids::MNU_REM_SEL),
+					});
+				}
 			}
 		});
 

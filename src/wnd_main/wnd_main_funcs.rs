@@ -1,8 +1,9 @@
 use std::cell::Cell;
+use std::error::Error;
 use std::rc::Rc;
-use winsafe::{self as w, gui};
+use winsafe::{self as w, co, gui};
 
-use crate::ids;
+use crate::{ids, util};
 use super::WndMain;
 
 impl WndMain {
@@ -53,7 +54,7 @@ impl WndMain {
 			fra_conversion, rad_mp3_flac_wav, rad_cbr_vbr,
 			cmb_cbr, cmb_vbr, lbl_flac_lvl, cmb_flac_lvl,
 			chk_del_orig, lbl_threads, cmb_threads, btn_run, resz,
-			orig_sz: Rc::new(Cell::new(w::SIZE::default())),
+			min_sz: Rc::new(Cell::new(w::SIZE::default())),
 		};
 		new_self.events();
 		new_self.menu_events();
@@ -64,7 +65,36 @@ impl WndMain {
 		self.wnd.run_main(None)
 	}
 
-	pub(super) fn load_ini(&self) {
+	pub(super) fn update_run_count(&self) -> Result<(), Box<dyn Error>> {
+		let num_files = self.lst_files.items().count();
+		if num_files == 0 {
+			self.btn_run.hwnd().SetWindowText("&Run")?;
+		} else {
+			self.btn_run.hwnd().SetWindowText(&format!("Run ({})", num_files))?;
+		}
+		Ok(())
+	}
 
+	pub(super) fn add_files(&self, files: &Vec<String>) -> Result<(), Box<dyn Error>> {
+		for file in files.iter() {
+			let (hfile, _) = w::HFILE::CreateFile(file, co::GENERIC::READ,
+				co::FILE_SHARE::READ, None, co::DISPOSITION::OPEN_EXISTING,
+				co::FILE_ATTRIBUTE::NORMAL, None)?;
+			let sz = hfile.GetFileSizeEx()?;
+			hfile.CloseHandle()?;
+
+			self.lst_files.items().add(&[file, &util::format_bytes(sz)],
+				Some(if file.starts_with("mp3") {
+					0
+				} else if file.starts_with("flac") {
+					1
+				} else { // wav
+					2
+				}),
+			)?;
+		}
+		self.lst_files.columns().set_width_to_fill(0)?;
+		self.update_run_count()?;
+		Ok(())
 	}
 }
