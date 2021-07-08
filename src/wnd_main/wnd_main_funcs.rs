@@ -72,6 +72,7 @@ impl WndMain {
 		} else {
 			self.btn_run.hwnd().SetWindowText(&format!("Run ({})", num_files))?;
 		}
+		self.btn_run.hwnd().EnableWindow(num_files > 0);
 		Ok(())
 	}
 

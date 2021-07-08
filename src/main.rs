@@ -4,7 +4,6 @@
 mod defer;
 
 mod ids;
-mod prompt;
 mod util;
 mod wnd_main;
 mod wnd_run;

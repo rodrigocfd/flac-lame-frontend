@@ -1,7 +1,7 @@
 use winsafe::{self as w, co, msg, shell};
 
 use crate::ids;
-use crate::prompt;
+use crate::util;
 use super::WndMain;
 
 impl WndMain {
@@ -73,11 +73,10 @@ impl WndMain {
 				let mut res_buf = Vec::default();
 				w::GetFileVersionInfo(&exe_name, &mut res_buf).unwrap();
 
-				let fis = w::VarQueryValue(&res_buf, "\\").unwrap();
-				let fi: &w::VS_FIXEDFILEINFO = unsafe { &*(fis.as_ptr() as *const w::VS_FIXEDFILEINFO) };
-				let ver = fi.dwFileVersion();
+				let vsffi = unsafe { w::VarQueryValue::<w::VS_FIXEDFILEINFO>(&res_buf, "\\").unwrap() };
+				let ver = vsffi.dwFileVersion();
 
-				prompt::info(self2.wnd.hwnd(), "About",
+				util::prompt::info(self2.wnd.hwnd(), "About",
 					&format!(
 						"ID3 Padding Remover v{}.{}.{}\n\
 						Writen in Rust with WinSafe library.\n\n\

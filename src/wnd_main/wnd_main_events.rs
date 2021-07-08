@@ -87,7 +87,7 @@ impl WndMain {
 						let mut file = file.clone();
 						file.reserve(file.len() + 10); // arbitrary
 
-						if util::is_dir(&file).unwrap() {
+						if util::path_is_dir(&file).unwrap() {
 							if !file.ends_with('\\') {
 								file.push('\\');
 							}
@@ -170,6 +170,19 @@ impl WndMain {
 							.GetDisplayName(shell::co::SIGDN::FILESYSPATH).unwrap(),
 					).unwrap();
 				}
+			}
+		});
+
+		self.btn_run.on().bn_clicked({
+			let self2 = self.clone();
+			move || {
+				let new_dest = self2.txt_dest.text_str().unwrap();
+				if !util::path_exists(&new_dest) {
+					util::prompt::err(self2.wnd.hwnd(), "No directory",
+						&format!("Target directory does not exist:\n{}", new_dest));
+					return;
+				}
+
 			}
 		});
 	}
