@@ -2,6 +2,7 @@ use winsafe::{self as w, co, gui, msg, shell};
 
 use crate::ids;
 use crate::util;
+use crate::wnd_run;
 use super::WndMain;
 
 impl WndMain {
@@ -176,13 +177,43 @@ impl WndMain {
 		self.btn_run.on().bn_clicked({
 			let self2 = self.clone();
 			move || {
-				let new_dest = self2.txt_dest.text_str().unwrap();
-				if !util::path_exists(&new_dest) {
-					util::prompt::err(self2.wnd.hwnd(), "No directory",
+				let new_dest = self2.txt_dest.text_str().unwrap().trim().to_owned();
+				if !new_dest.is_empty() && !util::path_exists(&new_dest) {
+					util::prompt::err(self2.wnd.hwnd(), "Invalid directory",
 						&format!("Target directory does not exist:\n{}", new_dest));
 					return;
 				}
 
+				let dest_folder = self2.txt_dest.text_str().unwrap();
+
+				let idx_type = self2.rad_mp3_flac_wav.checked_index().unwrap();
+				let target = if idx_type == 0 { // mp3
+					if self2.rad_cbr_vbr.checked_index().unwrap() == 0 { // mp3/cbr
+						let txt_quality = self2.cmb_cbr.items().selected_text().unwrap();
+						let idx_space = txt_quality.find(' ').unwrap_or_default();
+						wnd_run::Target::Mp3(wnd_run::Mp3Enc::Cbr, txt_quality[..idx_space].to_owned())
+					} else { // mp3/vbr
+						let txt_quality = self2.cmb_vbr.items().selected_text().unwrap();
+						let idx_space = txt_quality.find(' ').unwrap_or_default();
+						wnd_run::Target::Mp3(wnd_run::Mp3Enc::Vbr, txt_quality[..idx_space].to_owned())
+					}
+				} else if idx_type == 1 { // flac
+					let txt_quality = self2.cmb_flac_lvl.items().selected_text().unwrap();
+					wnd_run::Target::Flac(txt_quality)
+				} else { // wav
+					wnd_run::Target::Wav
+				};
+
+				let run_opts = wnd_run::Opts {
+					files: self2.lst_files.columns().all_texts(0),
+					dest_folder: if dest_folder.is_empty() { None } else { Some(dest_folder) },
+					target,
+					del_orig: self2.chk_del_orig.is_checked(),
+					num_threads: self2.cmb_threads.items().selected_text().unwrap().parse().unwrap(),
+				};
+
+				let runner = wnd_run::WndRun::new(&self2.wnd, run_opts);
+				runner.show();
 			}
 		});
 	}
