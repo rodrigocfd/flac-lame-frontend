@@ -8,7 +8,7 @@ impl WndRun {
 			let self2 = self.clone();
 			move |_: msg::wm::InitDialog| -> bool {
 				let nfiles = self2.opts.files.len();
-				self2.lbl_status.set_text(&format!("0 of {} files finished...", nfiles)).unwrap();
+				self2.lbl_status.set_text(&format!("0 of {} file(s) finished...", nfiles)).unwrap();
 				self2.pro_status.set_range(0, nfiles as _);
 
 				{
@@ -21,7 +21,7 @@ impl WndRun {
 
 				let max_parallel = std::cmp::min(self2.opts.num_threads, nfiles);
 				self2.wnd.hwnd().SetWindowText(
-					&format!("Running {} threads", max_parallel)).unwrap();
+					&format!("Running {} thread(s)", max_parallel)).unwrap();
 
 				for _ in 0..max_parallel {
 					std::thread::spawn({
@@ -34,6 +34,6 @@ impl WndRun {
 			}
 		});
 
-		// self.wnd.on().wm_close(|| { }); // EndDialog() not called, don't close modal
+		self.wnd.on().wm_close(|| { }); // EndDialog() not called, don't close modal
 	}
 }

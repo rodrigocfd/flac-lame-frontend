@@ -21,7 +21,7 @@ impl WndRun {
 		self.wnd.show_modal().unwrap();
 	}
 
-	pub(super) fn process_next_file(&self, nfiles: usize) {
+	pub(super) fn process_next_file(&self, nfiles: usize) { // always runs in a parallel thread
 		let idx = {
 			let mut files_left = self.files_left.lock().unwrap();
 			files_left.remove(0) // remove first index; assumes there is at least 1
@@ -37,9 +37,9 @@ impl WndRun {
 			let mut files_done = self.files_done.lock().unwrap();
 			*files_done += 1;
 
-			self.wnd.run_ui_thread(|| {
+			self.wnd.run_ui_thread(|| { // progress, update UI
 				self.lbl_status.set_text(
-					&format!("{} of {} files finished...", *files_done, nfiles)).unwrap();
+					&format!("{} of {} file(s) finished...", *files_done, nfiles)).unwrap();
 				self.pro_status.set_position(*files_done as _);
 			});
 
@@ -49,7 +49,9 @@ impl WndRun {
 		if has_more {
 			self.process_next_file(nfiles);
 		} else if finished_processing {
-			println!("DONE");
+			self.wnd.run_ui_thread(|| { // finished, update UI
+				self.wnd.hwnd().EndDialog(0).unwrap();
+			});
 		}
 	}
 
