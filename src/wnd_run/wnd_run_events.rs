@@ -12,10 +12,10 @@ impl WndRun {
 				self2.pro_status.set_range(0, nfiles as _);
 
 				{
-					let mut files_left = self2.files_left.lock().unwrap();
-					files_left.reserve(nfiles);
+					let mut files_process = self2.files_process.lock().unwrap();
+					files_process.idx_files_left.reserve(nfiles);
 					for idx in 0..nfiles {
-						files_left.push(idx); // index of each file
+						files_process.idx_files_left.push(idx); // index of each file, will be taked away when processed
 					}
 				}
 

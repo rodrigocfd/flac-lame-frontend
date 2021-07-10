@@ -2,17 +2,22 @@ use std::sync::{Arc, Mutex};
 use winsafe::gui;
 
 use crate::ids;
-use super::{Mp3Enc, Opts, Target, WndRun};
+use super::{FilesProcess, Mp3Enc, Opts, Target, WndRun};
 
 impl WndRun {
 	pub fn new(parent: &dyn gui::Parent, opts: Opts) -> Self {
 		let wnd        = gui::WindowModal::new_dlg(parent, ids::DLG_RUN);
 		let lbl_status = gui::Label::new_dlg(&wnd, ids::LBL_STATUS);
 		let pro_status = gui::ProgressBar::new_dlg(&wnd, ids::PRO_STATUS);
-		let files_left = Arc::new(Mutex::new(Vec::default()));
-		let files_done = Arc::new(Mutex::new(0));
 
-		let new_self = Self { wnd, lbl_status, pro_status, opts, files_left, files_done };
+		let files_process = Arc::new(Mutex::new(
+			FilesProcess {
+				idx_files_left: Vec::default(),
+				num_files_done: 0
+			},
+		));
+
+		let new_self = Self { wnd, lbl_status, pro_status, opts, files_process };
 		new_self.events();
 		new_self
 	}
@@ -21,10 +26,10 @@ impl WndRun {
 		self.wnd.show_modal().unwrap();
 	}
 
-	pub(super) fn process_next_file(&self, nfiles: usize) { // always runs in a parallel thread
+	pub(super) fn process_next_file(&self, nfiles: usize) { // will always run in a parallel thread
 		let idx = {
-			let mut files_left = self.files_left.lock().unwrap();
-			files_left.remove(0) // remove first index; assumes there is at least 1
+			let mut files_process = self.files_process.lock().unwrap();
+			files_process.idx_files_left.remove(0) // take away first index; assumes there is at least 1
 		};
 
 		match &self.opts.target {
@@ -34,16 +39,17 @@ impl WndRun {
 		}
 
 		let (has_more, finished_processing) = {
-			let mut files_done = self.files_done.lock().unwrap();
-			*files_done += 1;
+			let mut files_process = self.files_process.lock().unwrap();
+			files_process.num_files_done += 1;
 
 			self.wnd.run_ui_thread(|| { // progress, update UI
 				self.lbl_status.set_text(
-					&format!("{} of {} file(s) finished...", *files_done, nfiles)).unwrap();
-				self.pro_status.set_position(*files_done as _);
+					&format!("{} of {} file(s) finished...",
+						files_process.num_files_done, nfiles)).unwrap();
+				self.pro_status.set_position(files_process.num_files_done as _);
 			});
 
-			(!self.files_left.lock().unwrap().is_empty(), *files_done == nfiles)
+			(!files_process.idx_files_left.is_empty(), files_process.num_files_done == nfiles)
 		};
 
 		if has_more {

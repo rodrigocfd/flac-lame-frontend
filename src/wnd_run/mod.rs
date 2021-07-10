@@ -6,12 +6,11 @@ mod wnd_run_funcs;
 
 #[derive(Clone)]
 pub struct WndRun {
-	wnd:        gui::WindowModal,
-	lbl_status: gui::Label,
-	pro_status: gui::ProgressBar,
-	opts:       Opts,
-	files_left: Arc<Mutex<Vec<usize>>>,
-	files_done: Arc<Mutex<usize>>,
+	wnd:           gui::WindowModal,
+	lbl_status:    gui::Label,
+	pro_status:    gui::ProgressBar,
+	opts:          Opts,
+	files_process: Arc<Mutex<FilesProcess>>,
 }
 
 #[derive(PartialEq, Eq, Clone)]
@@ -31,4 +30,9 @@ pub struct Opts {
 	pub target:      Target,
 	pub del_orig:    bool,
 	pub num_threads: usize,
+}
+
+struct FilesProcess {
+	pub idx_files_left: Vec<usize>,
+	pub num_files_done: usize,
 }
