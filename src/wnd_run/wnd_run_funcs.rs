@@ -1,5 +1,5 @@
 use std::sync::{Arc, Mutex};
-use winsafe::gui;
+use winsafe::{self as w, co, gui, shell};
 
 use crate::ids;
 use super::{FilesProcess, Mp3Enc, Opts, Target, WndRun};
@@ -10,6 +10,9 @@ impl WndRun {
 		let lbl_status = gui::Label::new_dlg(&wnd, ids::LBL_STATUS);
 		let pro_status = gui::ProgressBar::new_dlg(&wnd, ids::PRO_STATUS);
 
+		let itbl = w::CoCreateInstance(
+			&shell::clsid::TaskbarList, None, co::CLSCTX::INPROC_SERVER).unwrap();
+
 		let files_process = Arc::new(Mutex::new(
 			FilesProcess {
 				idx_files_left: Vec::default(),
@@ -17,7 +20,7 @@ impl WndRun {
 			},
 		));
 
-		let new_self = Self { wnd, lbl_status, pro_status, opts, files_process };
+		let new_self = Self { wnd, lbl_status, pro_status, itbl, opts, files_process };
 		new_self.events();
 		new_self
 	}
@@ -46,6 +49,9 @@ impl WndRun {
 				self.lbl_status.set_text(
 					&format!("{} of {} file(s) finished...",
 						files_process.num_files_done, nfiles)).unwrap();
+				self.itbl.SetProgressValue(
+					self.wnd.hwnd().GetAncestor(co::GA::ROOTOWNER).unwrap(),
+					files_process.num_files_done as _, nfiles as _).unwrap();
 				self.pro_status.set_position(files_process.num_files_done as _);
 			});
 
@@ -56,6 +62,9 @@ impl WndRun {
 			self.process_next_file(nfiles);
 		} else if finished_processing {
 			self.wnd.run_ui_thread(|| { // finished, update UI
+				self.itbl.SetProgressState(
+					self.wnd.hwnd().GetAncestor(co::GA::ROOTOWNER).unwrap(),
+					shell::co::TBPF::NOPROGRESS).unwrap();
 				self.wnd.hwnd().EndDialog(0).unwrap();
 			});
 		}

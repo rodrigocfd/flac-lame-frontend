@@ -26,7 +26,7 @@ impl WndMain {
 		self.wnd.on().wm_command_accel_menu(ids::MNU_OPEN, {
 			let self2 = self.clone();
 			move || {
-				let fileo: shell::IFileOpenDialog = w::CoCreateInstance(
+				let fileo = w::CoCreateInstance::<shell::IFileOpenDialog>(
 					&shell::clsid::FileOpenDialog,
 					None,
 					co::CLSCTX::INPROC_SERVER,

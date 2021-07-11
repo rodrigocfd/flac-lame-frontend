@@ -1,5 +1,5 @@
 use std::sync::{Arc, Mutex};
-use winsafe::gui;
+use winsafe::{gui, shell};
 
 mod wnd_run_events;
 mod wnd_run_funcs;
@@ -9,6 +9,7 @@ pub struct WndRun {
 	wnd:           gui::WindowModal,
 	lbl_status:    gui::Label,
 	pro_status:    gui::ProgressBar,
+	itbl:          shell::ITaskbarList4,
 	opts:          Opts,
 	files_process: Arc<Mutex<FilesProcess>>,
 }
