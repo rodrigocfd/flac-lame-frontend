@@ -40,10 +40,9 @@ impl WndMain {
 				).unwrap();
 
 				fileo.SetFileTypes(&[
-					("MP3 audio files", "*.mp3"),
 					("FLAC audio files", "*.flac"),
 					("WAV audio files", "*.wav"),
-					("Supported audio files", "*.mp3;*.flac;*.wav"),
+					("Supported audio files", "*.flac;*.wav"),
 				]).unwrap();
 
 				fileo.SetFileTypeIndex(4).unwrap();

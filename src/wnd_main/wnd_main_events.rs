@@ -83,7 +83,7 @@ impl WndMain {
 				let dropped_files = p.hdrop.DragQueryFiles().unwrap();
 				let mut all_files = Vec::with_capacity(dropped_files.len());
 
-				[".mp3", ".flac", ".wav"].iter().for_each(|ext: &&str| {
+				[".flac", ".wav"].iter().for_each(|ext: &&str| {
 					dropped_files.iter().for_each(|file: &String| {
 						let mut file = file.clone();
 						file.reserve(file.len() + 10); // arbitrary
@@ -93,7 +93,7 @@ impl WndMain {
 								file.push('\\');
 							}
 							file.push('*');
-							file.push_str(*ext); // *.mp3
+							file.push_str(*ext); // *.flac
 
 							for sub_file in w::HFINDFILE::ListAll(&file).unwrap() { // just search 1 level below
 								if sub_file.to_lowercase().ends_with(*ext) {
