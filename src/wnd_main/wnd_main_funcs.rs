@@ -76,8 +76,9 @@ impl WndMain {
 		Ok(())
 	}
 
-	pub(super) fn add_files(&self, files: &Vec<String>) -> Result<(), Box<dyn Error>> {
+	pub(super) fn add_files<S: AsRef<str>>(&self, files: &[S]) -> Result<(), Box<dyn Error>> {
 		for file in files.iter() {
+			let file = file.as_ref();
 			let (hfile, _) = w::HFILE::CreateFile(file, co::GENERIC::READ,
 				co::FILE_SHARE::READ, None, co::DISPOSITION::OPEN_EXISTING,
 				co::FILE_ATTRIBUTE::NORMAL, None)?;

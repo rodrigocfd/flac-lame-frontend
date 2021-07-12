@@ -184,9 +184,16 @@ impl WndMain {
 					return;
 				}
 
-				let dest_folder = self2.txt_dest.text_str().unwrap();
-
 				let idx_type = self2.rad_mp3_flac_wav.checked_index().unwrap();
+
+				for file in self2.lst_files.columns().all_texts(0).iter() {
+					if idx_type == 2 && file.ends_with(".wav") {
+						util::prompt::err(self2.wnd.hwnd(), "Bad conversion",
+							&format!("Cannot convert WAV to WAV:\n{}", file));
+						return;
+					}
+				}
+
 				let target = if idx_type == 0 { // mp3
 					if self2.rad_cbr_vbr.checked_index().unwrap() == 0 { // mp3/cbr
 						let txt_quality = self2.cmb_cbr.items().selected_text().unwrap();
@@ -203,6 +210,8 @@ impl WndMain {
 				} else { // wav
 					wnd_run::Target::Wav
 				};
+
+				let dest_folder = self2.txt_dest.text_str().unwrap();
 
 				let run_opts = wnd_run::Opts {
 					files: self2.lst_files.columns().all_texts(0),
