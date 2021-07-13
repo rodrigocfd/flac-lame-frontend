@@ -63,13 +63,6 @@ impl WndRun {
 			self.process_next_file(nfiles);
 		} else if finished_processing {
 			self.wnd.run_ui_thread(|| { // finished, update UI
-				self.itbl.SetProgressValue(self.wnd.hwnd(), nfiles as _, nfiles as _).unwrap();
-				self.pro_status.set_position(nfiles as _);
-			});
-
-			w::Sleep(500); // so we can briefly see the 100%
-
-			self.wnd.run_ui_thread(|| { // cleanup, update UI
 				self.itbl.SetProgressState(
 					self.wnd.hwnd().GetAncestor(co::GA::ROOTOWNER).unwrap(),
 					shell::co::TBPF::NOPROGRESS).unwrap();

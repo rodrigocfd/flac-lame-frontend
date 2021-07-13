@@ -226,8 +226,14 @@ impl WndMain {
 					num_threads: self2.cmb_threads.items().selected_text().unwrap().parse().unwrap(),
 				};
 
+				let t0 = util::Timer::start();
+
 				let runner = wnd_run::WndRun::new(&self2.wnd, run_opts);
 				runner.show();
+
+				util::prompt::info(self2.wnd.hwnd(), "Process finished",
+					&format!("{} file(s) processed in {:.3} secs.",
+						self2.lst_files.items().count(), t0.now_ms() / 1000.0));
 			}
 		});
 	}
