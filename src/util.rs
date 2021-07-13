@@ -34,6 +34,13 @@ pub mod path {
 	pub fn has_extension(path: &str, extension: &str) -> bool {
 		path.to_uppercase().ends_with(&extension.to_uppercase())
 	}
+
+	/// New extension must start with a dot, like `".mp3"`.
+	pub fn replace_extension(path: &str, new_extension: &str) -> String {
+		let mut p = path[..path.rfind('.').unwrap()].to_owned();
+		p.push_str(new_extension);
+		p
+	}
 }
 
 pub mod prompt {

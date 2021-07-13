@@ -79,15 +79,38 @@ impl WndRun {
 	}
 
 	pub(super) fn convert_to_mp3(&self, idx: usize, enc: Mp3Enc, quality: &str) {
-		let file_path = &self.opts.files[idx];
-		if util::path::has_extension(file_path, ".flac") {
+		let src_path = &self.opts.files[idx];
 
-		} else if util::path::has_extension(file_path, ".wav") {
+		if util::path::has_extension(src_path, ".flac") {
+			Self::run_cmd(
+				&format!("\"{}\" -d \"{}\"", // intermediary convert to WAV with FLAC
+					self.opts.flac_path, src_path),
+			);
+			let intermediary_wav = util::path::replace_extension(src_path, ".wav");
+			Self::run_cmd(
+				&format!("\"{}\" -{}{} --noreplaygain \"{}\"", // convert to MP3 with LAME
+					self.opts.lame_path,
+					match enc {
+						Mp3Enc::Cbr => "b",
+						Mp3Enc::Vbr => "V",
+					},
+					quality, intermediary_wav,
+				),
+			);
+			w::DeleteFile(&intermediary_wav).unwrap();
 
+		} else if util::path::has_extension(src_path, ".wav") {
+			Self::run_cmd(
+				&format!("\"{}\" -{}{} --noreplaygain \"{}\"", // convert to MP3 with LAME
+					self.opts.lame_path,
+					match enc {
+						Mp3Enc::Cbr => "b",
+						Mp3Enc::Vbr => "V",
+					},
+					quality, src_path,
+				),
+			);
 		}
-
-		winsafe::Sleep(2000);
-		println!("mp3 {} {} {}", idx, quality, winsafe::GetCurrentThreadId());
 	}
 
 	pub(super) fn convert_to_flac(&self, idx: usize, quality: &str) {
@@ -96,5 +119,22 @@ impl WndRun {
 
 	pub(super) fn convert_to_wav(&self, idx: usize) {
 
+	}
+
+	fn run_cmd(cmd_line: &str) -> u32 {
+		let mut sa = w::SECURITY_ATTRIBUTES::default();
+		sa.set_bInheritHandle(true);
+
+		let mut si = w::STARTUPINFO::default();
+		si.dwFlags = co::STARTF::USESHOWWINDOW;
+		si.set_wShowWindow(co::SW::SHOW);
+
+		let pi = w::HPROCESS::CreateProcess(None, Some(cmd_line), Some(&mut sa),
+			None, false, co::CREATE::NONE, None, None, &mut si).unwrap();
+		defer! { pi.hThread.CloseHandle().unwrap(); }
+		defer! { pi.hProcess.CloseHandle().unwrap(); }
+
+		pi.hProcess.WaitForSingleObject(None).unwrap();
+		pi.hProcess.GetExitCodeProcess().unwrap()
 	}
 }
