@@ -37,9 +37,9 @@ impl WndRun {
 		};
 
 		match &self.opts.target {
-			Target::Mp3(enc, quality) => self.convert_to_mp3(idx, *enc, quality),
-			Target::Flac(quality) => self.convert_to_flac(idx, quality),
-			Target::Wav => self.convert_to_wav(idx),
+			Target::Mp3(enc, quality) => self.convert_to_mp3(&self.opts.files[idx], *enc, quality),
+			Target::Flac(quality) => self.convert_to_flac(&self.opts.files[idx], quality),
+			Target::Wav => self.convert_to_wav(&self.opts.files[idx]),
 		}
 
 		let (has_more, finished_processing) = {
@@ -71,8 +71,18 @@ impl WndRun {
 		}
 	}
 
-	pub(super) fn convert_to_mp3(&self, idx: usize, enc: Mp3Enc, quality: &str) {
-		let src_path = &self.opts.files[idx];
+	pub(super) fn convert_to_mp3(&self, src_path: &str, enc: Mp3Enc, quality: &str) {
+		let wav_to_mp3 = |the_src: &str| {
+			Self::run_cmd(
+				&format!("\"{}\" -{}{} --noreplaygain \"{}\"", // convert to MP3 with LAME
+					self.opts.lame_path,
+					match enc {
+						Mp3Enc::Cbr => "b",
+						Mp3Enc::Vbr => "V",
+					},
+					quality, the_src),
+			);
+		};
 
 		if util::path::has_extension(src_path, ".flac") {
 			Self::run_cmd(
@@ -80,37 +90,37 @@ impl WndRun {
 					self.opts.flac_path, src_path),
 			);
 			let intermediary_wav = util::path::replace_extension(src_path, ".wav");
-			Self::run_cmd(
-				&format!("\"{}\" -{}{} --noreplaygain \"{}\"", // convert to MP3 with LAME
-					self.opts.lame_path,
-					match enc {
-						Mp3Enc::Cbr => "b",
-						Mp3Enc::Vbr => "V",
-					},
-					quality, intermediary_wav,
-				),
-			);
+			wav_to_mp3(&intermediary_wav);
 			w::DeleteFile(&intermediary_wav).unwrap();
-
 		} else if util::path::has_extension(src_path, ".wav") {
-			Self::run_cmd(
-				&format!("\"{}\" -{}{} --noreplaygain \"{}\"", // convert to MP3 with LAME
-					self.opts.lame_path,
-					match enc {
-						Mp3Enc::Cbr => "b",
-						Mp3Enc::Vbr => "V",
-					},
-					quality, src_path,
-				),
-			);
+			wav_to_mp3(src_path);
 		}
 	}
 
-	pub(super) fn convert_to_flac(&self, idx: usize, quality: &str) {
+	pub(super) fn convert_to_flac(&self, src_path: &str, quality: &str) {
+		let wav_to_flac = |the_src: &str| {
+			Self::run_cmd(
+				&format!("\"{}\" -{} -V --no-seektable \"{}\"",
+					self.opts.flac_path, quality, the_src),
+			);
+			println!("{}", &format!("\"{}\" -{} -V --no-seektable \"{}\"",
+			self.opts.flac_path, quality, the_src));
+		};
 
+		if util::path::has_extension(src_path, ".flac") {
+			Self::run_cmd(
+				&format!("\"{}\" -d \"{}\"", // intermediary convert to WAV with FLAC
+					self.opts.flac_path, src_path),
+			);
+			let intermediary_wav = util::path::replace_extension(src_path, ".wav");
+			wav_to_flac(&intermediary_wav);
+			w::DeleteFile(&intermediary_wav).unwrap();
+		} else if util::path::has_extension(src_path, ".wav") {
+			wav_to_flac(src_path);
+		}
 	}
 
-	pub(super) fn convert_to_wav(&self, idx: usize) {
+	pub(super) fn convert_to_wav(&self, src_path: &str) {
 
 	}
 
