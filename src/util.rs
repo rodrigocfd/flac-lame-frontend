@@ -1,14 +1,3 @@
-use std::error::Error;
-use winsafe::{self as w, co};
-
-pub fn path_is_dir(path: &str) -> Result<bool, Box<dyn Error>> {
-	Ok(w::GetFileAttributes(path)?.has(co::FILE_ATTRIBUTE::DIRECTORY))
-}
-
-pub fn path_exists(path: &str) -> bool {
-	w::GetFileAttributes(path).is_ok()
-}
-
 pub fn format_bytes(num_bytes: usize) -> String {
 	if num_bytes < 1024 {
 		format!("{} bytes", num_bytes)
@@ -22,6 +11,23 @@ pub fn format_bytes(num_bytes: usize) -> String {
 		format!("{:.2} TB", (num_bytes as f64) / 1024.0 / 1024.0 / 1024.0 / 1024.0)
 	} else {
 		format!("{:.2} PB", (num_bytes as f64) / 1024.0 / 1024.0 / 1024.0 / 1024.0 / 1024.0)
+	}
+}
+
+pub mod path {
+	use std::error::Error;
+	use winsafe::{self as w, co};
+
+	pub fn is_dir(path: &str) -> Result<bool, Box<dyn Error>> {
+		Ok(w::GetFileAttributes(path)?.has(co::FILE_ATTRIBUTE::DIRECTORY))
+	}
+
+	pub fn exists(path: &str) -> bool {
+		w::GetFileAttributes(path).is_ok()
+	}
+
+	pub fn has_extension(path: &str, extension: &str) -> bool {
+		path.to_uppercase().ends_with(&extension.to_uppercase())
 	}
 }
 

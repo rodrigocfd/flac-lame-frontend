@@ -2,6 +2,7 @@ use std::sync::{Arc, Mutex};
 use winsafe::{self as w, co, gui, shell};
 
 use crate::ids;
+use crate::util;
 use super::{FilesProcess, Mp3Enc, Opts, Target, WndRun};
 
 impl WndRun {
@@ -62,6 +63,13 @@ impl WndRun {
 			self.process_next_file(nfiles);
 		} else if finished_processing {
 			self.wnd.run_ui_thread(|| { // finished, update UI
+				self.itbl.SetProgressValue(self.wnd.hwnd(), nfiles as _, nfiles as _).unwrap();
+				self.pro_status.set_position(nfiles as _);
+			});
+
+			w::Sleep(500); // so we can briefly see the 100%
+
+			self.wnd.run_ui_thread(|| { // cleanup, update UI
 				self.itbl.SetProgressState(
 					self.wnd.hwnd().GetAncestor(co::GA::ROOTOWNER).unwrap(),
 					shell::co::TBPF::NOPROGRESS).unwrap();
@@ -71,6 +79,13 @@ impl WndRun {
 	}
 
 	pub(super) fn convert_to_mp3(&self, idx: usize, enc: Mp3Enc, quality: &str) {
+		let file_path = &self.opts.files[idx];
+		if util::path::has_extension(file_path, ".flac") {
+
+		} else if util::path::has_extension(file_path, ".wav") {
+
+		}
+
 		winsafe::Sleep(2000);
 		println!("mp3 {} {} {}", idx, quality, winsafe::GetCurrentThreadId());
 	}

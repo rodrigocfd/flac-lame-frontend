@@ -88,7 +88,7 @@ impl WndMain {
 						let mut file = file.clone();
 						file.reserve(file.len() + 10); // arbitrary
 
-						if util::path_is_dir(&file).unwrap() {
+						if util::path::is_dir(&file).unwrap() {
 							if !file.ends_with('\\') {
 								file.push('\\');
 							}
@@ -178,7 +178,7 @@ impl WndMain {
 			let self2 = self.clone();
 			move || {
 				let new_dest = self2.txt_dest.text_str().unwrap().trim().to_owned();
-				if !new_dest.is_empty() && !util::path_exists(&new_dest) {
+				if !new_dest.is_empty() && !util::path::exists(&new_dest) {
 					util::prompt::err(self2.wnd.hwnd(), "Invalid directory",
 						&format!("Target directory does not exist:\n{}", new_dest));
 					return;
