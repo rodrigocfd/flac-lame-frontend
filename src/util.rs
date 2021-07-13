@@ -26,6 +26,11 @@ pub mod path {
 		w::GetFileAttributes(path).is_ok()
 	}
 
+	/// Path of file, without trailing backslash.
+	pub fn get_path(path: &str) -> String {
+		path[..path.rfind("\\").unwrap()].to_owned()
+	}
+
 	pub fn has_extension(path: &str, extension: &str) -> bool {
 		path.to_uppercase().ends_with(&extension.to_uppercase())
 	}

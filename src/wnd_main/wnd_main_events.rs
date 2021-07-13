@@ -213,7 +213,12 @@ impl WndMain {
 
 				let dest_folder = self2.txt_dest.text_str().unwrap();
 
+				let ini = w::Ini::parse_from_file(
+					&format!("{}\\flac-lame-frontend.ini", Self::real_exe_path())).unwrap();
+
 				let run_opts = wnd_run::Opts {
+					lame_path: ini.value("Tools", "lame").unwrap().to_owned(),
+					flac_path: ini.value("Tools", "flac").unwrap().to_owned(),
 					files: self2.lst_files.columns().all_texts(0),
 					dest_folder: if dest_folder.is_empty() { None } else { Some(dest_folder) },
 					target,

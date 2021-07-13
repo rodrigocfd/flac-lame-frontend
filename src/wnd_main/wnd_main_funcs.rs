@@ -99,4 +99,18 @@ impl WndMain {
 		self.update_run_count()?;
 		Ok(())
 	}
+
+	#[cfg(debug_assertions)]
+	pub(super) fn real_exe_path() -> String {
+		let mut exe_path = w::HINSTANCE::NULL.GetModuleFileName().unwrap(); // .\target\debug\*.exe
+		exe_path = util::path::get_path(&exe_path);
+		exe_path = util::path::get_path(&exe_path);
+		util::path::get_path(&exe_path)
+	}
+
+	#[cfg(not(debug_assertions))]
+	pub(super) fn real_exe_path() -> String {
+		let exe_path = w::HINSTANCE::NULL.GetModuleFileName().unwrap();
+		util::path::get_path(&exe_path)
+	}
 }

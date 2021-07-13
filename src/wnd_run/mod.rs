@@ -26,6 +26,8 @@ pub enum Mp3Enc { Cbr, Vbr }
 
 #[derive(Clone)]
 pub struct Opts {
+	pub lame_path:   String,
+	pub flac_path:   String,
 	pub files:       Vec<String>,
 	pub dest_folder: Option<String>,
 	pub target:      Target,
