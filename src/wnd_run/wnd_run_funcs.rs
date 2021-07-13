@@ -73,7 +73,7 @@ impl WndRun {
 
 	pub(super) fn convert_to_mp3(&self, src_path: &str, enc: Mp3Enc, quality: &str) {
 		let wav_to_mp3 = |the_src: &str| {
-			Self::run_cmd(
+			Self::raw_run_cmd(
 				&format!("\"{}\" -{}{} --noreplaygain \"{}\"", // convert to MP3 with LAME
 					self.opts.lame_path,
 					match enc {
@@ -85,7 +85,7 @@ impl WndRun {
 		};
 
 		if util::path::has_extension(src_path, ".flac") {
-			Self::run_cmd(
+			Self::raw_run_cmd(
 				&format!("\"{}\" -d \"{}\"", // intermediary convert to WAV with FLAC
 					self.opts.flac_path, src_path),
 			);
@@ -99,7 +99,7 @@ impl WndRun {
 
 	pub(super) fn convert_to_flac(&self, src_path: &str, quality: &str) {
 		let wav_to_flac = |the_src: &str| {
-			Self::run_cmd(
+			Self::raw_run_cmd(
 				&format!("\"{}\" -{} -V --no-seektable \"{}\"",
 					self.opts.flac_path, quality, the_src),
 			);
@@ -108,7 +108,7 @@ impl WndRun {
 		};
 
 		if util::path::has_extension(src_path, ".flac") {
-			Self::run_cmd(
+			Self::raw_run_cmd(
 				&format!("\"{}\" -d \"{}\"", // intermediary convert to WAV with FLAC
 					self.opts.flac_path, src_path),
 			);
@@ -121,10 +121,15 @@ impl WndRun {
 	}
 
 	pub(super) fn convert_to_wav(&self, src_path: &str) {
-
+		if util::path::has_extension(src_path, ".flac") { // if wav already, nothing is done
+			Self::raw_run_cmd(
+				&format!("\"{}\" -d \"{}\"",
+					self.opts.flac_path, src_path),
+			);
+		}
 	}
 
-	fn run_cmd(cmd_line: &str) -> u32 {
+	fn raw_run_cmd(cmd_line: &str) -> u32 {
 		let mut sa = w::SECURITY_ATTRIBUTES::default();
 		sa.set_bInheritHandle(true);
 
