@@ -42,6 +42,18 @@ impl WndRun {
 			Target::Wav => self.convert_to_wav(&self.opts.files[idx]),
 		}
 
+		self.opts.dest_folder.as_ref().map(|dest_folder: &String| { // move file if due
+			let converted_file = util::path::swap_extension(&self.opts.files[idx],
+				match &self.opts.target {
+					Target::Mp3(_, _) => ".mp3",
+					Target::Flac(_) => ".flac",
+					Target::Wav => ".wav",
+				});
+			w::MoveFile(&converted_file,
+				&format!("{}\\{}", dest_folder, util::path::get_file(&converted_file)),
+			).unwrap();
+		});
+
 		let (has_more, finished_processing) = {
 			let mut files_process = self.files_process.lock().unwrap();
 			files_process.num_files_done += 1;
@@ -89,7 +101,7 @@ impl WndRun {
 				&format!("\"{}\" -d \"{}\"", // intermediary convert to WAV with FLAC
 					self.opts.flac_path, src_path),
 			);
-			let intermediary_wav = util::path::replace_extension(src_path, ".wav");
+			let intermediary_wav = util::path::swap_extension(src_path, ".wav");
 			wav_to_mp3(&intermediary_wav);
 			w::DeleteFile(&intermediary_wav).unwrap();
 		} else if util::path::has_extension(src_path, ".wav") {
@@ -112,7 +124,7 @@ impl WndRun {
 				&format!("\"{}\" -d \"{}\"", // intermediary convert to WAV with FLAC
 					self.opts.flac_path, src_path),
 			);
-			let intermediary_wav = util::path::replace_extension(src_path, ".wav");
+			let intermediary_wav = util::path::swap_extension(src_path, ".wav");
 			wav_to_flac(&intermediary_wav);
 			w::DeleteFile(&intermediary_wav).unwrap();
 		} else if util::path::has_extension(src_path, ".wav") {

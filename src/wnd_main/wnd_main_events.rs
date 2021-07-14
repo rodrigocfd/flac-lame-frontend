@@ -211,7 +211,13 @@ impl WndMain {
 					wnd_run::Target::Wav
 				};
 
-				let dest_folder = self2.txt_dest.text_str().unwrap();
+				let dest_folder = { // without trailing backslash
+					let mut dest_folder = self2.txt_dest.text_str().unwrap();
+					if dest_folder.ends_with('\\') {
+						dest_folder.pop();
+					}
+					dest_folder
+				};
 
 				let ini = w::Ini::parse_from_file(
 					&format!("{}\\flac-lame-frontend.ini", Self::real_exe_path())).unwrap();

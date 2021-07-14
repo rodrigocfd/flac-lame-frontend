@@ -42,6 +42,11 @@ pub mod path {
 		w::GetFileAttributes(path).is_ok()
 	}
 
+	/// Filename itself of the full path.
+	pub fn get_file(path: &str) -> String {
+		path[path.rfind("\\").unwrap() + 1..].to_owned()
+	}
+
 	/// Path of file, without trailing backslash.
 	pub fn get_path(path: &str) -> String {
 		path[..path.rfind("\\").unwrap()].to_owned()
@@ -52,7 +57,7 @@ pub mod path {
 	}
 
 	/// New extension must start with a dot, like `".mp3"`.
-	pub fn replace_extension(path: &str, new_extension: &str) -> String {
+	pub fn swap_extension(path: &str, new_extension: &str) -> String {
 		let mut p = path[..path.rfind('.').unwrap()].to_owned();
 		p.push_str(new_extension);
 		p
