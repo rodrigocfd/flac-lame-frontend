@@ -2,3 +2,4 @@
 *.code-workspace
 *.lib
 Cargo.lock
+deploy.sh
