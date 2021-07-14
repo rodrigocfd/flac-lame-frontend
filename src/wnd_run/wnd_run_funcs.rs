@@ -42,7 +42,7 @@ impl WndRun {
 			Target::Wav => self.convert_to_wav(&self.opts.files[idx]),
 		}
 
-		self.opts.dest_folder.as_ref().map(|dest_folder: &String| { // move file if due
+		self.opts.dest_folder.as_ref().map(|dest_folder: &String| { // move original file if due
 			let converted_file = util::path::swap_extension(&self.opts.files[idx],
 				match &self.opts.target {
 					Target::Mp3(_, _) => ".mp3",
@@ -53,6 +53,10 @@ impl WndRun {
 				&format!("{}\\{}", dest_folder, util::path::get_file(&converted_file)),
 			).unwrap();
 		});
+
+		if self.opts.del_orig { // delete original file if due
+			w::DeleteFile(&self.opts.files[idx]).unwrap();
+		}
 
 		let (has_more, finished_processing) = {
 			let mut files_process = self.files_process.lock().unwrap();
