@@ -181,6 +181,8 @@ impl WndMain {
 				if !new_dest.is_empty() && !util::path::exists(&new_dest) {
 					util::prompt::err(self2.wnd.hwnd(), "Invalid directory",
 						&format!("Target directory does not exist:\n{}", new_dest));
+					self2.txt_dest.set_selection(Some(0), None);
+					self2.txt_dest.hwnd().SetFocus();
 					return;
 				}
 
