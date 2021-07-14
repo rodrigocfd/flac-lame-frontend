@@ -79,10 +79,15 @@ impl WndMain {
 	pub(super) fn add_files<S: AsRef<str>>(&self, files: &[S]) -> Result<(), Box<dyn Error>> {
 		for file in files.iter() {
 			let file = file.as_ref();
+
+			if self.lst_files.items().find(file).is_some() {
+				continue; // file already added to list, do nothing
+			}
+
 			let (hfile, _) = w::HFILE::CreateFile(file, co::GENERIC::READ,
 				co::FILE_SHARE::READ, None, co::DISPOSITION::OPEN_EXISTING,
 				co::FILE_ATTRIBUTE::NORMAL, None)?;
-			let sz = hfile.GetFileSizeEx()?;
+			let sz = hfile.GetFileSizeEx()?; // read file size
 			hfile.CloseHandle()?;
 
 			self.lst_files.items().add(&[file, &util::format_bytes(sz)],
