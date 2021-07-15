@@ -106,7 +106,13 @@ impl WndMain {
 					});
 				});
 
-				self2.add_files(&all_files).unwrap();
+				if all_files.is_empty() {
+					util::prompt::err(self2.wnd.hwnd(), "No files added",
+						&format!("{} file(s) have been dropped, but none of them was WAV or FLAC.",
+							dropped_files.len()));
+				} else {
+					self2.add_files(&all_files).unwrap();
+				}
 			}
 		});
 
@@ -223,10 +229,21 @@ impl WndMain {
 
 				let ini = w::Ini::parse_from_file(
 					&format!("{}\\flac-lame-frontend.ini", Self::real_exe_path())).unwrap();
+				let lame_path = ini.value("Tools", "lame").unwrap().to_owned();
+				let flac_path = ini.value("Tools", "flac").unwrap().to_owned();
+				if !util::path::exists(&lame_path) {
+					util::prompt::err(self2.wnd.hwnd(), "LAME not found",
+						&format!("LAME not found at:\n{}", lame_path));
+					return;
+				} else if !util::path::exists(&flac_path) {
+					util::prompt::err(self2.wnd.hwnd(), "FLAC not found",
+						&format!("FLAC not found at:\n{}", lame_path));
+					return;
+				}
 
 				let run_opts = wnd_run::Opts {
-					lame_path: ini.value("Tools", "lame").unwrap().to_owned(),
-					flac_path: ini.value("Tools", "flac").unwrap().to_owned(),
+					lame_path,
+					flac_path,
 					files: self2.lst_files.columns().all_texts(0),
 					dest_folder: if dest_folder.is_empty() { None } else { Some(dest_folder) },
 					target,

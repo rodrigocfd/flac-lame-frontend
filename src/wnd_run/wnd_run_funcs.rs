@@ -154,7 +154,7 @@ impl WndRun {
 		si.set_wShowWindow(co::SW::SHOW);
 
 		let pi = w::HPROCESS::CreateProcess(None, Some(cmd_line), Some(&mut sa),
-			None, false, co::CREATE::NONE, None, None, &mut si).unwrap();
+			None, false, co::CREATE::NoValue, None, None, &mut si).unwrap();
 		defer! { pi.hThread.CloseHandle().unwrap(); }
 		defer! { pi.hProcess.CloseHandle().unwrap(); }
 
