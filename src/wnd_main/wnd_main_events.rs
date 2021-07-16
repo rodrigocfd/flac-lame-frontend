@@ -183,7 +183,7 @@ impl WndMain {
 		self.btn_run.on().bn_clicked({
 			let self2 = self.clone();
 			move || {
-				let new_dest = self2.txt_dest.text_str().unwrap().trim().to_owned();
+				let new_dest = self2.txt_dest.text().unwrap().trim().to_owned();
 				if !new_dest.is_empty() && !util::path::exists(&new_dest) {
 					util::prompt::err(self2.wnd.hwnd(), "Invalid directory",
 						&format!("Target directory does not exist:\n{}", new_dest));
@@ -220,7 +220,7 @@ impl WndMain {
 				};
 
 				let dest_folder = { // without trailing backslash
-					let mut dest_folder = self2.txt_dest.text_str().unwrap();
+					let mut dest_folder = self2.txt_dest.text().unwrap();
 					if dest_folder.ends_with('\\') {
 						dest_folder.pop();
 					}
