@@ -65,6 +65,8 @@ pub mod path {
 }
 
 pub mod prompt {
+	#![allow(dead_code)]
+
 	use winsafe::{self as w, co};
 
 	pub fn err(hwnd: w::HWND, title: &str, body: &str) {

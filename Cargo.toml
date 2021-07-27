@@ -12,5 +12,6 @@ codegen-units = 1
 [dependencies]
 winsafe = { path = "../winsafe", features = ["shell"] }
 
+# Release build with static linking:
 # https://doc.rust-lang.org/reference/linkage.html#static-and-dynamic-c-runtimes
 # RUSTFLAGS='-C target-feature=+crt-static' cargo build --release --target x86_64-pc-windows-msvc
