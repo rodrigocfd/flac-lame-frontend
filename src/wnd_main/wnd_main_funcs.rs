@@ -105,8 +105,27 @@ impl WndMain {
 		Ok(())
 	}
 
+	pub(super) fn read_tool_paths() -> Result<(String, String), Box<dyn Error>> {
+		let ini_file = w::Ini::parse_from_file(
+			&format!("{}\\flac-lame-frontend.ini", Self::real_exe_path()),
+		)?;
+
+		let lame_path = ini_file.value("Tools", "lame")
+			.ok_or(format!("LAME path not found in INI file."))?.to_owned();
+		let flac_path = ini_file.value("Tools", "flac")
+			.ok_or(format!("FLAC path not found in INI file."))?.to_owned();
+
+		if !util::path::exists(&lame_path) {
+			return Err(format!("LAME not found at:\n{}", lame_path).into());
+		} else if !util::path::exists(&flac_path) {
+			return Err(format!("FLAC not found at:\n{}", lame_path).into());
+		}
+
+		Ok((lame_path, flac_path))
+	}
+
 	#[cfg(debug_assertions)]
-	pub(super) fn real_exe_path() -> String {
+	fn real_exe_path() -> String {
 		let mut exe_path = w::HINSTANCE::NULL.GetModuleFileName().unwrap(); // .\target\debug\*.exe
 		exe_path = util::path::get_path(&exe_path);
 		exe_path = util::path::get_path(&exe_path);
@@ -114,7 +133,7 @@ impl WndMain {
 	}
 
 	#[cfg(not(debug_assertions))]
-	pub(super) fn real_exe_path() -> String {
+	fn real_exe_path() -> String {
 		let exe_path = w::HINSTANCE::NULL.GetModuleFileName().unwrap();
 		util::path::get_path(&exe_path)
 	}
