@@ -227,10 +227,10 @@ impl WndMain {
 					dest_folder
 				};
 
-				let ini = w::Ini::parse_from_file(
+				let ini_file = w::Ini::parse_from_file(
 					&format!("{}\\flac-lame-frontend.ini", Self::real_exe_path())).unwrap();
-				let lame_path = ini.value("Tools", "lame").unwrap().to_owned();
-				let flac_path = ini.value("Tools", "flac").unwrap().to_owned();
+				let lame_path = ini_file.value("Tools", "lame").unwrap().to_owned();
+				let flac_path = ini_file.value("Tools", "flac").unwrap().to_owned();
 				if !util::path::exists(&lame_path) {
 					util::prompt::err(self2.wnd.hwnd(), "LAME not found",
 						&format!("LAME not found at:\n{}", lame_path));
