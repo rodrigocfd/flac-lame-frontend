@@ -16,6 +16,8 @@ impl WndMain {
 				himg.AddIconFromShell(&["mp3", "flac", "wav"]).unwrap();
 				self2.lst_files.set_image_list(co::LVSIL::SMALL, himg);
 
+				dbg!(&self2.wnd);
+
 				self2.lst_files.columns().add(&[("File", 100), ("Size", 70)]).unwrap();
 				self2.lst_files.columns().set_width_to_fill(0).unwrap();
 
