@@ -87,7 +87,7 @@ impl WndRun {
 		}
 	}
 
-	pub(super) fn convert_to_mp3(&self, src_path: &str, enc: Mp3Enc, quality: &str) {
+	fn convert_to_mp3(&self, src_path: &str, enc: Mp3Enc, quality: &str) {
 		let wav_to_mp3 = |the_src: &str| {
 			Self::raw_run_cmd(
 				&format!("\"{}\" -{}{} --noreplaygain \"{}\"", // convert to MP3 with LAME
@@ -113,7 +113,7 @@ impl WndRun {
 		}
 	}
 
-	pub(super) fn convert_to_flac(&self, src_path: &str, quality: &str) {
+	fn convert_to_flac(&self, src_path: &str, quality: &str) {
 		let wav_to_flac = |the_src: &str| {
 			Self::raw_run_cmd(
 				&format!("\"{}\" -{} -V --no-seektable \"{}\"",
@@ -136,7 +136,7 @@ impl WndRun {
 		}
 	}
 
-	pub(super) fn convert_to_wav(&self, src_path: &str) {
+	fn convert_to_wav(&self, src_path: &str) {
 		if util::path::has_extension(src_path, ".flac") { // if wav already, nothing is done
 			Self::raw_run_cmd(
 				&format!("\"{}\" -d \"{}\"",
