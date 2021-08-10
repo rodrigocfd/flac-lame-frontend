@@ -1,3 +1,4 @@
+use defer_lite::defer;
 use std::sync::{Arc, Mutex};
 use winsafe::{self as w, co, gui, shell};
 
