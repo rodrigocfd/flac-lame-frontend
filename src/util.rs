@@ -88,7 +88,7 @@ pub mod prompt {
 		tdc.hwndParent = hwnd;
 		tdc.dwFlags = co::TDF::ALLOW_DIALOG_CANCELLATION;
 		tdc.dwCommonButtons = btns;
-		tdc.set_hMainIcon(w::HiconIdTdicon::Tdicon(ico));
+		tdc.set_pszMainIcon(w::IconIdTdicon::Tdicon(ico));
 
 		let mut title = w::WString::from_str(title);
 		tdc.set_pszWindowTitle(Some(&mut title));
