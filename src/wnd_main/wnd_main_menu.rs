@@ -77,7 +77,7 @@ impl WndMain {
 
 				util::prompt::info(self2.wnd.hwnd(), "About",
 					&format!(
-						"ID3 Padding Remover v{}.{}.{}\n\
+						"FLAC/LAME front end v{}.{}.{}\n\
 						Writen in Rust with WinSafe library.\n\n\
 						Rodrigo César de Freitas Dias © 2013-2021",
 						ver[0], ver[1], ver[2]));
