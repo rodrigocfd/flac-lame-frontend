@@ -1,140 +1,74 @@
-use std::cell::Cell;
-use std::error::Error;
-use std::rc::Rc;
-use winsafe::{self as w, co, gui};
+use winsafe::{self as w, prelude::*, co};
 
-use crate::{ids, util};
+use crate::util;
 use super::WndMain;
 
 impl WndMain {
-	pub fn new() -> Self {
-		let context_menu = w::HINSTANCE::NULL
-			.LoadMenu(ids::MEN_MAIN).unwrap()
-			.GetSubMenu(0).unwrap();
-
-		let wnd = gui::WindowMain::new_dlg(ids::DLG_MAIN, Some(ids::ICO_MAIN), Some(ids::ACC_MAIN));
-		let lst_files = gui::ListView::new_dlg(&wnd, ids::LST_FILES, Some(context_menu));
-
-		let lbl_dest = gui::Label::new_dlg(&wnd, ids::LBL_DEST);
-		let txt_dest = gui::Edit::new_dlg(&wnd, ids::TXT_DEST);
-		let btn_dest = gui::Button::new_dlg(&wnd, ids::BTN_DEST);
-
-		let fra_conversion   = gui::Label::new_dlg(&wnd, ids::FRA_CONVERSION);
-		let rad_mp3_flac_wav = gui::RadioGroup::new_dlg(&wnd, &[ids::RAD_MP3, ids::RAD_FLAC, ids::RAD_WAV]);
-		let rad_cbr_vbr      = gui::RadioGroup::new_dlg(&wnd, &[ids::RAD_CBR, ids::RAD_VBR]);
-		let cmb_cbr          = gui::ComboBox::new_dlg(&wnd, ids::CMB_CBR);
-		let cmb_vbr          = gui::ComboBox::new_dlg(&wnd, ids::CMB_VBR);
-		let lbl_flac_lvl     = gui::Label::new_dlg(&wnd, ids::LBL_FLAC_LVL);
-		let cmb_flac_lvl     = gui::ComboBox::new_dlg(&wnd, ids::CMB_FLAC_LVL);
-
-		let chk_del_orig = gui::CheckBox::new_dlg(&wnd, ids::CHK_DEL_ORIG);
-		let lbl_threads  = gui::Label::new_dlg(&wnd, ids::LBL_THREADS);
-		let cmb_threads  = gui::ComboBox::new_dlg(&wnd, ids::CMB_THREADS);
-		let btn_run      = gui::Button::new_dlg(&wnd, ids::BTN_RUN);
-
-		let resz = gui::Resizer::new(&wnd, &[
-			(gui::Resz::Resize, gui::Resz::Resize, &[&lst_files]),
-			(gui::Resz::Nothing, gui::Resz::Repos, &[&lbl_dest]),
-			(gui::Resz::Resize, gui::Resz::Repos, &[&txt_dest]),
-			(gui::Resz::Repos, gui::Resz::Repos, &[&btn_dest]),
-			(gui::Resz::Nothing, gui::Resz::Repos, &[
-				&fra_conversion,
-				&cmb_cbr, &cmb_vbr,
-				&lbl_flac_lvl, &cmb_flac_lvl,
-				&chk_del_orig, &lbl_threads, &cmb_threads,
-			]),
-			(gui::Resz::Nothing, gui::Resz::Repos, &rad_mp3_flac_wav.as_child_vec()),
-			(gui::Resz::Nothing, gui::Resz::Repos, &rad_cbr_vbr.as_child_vec()),
-			(gui::Resz::Repos, gui::Resz::Repos, &[&btn_run]),
-		]);
-
-		let new_self = Self {
-			wnd, lst_files,
-			lbl_dest, txt_dest, btn_dest,
-			fra_conversion, rad_mp3_flac_wav, rad_cbr_vbr,
-			cmb_cbr, cmb_vbr, lbl_flac_lvl, cmb_flac_lvl,
-			chk_del_orig, lbl_threads, cmb_threads, btn_run, resz,
-			min_sz: Rc::new(Cell::new(w::SIZE::default())),
-		};
-		new_self.events();
-		new_self.menu_events();
-		new_self
+	/// Displays the standard error message box.
+	pub(super) fn msg_err(&self, caption: &str, msg: &str) -> w::AnyResult<()> {
+		self.wnd.hwnd().TaskDialog(
+			None,
+			Some(caption),
+			None,
+			Some(msg),
+			co::TDCBF::OK,
+			w::IconRes::Error,
+		).map(|_| ()).map_err(|e| e.into())
 	}
 
-	pub fn run(&self) -> w::WinResult<()> {
-		self.wnd.run_main(None)
-	}
-
-	pub(super) fn update_run_count(&self) -> Result<(), Box<dyn Error>> {
+	/// Updates the label of the Run button, counting the number of files to be
+	/// processed.
+	pub(super) fn update_run_count(&self) {
 		let num_files = self.lst_files.items().count();
 		if num_files == 0 {
-			self.btn_run.hwnd().SetWindowText("&Run")?;
+			self.btn_run.set_text("&Run");
 		} else {
-			self.btn_run.hwnd().SetWindowText(&format!("&Run ({})", num_files))?;
+			self.btn_run.set_text(&format!("&Run ({})", num_files));
 		}
 		self.btn_run.hwnd().EnableWindow(num_files > 0);
+	}
+
+	/// Adds the files to the main list view, retrieving their sizes.
+	pub(super) fn add_files(&self, files: &[impl AsRef<str>]) -> w::AnyResult<()> {
+		files.iter()
+			.map(|file| file.as_ref())
+			.filter(|file| self.lst_files.items().find(file).is_none()) // skip if file already added
+			.try_for_each(|file| -> w::AnyResult<()> {
+				let sz = w::File::open(file, w::FileAccess::ExistingReadOnly)?.size()?;
+				let icon_idx = if w::path::has_extension(file, &[".mp3"]) { 0 }
+					else if w::path::has_extension(file, &[".flac"]) { 1 }
+					else { 2 }; // wav
+				self.lst_files.items().add(&[file, &util::format_bytes(sz as _)], Some(icon_idx));
+				Ok(())
+			})?;
+
+		self.lst_files.columns().get(0).set_width_to_fill();
+		self.update_run_count();
 		Ok(())
 	}
 
-	pub(super) fn add_files<S: AsRef<str>>(&self, files: &[S]) -> Result<(), Box<dyn Error>> {
-		for file in files.iter() {
-			let file = file.as_ref();
+	/// Returns the paths of LAME and FLAC tools, read from the local INI file.
+	pub(super) fn read_tool_paths() -> w::AnyResult<(String, String)> {
+		let ini_file_path = format!("{}\\flac-lame-frontend.ini", w::path::exe_path()?);
+		let lame_path = match w::GetPrivateProfileString("Tools", "lame", &ini_file_path)? {
+			Some(lame_path) => lame_path,
+			None => {
+				return Err(format!("LAME path not found at:\n{}", ini_file_path).into());
+			},
+		};
+		let flac_path = match w::GetPrivateProfileString("Tools", "flac", &ini_file_path)? {
+			Some(lame_path) => lame_path,
+			None => {
+				return Err(format!("FLAC path not found at:\n{}", ini_file_path).into());
+			},
+		};
 
-			if self.lst_files.items().find(file).is_some() {
-				continue; // file already added to list, do nothing
-			}
-
-			let (hfile, _) = w::HFILE::CreateFile(file, co::GENERIC::READ,
-				co::FILE_SHARE::READ, None, co::DISPOSITION::OPEN_EXISTING,
-				co::FILE_ATTRIBUTE::NORMAL, None)?;
-			let sz = hfile.GetFileSizeEx()?; // read file size
-			hfile.CloseHandle()?;
-
-			self.lst_files.items().add(&[file, &util::format_bytes(sz)],
-				Some(if file.starts_with("mp3") {
-					0
-				} else if file.starts_with("flac") {
-					1
-				} else { // wav
-					2
-				}),
-			)?;
+		if !w::path::exists(&lame_path) {
+			Err(format!("LAME tool not found at:\n{}", lame_path).into())
+		} else if !w::path::exists(&flac_path) {
+			Err(format!("FLAC tool not found at:\n{}", flac_path).into())
+		} else {
+			Ok((lame_path, flac_path))
 		}
-		self.lst_files.columns().set_width_to_fill(0)?;
-		self.update_run_count()?;
-		Ok(())
-	}
-
-	pub(super) fn read_tool_paths() -> Result<(String, String), Box<dyn Error>> {
-		let ini_file = w::Ini::parse_from_file(
-			&format!("{}\\flac-lame-frontend.ini", Self::real_exe_path()),
-		)?;
-
-		let lame_path = ini_file.value("Tools", "lame")
-			.ok_or(format!("LAME path not found in INI file."))?.to_owned();
-		let flac_path = ini_file.value("Tools", "flac")
-			.ok_or(format!("FLAC path not found in INI file."))?.to_owned();
-
-		if !util::path::exists(&lame_path) {
-			return Err(format!("LAME not found at:\n{}", lame_path).into());
-		} else if !util::path::exists(&flac_path) {
-			return Err(format!("FLAC not found at:\n{}", lame_path).into());
-		}
-
-		Ok((lame_path, flac_path))
-	}
-
-	#[cfg(debug_assertions)]
-	fn real_exe_path() -> String {
-		let mut exe_path = w::HINSTANCE::NULL.GetModuleFileName().unwrap(); // .\target\debug\*.exe
-		exe_path = util::path::get_path(&exe_path);
-		exe_path = util::path::get_path(&exe_path);
-		util::path::get_path(&exe_path)
-	}
-
-	#[cfg(not(debug_assertions))]
-	fn real_exe_path() -> String {
-		let exe_path = w::HINSTANCE::NULL.GetModuleFileName().unwrap();
-		util::path::get_path(&exe_path)
 	}
 }

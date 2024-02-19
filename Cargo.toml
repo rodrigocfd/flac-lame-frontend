@@ -1,8 +1,9 @@
 [package]
 name = "flac-lame-frontend"
-version = "2.0.0"
-authors = ["Rodrigo Cesar de Freitas Dias <rcesar@gmail.com>"]
-edition = "2018"
+description = "A GUI to work with FLAC and LAME command line tools."
+version = "2.1.0"
+authors = ["Rodrigo César de Freitas Dias <rcesar@gmail.com>"]
+edition = "2021"
 
 [profile.release]
 lto = true
@@ -10,9 +11,7 @@ codegen-units = 1
 #panic = "abort"
 
 [dependencies]
-defer-lite = "1.0.0"
-winsafe = { path = "../winsafe", features = ["shell"] }
+winsafe = { path = "../winsafe", features = ["gui", "version"] }
 
-# Release build with static linking:
 # https://doc.rust-lang.org/reference/linkage.html#static-and-dynamic-c-runtimes
 # RUSTFLAGS='-C target-feature=+crt-static' cargo build --release --target x86_64-pc-windows-msvc

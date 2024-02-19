@@ -1,87 +1,83 @@
-use winsafe::{self as w, co, msg, shell};
+use winsafe::{prelude::*, self as w, co, msg};
 
 use crate::ids;
-use crate::util;
 use super::WndMain;
 
 impl WndMain {
-	pub(super) fn menu_events(&self) {
-		self.wnd.on().wm_init_menu_popup({
-			let self2 = self.clone();
-			move |p: msg::wm::InitMenuPopup| {
-				if p.hmenu == self2.lst_files.context_menu().unwrap() {
-					let has_sel = self2.lst_files.items().selected_count() > 0;
-					p.hmenu.EnableMenuItem(w::IdPos::Id(ids::MNU_REM_SEL), has_sel).unwrap();
-				}
+	pub(super) fn events_menu(&self) {
+		let self2 = self.clone();
+		self.wnd.on().wm_init_menu_popup(move |p| {
+			if p.hmenu == *self2.lst_files.context_menu().unwrap() {
+				let has_sel = self2.lst_files.items().selected_count() > 0;
+				p.hmenu.EnableMenuItem(w::IdPos::Id(ids::MNU_REM_SEL), has_sel)?;
 			}
+			Ok(())
 		});
 
-		self.wnd.on().wm_command_accel_menu(co::DLGID::CANCEL.into(), {
-			let wnd = self.wnd.clone();
-			move || {
-				wnd.hwnd().PostMessage(msg::wm::Close {}).unwrap(); // close on ESC
-			}
+		let wnd = self.wnd.clone();
+		self.wnd.on().wm_command_accel_menu(co::DLGID::CANCEL.into(), move || {
+			wnd.hwnd().PostMessage(msg::wm::Close {})?; // close on ESC
+			Ok(())
 		});
 
-		self.wnd.on().wm_command_accel_menu(ids::MNU_OPEN, {
-			let self2 = self.clone();
-			move || {
-				let fileo = w::CoCreateInstance::<shell::IFileOpenDialog>(
-					&shell::clsid::FileOpenDialog,
-					None,
-					co::CLSCTX::INPROC_SERVER,
-				).unwrap();
+		let self2 = self.clone();
+		self.wnd.on().wm_command_accel_menu(ids::MNU_OPEN, move || {
+			let fileo = w::CoCreateInstance::<w::IFileOpenDialog>(
+				&co::CLSID::FileOpenDialog, None, co::CLSCTX::INPROC_SERVER)?;
 
-				fileo.SetOptions(
-					fileo.GetOptions().unwrap()
-						| shell::co::FOS::FORCEFILESYSTEM
-						| shell::co::FOS::FILEMUSTEXIST
-						| shell::co::FOS::ALLOWMULTISELECT,
-				).unwrap();
+			fileo.SetOptions(
+				fileo.GetOptions()?
+					| co::FOS::FORCEFILESYSTEM
+					| co::FOS::FILEMUSTEXIST
+					| co::FOS::ALLOWMULTISELECT,
+			)?;
 
-				fileo.SetFileTypes(&[
-					("FLAC audio files", "*.flac"),
-					("WAV audio files", "*.wav"),
-					("Supported audio files", "*.flac;*.wav"),
-				]).unwrap();
+			fileo.SetFileTypes(&[
+				("FLAC audio files", "*.flac"),
+				("WAV audio files", "*.wav"),
+				("Supported audio files", "*.flac;*.wav"),
+			])?;
+			fileo.SetFileTypeIndex(3)?;
 
-				fileo.SetFileTypeIndex(4).unwrap();
-
-				if fileo.Show(self2.wnd.hwnd()).unwrap() {
-					self2.add_files(
-						&fileo.GetResults().unwrap()
-							.GetDisplayNames(shell::co::SIGDN::FILESYSPATH).unwrap(),
-					).unwrap();
-				}
+			if fileo.Show(self2.wnd.hwnd())? {
+				self2.add_files(
+					&fileo.GetResults()?
+						.iter()?
+						.map(|shi| shi?.GetDisplayName(co::SIGDN::FILESYSPATH))
+						.collect::<w::HrResult<Vec<_>>>()?,
+				)?;
 			}
+			Ok(())
 		});
 
-		self.wnd.on().wm_command_accel_menu(ids::MNU_REM_SEL, {
-			let self2 = self.clone();
-			move || {
-				self2.lst_files.items().delete_selected().unwrap();
-				self2.update_run_count().unwrap();
-			}
+		let self2 = self.clone();
+		self.wnd.on().wm_command_accel_menu(ids::MNU_REM_SEL, move || {
+			self2.lst_files.items().delete_selected();
+			self2.update_run_count();
+			Ok(())
 		});
 
-		self.wnd.on().wm_command_accel_menu(ids::MNU_ABOUT, {
-			let self2 = self.clone();
-			move || {
-				// Read version from resource.
-				let exe_name = w::HINSTANCE::NULL.GetModuleFileName().unwrap();
-				let mut res_buf = Vec::default();
-				w::GetFileVersionInfo(&exe_name, &mut res_buf).unwrap();
+		let self2 = self.clone();
+		self.wnd.on().wm_command_accel_menu(ids::MNU_ABOUT, move || {
+			let exe_name = w::HINSTANCE::NULL.GetModuleFileName()?;
+			let hversion = w::HVERSIONINFO::GetFileVersionInfo(&exe_name)?;
+			let version_info = hversion.version_info()?;
+			let version_parts = version_info.dwFileVersion();
 
-				let vsffi = unsafe { w::VarQueryValue::<w::VS_FIXEDFILEINFO>(&res_buf, "\\").unwrap() };
-				let ver = vsffi.dwFileVersion();
-
-				util::prompt::info(self2.wnd.hwnd(), "About",
-					&format!(
-						"FLAC/LAME front end v{}.{}.{}\n\
-						Writen in Rust with WinSafe library.\n\n\
-						Rodrigo César de Freitas Dias © 2013-2021",
-						ver[0], ver[1], ver[2]));
-			}
+			self2.wnd.hwnd().TaskDialog(
+				None,
+				Some("About"),
+				Some("FLAC/LAME front end"),
+				Some(&format!(
+					"Version {}.{}.{}\n\
+					Writen in Rust with WinSafe library.\n\n\
+					Rodrigo César de Freitas Dias © 2013-2024",
+					version_parts[0], version_parts[1], version_parts[2],
+				)),
+				co::TDCBF::OK,
+				w::IconRes::Info,
+			)?;
+			Ok(())
 		});
 	}
 }

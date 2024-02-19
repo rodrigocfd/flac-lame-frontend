@@ -2,9 +2,10 @@ use std::cell::Cell;
 use std::rc::Rc;
 use winsafe::{self as w, gui};
 
-mod wnd_main_events;
+mod wnd_main_ctor;
 mod wnd_main_funcs;
 mod wnd_main_menu;
+mod wnd_main_wm;
 
 #[derive(Clone)]
 pub struct WndMain {
@@ -28,6 +29,5 @@ pub struct WndMain {
 	cmb_threads:  gui::ComboBox,
 	btn_run:      gui::Button,
 
-	resz:   gui::Resizer,
 	min_sz: Rc<Cell<w::SIZE>>,
 }
