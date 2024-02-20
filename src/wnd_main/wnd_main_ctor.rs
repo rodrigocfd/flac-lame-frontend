@@ -3,7 +3,7 @@ use std::rc::Rc;
 use winsafe::{self as w, prelude::*, co, gui};
 
 use crate::ids;
-use super::WndMain;
+use super::{ini_file, WndMain};
 
 impl WndMain {
 	pub fn new() -> w::AnyResult<Self> {
@@ -54,6 +54,8 @@ impl WndMain {
 	}
 
 	pub(super) fn init_dialog(&self) -> w::AnyResult<bool> {
+		let ui_settings = ini_file::read_ui_settings()?;
+
 		// Since the list view doesn't have LVS_SHAREIMAGELISTS style (not
 		// set in the resource editor), the image list will be automatically
 		// deleted by the list view.
@@ -69,22 +71,23 @@ impl WndMain {
 			"64 kbps", "80 kbps", "96 kbps", "112 kbps",
 			"128 kbps; default",
 			"160 kbps", "192 kbps", "224 kbps", "256 kbps", "320 kbps"]);
-		self.cmb_cbr.items().select(Some(8));
+		self.cmb_cbr.items().select(Some(ui_settings.cbr as _));
 
 		self.cmb_vbr.items().add(&[
 			"0 (~245 kbps)", "1 (~225 kbps)", "2 (~190 kbps)", "3 (~175 kbps)",
 			"4 (~165 kbps); default",
 			"5 (~130 kbps)", "6 (~115 kbps)", "7 (~100 kbps)", "8 (~85 kbps)", "9 (~65 kbps)"]);
-		self.cmb_vbr.items().select(Some(4));
+		self.cmb_vbr.items().select(Some(ui_settings.vbr as _));
 
 		self.cmb_flac_lvl.items().add(&["1", "2", "3", "4", "5", "6", "7", "8"]);
-		self.cmb_flac_lvl.items().select(Some(7));
+		self.cmb_flac_lvl.items().select(Some(ui_settings.flaclvl as _));
 
-		self.rad_mp3_flac_wav[0].select_and_trigger(true)?;
-		self.rad_cbr_vbr[1].select_and_trigger(true)?;
+		self.rad_mp3_flac_wav[ui_settings.target as _].select_and_trigger(true)?;
+		self.rad_cbr_vbr[ui_settings.mp3enc as _].select_and_trigger(true)?;
+		self.chk_del_orig.set_check_state_and_trigger(
+			if ui_settings.delorig { gui::CheckState::Checked } else { gui::CheckState::Unchecked });
 
 		let si = w::GetSystemInfo();
-
 		self.cmb_threads.items().add(&["1", "2", "4", "6", "8", "12"]);
 		self.cmb_threads.items().select(
 			Some(match si.dwNumberOfProcessors {

@@ -1,15 +1,23 @@
 use winsafe::{self as w, prelude::*, co, msg};
 
-use crate::ids;
-use crate::util;
-use crate::wnd_run;
-use super::WndMain;
+use crate::{ids, util, wnd_run};
+use super::{ini_file, WndMain};
 
 impl WndMain {
 	pub(super) fn events_wm(&self) {
 		let self2 = self.clone();
 		self.wnd.on().wm_init_dialog(move |_| {
 			self2.init_dialog()
+		});
+
+		let self2 = self.clone();
+		self.wnd.on().wm_close(move || {
+			let ui_settings = self2.get_ui_settings_state();
+			if let Err(e) = ini_file::serialize_ui_settings(&ui_settings) {
+				self2.msg_err("Error saving INI", &e.to_string()).ok();
+			}
+			self2.wnd.hwnd().DestroyWindow()?;
+			Ok(())
 		});
 
 		let self2 = self.clone();
@@ -165,7 +173,7 @@ impl WndMain {
 
 			let dest_folder = w::path::rtrim_backslash(&self2.txt_dest.text()).to_owned();
 
-			let (lame_path, flac_path) = match Self::read_tool_paths() {
+			let (lame_path, flac_path) = match ini_file::read_tool_paths() {
 				Ok((flac_path, lame_path)) => (flac_path, lame_path),
 				Err(e) => {
 					self2.msg_err("Tool not found", &e.to_string())?;

@@ -1,7 +1,7 @@
 use winsafe::{self as w, prelude::*, co};
 
 use crate::util;
-use super::WndMain;
+use super::{ini_file, WndMain};
 
 impl WndMain {
 	/// Displays the standard error message box.
@@ -47,28 +47,16 @@ impl WndMain {
 		Ok(())
 	}
 
-	/// Returns the paths of LAME and FLAC tools, read from the local INI file.
-	pub(super) fn read_tool_paths() -> w::AnyResult<(String, String)> {
-		let ini_file_path = format!("{}\\flac-lame-frontend.ini", w::path::exe_path()?);
-		let lame_path = match w::GetPrivateProfileString("Tools", "lame", &ini_file_path)? {
-			Some(lame_path) => lame_path,
-			None => {
-				return Err(format!("LAME path not found at:\n{}", ini_file_path).into());
-			},
-		};
-		let flac_path = match w::GetPrivateProfileString("Tools", "flac", &ini_file_path)? {
-			Some(lame_path) => lame_path,
-			None => {
-				return Err(format!("FLAC path not found at:\n{}", ini_file_path).into());
-			},
-		};
-
-		if !w::path::exists(&lame_path) {
-			Err(format!("LAME tool not found at:\n{}", lame_path).into())
-		} else if !w::path::exists(&flac_path) {
-			Err(format!("FLAC tool not found at:\n{}", flac_path).into())
-		} else {
-			Ok((lame_path, flac_path))
+	/// Fills the `UiSettings` object with the current state of the UI.
+	#[must_use]
+	pub(super) fn get_ui_settings_state(&self) -> ini_file::UiSettings {
+		ini_file::UiSettings {
+			target:  self.rad_mp3_flac_wav.checked_index().unwrap() as _,
+			mp3enc:  self.rad_cbr_vbr.checked_index().unwrap() as _,
+			cbr:     self.cmb_cbr.items().selected_index().unwrap() as _,
+			vbr:     self.cmb_vbr.items().selected_index().unwrap() as _,
+			flaclvl: self.cmb_flac_lvl.items().selected_index().unwrap() as _,
+			delorig: self.chk_del_orig.is_checked(),
 		}
 	}
 }

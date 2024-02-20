@@ -2,6 +2,7 @@ use std::cell::Cell;
 use std::rc::Rc;
 use winsafe::{self as w, gui};
 
+mod ini_file;
 mod wnd_main_ctor;
 mod wnd_main_funcs;
 mod wnd_main_menu;
