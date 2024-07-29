@@ -180,6 +180,7 @@
     <ClInclude Include="..\windlg\windlg\ProgressBar.h" />
     <ClInclude Include="..\windlg\windlg\StatusBar.h" />
     <ClInclude Include="..\windlg\windlg\str.h" />
+    <ClInclude Include="..\windlg\windlg\TimeCount.h" />
     <ClInclude Include="..\windlg\windlg\vec.h" />
     <ClInclude Include="..\windlg\windlg\VersionInfo.h" />
     <ClInclude Include="..\windlg\windlg\Window.h" />
@@ -209,6 +210,7 @@
     <ClCompile Include="..\windlg\windlg\ProgressBar.cpp" />
     <ClCompile Include="..\windlg\windlg\StatusBar.cpp" />
     <ClCompile Include="..\windlg\windlg\str.cpp" />
+    <ClCompile Include="..\windlg\windlg\TimeCount.cpp" />
     <ClCompile Include="..\windlg\windlg\VersionInfo.cpp" />
     <ClCompile Include="..\windlg\windlg\Window.cpp" />
     <ClCompile Include="src\convert.cpp" />

@@ -1,3 +1,4 @@
+#define NOMINMAX // https://stackoverflow.com/a/5004874/6923555
 #include "DlgMain.h"
 #include "convert.h"
 #include "../res/resource.h"
@@ -141,12 +142,15 @@ DlgRunnin::Opts DlgMain::_buildOpts()
 	std::wstring destFolder = lib::NativeControl{this, TXT_DEST}.text();
 	lib::str::trim(destFolder);
 
+	std::vector<std::wstring> files = lib::ListView{this, LST_FILES}.columns[0].itemTexts();
+	size_t maxThreads = std::stoul(lib::ComboBox{this, CMB_NUMTHREADS}.text());
+
 	DlgRunnin::Opts opts{
-		.files = lib::ListView{this, LST_FILES}.columns[0].itemTexts(),
+		.files = files,
 		.destFolder = destFolder.empty() ? std::nullopt : std::optional{destFolder},
 		.delSrc = lib::CheckRadio{this, CHK_DELSRC}.isChecked(),
 		.isVbr = lib::CheckRadio{this, RAD_VBR}.isChecked(),
-		.numThreads = std::stoul(lib::ComboBox{this, CMB_NUMTHREADS}.text()),
+		.numThreads = static_cast<BYTE>(std::min(maxThreads, files.size())),
 	};
 
 	lib::CheckRadio radMp3{this, RAD_MP3};

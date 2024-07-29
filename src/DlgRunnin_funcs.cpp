@@ -28,6 +28,11 @@ void DlgRunnin::_processNextFileDetached()
 		_processNextFileDetached(); // reuse the same thread
 	} else { // finished all processing
 		dlg.runUiThread([this]() {
+			auto dur = _time.now();
+			auto msg = lib::str::fmt(L"%d file(s) converted with %d thread(s) in %d:%02d.%03d.",
+				_opts.files.size(), _opts.numThreads, dur.min, dur.sec, dur.ms);
+			dlg.msgBox(L"Process finished", L"", msg, TDCBF_OK_BUTTON, TD_INFORMATION_ICON);
+
 			_taskbar->SetProgressState(GetParent(hWnd()), TBPF_NOPROGRESS);
 			EndDialog(hWnd(), 0);
 		});

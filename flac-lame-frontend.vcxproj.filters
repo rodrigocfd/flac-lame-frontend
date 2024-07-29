@@ -102,6 +102,9 @@
     <ClInclude Include="..\windlg\windlg\Dialog.h">
       <Filter>WinDlg</Filter>
     </ClInclude>
+    <ClInclude Include="..\windlg\windlg\TimeCount.h">
+      <Filter>WinDlg</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\DlgMain_funcs.cpp">
@@ -183,6 +186,9 @@
       <Filter>WinDlg</Filter>
     </ClCompile>
     <ClCompile Include="..\windlg\windlg\Window.cpp">
+      <Filter>WinDlg</Filter>
+    </ClCompile>
+    <ClCompile Include="..\windlg\windlg\TimeCount.cpp">
       <Filter>WinDlg</Filter>
     </ClCompile>
   </ItemGroup>

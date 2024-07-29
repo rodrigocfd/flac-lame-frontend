@@ -18,7 +18,7 @@ public:
 		bool delSrc;
 		bool isVbr;
 		std::wstring quality;
-		UINT numThreads;
+		BYTE numThreads;
 	};
 
 private:
@@ -27,6 +27,7 @@ private:
 	UINT _idxNextFile = 0;
 	UINT _numFilesDone = 0;
 	std::mutex _mutex;
+	lib::TimeCount _time;
 
 public:
 	virtual ~DlgRunnin() { }
