@@ -27,7 +27,7 @@ INT_PTR DlgRunnin::onInitDialog()
 	lib::ProgressBar{this, PRO_STATUS}.setRange(0, numFiles);
 
 	for (UINT i = 0; i < batchSz; ++i) {
-		this->runDetachedThread([this]() {
+		dlg.runDetachedThread([this]() {
 			_processNextFileDetached();
 		});
 	}

@@ -23,7 +23,7 @@ void DlgMain::_loadIniSettings()
 {
 	std::wstring iniPath = convert::iniPath();
 	if (!lib::path::exists(iniPath)) {
-		this->sys.msgBox(L"No INI file", L"", L"INI file not found at:\n" + iniPath, TDCBF_OK_BUTTON, TD_ERROR_ICON);
+		dlg.msgBox(L"No INI file", L"", L"INI file not found at:\n" + iniPath, TDCBF_OK_BUTTON, TD_ERROR_ICON);
 		return;
 	}
 
@@ -118,7 +118,7 @@ void DlgMain::_finishAddingFilesToList()
 		lib::NativeControl{this, BTN_RUN}.setText(L"&Run"); // no files in the list
 	}
 
-	this->enable({BTN_RUN}, numFiles > 0);
+	dlg.enable({BTN_RUN}, numFiles > 0);
 }
 
 bool DlgMain::_validateDestDir()
@@ -129,7 +129,7 @@ bool DlgMain::_validateDestDir()
 
 	if (!destDir.empty() && !lib::path::exists(destDir)) {
 		std::wstring msg = L"Destination directory doest not exist:\n" + destDir;
-		this->sys.msgBox(L"Invalid directory", L"", msg, TDCBF_OK_BUTTON, TD_ERROR_ICON);
+		dlg.msgBox(L"Invalid directory", L"", msg, TDCBF_OK_BUTTON, TD_ERROR_ICON);
 		txtDest.focus();
 		return false;
 	}

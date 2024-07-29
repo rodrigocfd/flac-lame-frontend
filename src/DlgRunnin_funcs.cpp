@@ -17,7 +17,7 @@ void DlgRunnin::_processNextFileDetached()
 		std::scoped_lock lock{_mutex};
 		++_numFilesDone;
 	}
-	this->runUiThread([this]() {
+	dlg.runUiThread([this]() {
 		_taskbar->SetProgressValue(GetParent(hWnd()), _numFilesDone, _opts.files.size());
 		lib::ProgressBar{this, PRO_STATUS}.setPos(_numFilesDone);
 		lib::NativeControl{this, LBL_STATUS}.setText(
@@ -27,7 +27,7 @@ void DlgRunnin::_processNextFileDetached()
 	if (_numFilesDone < _opts.files.size()) { // more files to come
 		_processNextFileDetached(); // reuse the same thread
 	} else { // finished all processing
-		this->runUiThread([this]() {
+		dlg.runUiThread([this]() {
 			_taskbar->SetProgressState(GetParent(hWnd()), TBPF_NOPROGRESS);
 			EndDialog(hWnd(), 0);
 		});
@@ -55,12 +55,12 @@ bool DlgRunnin::_launchConvertProcess(UINT idxFile)
 			std::scoped_lock lock{_mutex};
 			_idxNextFile = static_cast<UINT>(_opts.files.size()); // prevent further processing
 		}
-		this->runUiThread([this, &idxFile, &file, &e]() {
+		dlg.runUiThread([this, &idxFile, &file, &e]() {
 			_taskbar->SetProgressState(GetParent(hWnd()), TBPF_ERROR);
 			lib::ProgressBar prog{this, PRO_STATUS};
 			prog.setState(PBST_ERROR);
 
-			this->sys.msgBox(L"Conversion failed", L"",
+			dlg.msgBox(L"Conversion failed", L"",
 				lib::str::fmt(L"File #%u:\n%s\n\n%s", idxFile, file, lib::str::toWide(e.what())),
 				TDCBF_OK_BUTTON, TD_ERROR_ICON);
 

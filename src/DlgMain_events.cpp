@@ -4,7 +4,7 @@
 int APIENTRY wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int cmdShow)
 {
 	DlgMain d;
-	return d.runMain(hInst, DLG_MAIN, cmdShow, ICO_RONBURGUNDY, ACC_MAIN);
+	return lib::runMain(d, hInst, DLG_MAIN, cmdShow, ICO_RONBURGUNDY, ACC_MAIN);
 }
 
 INT_PTR DlgMain::dlgProc(UINT uMsg, WPARAM wp, LPARAM lp)
@@ -126,7 +126,7 @@ INT_PTR DlgMain::onInitMenuPopup(WPARAM wp)
 
 INT_PTR DlgMain::onDropFiles(WPARAM wp)
 {
-	for (const auto& file : this->droppedFiles(reinterpret_cast<HDROP>(wp))) {
+	for (const auto& file : dlg.droppedFiles(reinterpret_cast<HDROP>(wp))) {
 		if (lib::path::isDir(file)) { // if a directory, add all files inside of it
 			for (const auto& subFile : lib::path::dirList(file + L"\\*.mp3"))  _addFileToList(subFile);
 			for (const auto& subFile : lib::path::dirList(file + L"\\*.flac")) _addFileToList(subFile);
@@ -141,7 +141,7 @@ INT_PTR DlgMain::onDropFiles(WPARAM wp)
 
 INT_PTR DlgMain::onMnuOpenFiles()
 {
-	std::optional<std::vector<std::wstring>> files = this->sys.openFiles({
+	std::optional<std::vector<std::wstring>> files = dlg.showOpenFiles({
 		{L"MP3, FLAC and WAV files", L"*.mp3;*.flac;*.wav"},
 		{L"MP3 files", L"*.mp3"},
 		{L"FLAC files", L"*.flac"},
@@ -170,13 +170,13 @@ INT_PTR DlgMain::onMnuAbout()
 	std::array<WORD, 4> ver = vi.verNum();
 	auto body = lib::str::fmt(L"Version %u.%u.%u.\nWritten in C++20.", ver[0], ver[1], ver[2]);
 
-	this->sys.msgBox(L"About", productName, body, TDCBF_OK_BUTTON, TD_INFORMATION_ICON);
+	dlg.msgBox(L"About", productName, body, TDCBF_OK_BUTTON, TD_INFORMATION_ICON);
 	return TRUE;
 }
 
 INT_PTR DlgMain::onBtnDest()
 {
-	std::optional<std::wstring> fo = this->sys.openFolder();
+	std::optional<std::wstring> fo = dlg.showOpenFolder();
 	if (fo.has_value())
 		lib::NativeControl{this, TXT_DEST}.setText(fo.value());
 	return TRUE;
@@ -206,10 +206,10 @@ INT_PTR DlgMain::onListHeaderClick(LPARAM lp)
 INT_PTR DlgMain::onRadioClick()
 {
 	bool isMp3 = lib::CheckRadio{this, RAD_MP3}.isChecked();
-	this->enable({RAD_CBR, CMB_CBR, RAD_VBR, CMB_VBR}, isMp3);
-	this->enable({LBL_LEVEL, CMB_FLAC}, lib::CheckRadio{this, RAD_FLAC}.isChecked());
-	this->enable({CMB_CBR}, isMp3 && lib::CheckRadio{this, RAD_CBR}.isChecked());
-	this->enable({CMB_VBR}, isMp3 && lib::CheckRadio{this, RAD_VBR}.isChecked());
+	dlg.enable({RAD_CBR, CMB_CBR, RAD_VBR, CMB_VBR}, isMp3);
+	dlg.enable({LBL_LEVEL, CMB_FLAC}, lib::CheckRadio{this, RAD_FLAC}.isChecked());
+	dlg.enable({CMB_CBR}, isMp3 && lib::CheckRadio{this, RAD_CBR}.isChecked());
+	dlg.enable({CMB_VBR}, isMp3 && lib::CheckRadio{this, RAD_VBR}.isChecked());
 	return TRUE;
 }
 
