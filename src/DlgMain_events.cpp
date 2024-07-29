@@ -89,19 +89,8 @@ INT_PTR DlgMain::onInitDialog()
 		L"5 (~130 kbps)", L"6 (~115 kbps)", L"7 (~100 kbps)", L"8 (~85 kbps)", L"9 (~65 kbps)",
 	});
 	lib::ComboBox{this, CMB_FLAC}.add({L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8"});
-
-	lib::ComboBox cmbThreads{this, CMB_NUMTHREADS};
-	cmbThreads.add({L"1", L"2", L"4", L"6", L"8", L"12"});
-	SYSTEM_INFO si{};
-	GetSystemInfo(&si);
-	switch (si.dwNumberOfProcessors) {
-		case  2: cmbThreads.select(1); break;
-		case  4: cmbThreads.select(2); break;
-		case  6: cmbThreads.select(3); break;
-		case  8: cmbThreads.select(4); break;
-		case 12: cmbThreads.select(5); break;
-		default: cmbThreads.select(0);
-	}
+	lib::ComboBox{this, CMB_NUMTHREADS}.add({L"1", L"2", L"4", L"6", L"8", L"12"});
+	_setNumberOfThreads();
 
 	RECT rc{};
 	GetWindowRect(hWnd(), &rc);

@@ -41,6 +41,7 @@ private:
 	INT_PTR onBtnRun();
 	INT_PTR onClose();
 
+	void _setNumberOfThreads();
 	void _loadIniSettings();
 	void _saveIniSettings();
 	void _addFileToList(std::wstring_view file);

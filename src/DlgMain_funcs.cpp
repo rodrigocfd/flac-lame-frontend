@@ -2,6 +2,23 @@
 #include "convert.h"
 #include "../res/resource.h"
 
+void DlgMain::_setNumberOfThreads()
+{
+	lib::ComboBox cmbThreads{this, CMB_NUMTHREADS};
+
+	SYSTEM_INFO si{};
+	GetSystemInfo(&si);
+
+	switch (si.dwNumberOfProcessors) {
+		case  2: cmbThreads.select(1); break;
+		case  4: cmbThreads.select(2); break;
+		case  6: cmbThreads.select(3); break;
+		case  8: cmbThreads.select(4); break;
+		case 12: cmbThreads.select(5); break;
+		default: cmbThreads.select(0);
+	}
+}
+
 void DlgMain::_loadIniSettings()
 {
 	std::wstring iniPath = convert::iniPath();
