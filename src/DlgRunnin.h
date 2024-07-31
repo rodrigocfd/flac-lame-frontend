@@ -21,15 +21,6 @@ public:
 		BYTE numThreads;
 	};
 
-private:
-	lib::ComPtr<ITaskbarList4> _taskbar;
-	Opts _opts;
-	UINT _idxNextFile = 0;
-	UINT _numFilesDone = 0;
-	std::mutex _mutex;
-	lib::TimeCount _time;
-
-public:
 	virtual ~DlgRunnin() { }
 
 	constexpr explicit DlgRunnin(Opts&& opts) : _opts{std::move(opts)} { }
@@ -44,4 +35,11 @@ private:
 
 	void _processNextFileDetached();
 	bool _launchConvertProcess(UINT idxFile);
+
+	lib::ComPtr<ITaskbarList4> _taskbar;
+	Opts _opts;
+	UINT _idxNextFile = 0;
+	UINT _numFilesDone = 0;
+	std::mutex _mutex;
+	lib::TimeCount _time;
 };
