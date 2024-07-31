@@ -21,10 +21,10 @@ private:
 
 	INT_PTR dlgProc(UINT uMsg, WPARAM wp, LPARAM lp) override;
 	INT_PTR onInitDialog();
+	void    onDropTarget(const std::vector<std::wstring>& files) override;
 	INT_PTR onGetMinMaxInfo(LPARAM lp);
 	INT_PTR onSize(WPARAM wp, LPARAM lp);
 	INT_PTR onInitMenuPopup(WPARAM wp);
-	INT_PTR onDropFiles(WPARAM wp);
 	INT_PTR onMnuOpenFiles();
 	INT_PTR onMnuRemSelected();
 	INT_PTR onMnuAbout();

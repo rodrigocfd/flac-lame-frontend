@@ -3,6 +3,7 @@
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int cmdShow)
 {
+	lib::ComOle oleLib;
 	DlgMain d;
 	return lib::runMain(d, hInst, DLG_MAIN, cmdShow, ICO_RONBURGUNDY, ACC_MAIN);
 }
@@ -17,7 +18,6 @@ INT_PTR DlgMain::dlgProc(UINT uMsg, WPARAM wp, LPARAM lp)
 		case WM_GETMINMAXINFO: return onGetMinMaxInfo(lp);
 		case WM_SIZE:          return onSize(wp, lp);
 		case WM_INITMENUPOPUP: return onInitMenuPopup(wp);
-		case WM_DROPFILES:     return onDropFiles(wp);
 		case WM_COMMAND:
 			switch (LOWORD(wp)) {
 				case MNU_OPENFILES:   return onMnuOpenFiles();
@@ -55,6 +55,8 @@ INT_PTR DlgMain::dlgProc(UINT uMsg, WPARAM wp, LPARAM lp)
 
 INT_PTR DlgMain::onInitDialog()
 {
+	dlg.registerDragDrop();
+
 	_layout.add(lib::Layout::Act::Resize, lib::Layout::Act::Resize, {LST_FILES})
 		.add(lib::Layout::Act::None, lib::Layout::Act::Repos, {LBL_DEST, FRA_CONV,
 			RAD_MP3, RAD_CBR, CMB_CBR, RAD_VBR, CMB_VBR,
@@ -100,6 +102,20 @@ INT_PTR DlgMain::onInitDialog()
 	return TRUE;
 }
 
+void DlgMain::onDropTarget(const std::vector<std::wstring>& files)
+{
+	for (const auto& file : files) {
+		if (lib::path::isDir(file)) { // if a directory, add all files inside of it
+			for (const auto& subFile : lib::path::dirList(file + L"\\*.mp3"))  _addFileToList(subFile);
+			for (const auto& subFile : lib::path::dirList(file + L"\\*.flac")) _addFileToList(subFile);
+			for (const auto& subFile : lib::path::dirList(file + L"\\*.wav"))  _addFileToList(subFile);
+		} else {
+			_addFileToList(file); // add single file
+		}
+	}
+	_finishAddingFilesToList();
+}
+
 INT_PTR DlgMain::onGetMinMaxInfo(LPARAM lp)
 {
 	auto pMmi = reinterpret_cast<MINMAXINFO*>(lp);
@@ -121,21 +137,6 @@ INT_PTR DlgMain::onInitMenuPopup(WPARAM wp)
 		popupMenu.enableItemsByCmd({MNU_REMSELECTED},
 			lib::ListView{this, LST_FILES}.items.countSelected() > 0);
 	}
-	return TRUE;
-}
-
-INT_PTR DlgMain::onDropFiles(WPARAM wp)
-{
-	for (const auto& file : dlg.droppedFiles(reinterpret_cast<HDROP>(wp))) {
-		if (lib::path::isDir(file)) { // if a directory, add all files inside of it
-			for (const auto& subFile : lib::path::dirList(file + L"\\*.mp3"))  _addFileToList(subFile);
-			for (const auto& subFile : lib::path::dirList(file + L"\\*.flac")) _addFileToList(subFile);
-			for (const auto& subFile : lib::path::dirList(file + L"\\*.wav"))  _addFileToList(subFile);
-		} else {
-			_addFileToList(file); // add single file
-		}
-	}
-	_finishAddingFilesToList();
 	return TRUE;
 }
 
