@@ -173,7 +173,6 @@
     <ClInclude Include="..\windlg\windlg\FileMapped.h" />
     <ClInclude Include="..\windlg\windlg\ImgList.h" />
     <ClInclude Include="..\windlg\windlg\ini.h" />
-    <ClInclude Include="..\windlg\windlg\Layout.h" />
     <ClInclude Include="..\windlg\windlg\lib.h" />
     <ClInclude Include="..\windlg\windlg\ListView.h" />
     <ClInclude Include="..\windlg\windlg\Menu.h" />
@@ -204,7 +203,6 @@
     <ClCompile Include="..\windlg\windlg\FileMapped.cpp" />
     <ClCompile Include="..\windlg\windlg\ImgList.cpp" />
     <ClCompile Include="..\windlg\windlg\ini.cpp" />
-    <ClCompile Include="..\windlg\windlg\Layout.cpp" />
     <ClCompile Include="..\windlg\windlg\ListView.cpp" />
     <ClCompile Include="..\windlg\windlg\Menu.cpp" />
     <ClCompile Include="..\windlg\windlg\NativeControl.cpp" />

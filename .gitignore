@@ -5,3 +5,4 @@ x64_Debug/
 x64_Release/
 *.aps
 *.user
+deploy.bat

@@ -10,7 +10,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPWSTR, _In
 
 INT_PTR DlgMain::dlgProc(UINT uMsg, WPARAM wp, LPARAM lp)
 {
-	_layout.autoArrange(this, uMsg, wp, lp);
 	lib::ListView::ProcessMessages(this, LST_FILES, uMsg, wp, lp, MEN_MAIN);
 
 	switch (uMsg) {
@@ -55,15 +54,15 @@ INT_PTR DlgMain::dlgProc(UINT uMsg, WPARAM wp, LPARAM lp)
 
 INT_PTR DlgMain::onInitDialog()
 {
-	dlg.registerDragDrop();
-
-	_layout.add(lib::Layout::Act::Resize, lib::Layout::Act::Resize, {LST_FILES})
-		.add(lib::Layout::Act::None, lib::Layout::Act::Repos, {LBL_DEST, FRA_CONV,
+	dlg.registerDragDrop()
+		.layout(lib::Dialog::Act::Resize, lib::Dialog::Act::Resize, {LST_FILES})
+		.layout(lib::Dialog::Act::None, lib::Dialog::Act::Repos, {
+			LBL_DEST, FRA_CONV,
 			RAD_MP3, RAD_CBR, CMB_CBR, RAD_VBR, CMB_VBR,
 			RAD_FLAC, LBL_LEVEL, CMB_FLAC, RAD_WAV,
 			CHK_DELSRC, LBL_NUMTHREADS, CMB_NUMTHREADS})
-		.add(lib::Layout::Act::Resize, lib::Layout::Act::Repos, {TXT_DEST})
-		.add(lib::Layout::Act::Repos, lib::Layout::Act::Repos, {BTN_DEST, BTN_RUN});
+		.layout(lib::Dialog::Act::Resize, lib::Dialog::Act::Repos, {TXT_DEST})
+		.layout(lib::Dialog::Act::Repos, lib::Dialog::Act::Repos, {BTN_DEST, BTN_RUN});
 
 	_imgLst.create({16, 16});
 	_imgLst.addShell({L"mp3", L"flac", L"wav"});

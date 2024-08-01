@@ -44,7 +44,6 @@ private:
 	DlgRunnin::Opts _buildOpts();
 
 	SIZE _minSize{};
-	lib::Layout _layout;
 	lib::ImgList _imgLst;
 	struct { int col; bool asc; } _sort = {.col = 0, .asc = true};
 };

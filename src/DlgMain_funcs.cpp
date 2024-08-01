@@ -59,7 +59,7 @@ void DlgMain::_saveIniSettings()
 
 	UINT idxTarget = 0;
 	if (lib::CheckRadio{this, RAD_FLAC}.isChecked()) idxTarget = 1;
-	else if (lib::CheckRadio{this, RAD_WAV}.isChecked()) idxTarget = 2;
+		else if (lib::CheckRadio{this, RAD_WAV}.isChecked()) idxTarget = 2;
 	lib::ini::writeInt(iniPath, L"UiSettings", L"target", idxTarget);
 
 	UINT idxMp3Enc = 0;

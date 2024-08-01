@@ -51,9 +51,6 @@
     <ClInclude Include="..\windlg\windlg\ini.h">
       <Filter>WinDlg</Filter>
     </ClInclude>
-    <ClInclude Include="..\windlg\windlg\Layout.h">
-      <Filter>WinDlg</Filter>
-    </ClInclude>
     <ClInclude Include="..\windlg\windlg\lib.h">
       <Filter>WinDlg</Filter>
     </ClInclude>
@@ -156,9 +153,6 @@
       <Filter>WinDlg</Filter>
     </ClCompile>
     <ClCompile Include="..\windlg\windlg\ini.cpp">
-      <Filter>WinDlg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\windlg\windlg\Layout.cpp">
       <Filter>WinDlg</Filter>
     </ClCompile>
     <ClCompile Include="..\windlg\windlg\ListView.cpp">
