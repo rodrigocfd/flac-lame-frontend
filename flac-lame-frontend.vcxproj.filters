@@ -42,9 +42,6 @@
     <ClInclude Include="..\windlg\windlg\File.h">
       <Filter>WinDlg</Filter>
     </ClInclude>
-    <ClInclude Include="..\windlg\windlg\FileMapped.h">
-      <Filter>WinDlg</Filter>
-    </ClInclude>
     <ClInclude Include="..\windlg\windlg\ImgList.h">
       <Filter>WinDlg</Filter>
     </ClInclude>
@@ -144,9 +141,6 @@
       <Filter>WinDlg</Filter>
     </ClCompile>
     <ClCompile Include="..\windlg\windlg\File.cpp">
-      <Filter>WinDlg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\windlg\windlg\FileMapped.cpp">
       <Filter>WinDlg</Filter>
     </ClCompile>
     <ClCompile Include="..\windlg\windlg\ImgList.cpp">

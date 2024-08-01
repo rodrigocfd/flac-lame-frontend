@@ -91,7 +91,7 @@ INT_PTR DlgMain::onInitDialog()
 	});
 	lib::ComboBox{this, CMB_FLAC}.add({L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8"});
 	lib::ComboBox{this, CMB_NUMTHREADS}.add({L"1", L"2", L"4", L"6", L"8", L"12"});
-	_setNumberOfThreads();
+	_setInitialNumberOfThreads();
 
 	RECT rc{};
 	GetWindowRect(hWnd(), &rc);
@@ -170,7 +170,7 @@ INT_PTR DlgMain::onMnuAbout()
 	std::array<WORD, 4> ver = vi.verNum();
 	auto body = lib::str::fmt(L"Version %u.%u.%u.\nWritten in C++20.", ver[0], ver[1], ver[2]);
 
-	dlg.msgBox(L"About", productName, body, TDCBF_OK_BUTTON, TD_INFORMATION_ICON);
+	dlg.msgBox(L"About", {productName}, body, TDCBF_OK_BUTTON, TD_INFORMATION_ICON);
 	return TRUE;
 }
 

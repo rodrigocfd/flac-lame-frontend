@@ -3,7 +3,7 @@
 #include "convert.h"
 #include "../res/resource.h"
 
-void DlgMain::_setNumberOfThreads()
+void DlgMain::_setInitialNumberOfThreads()
 {
 	lib::ComboBox cmbThreads{this, CMB_NUMTHREADS};
 
@@ -24,7 +24,7 @@ void DlgMain::_loadIniSettings()
 {
 	std::wstring iniPath = convert::iniPath();
 	if (!lib::path::exists(iniPath)) {
-		dlg.msgBox(L"No INI file", L"", L"INI file not found at:\n" + iniPath, TDCBF_OK_BUTTON, TD_ERROR_ICON);
+		dlg.msgBox(L"No INI file", {}, L"INI file not found at:\n" + iniPath, TDCBF_OK_BUTTON, TD_ERROR_ICON);
 		return;
 	}
 
@@ -77,8 +77,8 @@ void DlgMain::_addFileToList(std::wstring_view file)
 {
 	int ico = -1;
 	if (lib::path::hasExtension(file, {L"mp3"})) ico = 0;
-	else if (lib::path::hasExtension(file, {L"flac"})) ico = 1;
-	else if (lib::path::hasExtension(file, {L"wav"})) ico = 2;
+		else if (lib::path::hasExtension(file, {L"flac"})) ico = 1;
+		else if (lib::path::hasExtension(file, {L"wav"})) ico = 2;
 
 	lib::ListView lv{this, LST_FILES};
 	if (!lv.items.find(file).has_value()) { // add only if not present yet
@@ -104,8 +104,8 @@ void DlgMain::_finishAddingFilesToList()
 		lv.columns[0].setWidthToFill();
 
 		lv.items.sort([this](lib::ListView::Item a, lib::ListView::Item b) -> int {
-			auto pNfoA = a.data<FileInfo*>();
-			auto pNfoB = b.data<FileInfo*>();
+			auto pNfoA = a.data<const FileInfo*>();
+			auto pNfoB = b.data<const FileInfo*>();
 			int cmp = 0;
 
 			if (_sort.col == 0) { // by file path
@@ -130,7 +130,7 @@ bool DlgMain::_validateDestDir()
 
 	if (!destDir.empty() && !lib::path::exists(destDir)) {
 		std::wstring msg = L"Destination directory doest not exist:\n" + destDir;
-		dlg.msgBox(L"Invalid directory", L"", msg, TDCBF_OK_BUTTON, TD_ERROR_ICON);
+		dlg.msgBox(L"Invalid directory", {}, msg, TDCBF_OK_BUTTON, TD_ERROR_ICON);
 		txtDest.focus();
 		return false;
 	}
