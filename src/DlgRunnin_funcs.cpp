@@ -1,12 +1,13 @@
 #include "DlgRunnin.h"
 #include "convert.h"
 #include "../res/resource.h"
+using std::scoped_lock, std::wstring;
 
 void DlgRunnin::_processNextFileDetached()
 {
 	UINT idxFile = 0;
 	{
-		std::scoped_lock lock{_mutex};
+		scoped_lock lock{_mutex};
 		idxFile = _idxNextFile++; // take the next available index and increment it
 	}
 	if (idxFile >= _opts.files.size()) return; // no more files to process
@@ -14,7 +15,7 @@ void DlgRunnin::_processNextFileDetached()
 	if (!_launchConvertProcess(idxFile)) return; // halt if an error occurred
 
 	{	// Conversion finished, update UI and move to next file, if any.
-		std::scoped_lock lock{_mutex};
+		scoped_lock lock{_mutex};
 		++_numFilesDone;
 	}
 	dlg.runUiThread([this]() {
@@ -41,8 +42,8 @@ void DlgRunnin::_processNextFileDetached()
 
 bool DlgRunnin::_launchConvertProcess(UINT idxFile)
 {
-	const std::wstring& file = _opts.files[idxFile];
-	std::wstring iniPath = convert::iniPath();
+	const wstring& file = _opts.files[idxFile];
+	wstring iniPath = convert::iniPath();
 
 	try {
 		switch (_opts.target) {
@@ -57,7 +58,7 @@ bool DlgRunnin::_launchConvertProcess(UINT idxFile)
 		}
 	} catch (const std::exception& e) {
 		{
-			std::scoped_lock lock{_mutex};
+			scoped_lock lock{_mutex};
 			_idxNextFile = static_cast<UINT>(_opts.files.size()); // prevent further processing
 		}
 		dlg.runUiThread([this, &idxFile, &file, &e]() {

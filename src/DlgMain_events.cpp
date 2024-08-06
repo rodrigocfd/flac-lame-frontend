@@ -1,5 +1,6 @@
 #include "DlgMain.h"
 #include "../res/resource.h"
+using std::array, std::optional, std::vector, std::wstring, std::wstring_view;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInst, _In_opt_ HINSTANCE, _In_ LPWSTR, _In_ int cmdShow)
 {
@@ -64,8 +65,8 @@ INT_PTR DlgMain::onInitDialog()
 		.layout(lib::Dialog::Act::Resize, lib::Dialog::Act::Repos, {TXT_DEST})
 		.layout(lib::Dialog::Act::Repos, lib::Dialog::Act::Repos, {BTN_DEST, BTN_RUN});
 
-	_imgLst.create({16, 16});
-	_imgLst.addShell({L"mp3", L"flac", L"wav"});
+	_imgLst.create({16, 16})
+		.addShell({L"mp3", L"flac", L"wav"});
 
 	lib::ListView lv{this, LST_FILES};
 	lv.setImageList(_imgLst)
@@ -101,7 +102,7 @@ INT_PTR DlgMain::onInitDialog()
 	return TRUE;
 }
 
-void DlgMain::onDropTarget(const std::vector<std::wstring>& files)
+void DlgMain::onDropTarget(const vector<wstring>& files)
 {
 	for (const auto& file : files) {
 		if (lib::path::isDir(file)) { // if a directory, add all files inside of it
@@ -141,14 +142,13 @@ INT_PTR DlgMain::onInitMenuPopup(WPARAM wp)
 
 INT_PTR DlgMain::onMnuOpenFiles()
 {
-	std::optional<std::vector<std::wstring>> files = dlg.showOpenFiles({
+	if (optional<vector<wstring>> files = dlg.showOpenFiles({
 		{L"MP3, FLAC and WAV files", L"*.mp3;*.flac;*.wav"},
 		{L"MP3 files", L"*.mp3"},
 		{L"FLAC files", L"*.flac"},
 		{L"WAV files", L"*.wav"},
 		{L"All files", L"*.*"},
-	});
-	if (files.has_value()) {
+	}); files.has_value()) {
 		for (const auto& file : files.value())
 			_addFileToList(file);
 		_finishAddingFilesToList();
@@ -166,8 +166,8 @@ INT_PTR DlgMain::onMnuRemSelected()
 INT_PTR DlgMain::onMnuAbout()
 {
 	lib::VersionInfo vi;
-	std::wstring_view productName = vi.strInfo(vi.langsCps()[0], L"ProductName");
-	std::array<WORD, 4> ver = vi.verNum();
+	wstring_view productName = vi.strInfo(vi.langsCps()[0], L"ProductName");
+	array<WORD, 4> ver = vi.verNum();
 	auto body = lib::str::fmt(L"Version %u.%u.%u.\nWritten in C++20.", ver[0], ver[1], ver[2]);
 
 	dlg.msgBox(L"About", {productName}, body, TDCBF_OK_BUTTON, TD_INFORMATION_ICON);
@@ -176,7 +176,7 @@ INT_PTR DlgMain::onMnuAbout()
 
 INT_PTR DlgMain::onBtnDest()
 {
-	std::optional<std::wstring> fo = dlg.showOpenFolder();
+	optional<wstring> fo = dlg.showOpenFolder();
 	if (fo.has_value())
 		lib::NativeControl{this, TXT_DEST}.setText(fo.value());
 	return TRUE;

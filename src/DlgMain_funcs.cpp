@@ -2,6 +2,7 @@
 #include "DlgMain.h"
 #include "convert.h"
 #include "../res/resource.h"
+using std::optional, std::vector, std::wstring, std::wstring_view;
 
 void DlgMain::_setInitialNumberOfThreads()
 {
@@ -22,7 +23,7 @@ void DlgMain::_setInitialNumberOfThreads()
 
 void DlgMain::_loadIniSettings()
 {
-	std::wstring iniPath = convert::iniPath();
+	wstring iniPath = convert::iniPath();
 	if (!lib::path::exists(iniPath)) {
 		dlg.msgBox(L"No INI file", {}, L"INI file not found at:\n" + iniPath, TDCBF_OK_BUTTON, TD_ERROR_ICON);
 		return;
@@ -55,7 +56,7 @@ void DlgMain::_loadIniSettings()
 
 void DlgMain::_saveIniSettings()
 {
-	std::wstring iniPath = convert::iniPath();
+	wstring iniPath = convert::iniPath();
 
 	UINT idxTarget = 0;
 	if (lib::CheckRadio{this, RAD_FLAC}.isChecked()) idxTarget = 1;
@@ -73,7 +74,7 @@ void DlgMain::_saveIniSettings()
 		lib::CheckRadio{this, CHK_DELSRC}.isChecked() ? 1 : 0);
 }
 
-void DlgMain::_addFileToList(std::wstring_view file)
+void DlgMain::_addFileToList(wstring_view file)
 {
 	int ico = -1;
 	if (lib::path::hasExtension(file, {L"mp3"})) ico = 0;
@@ -129,7 +130,7 @@ bool DlgMain::_validateDestDir()
 	lib::str::trim(destDir);
 
 	if (!destDir.empty() && !lib::path::exists(destDir)) {
-		std::wstring msg = L"Destination directory doest not exist:\n" + destDir;
+		wstring msg = L"Destination directory doest not exist:\n" + destDir;
 		dlg.msgBox(L"Invalid directory", {}, msg, TDCBF_OK_BUTTON, TD_ERROR_ICON);
 		txtDest.focus();
 		return false;
@@ -139,15 +140,15 @@ bool DlgMain::_validateDestDir()
 
 DlgRunnin::Opts DlgMain::_buildOpts()
 {
-	std::wstring destFolder = lib::NativeControl{this, TXT_DEST}.text();
+	wstring destFolder = lib::NativeControl{this, TXT_DEST}.text();
 	lib::str::trim(destFolder);
 
-	std::vector<std::wstring> files = lib::ListView{this, LST_FILES}.columns[0].itemTexts();
+	vector<wstring> files = lib::ListView{this, LST_FILES}.columns[0].itemTexts();
 	size_t maxThreads = std::stoul(lib::ComboBox{this, CMB_NUMTHREADS}.text());
 
 	DlgRunnin::Opts opts{
 		.files = files,
-		.destFolder = destFolder.empty() ? std::nullopt : std::optional{destFolder},
+		.destFolder = destFolder.empty() ? std::nullopt : optional{destFolder},
 		.delSrc = lib::CheckRadio{this, CHK_DELSRC}.isChecked(),
 		.isVbr = lib::CheckRadio{this, RAD_VBR}.isChecked(),
 		.numThreads = static_cast<BYTE>(std::min(maxThreads, files.size())),
