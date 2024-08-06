@@ -55,10 +55,10 @@ void convert::toWav(wstring_view iniPath, wstring_view srcFile,
 		finalDestFolder.emplace(destFolder.value());
 	
 	wstring cmdLine;
-	if (path::hasExtension(srcFile, {L"mp3"})) {
+	if (path::hasExtension(srcFile, L"mp3")) {
 		auto lamePath = ini::readStr(iniPath, L"Tools", L"lame");
 		cmdLine = str::fmt(L"\"%s\" --decode \"%s\"", lamePath, srcFile);
-	} else if (path::hasExtension(srcFile, {L"flac"})) {
+	} else if (path::hasExtension(srcFile, L"flac")) {
 		auto flacPath = ini::readStr(iniPath, L"Tools", L"flac");
 		cmdLine = str::fmt(L"\"%s\" -d \"%s\"", flacPath, srcFile);
 		if (finalDestFolder.has_value()) {
@@ -87,9 +87,9 @@ void convert::toFlac(wstring_view iniPath, wstring_view srcFile,
 	wstring finalSrcFile{srcFile};
 
 	if (path::hasExtension(finalSrcFile, {L"flac", L"mp3"})) { // needs intermediary WAV conversion
-		if (path::hasExtension(finalSrcFile, {L"mp3"})) { // MP3 to FLAC
+		if (path::hasExtension(finalSrcFile, L"mp3")) { // MP3 to FLAC
 			toWav(iniPath, finalSrcFile, finalDestFolder, delSrc); // send WAV straight to new folder, if any
-		} else if (path::hasExtension(finalSrcFile, {L"flac"})) { // FLAC to FLAC
+		} else if (path::hasExtension(finalSrcFile, L"flac")) { // FLAC to FLAC
 			toWav(iniPath, finalSrcFile, finalDestFolder, // send WAV straight to new folder, if any
 				finalDestFolder.has_value() ? delSrc : true); // if same destination folder, then delete FLAC (will be replaced)
 		}
@@ -100,7 +100,7 @@ void convert::toFlac(wstring_view iniPath, wstring_view srcFile,
 		}
 		finalSrcFile = path::swapExtension(finalSrcFile, L"wav"); // our source is now a WAV
 		delSrc = true; // delete intermediary WAV
-	} else if (!path::hasExtension(finalSrcFile, {L"wav"})) {
+	} else if (!path::hasExtension(finalSrcFile, L"wav")) {
 		throw std::logic_error(
 			str::toAnsi( str::fmt(L"Not a FLAC/WAV: %s\n", finalSrcFile) ));
 	}
@@ -127,9 +127,9 @@ void convert::toMp3(wstring_view iniPath, wstring_view srcFile,
 	wstring finalSrcFile{srcFile};
 
 	if (path::hasExtension(finalSrcFile, {L"flac", L"mp3"})) { // needs intermediary WAV conversion
-		if (path::hasExtension(finalSrcFile, {L"flac"})) { // FLAC to MP3
+		if (path::hasExtension(finalSrcFile, L"flac")) { // FLAC to MP3
 			toWav(iniPath, finalSrcFile, finalDestFolder, delSrc); // send WAV straight to new folder, if any
-		} else if (path::hasExtension(finalSrcFile, {L"mp3"})) { // MP3 to MP3
+		} else if (path::hasExtension(finalSrcFile, L"mp3")) { // MP3 to MP3
 			toWav(iniPath, finalSrcFile, finalDestFolder, // send WAV straight to new folder, if any
 				finalDestFolder.has_value() ? delSrc : true); // if same destination folder, then delete MP3 (will be replaced)
 		}
@@ -140,7 +140,7 @@ void convert::toMp3(wstring_view iniPath, wstring_view srcFile,
 		}
 		finalSrcFile = path::swapExtension(finalSrcFile, L"wav"); // our source is now a WAV
 		delSrc = true; // delete intermediary WAV
-	} else if (!path::hasExtension(finalSrcFile, {L"wav"})) {
+	} else if (!path::hasExtension(finalSrcFile, L"wav")) {
 		throw std::logic_error(
 			str::toAnsi( str::fmt(L"Not a FLAC/MP3/WAV: %s\n", finalSrcFile) ));
 	}

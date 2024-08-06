@@ -77,9 +77,9 @@ void DlgMain::_saveIniSettings()
 void DlgMain::_addFileToList(wstring_view file)
 {
 	int ico = -1;
-	if (lib::path::hasExtension(file, {L"mp3"})) ico = 0;
-		else if (lib::path::hasExtension(file, {L"flac"})) ico = 1;
-		else if (lib::path::hasExtension(file, {L"wav"})) ico = 2;
+	if (lib::path::hasExtension(file, L"mp3")) ico = 0;
+		else if (lib::path::hasExtension(file, L"flac")) ico = 1;
+		else if (lib::path::hasExtension(file, L"wav")) ico = 2;
 
 	lib::ListView lv{this, LST_FILES};
 	if (!lv.items.find(file).has_value()) { // add only if not present yet
