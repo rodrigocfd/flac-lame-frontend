@@ -4,7 +4,7 @@
 #include "../res/resource.h"
 using std::optional, std::vector, std::wstring, std::wstring_view;
 
-void DlgMain::_setInitialNumberOfThreads()
+void DlgMain::_setInitialNumberOfThreads() const
 {
 	lib::ComboBox cmbThreads{this, CMB_NUMTHREADS};
 
@@ -21,7 +21,7 @@ void DlgMain::_setInitialNumberOfThreads()
 	}
 }
 
-void DlgMain::_loadIniSettings()
+void DlgMain::_loadIniSettings() const
 {
 	wstring iniPath = convert::iniPath();
 	if (!lib::path::exists(iniPath)) {
@@ -54,7 +54,7 @@ void DlgMain::_loadIniSettings()
 	if (bDelOrig) lib::CheckRadio{this, CHK_DELSRC}.checkAndTrigger();
 }
 
-void DlgMain::_saveIniSettings()
+void DlgMain::_saveIniSettings() const
 {
 	wstring iniPath = convert::iniPath();
 
@@ -74,7 +74,7 @@ void DlgMain::_saveIniSettings()
 		lib::CheckRadio{this, CHK_DELSRC}.isChecked() ? 1 : 0);
 }
 
-void DlgMain::_addFileToList(wstring_view file)
+void DlgMain::_addFileToList(wstring_view file) const
 {
 	int ico = -1;
 	if (lib::path::hasExtension(file, L"mp3")) ico = 0;
@@ -93,7 +93,7 @@ void DlgMain::_addFileToList(wstring_view file)
 	}
 }
 
-void DlgMain::_finishAddingFilesToList()
+void DlgMain::_finishAddingFilesToList() const
 {
 	lib::ListView lv{this, LST_FILES};
 	UINT numFiles = lv.items.count();
@@ -123,7 +123,7 @@ void DlgMain::_finishAddingFilesToList()
 	dlg.enable({BTN_RUN}, numFiles > 0);
 }
 
-bool DlgMain::_validateDestDir()
+bool DlgMain::_validateDestDir() const
 {
 	lib::NativeControl txtDest{this, TXT_DEST};
 	auto destDir = txtDest.text();
@@ -138,7 +138,7 @@ bool DlgMain::_validateDestDir()
 	return true;
 }
 
-DlgRunnin::Opts DlgMain::_buildOpts()
+DlgRunnin::Opts DlgMain::_buildOpts() const
 {
 	wstring destFolder = lib::NativeControl{this, TXT_DEST}.text();
 	lib::str::trim(destFolder);
