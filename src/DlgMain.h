@@ -7,8 +7,8 @@ public:
 	virtual ~DlgMain() { }
 
 	constexpr DlgMain() = default;
-	DlgMain(const DialogMain&) = delete;
-	DlgMain(DialogMain&&) = delete;
+	DlgMain(const DlgMain&) = delete;
+	DlgMain(DlgMain&&) = delete;
 	DlgMain& operator=(const DlgMain&) = delete;
 	DlgMain& operator=(DlgMain&&) = delete;
 
