@@ -87,7 +87,7 @@ void DlgMain::_addFileToList(wstring_view file) const
 		size_t fsz = f.size();
 		f.close();
 
-		auto szStr = lib::str::fmtBytes(fsz);
+		wstring szStr = lib::str::fmtBytes(fsz);
 		lv.items.add(file, {szStr}, ico)
 			.setData(new FileInfo{file, static_cast<int>(fsz)}); // will be deleted in LVN_DELETEITEM
 	}
@@ -126,7 +126,7 @@ void DlgMain::_finishAddingFilesToList() const
 bool DlgMain::_validateDestDir() const
 {
 	lib::NativeControl txtDest{this, TXT_DEST};
-	auto destDir = txtDest.text();
+	wstring destDir = txtDest.text();
 	lib::str::trim(destDir);
 
 	if (!destDir.empty() && !lib::path::exists(destDir)) {

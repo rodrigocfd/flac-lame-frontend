@@ -104,7 +104,7 @@ INT_PTR DlgMain::onInitDialog()
 
 void DlgMain::onDropTarget(const vector<wstring>& files)
 {
-	for (const auto& file : files) {
+	for (auto&& file : files) {
 		if (lib::path::isDir(file)) { // if a directory, add all files inside of it
 			for (const auto& subFile : lib::path::dirList(file + L"\\*.mp3"))  _addFileToList(subFile);
 			for (const auto& subFile : lib::path::dirList(file + L"\\*.flac")) _addFileToList(subFile);
@@ -216,7 +216,7 @@ INT_PTR DlgMain::onRadioClick()
 INT_PTR DlgMain::onBtnRun()
 {
 	if (_validateDestDir()) {
-		auto opts = _buildOpts();
+		DlgRunnin::Opts opts = _buildOpts();
 		DlgRunnin d{std::move(opts)};
 		d.showModal(this, DLG_RUNNIN);
 

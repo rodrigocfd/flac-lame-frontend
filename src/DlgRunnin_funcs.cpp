@@ -29,8 +29,8 @@ void DlgRunnin::_processNextFileDetached()
 		_processNextFileDetached(); // reuse the same thread
 	} else { // finished all processing
 		dlg.runUiThread([this]() {
-			auto dur = _time.now();
-			auto msg = lib::str::fmt(L"%d file(s) converted with %d thread(s) in %d:%02d.%03d.",
+			lib::TimeCount::Duration dur = _time.now();
+			wstring msg = lib::str::fmt(L"%d file(s) converted with %d thread(s) in %d:%02d.%03d.",
 				_opts.files.size(), _opts.numThreads, dur.min, dur.sec, dur.ms);
 			dlg.msgBox(L"Process finished", {}, msg, TDCBF_OK_BUTTON, TD_INFORMATION_ICON);
 
