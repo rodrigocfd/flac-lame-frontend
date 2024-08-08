@@ -110,7 +110,7 @@ void DlgMain::_finishAddingFilesToList() const
 			int cmp = 0;
 
 			if (_sort.col == 0) { // by file path
-				cmp = lstrcmpiW(pNfoA->path.c_str(), pNfoB->path.c_str());
+				cmp = lib::str::cmpI(pNfoA->path, pNfoB->path);
 			} else if (_sort.col == 1) { // by file size
 				cmp = pNfoA->size - pNfoB->size;
 			}
