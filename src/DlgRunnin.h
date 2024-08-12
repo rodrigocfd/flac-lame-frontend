@@ -41,5 +41,5 @@ private:
 	UINT _idxNextFile = 0;
 	UINT _numFilesDone = 0;
 	std::mutex _mutex;
-	lib::TimeCount _time;
+	lib::TimeCount _time = lib::TimeCount::Delayed();
 };

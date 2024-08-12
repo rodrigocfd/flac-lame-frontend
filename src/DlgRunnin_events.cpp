@@ -23,7 +23,7 @@ INT_PTR DlgRunnin::onInitDialog()
 	lib::NativeControl{this, LBL_STATUS}.setText(
 		lib::str::fmt(L"Processing first %d file(s)...", _opts.numThreads));
 	lib::ProgressBar{this, PRO_STATUS}.setRange(0, numFiles);
-	_time.start();
+	_time.restart();
 
 	for (UINT i = 0; i < _opts.numThreads; ++i) {
 		dlg.runDetachedThread([this]() {
