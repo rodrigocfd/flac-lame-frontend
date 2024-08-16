@@ -56,14 +56,14 @@ INT_PTR DlgMain::dlgProc(UINT uMsg, WPARAM wp, LPARAM lp)
 INT_PTR DlgMain::onInitDialog()
 {
 	dlg.registerDragDrop()
-		.layout(lib::Dialog::Act::Resize, lib::Dialog::Act::Resize, {LST_FILES})
-		.layout(lib::Dialog::Act::None, lib::Dialog::Act::Repos, {
+		.layout(lib::Dialog::Horz::Resize, lib::Dialog::Vert::Resize, {LST_FILES})
+		.layout(lib::Dialog::Horz::None, lib::Dialog::Vert::Repos, {
 			LBL_DEST, FRA_CONV,
 			RAD_MP3, RAD_CBR, CMB_CBR, RAD_VBR, CMB_VBR,
 			RAD_FLAC, LBL_LEVEL, CMB_FLAC, RAD_WAV,
 			CHK_DELSRC, LBL_NUMTHREADS, CMB_NUMTHREADS})
-		.layout(lib::Dialog::Act::Resize, lib::Dialog::Act::Repos, {TXT_DEST})
-		.layout(lib::Dialog::Act::Repos, lib::Dialog::Act::Repos, {BTN_DEST, BTN_RUN});
+		.layout(lib::Dialog::Horz::Resize, lib::Dialog::Vert::Repos, {TXT_DEST})
+		.layout(lib::Dialog::Horz::Repos, lib::Dialog::Vert::Repos, {BTN_DEST, BTN_RUN});
 
 	_imgLst.create({16, 16})
 		.addShell({L"mp3", L"flac", L"wav"});
