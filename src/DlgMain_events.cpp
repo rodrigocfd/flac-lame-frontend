@@ -47,9 +47,9 @@ INT_PTR DlgMain::dlgProc(UINT uMsg, WPARAM wp, LPARAM lp)
 					}
 				default: return FALSE;
 			}
-		case WM_CLOSE:     return onClose();
-		case WM_NCDESTROY: PostQuitMessage(0); return TRUE;
-		default:           return FALSE;
+		case WM_CLOSE:   return onClose();
+		case WM_DESTROY: PostQuitMessage(0); return TRUE;
+		default:         return FALSE;
 	}
 }
 
