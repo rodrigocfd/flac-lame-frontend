@@ -27,7 +27,7 @@ INT_PTR DlgRunnin::onInitDialog()
 
 	for (UINT i = 0; i < _opts.numThreads; ++i) {
 		dlg.runDetachedThread([this]() {
-			_processNextFileDetached();
+			processNextFileDetached();
 		});
 	}
 	return TRUE;

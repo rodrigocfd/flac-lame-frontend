@@ -33,8 +33,8 @@ private:
 	INT_PTR dlgProc(UINT uMsg, WPARAM wp, LPARAM lp) override;
 	INT_PTR onInitDialog();
 
-	void _processNextFileDetached();
-	bool _launchConvertProcess(UINT idxFile);
+	void processNextFileDetached();
+	bool launchConvertProcess(UINT idxFile);
 
 	lib::ComPtr<ITaskbarList4> _taskbar;
 	Opts _opts;

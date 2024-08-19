@@ -92,13 +92,13 @@ INT_PTR DlgMain::onInitDialog()
 	});
 	lib::ComboBox{this, CMB_FLAC}.add({L"1", L"2", L"3", L"4", L"5", L"6", L"7", L"8"});
 	lib::ComboBox{this, CMB_NUMTHREADS}.add({L"1", L"2", L"4", L"6", L"8", L"12"});
-	_setInitialNumberOfThreads();
+	setInitialNumberOfThreads();
 
 	RECT rc{};
 	GetWindowRect(hWnd(), &rc);
 	_minSize = {.cx = rc.right - rc.left, .cy = rc.bottom - rc.top};
 
-	_loadIniSettings();
+	loadIniSettings();
 	return TRUE;
 }
 
@@ -106,14 +106,14 @@ void DlgMain::onDropTarget(const vector<wstring>& files)
 {
 	for (auto&& file : files) {
 		if (lib::path::isDir(file)) { // if a directory, add all files inside of it
-			for (const auto& subFile : lib::path::dirList(file + L"\\*.mp3"))  _addFileToList(subFile);
-			for (const auto& subFile : lib::path::dirList(file + L"\\*.flac")) _addFileToList(subFile);
-			for (const auto& subFile : lib::path::dirList(file + L"\\*.wav"))  _addFileToList(subFile);
+			for (const auto& subFile : lib::path::dirList(file + L"\\*.mp3"))  addFileToList(subFile);
+			for (const auto& subFile : lib::path::dirList(file + L"\\*.flac")) addFileToList(subFile);
+			for (const auto& subFile : lib::path::dirList(file + L"\\*.wav"))  addFileToList(subFile);
 		} else {
-			_addFileToList(file); // add single file
+			addFileToList(file); // add single file
 		}
 	}
-	_finishAddingFilesToList();
+	finishAddingFilesToList();
 }
 
 INT_PTR DlgMain::onGetMinMaxInfo(LPARAM lp)
@@ -150,8 +150,8 @@ INT_PTR DlgMain::onMnuOpenFiles()
 		{L"All files", L"*.*"},
 	}); files.has_value()) {
 		for (const auto& file : files.value())
-			_addFileToList(file);
-		_finishAddingFilesToList();
+			addFileToList(file);
+		finishAddingFilesToList();
 	}
 	return TRUE;
 }
@@ -159,7 +159,7 @@ INT_PTR DlgMain::onMnuOpenFiles()
 INT_PTR DlgMain::onMnuRemSelected()
 {
 	lib::ListView{this, LST_FILES}.items.removeSelected();
-	_finishAddingFilesToList();
+	finishAddingFilesToList();
 	return TRUE;
 }
 
@@ -199,7 +199,7 @@ INT_PTR DlgMain::onListHeaderClick(LPARAM lp)
 
 	lv.columns[pNmh->iItem].setSortArrow(willSortAsc ? HDF_SORTUP : HDF_SORTDOWN); // draw arrow
 	_sort = {.col = pNmh->iItem, .asc = willSortAsc}; // update state
-	_finishAddingFilesToList(); // sort the files
+	finishAddingFilesToList(); // sort the files
 	return TRUE;
 }
 
@@ -215,8 +215,8 @@ INT_PTR DlgMain::onRadioClick()
 
 INT_PTR DlgMain::onBtnRun()
 {
-	if (_validateDestDir()) {
-		DlgRunnin::Opts opts = _buildOpts();
+	if (validateDestDir()) {
+		DlgRunnin::Opts opts = buildOpts();
 		DlgRunnin d{std::move(opts)};
 		d.showModal(this, DLG_RUNNIN);
 
@@ -232,7 +232,7 @@ INT_PTR DlgMain::onBtnRun()
 
 INT_PTR DlgMain::onClose()
 {
-	_saveIniSettings();
+	saveIniSettings();
 	DestroyWindow(hWnd());
 	return TRUE;
 }

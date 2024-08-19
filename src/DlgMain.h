@@ -35,13 +35,13 @@ private:
 	INT_PTR onBtnRun();
 	INT_PTR onClose();
 
-	void _setInitialNumberOfThreads() const;
-	void _loadIniSettings() const;
-	void _saveIniSettings() const;
-	void _addFileToList(std::wstring_view file) const;
-	void _finishAddingFilesToList() const;
-	bool _validateDestDir() const;
-	DlgRunnin::Opts _buildOpts() const;
+	void setInitialNumberOfThreads() const;
+	void loadIniSettings() const;
+	void saveIniSettings() const;
+	void addFileToList(std::wstring_view file) const;
+	void finishAddingFilesToList() const;
+	bool validateDestDir() const;
+	DlgRunnin::Opts buildOpts() const;
 
 	SIZE _minSize{};
 	lib::ImgList _imgLst;

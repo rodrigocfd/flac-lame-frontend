@@ -3,7 +3,7 @@
 #include "../res/resource.h"
 using std::scoped_lock, std::wstring;
 
-void DlgRunnin::_processNextFileDetached()
+void DlgRunnin::processNextFileDetached()
 {
 	UINT idxFile = 0;
 	{
@@ -12,7 +12,7 @@ void DlgRunnin::_processNextFileDetached()
 	}
 	if (idxFile >= _opts.files.size()) return; // no more files to process
 
-	if (!_launchConvertProcess(idxFile)) return; // halt if an error occurred
+	if (!launchConvertProcess(idxFile)) return; // halt if an error occurred
 
 	{	// Conversion finished, update UI and move to next file, if any.
 		scoped_lock lock{_mutex};
@@ -26,7 +26,7 @@ void DlgRunnin::_processNextFileDetached()
 	});
 
 	if (_numFilesDone < _opts.files.size()) { // more files to come
-		_processNextFileDetached(); // reuse the same thread
+		processNextFileDetached(); // reuse the same thread
 	} else { // finished all processing
 		dlg.runUiThread([this]() {
 			lib::TimeCount::Duration dur = _time.now();
@@ -40,7 +40,7 @@ void DlgRunnin::_processNextFileDetached()
 	}
 }
 
-bool DlgRunnin::_launchConvertProcess(UINT idxFile)
+bool DlgRunnin::launchConvertProcess(UINT idxFile)
 {
 	const wstring& file = _opts.files[idxFile];
 	wstring iniPath = convert::iniPath();
