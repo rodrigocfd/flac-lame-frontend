@@ -4,11 +4,6 @@
 using namespace lib;
 using std::optional, std::wstring, std::wstring_view;
 
-wstring convert::iniPath()
-{
-	return lib::path::exeDir() + L"\\flac-lame-frontend.ini";
-}
-
 static DWORD _execCmd(wstring_view cmdLine)
 {
 	SECURITY_ATTRIBUTES sa = {
@@ -47,7 +42,7 @@ static void _execAndDelete(wstring_view cmdLine, wstring_view srcFile, bool delS
 	if (delSrc) DeleteFileW(srcFile.data());
 }
 
-void convert::toWav(wstring_view iniPath, wstring_view srcFile,
+void convert::toWav(const lib::Ini& ini, wstring_view srcFile,
 	optional<wstring_view> destFolder, bool delSrc)
 {
 	optional<wstring> finalDestFolder;
@@ -56,10 +51,10 @@ void convert::toWav(wstring_view iniPath, wstring_view srcFile,
 	
 	wstring cmdLine;
 	if (path::hasExtension(srcFile, L"mp3")) {
-		auto lamePath = ini::readStr(iniPath, L"Tools", L"lame");
+		auto lamePath = ini.get(L"Tools", L"lame");
 		cmdLine = str::fmt(L"\"%s\" --decode \"%s\"", lamePath, srcFile);
 	} else if (path::hasExtension(srcFile, L"flac")) {
-		auto flacPath = ini::readStr(iniPath, L"Tools", L"flac");
+		auto flacPath = ini.get(L"Tools", L"flac");
 		cmdLine = str::fmt(L"\"%s\" -d \"%s\"", flacPath, srcFile);
 		if (finalDestFolder.has_value()) {
 			cmdLine.append(L" -o"); // different destination folder requires flag
@@ -77,7 +72,7 @@ void convert::toWav(wstring_view iniPath, wstring_view srcFile,
 	_execAndDelete(cmdLine, srcFile, delSrc);
 }
 
-void convert::toFlac(wstring_view iniPath, wstring_view srcFile,
+void convert::toFlac(const lib::Ini& ini, wstring_view srcFile,
 	optional<wstring_view> destFolder, bool delSrc, wstring_view quality)
 {
 	optional<wstring> finalDestFolder;
@@ -88,9 +83,9 @@ void convert::toFlac(wstring_view iniPath, wstring_view srcFile,
 
 	if (path::hasExtension(finalSrcFile, {L"flac", L"mp3"})) { // needs intermediary WAV conversion
 		if (path::hasExtension(finalSrcFile, L"mp3")) { // MP3 to FLAC
-			toWav(iniPath, finalSrcFile, finalDestFolder, delSrc); // send WAV straight to new folder, if any
+			toWav(ini, finalSrcFile, finalDestFolder, delSrc); // send WAV straight to new folder, if any
 		} else if (path::hasExtension(finalSrcFile, L"flac")) { // FLAC to FLAC
-			toWav(iniPath, finalSrcFile, finalDestFolder, // send WAV straight to new folder, if any
+			toWav(ini, finalSrcFile, finalDestFolder, // send WAV straight to new folder, if any
 				finalDestFolder.has_value() ? delSrc : true); // if same destination folder, then delete FLAC (will be replaced)
 		}
 
@@ -105,7 +100,7 @@ void convert::toFlac(wstring_view iniPath, wstring_view srcFile,
 			str::toAnsi( str::fmt(L"Not a FLAC/WAV: %s\n", finalSrcFile) ));
 	}
 
-	auto flacPath = ini::readStr(iniPath, L"Tools", L"flac");
+	auto flacPath = ini.get(L"Tools", L"flac");
 	auto cmdLine = str::fmt(L"\"%s\" -%s -V --no-seektable \"%s\"", flacPath, quality, finalSrcFile);
 
 	if (finalDestFolder.has_value()) { // different destination folder
@@ -117,7 +112,7 @@ void convert::toFlac(wstring_view iniPath, wstring_view srcFile,
 	_execAndDelete(cmdLine, finalSrcFile, delSrc);
 }
 
-void convert::toMp3(wstring_view iniPath, wstring_view srcFile,
+void convert::toMp3(const lib::Ini& ini, wstring_view srcFile,
 	optional<wstring_view> destFolder, bool delSrc, wstring_view quality, bool isVbr)
 {
 	optional<wstring> finalDestFolder;
@@ -128,9 +123,9 @@ void convert::toMp3(wstring_view iniPath, wstring_view srcFile,
 
 	if (path::hasExtension(finalSrcFile, {L"flac", L"mp3"})) { // needs intermediary WAV conversion
 		if (path::hasExtension(finalSrcFile, L"flac")) { // FLAC to MP3
-			toWav(iniPath, finalSrcFile, finalDestFolder, delSrc); // send WAV straight to new folder, if any
+			toWav(ini, finalSrcFile, finalDestFolder, delSrc); // send WAV straight to new folder, if any
 		} else if (path::hasExtension(finalSrcFile, L"mp3")) { // MP3 to MP3
-			toWav(iniPath, finalSrcFile, finalDestFolder, // send WAV straight to new folder, if any
+			toWav(ini, finalSrcFile, finalDestFolder, // send WAV straight to new folder, if any
 				finalDestFolder.has_value() ? delSrc : true); // if same destination folder, then delete MP3 (will be replaced)
 		}
 
@@ -145,7 +140,7 @@ void convert::toMp3(wstring_view iniPath, wstring_view srcFile,
 			str::toAnsi( str::fmt(L"Not a FLAC/MP3/WAV: %s\n", finalSrcFile) ));
 	}
 
-	auto lamePath = ini::readStr(iniPath, L"Tools", L"lame");
+	auto lamePath = ini.get(L"Tools", L"lame");
 	auto cmdLine = str::fmt(L"\"%s\" -%s%s --noreplaygain \"%s\"",
 		lamePath, (isVbr ? L"V" : L"b"), quality.data(), finalSrcFile);
 

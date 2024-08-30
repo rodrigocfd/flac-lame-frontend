@@ -43,18 +43,17 @@ void DlgRunnin::processNextFileDetached()
 bool DlgRunnin::launchConvertProcess(UINT idxFile)
 {
 	const wstring& file = _opts.files[idxFile];
-	wstring iniPath = convert::iniPath();
 
 	try {
 		switch (_opts.target) {
 		case Target::Mp3:
-			convert::toMp3(iniPath, file, _opts.destFolder, _opts.delSrc, _opts.quality, _opts.isVbr);
+			convert::toMp3(_opts.ini, file, _opts.destFolder, _opts.delSrc, _opts.quality, _opts.isVbr);
 			break;
 		case Target::Flac:
-			convert::toFlac(iniPath, file, _opts.destFolder, _opts.delSrc, _opts.quality);
+			convert::toFlac(_opts.ini, file, _opts.destFolder, _opts.delSrc, _opts.quality);
 			break;
 		case Target::Wav:
-			convert::toWav(iniPath, file, _opts.destFolder, _opts.delSrc);
+			convert::toWav(_opts.ini, file, _opts.destFolder, _opts.delSrc);
 		}
 	} catch (const std::exception& e) {
 		{

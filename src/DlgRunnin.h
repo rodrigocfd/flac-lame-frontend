@@ -12,6 +12,7 @@ public:
 	enum class Target { Mp3, Flac, Wav };
 
 	struct Opts final {
+		const lib::Ini& ini;
 		std::vector<std::wstring> files;
 		std::optional<std::wstring> destFolder;
 		Target target;

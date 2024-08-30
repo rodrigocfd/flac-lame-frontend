@@ -21,20 +21,21 @@ void DlgMain::setInitialNumberOfThreads() const
 	}
 }
 
-void DlgMain::loadIniSettings() const
+void DlgMain::loadIniSettings()
 {
-	wstring iniPath = convert::iniPath();
-	if (!lib::path::exists(iniPath)) {
-		dlg.msgBox(L"No INI file", {}, L"INI file not found at:\n" + iniPath, TDCBF_OK_BUTTON, TD_ERROR_ICON);
+	_ini.iniPath = lib::path::exeDir() + L"\\flac-lame-frontend.ini";
+	if (!lib::path::exists(_ini.iniPath.value())) [[unlikely]] {
+		dlg.msgBox(L"No INI file", {}, L"INI file not found at:\n" + _ini.iniPath.value(), TDCBF_OK_BUTTON, TD_ERROR_ICON);
 		return;
 	}
+	_ini.load();	
 
-	UINT idxTarget = lib::ini::readInt(iniPath, L"UiSettings", L"target");
-	UINT idxMp3Enc = lib::ini::readInt(iniPath, L"UiSettings", L"mp3enc");
-	UINT idxCbr = lib::ini::readInt(iniPath, L"UiSettings", L"cbr");
-	UINT idxVbr = lib::ini::readInt(iniPath, L"UiSettings", L"vbr");
-	UINT idxFlacLvl = lib::ini::readInt(iniPath, L"UiSettings", L"flaclvl");
-	UINT bDelOrig = lib::ini::readInt(iniPath, L"UiSettings", L"delorig");
+	UINT idxTarget = _ini.getInt(L"UiSettings", L"target");
+	UINT idxMp3Enc = _ini.getInt(L"UiSettings", L"mp3enc");
+	UINT idxCbr = _ini.getInt(L"UiSettings", L"cbr");
+	UINT idxVbr = _ini.getInt(L"UiSettings", L"vbr");
+	UINT idxFlacLvl = _ini.getInt(L"UiSettings", L"flaclvl");
+	UINT bDelOrig = _ini.getInt(L"UiSettings", L"delorig");
 
 	lib::ComboBox{this, CMB_CBR}.select(idxCbr);
 	lib::ComboBox{this, CMB_VBR}.select(idxVbr);
@@ -54,24 +55,23 @@ void DlgMain::loadIniSettings() const
 	if (bDelOrig) lib::CheckRadio{this, CHK_DELSRC}.checkAndTrigger();
 }
 
-void DlgMain::saveIniSettings() const
+void DlgMain::saveIniSettings()
 {
-	wstring iniPath = convert::iniPath();
-
 	UINT idxTarget = 0;
 	if (lib::CheckRadio{this, RAD_FLAC}.isChecked()) idxTarget = 1;
 		else if (lib::CheckRadio{this, RAD_WAV}.isChecked()) idxTarget = 2;
-	lib::ini::writeInt(iniPath, L"UiSettings", L"target", idxTarget);
+	_ini.setInt(L"UiSettings", L"target", idxTarget);
 
 	UINT idxMp3Enc = 0;
 	if (lib::CheckRadio{this, RAD_VBR}.isChecked()) idxMp3Enc = 1;
-	lib::ini::writeInt(iniPath, L"UiSettings", L"mp3enc", idxMp3Enc);
+	_ini.setInt(L"UiSettings", L"mp3enc", idxMp3Enc);
 
-	lib::ini::writeInt(iniPath, L"UiSettings", L"cbr", lib::ComboBox{this, CMB_CBR}.selectedIndex().value());
-	lib::ini::writeInt(iniPath, L"UiSettings", L"vbr", lib::ComboBox{this, CMB_VBR}.selectedIndex().value());
-	lib::ini::writeInt(iniPath, L"UiSettings", L"flaclvl", lib::ComboBox{this, CMB_FLAC}.selectedIndex().value());
-	lib::ini::writeInt(iniPath, L"UiSettings", L"delorig",
-		lib::CheckRadio{this, CHK_DELSRC}.isChecked() ? 1 : 0);
+	_ini.setInt(L"UiSettings", L"cbr", lib::ComboBox{this, CMB_CBR}.selectedIndex().value());
+	_ini.setInt(L"UiSettings", L"vbr", lib::ComboBox{this, CMB_VBR}.selectedIndex().value());
+	_ini.setInt(L"UiSettings", L"flaclvl", lib::ComboBox{this, CMB_FLAC}.selectedIndex().value());
+	_ini.setInt(L"UiSettings", L"delorig", lib::CheckRadio{this, CHK_DELSRC}.isChecked() ? 1 : 0);
+
+	_ini.save();
 }
 
 void DlgMain::addFileToList(wstring_view file) const
@@ -147,6 +147,7 @@ DlgRunnin::Opts DlgMain::buildOpts() const
 	size_t maxThreads = std::stoul(lib::ComboBox{this, CMB_NUMTHREADS}.text());
 
 	DlgRunnin::Opts opts{
+		.ini = _ini,
 		.files = files,
 		.destFolder = destFolder.empty() ? std::nullopt : optional{destFolder},
 		.delSrc = lib::CheckRadio{this, CHK_DELSRC}.isChecked(),

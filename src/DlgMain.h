@@ -36,8 +36,8 @@ private:
 	INT_PTR onClose();
 
 	void setInitialNumberOfThreads() const;
-	void loadIniSettings() const;
-	void saveIniSettings() const;
+	void loadIniSettings();
+	void saveIniSettings();
 	void addFileToList(std::wstring_view file) const;
 	void finishAddingFilesToList() const;
 	bool validateDestDir() const;
@@ -46,4 +46,5 @@ private:
 	SIZE _minSize{};
 	lib::ImgList _imgLst;
 	struct { int col; bool asc; } _sort = {.col = 0, .asc = true};
+	lib::Ini _ini;
 };

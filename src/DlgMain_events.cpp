@@ -75,8 +75,7 @@ INT_PTR DlgMain::onInitDialog()
 		{L"File", lib::dpi::x(100)},
 		{L"Size", lib::dpi::x(70)},
 	});
-	lv.columns[0].setWidthToFill()
-		.setSortArrow(HDF_SORTUP);
+	lv.columns[0].setWidthToFill().setSortArrow(HDF_SORTUP);
 	lv.columns[1].setJustification(HDF_CENTER);
 
 	lib::ComboBox{this, CMB_CBR}.add({
