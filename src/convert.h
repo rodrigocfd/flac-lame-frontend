@@ -1,12 +1,31 @@
 #pragma once
-#include <windlg/lib.h>
+#include <optional>
+#include "../windlg/lib.hpp"
 
 namespace convert {
 
-void toWav(const lib::Ini& ini, std::wstring_view srcFile, std::optional<std::wstring_view> destFolder, bool delSrc);
-void toFlac(const lib::Ini& ini, std::wstring_view srcFile, std::optional<std::wstring_view> destFolder, bool delSrc,
-	std::wstring_view quality);
-void toMp3(const lib::Ini& ini, std::wstring_view srcFile, std::optional<std::wstring_view> destFolder, bool delSrc,
-	std::wstring_view quality, bool isVbr);
+	void to_wav(
+		wd::StrView lamePath,
+		wd::StrView flacPath,
+		wd::StrView srcFile,
+		std::optional<wd::StrView> destFolder,
+		bool delSrc);
+
+	void to_flac(
+		wd::StrView lamePath,
+		wd::StrView flacPath,
+		wd::StrView srcFile,
+		std::optional<wd::StrView> destFolder,
+		bool delSrc,
+		wd::StrView quality);
+
+	void to_mp3(
+		wd::StrView lamePath,
+		wd::StrView flacPath,
+		wd::StrView srcFile,
+		std::optional<wd::StrView> destFolder,
+		bool delSrc,
+		wd::StrView quality,
+		bool isVbr);
 
 }

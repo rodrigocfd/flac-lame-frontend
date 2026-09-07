@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="flac-lame-frontend.vcxproj" Id="7cd4d733-348c-4065-898a-33d7a62f2731" />
+</Solution>

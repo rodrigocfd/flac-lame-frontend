@@ -19,36 +19,36 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <VCProjectVersion>17.0</VCProjectVersion>
+    <VCProjectVersion>18.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{493380d7-d243-4aa9-b6bc-eb0370940bb7}</ProjectGuid>
-    <RootNamespace>flaclamefrontend</RootNamespace>
+    <ProjectGuid>{7cd4d733-348c-4065-898a-33d7a62f2731}</ProjectGuid>
+    <RootNamespace>flac_lame_frontend</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -73,158 +73,156 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(Platform)_$(Configuration)\</IntDir>
-    <IncludePath>..\windlg;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(Platform)_$(Configuration)\</IntDir>
-    <IncludePath>..\windlg;$(IncludePath)</IncludePath>
+    <LinkIncremental>false</LinkIncremental>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(Platform)_$(Configuration)\</IntDir>
-    <IncludePath>..\windlg;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)$(Platform)_$(Configuration)\</OutDir>
     <IntDir>$(Platform)_$(Configuration)\</IntDir>
-    <IncludePath>..\windlg;$(IncludePath)</IncludePath>
+    <LinkIncremental>false</LinkIncremental>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatSpecificWarningsAsErrors>4172;4715</TreatSpecificWarningsAsErrors>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>comctl32.lib;uxtheme.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+      <EnableDpiAwareness>true</EnableDpiAwareness>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <DebugInformationFormat>None</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <DebugInformationFormat>None</DebugInformationFormat>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <TreatSpecificWarningsAsErrors>4172;4715</TreatSpecificWarningsAsErrors>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalDependencies>comctl32.lib;uxtheme.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+      <EnableDpiAwareness>true</EnableDpiAwareness>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <TreatSpecificWarningsAsErrors>4172;4715</TreatSpecificWarningsAsErrors>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>comctl32.lib;uxtheme.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+      <EnableDpiAwareness>true</EnableDpiAwareness>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <DebugInformationFormat>None</DebugInformationFormat>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <DebugInformationFormat>None</DebugInformationFormat>
       <TreatWarningAsError>true</TreatWarningAsError>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <TreatSpecificWarningsAsErrors>4172;4715</TreatSpecificWarningsAsErrors>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
+      <AdditionalDependencies>comctl32.lib;uxtheme.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <Manifest>
+      <EnableSegmentHeap>true</EnableSegmentHeap>
+      <EnableDpiAwareness>true</EnableDpiAwareness>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\windlg\windlg\CheckRadio.h" />
-    <ClInclude Include="..\windlg\windlg\Com.h" />
-    <ClInclude Include="..\windlg\windlg\ComboBox.h" />
-    <ClInclude Include="..\windlg\windlg\CustomControl.h" />
-    <ClInclude Include="..\windlg\windlg\Dialog.h" />
-    <ClInclude Include="..\windlg\windlg\DialogMain.h" />
-    <ClInclude Include="..\windlg\windlg\DialogModal.h" />
-    <ClInclude Include="..\windlg\windlg\dpi.h" />
-    <ClInclude Include="..\windlg\windlg\File.h" />
-    <ClInclude Include="..\windlg\windlg\ImgList.h" />
-    <ClInclude Include="..\windlg\windlg\Ini.h" />
-    <ClInclude Include="..\windlg\windlg\lib.h" />
-    <ClInclude Include="..\windlg\windlg\ListView.h" />
-    <ClInclude Include="..\windlg\windlg\Menu.h" />
-    <ClInclude Include="..\windlg\windlg\NativeControl.h" />
-    <ClInclude Include="..\windlg\windlg\path.h" />
-    <ClInclude Include="..\windlg\windlg\ProgressBar.h" />
-    <ClInclude Include="..\windlg\windlg\StatusBar.h" />
-    <ClInclude Include="..\windlg\windlg\str.h" />
-    <ClInclude Include="..\windlg\windlg\TimeCount.h" />
-    <ClInclude Include="..\windlg\windlg\vec.h" />
-    <ClInclude Include="..\windlg\windlg\VersionInfo.h" />
-    <ClInclude Include="..\windlg\windlg\Window.h" />
+    <Manifest Include="res\win10.exe.manifest" />
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="res\resource.h" />
     <ClInclude Include="src\convert.h" />
-    <ClInclude Include="src\DlgMain.h" />
-    <ClInclude Include="src\DlgRunnin.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\windlg\windlg\CheckRadio.cpp" />
-    <ClCompile Include="..\windlg\windlg\Com.cpp" />
-    <ClCompile Include="..\windlg\windlg\ComboBox.cpp" />
-    <ClCompile Include="..\windlg\windlg\CustomControl.cpp" />
-    <ClCompile Include="..\windlg\windlg\Dialog.cpp" />
-    <ClCompile Include="..\windlg\windlg\DialogMain.cpp" />
-    <ClCompile Include="..\windlg\windlg\DialogModal.cpp" />
-    <ClCompile Include="..\windlg\windlg\dpi.cpp" />
-    <ClCompile Include="..\windlg\windlg\File.cpp" />
-    <ClCompile Include="..\windlg\windlg\ImgList.cpp" />
-    <ClCompile Include="..\windlg\windlg\Ini.cpp" />
-    <ClCompile Include="..\windlg\windlg\ListView.cpp" />
-    <ClCompile Include="..\windlg\windlg\Menu.cpp" />
-    <ClCompile Include="..\windlg\windlg\NativeControl.cpp" />
-    <ClCompile Include="..\windlg\windlg\path.cpp" />
-    <ClCompile Include="..\windlg\windlg\ProgressBar.cpp" />
-    <ClCompile Include="..\windlg\windlg\StatusBar.cpp" />
-    <ClCompile Include="..\windlg\windlg\str.cpp" />
-    <ClCompile Include="..\windlg\windlg\TimeCount.cpp" />
-    <ClCompile Include="..\windlg\windlg\VersionInfo.cpp" />
-    <ClCompile Include="..\windlg\windlg\Window.cpp" />
-    <ClCompile Include="src\convert.cpp" />
-    <ClCompile Include="src\DlgMain_events.cpp" />
-    <ClCompile Include="src\DlgMain_funcs.cpp" />
-    <ClCompile Include="src\DlgRunnin_events.cpp" />
-    <ClCompile Include="src\DlgRunnin_funcs.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Manifest Include="res\win10.exe.manifest" />
+    <ClInclude Include="src\dlg_main.h" />
+    <ClInclude Include="src\dlg_run.h" />
+    <ClInclude Include="windlg\com.hpp" />
+    <ClInclude Include="windlg\drop-target.hpp" />
+    <ClInclude Include="windlg\file.hpp" />
+    <ClInclude Include="windlg\lib.hpp" />
+    <ClInclude Include="windlg\string.hpp" />
+    <ClInclude Include="windlg\sys-func.hpp" />
+    <ClInclude Include="windlg\win-error.hpp" />
+    <ClInclude Include="windlg\wnd-aux.hpp" />
+    <ClInclude Include="windlg\wnd-ctl.hpp" />
+    <ClInclude Include="windlg\wnd-lv.hpp" />
+    <ClInclude Include="windlg\wnd.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="res\flac-lame-frontend.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\convert.cpp" />
+    <ClCompile Include="src\dlg_main_ev.cpp" />
+    <ClCompile Include="src\dlg_main_fun.cpp" />
+    <ClCompile Include="src\dlg_run_ev.cpp" />
+    <ClCompile Include="windlg\drop-target.cpp" />
+    <ClCompile Include="windlg\file.cpp" />
+    <ClCompile Include="windlg\string.cpp" />
+    <ClCompile Include="windlg\sys-func.cpp" />
+    <ClCompile Include="windlg\win-error.cpp" />
+    <ClCompile Include="windlg\wnd-aux.cpp" />
+    <ClCompile Include="windlg\wnd-ctl.cpp" />
+    <ClCompile Include="windlg\wnd-lv.cpp" />
+    <ClCompile Include="windlg\wnd.cpp" />
+  </ItemGroup>
+  <ItemGroup>
     <Image Include="res\Ron Burgundy.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="windlg\windlg.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

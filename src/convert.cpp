@@ -1,154 +1,151 @@
-#include <system_error>
-#include <windlg/lib.h>
 #include "convert.h"
-using namespace lib;
-using std::optional, std::wstring, std::wstring_view;
 
-static DWORD _execCmd(wstring_view cmdLine)
-{
-	SECURITY_ATTRIBUTES sa = {
-		.nLength = sizeof(SECURITY_ATTRIBUTES),
-		.bInheritHandle = TRUE,
-	};
-	STARTUPINFOW si = {
-		.cb = sizeof(STARTUPINFOW),
-		.dwFlags = STARTF_USESHOWWINDOW,
-		.wShowWindow = SW_SHOW,
-	};
-	PROCESS_INFORMATION pi{};
-	DWORD exitCode = 1; // returned by executed program
-	wstring cmdLine2{cmdLine}; // https://devblogs.microsoft.com/oldnewthing/20090601-00/?p=18083
-
-	if (!CreateProcessW(nullptr, cmdLine2.data(), &sa, nullptr, FALSE, 0, nullptr, nullptr, &si, &pi)) [[unlikely]] {
-		throw std::system_error(GetLastError(), std::system_category(), "CreateProcess failed");
-	}
-
-	WaitForSingleObject(pi.hProcess, INFINITE); // block the thread until the process finishes
-	GetExitCodeProcess(pi.hProcess, &exitCode);
-	CloseHandle(pi.hThread);
-	CloseHandle(pi.hProcess);
-	return exitCode;
-}
-
-static void _execAndDelete(wstring_view cmdLine, wstring_view srcFile, bool delSrc)
-{
+static void exec_and_delete(wd::StrView cmdLine, wd::StrView srcFile, bool delSrc) {
 #ifdef _DEBUG
 	// Debug summary of operations about to be performed.
-	OutputDebugStringW( lib::str::fmt(L"Run %s\n", cmdLine).c_str() );
-	if (delSrc) OutputDebugStringW( lib::str::fmt(L"Del %s\n", srcFile).c_str() );
+	wd::dbg(L"RUNNING:\n%s", cmdLine);
+	if (delSrc)
+		wd::dbg(L"...AND DELETING:\n%s", srcFile);
 #endif
 
-	_execCmd(cmdLine);
-	if (delSrc) DeleteFileW(srcFile.data());
+	wd::run_cmd_sync(cmdLine);
+	if (delSrc) {
+		if (!DeleteFileW(srcFile.c_str())) [[unlikely]] {
+			throw wd::WinErr{GetLastError(), wd::str::fmt(L"Failed to delete file:\n%s", srcFile)};
+		}
+	}
 }
 
-void convert::toWav(const lib::Ini& ini, wstring_view srcFile,
-	optional<wstring_view> destFolder, bool delSrc)
+struct TypeCheck final {
+	explicit TypeCheck(wd::StrView file) {
+		std::wstring fileUp{file};
+		wd::str::to_upper(fileUp);
+		isWav  = wd::str::ends_with(fileUp, L".WAV");
+		isFlac = wd::str::ends_with(fileUp, L".FLAC");
+		isMp3  = wd::str::ends_with(fileUp, L".MP3");
+	}
+	bool isWav=false, isFlac=false, isMp3=false;
+};
+
+void convert::to_wav(
+	wd::StrView lamePath,
+	wd::StrView flacPath,
+	wd::StrView srcFile,
+	std::optional<wd::StrView> destFolder,
+	bool delSrc)
 {
-	optional<wstring> finalDestFolder;
-	if (destFolder.has_value() && !str::eqI(path::dirFrom(srcFile), destFolder.value())) // different dir from src?
-		finalDestFolder.emplace(destFolder.value());
-	
-	wstring cmdLine;
-	if (path::hasExtension(srcFile, L"mp3")) {
-		auto lamePath = ini.get(L"Tools", L"lame");
-		cmdLine = str::fmt(L"\"%s\" --decode \"%s\"", lamePath, srcFile);
-	} else if (path::hasExtension(srcFile, L"flac")) {
-		auto flacPath = ini.get(L"Tools", L"flac");
-		cmdLine = str::fmt(L"\"%s\" -d \"%s\"", flacPath, srcFile);
-		if (finalDestFolder.has_value()) {
+	std::optional<std::wstring> destFolder2{};
+	if (destFolder.has_value() && wd::str::neq_i(wd::file::dir_from(srcFile), destFolder.value())) // different dir from src?
+		destFolder2.emplace(destFolder.value());
+
+	const TypeCheck srcFileType{srcFile};
+	std::wstring cmdLine{};
+
+	if (srcFileType.isMp3) {
+		cmdLine = wd::str::fmt(L"\"%s\" --decode \"%s\"", lamePath, srcFile);
+	} else if (srcFileType.isFlac) {
+		cmdLine = wd::str::fmt(L"\"%s\" -d \"%s\"", flacPath, srcFile);
+		if (destFolder2.has_value()) {
 			cmdLine.append(L" -o"); // different destination folder requires flag
 		}
 	} else {
-		throw std::logic_error(
-			str::toAnsi( str::fmt(L"Not a FLAC/MP3: %s\n", srcFile) ));
+		throw wd::WinErr{ERROR_INVALID_PARAMETER, wd::str::fmt(L"Nonsense conversion from WAV to WAV:\n%s", srcFile)};
 	}
 
-	if (finalDestFolder.has_value()) { // different destination folder
-		auto destWavPath = path::swapExtension(srcFile, L"wav");
-		cmdLine.append( str::fmt(L" \"%s\\%s\"", finalDestFolder.value(), path::fileFrom(destWavPath)) );
+	if (destFolder2.has_value()) { // different destination folder
+		std::wstring destWavPath = wd::file::remove_ext(srcFile) + L".wav";
+		cmdLine.append( wd::str::fmt(L" \"%s\\%s\"", destFolder2.value(), wd::file::filename_from(destWavPath)) );
 	}
 
-	_execAndDelete(cmdLine, srcFile, delSrc);
+	exec_and_delete(cmdLine, srcFile, delSrc);
 }
 
-void convert::toFlac(const lib::Ini& ini, wstring_view srcFile,
-	optional<wstring_view> destFolder, bool delSrc, wstring_view quality)
+void convert::to_flac(
+	wd::StrView lamePath,
+	wd::StrView flacPath,
+	wd::StrView srcFile,
+	std::optional<wd::StrView> destFolder,
+	bool delSrc,
+	wd::StrView quality)
 {
-	optional<wstring> finalDestFolder;
-	if (destFolder.has_value() && !str::eqI(path::dirFrom(srcFile), destFolder.value())) // different dir from src?
-		finalDestFolder.emplace(destFolder.value());
+	std::optional<std::wstring> destFolder2{};
+	if (destFolder.has_value() && wd::str::neq_i(wd::file::dir_from(srcFile), destFolder.value())) // different dir from src?
+		destFolder2.emplace(destFolder.value());
 
-	wstring finalSrcFile{srcFile};
+	const TypeCheck srcFileType{srcFile};
+	std::wstring srcFile2{srcFile};
 
-	if (path::hasExtension(finalSrcFile, {L"flac", L"mp3"})) { // needs intermediary WAV conversion
-		if (path::hasExtension(finalSrcFile, L"mp3")) { // MP3 to FLAC
-			toWav(ini, finalSrcFile, finalDestFolder, delSrc); // send WAV straight to new folder, if any
-		} else if (path::hasExtension(finalSrcFile, L"flac")) { // FLAC to FLAC
-			toWav(ini, finalSrcFile, finalDestFolder, // send WAV straight to new folder, if any
-				finalDestFolder.has_value() ? delSrc : true); // if same destination folder, then delete FLAC (will be replaced)
+	if (srcFileType.isMp3 || srcFileType.isFlac) { // needs intermediary WAV conversion
+		if (srcFileType.isMp3) { // MP3 to FLAC
+			to_wav(lamePath, flacPath, srcFile2, destFolder2, delSrc); // send WAV straight to new folder, if any
+		} else if (srcFileType.isFlac) { // FLAC to FLAC
+			to_wav(lamePath, flacPath, srcFile2, destFolder2, // send WAV straight to new folder, if any
+				destFolder2.has_value() ? delSrc : true); // if same destination folder, then delete FLAC (will be replaced)
 		}
 
-		if (finalDestFolder.has_value()) { // different destination folder
-			finalSrcFile = finalDestFolder.value() + L"\\" + path::fileFrom(finalSrcFile);
-			finalDestFolder.reset();
+		if (destFolder2.has_value()) { // different destination folder
+			srcFile2 = wd::str::fmt(L"%s\\%s", destFolder2.value(), wd::file::filename_from(srcFile2));
+			destFolder2 = std::nullopt;
 		}
-		finalSrcFile = path::swapExtension(finalSrcFile, L"wav"); // our source is now a WAV
+		srcFile2 = wd::file::remove_ext(srcFile2) + L".wav"; // our source is now a WAV
 		delSrc = true; // delete intermediary WAV
-	} else if (!path::hasExtension(finalSrcFile, L"wav")) {
-		throw std::logic_error(
-			str::toAnsi( str::fmt(L"Not a FLAC/WAV: %s\n", finalSrcFile) ));
+	} else if (!srcFileType.isFlac && !srcFileType.isWav) {
+		throw wd::WinErr{ERROR_INVALID_PARAMETER, wd::str::fmt(L"Not a FLAC/WAV:\n%s", srcFile)};
 	}
 
-	auto flacPath = ini.get(L"Tools", L"flac");
-	auto cmdLine = str::fmt(L"\"%s\" -%s -V --no-seektable \"%s\"", flacPath, quality, finalSrcFile);
+	std::wstring cmdLine = wd::str::fmt(L"\"%s\" -%s -V --no-seektable \"%s\"", flacPath, quality, srcFile2);
 
-	if (finalDestFolder.has_value()) { // different destination folder
-		wstring destFlacPath{finalSrcFile};
-		finalSrcFile = path::swapExtension(finalSrcFile, L"flac");
-		cmdLine.append( str::fmt(L" -o \"%s\\%s\"", finalDestFolder.value(), path::fileFrom(destFlacPath)) );
+	if (destFolder2.has_value()) { // different destination folder
+		std::wstring destFlacPath{srcFile2};
+		srcFile2 = wd::file::remove_ext(srcFile2) + L".flac";
+		cmdLine.append( wd::str::fmt(L" -o \"%s\\%s\"", destFolder2.value(), wd::file::filename_from(destFlacPath)) );
 	}
 
-	_execAndDelete(cmdLine, finalSrcFile, delSrc);
+	exec_and_delete(cmdLine, srcFile2, delSrc);
 }
 
-void convert::toMp3(const lib::Ini& ini, wstring_view srcFile,
-	optional<wstring_view> destFolder, bool delSrc, wstring_view quality, bool isVbr)
+void convert::to_mp3(
+	wd::StrView lamePath,
+	wd::StrView flacPath,
+	wd::StrView srcFile,
+	std::optional<wd::StrView> destFolder,
+	bool delSrc,
+	wd::StrView quality,
+	bool isVbr)
 {
-	optional<wstring> finalDestFolder;
-	if (destFolder.has_value() && !str::eqI(path::dirFrom(srcFile), destFolder.value())) // different dir from src?
-		finalDestFolder.emplace(destFolder.value());
+	std::optional<std::wstring> destFolder2{};
+	if (destFolder.has_value() && wd::StrView{wd::file::dir_from(srcFile)}.neq_i(destFolder.value())) // different dir from src?
+		destFolder2.emplace(destFolder.value());
 
-	wstring finalSrcFile{srcFile};
+	const TypeCheck srcFileType{srcFile};
+	std::wstring srcFile2{srcFile};
 
-	if (path::hasExtension(finalSrcFile, {L"flac", L"mp3"})) { // needs intermediary WAV conversion
-		if (path::hasExtension(finalSrcFile, L"flac")) { // FLAC to MP3
-			toWav(ini, finalSrcFile, finalDestFolder, delSrc); // send WAV straight to new folder, if any
-		} else if (path::hasExtension(finalSrcFile, L"mp3")) { // MP3 to MP3
-			toWav(ini, finalSrcFile, finalDestFolder, // send WAV straight to new folder, if any
-				finalDestFolder.has_value() ? delSrc : true); // if same destination folder, then delete MP3 (will be replaced)
+	if (srcFileType.isFlac || srcFileType.isMp3) { // needs intermediary WAV conversion
+		if (srcFileType.isFlac) { // FLAC to MP3
+			to_wav(lamePath, flacPath, srcFile2, destFolder2, delSrc); // send WAV straight to new folder, if any
+		} else if (srcFileType.isMp3) { // MP3 to MP3
+			to_wav(lamePath, flacPath, srcFile2, destFolder2, // send WAV straight to new folder, if any
+				destFolder2.has_value() ? delSrc : true); // if same destination folder, then delete MP3 (will be replaced)
 		}
 
-		if (finalDestFolder.has_value()) { // different destination folder
-			finalSrcFile = finalDestFolder.value() + L"\\" + path::fileFrom(finalSrcFile);
-			finalDestFolder.reset();
+		if (destFolder2.has_value()) { // different destination folder
+			srcFile2 = wd::str::fmt(L"%s\\%s", destFolder2.value(), wd::file::filename_from(srcFile2));
+			destFolder2 = std::nullopt;
 		}
-		finalSrcFile = path::swapExtension(finalSrcFile, L"wav"); // our source is now a WAV
+		srcFile2 = wd::file::remove_ext(srcFile2) + L".wav"; // our source is now a WAV
 		delSrc = true; // delete intermediary WAV
-	} else if (!path::hasExtension(finalSrcFile, L"wav")) {
-		throw std::logic_error(
-			str::toAnsi( str::fmt(L"Not a FLAC/MP3/WAV: %s\n", finalSrcFile) ));
+	} else if (!srcFileType.isFlac && !srcFileType.isMp3 && !srcFileType.isWav) {
+		throw wd::WinErr{ERROR_INVALID_PARAMETER, wd::str::fmt(L"Not a FLAC/MP3/WAV\n%s", srcFile)};
 	}
 
-	auto lamePath = ini.get(L"Tools", L"lame");
-	auto cmdLine = str::fmt(L"\"%s\" -%s%s --noreplaygain \"%s\"",
-		lamePath, (isVbr ? L"V" : L"b"), quality.data(), finalSrcFile);
+	std::wstring cmdLine = wd::str::fmt(L"\"%s\" -%s%s --noreplaygain \"%s\"",
+		lamePath, (isVbr ? L"V" : L"b"), quality, srcFile2);
 
-	if (finalDestFolder.has_value()) { // different destination folder
-		wstring destMp3Path{finalSrcFile};
-		finalSrcFile = path::swapExtension(finalSrcFile, L"mp3");
-		cmdLine.append( str::fmt(L" \"%s\\%s\"", finalDestFolder.value(), path::fileFrom(destMp3Path)) );
+	if (destFolder2.has_value()) { // different destination folder
+		std::wstring destMp3Path{srcFile2};
+		srcFile2 = wd::file::remove_ext(srcFile2) + L".mp3";
+		cmdLine.append( wd::str::fmt(L" \"%s\\%s\"", destFolder2.value(), wd::file::filename_from(destMp3Path)) );
 	}
 
-	_execAndDelete(cmdLine, finalSrcFile, delSrc);
+	exec_and_delete(cmdLine, srcFile2, delSrc);
 }
